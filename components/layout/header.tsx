@@ -59,14 +59,13 @@ export function Header() {
         <div className="flex h-20 items-center justify-between">
           {/* Logo */}
           <Link href="/" className="flex items-center gap-3">
-            <div className="hidden sm:block">
-              <span className={`text-lg font-bold tracking-tight ${scrolled ? "text-secondary" : "text-white"}`}>
-                DISTINCT
-              </span>
-              <span className={`block text-xs tracking-widest ${scrolled ? "text-muted-foreground" : "text-white/80"}`}>
-                CONSTRUCTION SOLUTIONS
-              </span>
-            </div>
+            <Image
+              src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/Disen%CC%83o%20sin%20ti%CC%81tulo-126-eMVzLpHMnW2LJ88tElpdNVJ3B6e6Gl.png"
+              alt="DCS Logo"
+              width={180}
+              height={50}
+              className="h-12 w-auto"
+            />
           </Link>
 
           {/* Desktop Navigation */}
