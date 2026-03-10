@@ -2,8 +2,8 @@
 
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { Play, ArrowRight, Star, Shield, Clock } from "lucide-react";
-import { useState } from "react";
+import { ArrowRight, Star, Shield, Clock } from "lucide-react";
+import { useState, useRef, useEffect } from "react";
 
 const stats = [
   { value: "500+", label: "Projects Completed" },
@@ -12,22 +12,64 @@ const stats = [
   { value: "$50M+", label: "Value Delivered" },
 ];
 
+const heroVideos = [
+  "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/AI_Generates_Architectural_Video_Prompt-2-EsaGIxuHEi6G6SimcXS7HvLnXclJst.mp4",
+  "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/Video_de_Construccio%CC%81n_Estilo_Documental-tcHMOROeTia9zXEArtXUktIUS9dNfk.mp4",
+  "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/Video_Generado_Listo-8dMvHgWFLWATLRFax4BdkyBEvHKwCI.mp4",
+  "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/AI_Generates_Architectural_Video_Prompt-9EmmEZf8o9NOaPUmDsu4jjFdXxGu5j.mp4",
+];
+
 export function Hero() {
-  const [isVideoOpen, setIsVideoOpen] = useState(false);
+  const [currentVideoIndex, setCurrentVideoIndex] = useState(0);
+  const [isTransitioning, setIsTransitioning] = useState(false);
+  const videoRef = useRef<HTMLVideoElement>(null);
+
+  useEffect(() => {
+    const video = videoRef.current;
+    if (!video) return;
+
+    const handleVideoEnd = () => {
+      setIsTransitioning(true);
+      setTimeout(() => {
+        setCurrentVideoIndex((prev) => (prev + 1) % heroVideos.length);
+        setIsTransitioning(false);
+      }, 500);
+    };
+
+    video.addEventListener("ended", handleVideoEnd);
+    return () => video.removeEventListener("ended", handleVideoEnd);
+  }, []);
+
+  useEffect(() => {
+    const video = videoRef.current;
+    if (video) {
+      video.playbackRate = 0.7; // Velocidad más lenta
+      video.load();
+      video.play().catch(() => {});
+    }
+  }, [currentVideoIndex]);
 
   return (
     <section className="relative min-h-screen flex items-center overflow-hidden">
-      {/* Background */}
-      <div className="absolute inset-0 bg-gradient-to-br from-secondary via-secondary to-secondary-light">
-        {/* Grid pattern overlay */}
-        <div 
-          className="absolute inset-0 opacity-10"
-          style={{
-            backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='1'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`,
-          }}
-        />
+      {/* Video Background */}
+      <div className="absolute inset-0">
+        <video
+          ref={videoRef}
+          key={currentVideoIndex}
+          autoPlay
+          muted
+          playsInline
+          className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-1000 ${
+            isTransitioning ? "opacity-0" : "opacity-100"
+          }`}
+        >
+          <source src={heroVideos[currentVideoIndex]} type="video/mp4" />
+        </video>
+        {/* Dark overlay for text readability */}
+        <div className="absolute inset-0 bg-secondary/70" />
         {/* Gradient overlay */}
-        <div className="absolute inset-0 bg-gradient-to-t from-secondary/90 via-transparent to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-t from-secondary via-secondary/50 to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-r from-secondary/80 via-transparent to-transparent" />
       </div>
 
       {/* Animated shapes */}
@@ -101,34 +143,65 @@ export function Hero() {
             </div>
           </div>
 
-          {/* Right Content - Video/Image Card */}
+          {/* Right Content - Featured Info Card */}
           <div className="relative hidden lg:block">
-            <div className="relative rounded-3xl overflow-hidden shadow-2xl bg-gradient-to-br from-primary/20 to-secondary/50 aspect-[4/3]">
-              {/* Placeholder for project image/video */}
-              <div className="absolute inset-0 bg-gradient-to-br from-primary/30 to-secondary/80 flex items-center justify-center">
-                <div className="text-center text-white">
-                  <button
-                    onClick={() => setIsVideoOpen(true)}
-                    className="w-20 h-20 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center mb-4 mx-auto hover:bg-white/30 transition-colors group"
-                  >
-                    <Play className="h-8 w-8 text-white fill-white ml-1 group-hover:scale-110 transition-transform" />
-                  </button>
-                  <p className="text-sm text-white/80">Watch Our Story</p>
-                </div>
+            <div className="relative rounded-3xl overflow-hidden shadow-2xl bg-white/10 backdrop-blur-md border border-white/20 p-8">
+              {/* Video progress indicator */}
+              <div className="flex gap-2 mb-6">
+                {heroVideos.map((_, index) => (
+                  <div
+                    key={index}
+                    className={`h-1 flex-1 rounded-full transition-all duration-500 ${
+                      index === currentVideoIndex
+                        ? "bg-primary"
+                        : index < currentVideoIndex
+                        ? "bg-white/60"
+                        : "bg-white/20"
+                    }`}
+                  />
+                ))}
               </div>
-              
-              {/* Floating badge */}
-              <div className="absolute bottom-4 left-4 right-4 bg-white/10 backdrop-blur-md rounded-2xl p-4 border border-white/20">
-                <div className="flex items-center gap-4">
-                  <div className="w-12 h-12 rounded-full bg-primary flex items-center justify-center">
-                    <Star className="h-6 w-6 text-white fill-white" />
+
+              <h3 className="text-2xl font-bold text-white mb-4">
+                Why Choose DCS?
+              </h3>
+
+              <div className="space-y-4 mb-6">
+                <div className="flex items-start gap-3">
+                  <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center flex-shrink-0 mt-0.5">
+                    <Shield className="h-4 w-4 text-primary" />
                   </div>
                   <div>
-                    <p className="font-semibold text-white">4.9/5 Rating</p>
-                    <p className="text-xs text-white/70">Based on 200+ reviews</p>
+                    <p className="font-semibold text-white">Licensed & Insured</p>
+                    <p className="text-sm text-white/60">CA License #1234567</p>
+                  </div>
+                </div>
+                <div className="flex items-start gap-3">
+                  <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center flex-shrink-0 mt-0.5">
+                    <Clock className="h-4 w-4 text-primary" />
+                  </div>
+                  <div>
+                    <p className="font-semibold text-white">On-Time Delivery</p>
+                    <p className="text-sm text-white/60">95% projects on schedule</p>
+                  </div>
+                </div>
+                <div className="flex items-start gap-3">
+                  <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center flex-shrink-0 mt-0.5">
+                    <Star className="h-4 w-4 text-primary" />
+                  </div>
+                  <div>
+                    <p className="font-semibold text-white">Top Rated</p>
+                    <p className="text-sm text-white/60">4.9/5 from 200+ reviews</p>
                   </div>
                 </div>
               </div>
+
+              <Link href="/contact" className="block">
+                <Button className="w-full" size="lg" rounded="full">
+                  Get Free Quote
+                  <ArrowRight className="h-5 w-5" />
+                </Button>
+              </Link>
             </div>
 
             {/* Decorative elements */}
@@ -137,24 +210,6 @@ export function Hero() {
           </div>
         </div>
       </div>
-
-      {/* Video Modal */}
-      {isVideoOpen && (
-        <div 
-          className="fixed inset-0 z-50 bg-black/90 flex items-center justify-center p-4"
-          onClick={() => setIsVideoOpen(false)}
-        >
-          <div className="relative w-full max-w-4xl aspect-video bg-secondary rounded-2xl flex items-center justify-center">
-            <p className="text-white/60">Video placeholder - Add your video here</p>
-            <button 
-              className="absolute top-4 right-4 text-white/60 hover:text-white"
-              onClick={() => setIsVideoOpen(false)}
-            >
-              Close
-            </button>
-          </div>
-        </div>
-      )}
     </section>
   );
 }
