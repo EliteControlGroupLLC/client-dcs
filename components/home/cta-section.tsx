@@ -15,8 +15,8 @@ const ctaOptions = [
   {
     icon: Phone,
     title: "Call Us Now",
-    description: "(619) 555-1234",
-    href: "tel:+16195551234",
+    description: "858-833-0705",
+    href: "tel:+18588330705",
     primary: false,
   },
   {

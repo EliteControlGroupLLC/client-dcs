@@ -59,13 +59,6 @@ export function Header() {
         <div className="flex h-20 items-center justify-between">
           {/* Logo */}
           <Link href="/" className="flex items-center gap-3">
-            <Image
-              src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/Disen%CC%83o%20sin%20ti%CC%81tulo-129-6x0h2yRouRjc8ELDWPK2WaCe9A8V4G.png"
-              alt="DCS Logo"
-              width={48}
-              height={48}
-              className="h-12 w-12"
-            />
             <div className="hidden sm:block">
               <span className={`text-lg font-bold tracking-tight ${scrolled ? "text-secondary" : "text-white"}`}>
                 DISTINCT
@@ -120,13 +113,13 @@ export function Header() {
           {/* CTA Button */}
           <div className="hidden lg:flex lg:items-center lg:gap-4">
             <a
-              href="tel:+16195551234"
+              href="tel:+18588330705"
               className={`flex items-center gap-2 text-sm font-medium ${
                 scrolled ? "text-secondary" : "text-white"
               }`}
             >
               <Phone className="h-4 w-4" />
-              (619) 555-1234
+              858-833-0705
             </a>
             <Link
               href="/contact"
