@@ -71,17 +71,17 @@ export function Footer() {
             
             {/* Contact Info */}
             <div className="space-y-3">
-              <a href="tel:+16195551234" className="flex items-center gap-3 text-sm text-white/70 hover:text-primary transition-colors">
+              <a href="tel:+18588330705" className="flex items-center gap-3 text-sm text-white/70 hover:text-primary transition-colors">
                 <Phone className="h-4 w-4" />
-                (619) 555-1234
+                858-833-0705
               </a>
-              <a href="mailto:info@distinctcs.com" className="flex items-center gap-3 text-sm text-white/70 hover:text-primary transition-colors">
+              <a href="mailto:Office@distinctcsolutions.com" className="flex items-center gap-3 text-sm text-white/70 hover:text-primary transition-colors">
                 <Mail className="h-4 w-4" />
-                info@distinctcs.com
+                Office@distinctcsolutions.com
               </a>
               <div className="flex items-start gap-3 text-sm text-white/70">
                 <MapPin className="h-4 w-4 mt-0.5 shrink-0" />
-                <span>San Diego, California</span>
+                <span>Chula Vista, CA</span>
               </div>
             </div>
 

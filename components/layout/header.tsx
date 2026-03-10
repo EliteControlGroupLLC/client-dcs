@@ -113,13 +113,13 @@ export function Header() {
           {/* CTA Button */}
           <div className="hidden lg:flex lg:items-center lg:gap-4">
             <a
-              href="tel:+16195551234"
+              href="tel:+18588330705"
               className={`flex items-center gap-2 text-sm font-medium ${
                 scrolled ? "text-secondary" : "text-white"
               }`}
             >
               <Phone className="h-4 w-4" />
-              (619) 555-1234
+              858-833-0705
             </a>
             <Link
               href="/contact"

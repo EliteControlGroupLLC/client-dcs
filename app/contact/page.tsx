@@ -87,7 +87,7 @@ export default function ContactPage() {
                   </div>
                   <div>
                     <h3 className="font-semibold text-secondary">Phone</h3>
-                    <p className="text-muted-foreground">(619) 555-0123</p>
+                    <p className="text-muted-foreground">858-833-0705</p>
                     <p className="text-sm text-muted-foreground">Mon-Fri 8am-6pm</p>
                   </div>
                 </div>
@@ -102,7 +102,7 @@ export default function ContactPage() {
                   </div>
                   <div>
                     <h3 className="font-semibold text-secondary">Email</h3>
-                    <p className="text-muted-foreground">info@distinctcs.com</p>
+                    <p className="text-muted-foreground">Office@distinctcsolutions.com</p>
                     <p className="text-sm text-muted-foreground">We reply within 24 hours</p>
                   </div>
                 </div>
@@ -117,7 +117,7 @@ export default function ContactPage() {
                   </div>
                   <div>
                     <h3 className="font-semibold text-secondary">Office</h3>
-                    <p className="text-muted-foreground">San Diego, California</p>
+                    <p className="text-muted-foreground">Chula Vista, CA</p>
                     <p className="text-sm text-muted-foreground">Serving all of San Diego County</p>
                   </div>
                 </div>
