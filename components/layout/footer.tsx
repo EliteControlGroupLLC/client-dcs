@@ -173,7 +173,7 @@ export function Footer() {
             <p className="text-sm text-white/50">
               © {new Date().getFullYear()} Distinct Construction Solutions. All rights reserved | Desarrollado por{" "}
               <a 
-                href="https://ikingdom.com" 
+                href="https://www.ikingdom.org" 
                 target="_blank" 
                 rel="noopener noreferrer"
                 className="relative inline-block text-[#2DD4BF] hover:text-[#5EEAD4] transition-colors font-medium"
