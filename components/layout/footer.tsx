@@ -163,7 +163,16 @@ export function Footer() {
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-6">
           <div className="flex flex-col md:flex-row justify-between items-center gap-4">
             <p className="text-sm text-white/50">
-              © {new Date().getFullYear()} Distinct Construction Solutions. All rights reserved.
+              © {new Date().getFullYear()} Distinct Construction Solutions. All rights reserved | Desarrollado por{" "}
+              <a 
+                href="https://ikingdom.com" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="relative inline-block text-[#2DD4BF] hover:text-[#5EEAD4] transition-colors font-medium"
+              >
+                iKingdom
+                <span className="absolute -bottom-0.5 left-0 w-full h-[3px] bg-gradient-to-r from-transparent via-[#2DD4BF]/60 to-transparent rounded-full" />
+              </a>
             </p>
             <div className="flex items-center gap-4">
               <span className="text-xs text-white/50">License #123456</span>
