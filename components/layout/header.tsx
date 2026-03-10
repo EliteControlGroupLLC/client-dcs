@@ -58,22 +58,15 @@ export function Header() {
       <nav className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="flex h-20 items-center justify-between">
           {/* Logo */}
-          <Link href="/" className="flex items-center gap-3">
+          <Link href="/" className="flex items-center">
             <Image
-              src="/images/logo-icon.png"
-              alt="DCS Logo"
-              width={48}
+              src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/Disen%CC%83o%20sin%20ti%CC%81tulo-128-0tkz4qS9L8HIm4pnyN7UmTyyxiRabQ.png"
+              alt="Distinct Construction Solutions Logo"
+              width={180}
               height={48}
-              className="h-12 w-12"
+              className="h-10 sm:h-12 w-auto"
+              priority
             />
-            <div className="hidden sm:block">
-              <span className={`text-lg font-bold tracking-tight ${scrolled ? "text-secondary" : "text-white"}`}>
-                DISTINCT
-              </span>
-              <span className={`block text-xs tracking-widest ${scrolled ? "text-muted-foreground" : "text-white/80"}`}>
-                CONSTRUCTION SOLUTIONS
-              </span>
-            </div>
           </Link>
 
           {/* Desktop Navigation */}
