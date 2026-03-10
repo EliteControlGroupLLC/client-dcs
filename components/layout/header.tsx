@@ -60,7 +60,7 @@ export function Header() {
           {/* Logo */}
           <Link href="/" className="flex items-center gap-3">
             <Image
-              src="/images/logo-icon.png"
+              src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/Disen%CC%83o%20sin%20ti%CC%81tulo-129-6x0h2yRouRjc8ELDWPK2WaCe9A8V4G.png"
               alt="DCS Logo"
               width={48}
               height={48}
