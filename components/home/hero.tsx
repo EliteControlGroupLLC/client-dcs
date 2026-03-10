@@ -1,7 +1,6 @@
 "use client";
 
 import Link from "next/link";
-import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { ArrowRight, Star, Shield, Clock } from "lucide-react";
 import { useState, useRef, useEffect } from "react";
@@ -81,17 +80,6 @@ export function Hero() {
         <div className="grid lg:grid-cols-2 gap-12 items-center">
           {/* Left Content */}
           <div className="text-white">
-            {/* Logo */}
-            <div className="mb-6">
-              <Image
-                src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/foto%20de%20perfil%20de%20LinkedIn%20creativo%20verde-50-7i7GgVpu8k3wMpgS3CQTjbTFiEtGMb.png"
-                alt="DCS Logo"
-                width={80}
-                height={80}
-                className="h-20 w-20"
-              />
-            </div>
-
             {/* Trust badge */}
             <div className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-sm rounded-full px-4 py-2 mb-8">
               <Shield className="h-4 w-4 text-primary" />

@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import Image from "next/image";
 import { Menu, X, ChevronDown, Phone } from "lucide-react";
 
 const navigation = [
@@ -59,13 +58,6 @@ export function Header() {
         <div className="flex h-20 items-center justify-between">
           {/* Logo */}
           <Link href="/" className="flex items-center gap-3">
-            <Image
-              src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/foto%20de%20perfil%20de%20LinkedIn%20creativo%20verde-50-7i7GgVpu8k3wMpgS3CQTjbTFiEtGMb.png"
-              alt="DCS Logo"
-              width={48}
-              height={48}
-              className="h-12 w-12"
-            />
             <div>
               <span className={`text-lg font-bold tracking-tight ${scrolled ? "text-secondary" : "text-white"}`}>
                 DISTINCT
