@@ -71,10 +71,18 @@ export function Footer() {
             
             {/* Contact Info */}
             <div className="space-y-3">
-              <a href="tel:+18588330705" className="flex items-center gap-3 text-sm text-white/70 hover:text-primary transition-colors">
-                <Phone className="h-4 w-4" />
-                858-833-0705
-              </a>
+              <div className="flex items-center gap-3 text-sm">
+                <Phone className="h-4 w-4 text-white/70" />
+                <div className="flex items-center gap-2">
+                  <a href="tel:+18588330705" className="text-white/70 hover:text-primary transition-colors">
+                    858-833-0705
+                  </a>
+                  <span className="text-white/30">|</span>
+                  <a href="sms:+18588330705" className="text-white/70 hover:text-primary transition-colors text-xs">
+                    Texto
+                  </a>
+                </div>
+              </div>
               <a href="mailto:Office@distinctcsolutions.com" className="flex items-center gap-3 text-sm text-white/70 hover:text-primary transition-colors">
                 <Mail className="h-4 w-4" />
                 Office@distinctcsolutions.com
