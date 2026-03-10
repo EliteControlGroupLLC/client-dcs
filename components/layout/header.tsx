@@ -59,13 +59,6 @@ export function Header() {
         <div className="flex h-20 items-center justify-between">
           {/* Logo */}
           <Link href="/" className="flex items-center gap-3">
-            <Image
-              src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/Disen%CC%83o%20sin%20ti%CC%81tulo-129-6x0h2yRouRjc8ELDWPK2WaCe9A8V4G.png"
-              alt="DCS Logo"
-              width={48}
-              height={48}
-              className="h-12 w-12"
-            />
             <div className="hidden sm:block">
               <span className={`text-lg font-bold tracking-tight ${scrolled ? "text-secondary" : "text-white"}`}>
                 DISTINCT
