@@ -48,8 +48,8 @@ export function Process() {
             Simple, Transparent Process
           </h2>
           <p className="text-lg text-muted-foreground leading-relaxed">
-            We've streamlined our process to make your construction experience as smooth as possible. 
-            Here's how we turn your vision into reality.
+            We&apos;ve streamlined our process to make your construction experience as smooth as possible. 
+            Here&apos;s how we turn your vision into reality.
           </p>
         </div>
 

@@ -11,7 +11,6 @@ import {
   Bed, 
   Bath, 
   Square,
-  ArrowUpDown,
   Heart,
   Eye,
   Download

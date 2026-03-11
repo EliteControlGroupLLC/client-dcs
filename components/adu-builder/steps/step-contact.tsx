@@ -98,7 +98,7 @@ export function StepContact() {
     <div>
       <h2 className="text-2xl font-bold text-secondary mb-2">Get Your Free Quote</h2>
       <p className="text-muted-foreground mb-8">
-        Enter your details and we'll send you a detailed quote within 24 hours.
+        Enter your details and we&apos;ll send you a detailed quote within 24 hours.
       </p>
 
       {/* Price summary */}

@@ -56,7 +56,7 @@ export function StepPropertyInfo() {
           />
         </div>
         <p className="text-xs text-muted-foreground mt-2">
-          We'll use this to check zoning requirements and provide accurate estimates.
+          We&apos;ll use this to check zoning requirements and provide accurate estimates.
         </p>
       </div>
 
@@ -100,7 +100,7 @@ export function StepPropertyInfo() {
           onChange={(e) => updateConfig({ lotSize: parseInt(e.target.value) || undefined })}
         />
         <p className="text-xs text-muted-foreground mt-2">
-          Don't know? No problem! We can help determine this later.
+          Don&apos;t know? No problem! We can help determine this later.
         </p>
       </div>
 

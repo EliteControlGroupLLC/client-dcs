@@ -115,7 +115,7 @@ export function ADUPriceSidebar() {
       {/* Quick contact */}
       <Card>
         <CardContent className="p-4">
-          <p className="text-sm text-muted-foreground mb-3">Have questions? We're here to help.</p>
+          <p className="text-sm text-muted-foreground mb-3">Have questions? We&apos;re here to help.</p>
           <a href="tel:+18588330705">
             <Button variant="outline" className="w-full">
               <Phone className="h-4 w-4" />

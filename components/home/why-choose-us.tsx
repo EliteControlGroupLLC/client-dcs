@@ -65,8 +65,8 @@ export function WhyChooseUs() {
             The DCS Difference
           </h2>
           <p className="text-lg text-white/70 leading-relaxed">
-            We're not just contractors—we're your partners in bringing your vision to life. 
-            Here's what sets us apart from the rest.
+            We&apos;re not just contractors—we&apos;re your partners in bringing your vision to life. 
+            Here&apos;s what sets us apart from the rest.
           </p>
         </div>
 
@@ -96,7 +96,7 @@ export function WhyChooseUs() {
                 ))}
               </div>
               <blockquote className="text-xl lg:text-2xl font-medium leading-relaxed mb-6">
-                "{testimonial.quote}"
+                &ldquo;{testimonial.quote}&rdquo;
               </blockquote>
               <div className="flex items-center gap-4">
                 <div className="w-12 h-12 rounded-full bg-primary/20 flex items-center justify-center">

@@ -41,7 +41,7 @@ export function StepWelcome() {
       </h1>
       
       <p className="text-lg text-muted-foreground max-w-xl mx-auto mb-8">
-        Welcome to our interactive ADU configurator. In just a few steps, you'll design 
+        Welcome to our interactive ADU configurator. In just a few steps, you&apos;ll design 
         your perfect accessory dwelling unit and get an instant price estimate.
       </p>
 
@@ -65,7 +65,7 @@ export function StepWelcome() {
 
       {/* What you'll get */}
       <div className="bg-secondary/5 rounded-xl p-6 mb-8">
-        <h3 className="font-semibold text-secondary mb-3">What you'll get:</h3>
+        <h3 className="font-semibold text-secondary mb-3">What you&apos;ll get:</h3>
         <ul className="space-y-2 text-sm text-left max-w-md mx-auto">
           {[
             "Custom ADU design tailored to your property",
@@ -83,7 +83,7 @@ export function StepWelcome() {
       </div>
 
       <Button size="lg" onClick={nextStep} className="group">
-        Let's Get Started
+        Let&apos;s Get Started
         <ArrowRight className="h-5 w-5 group-hover:translate-x-1 transition-transform" />
       </Button>
     </div>

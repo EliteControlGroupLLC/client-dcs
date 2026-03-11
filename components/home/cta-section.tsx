@@ -45,8 +45,8 @@ export function CTASection() {
             Ready to Start Your Project?
           </h2>
           <p className="text-lg text-white/80 leading-relaxed">
-            Take the first step toward your dream space. Whether you're considering an ADU, 
-            planning a remodel, or building a custom home, we're here to help make it happen.
+            Take the first step toward your dream space. Whether you&apos;re considering an ADU, 
+            planning a remodel, or building a custom home, we&apos;re here to help make it happen.
           </p>
         </div>
 
