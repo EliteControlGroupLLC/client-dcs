@@ -164,13 +164,13 @@ export function BathroomCalculator() {
             <div>
               <div className="text-sm text-cyan-700 mb-1">Base Remodel</div>
               <div className="text-2xl font-bold text-cyan-600">
-                ${estimate.baseCost.toLocaleString()}
+                ${(estimate.baseCost ?? 0).toLocaleString()}
               </div>
             </div>
             <div>
               <div className="text-sm text-cyan-700 mb-1">Premium Features</div>
               <div className="text-2xl font-bold text-cyan-600">
-                +${estimate.featureCost.toLocaleString()}
+                +${(estimate.featureCost ?? 0).toLocaleString()}
               </div>
             </div>
             <div>
