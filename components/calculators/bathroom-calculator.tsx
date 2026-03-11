@@ -28,6 +28,7 @@ const features = [
   { id: "skylight", name: "Skylight", cost: 2000 },
 ];
 
+/** Type for bathroom remodel estimate */
 interface EstimateResult {
   low: number;
   high: number;
