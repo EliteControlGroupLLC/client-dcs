@@ -28,6 +28,13 @@ const features = [
   { id: "skylight", name: "Skylight", cost: 2000 },
 ];
 
+interface EstimateResult {
+  low: number;
+  high: number;
+  baseCost: number;
+  featureCost: number;
+}
+
 export function BathroomCalculator() {
   const [type, setType] = useState("full");
   const [scope, setScope] = useState("full");
@@ -41,7 +48,7 @@ export function BathroomCalculator() {
     }
   };
 
-  const estimate = useMemo(() => {
+  const estimate = useMemo<EstimateResult>(() => {
     const selectedType = bathroomTypes.find(t => t.id === type);
     const selectedScope = scopeLevels.find(s => s.id === scope);
     
