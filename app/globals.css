@@ -66,10 +66,7 @@ body {
   font-family: var(--font-sans);
 }
 
-/* Smooth scrolling */
-html {
-  scroll-behavior: smooth;
-}
+
 
 /* Custom scrollbar */
 ::-webkit-scrollbar {
