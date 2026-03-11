@@ -28,14 +28,6 @@ const features = [
   { id: "skylight", name: "Skylight", cost: 2000 },
 ];
 
-/** Type for bathroom remodel estimate */
-interface EstimateResult {
-  low: number;
-  high: number;
-  baseCost: number;
-  featureCost: number;
-}
-
 export function BathroomCalculator() {
   const [type, setType] = useState("full");
   const [scope, setScope] = useState("full");
@@ -49,11 +41,13 @@ export function BathroomCalculator() {
     }
   };
 
-  const estimate = useMemo<EstimateResult>(() => {
+  const estimate = useMemo(() => {
     const selectedType = bathroomTypes.find(t => t.id === type);
     const selectedScope = scopeLevels.find(s => s.id === scope);
     
-    if (!selectedType || !selectedScope) return { low: 0, high: 0, baseCost: 0, featureCost: 0 };
+    if (!selectedType || !selectedScope) {
+      return { low: 0, high: 0, baseCost: 0, featureCost: 0 };
+    }
 
     const baseCost = selectedType.baseCost * selectedScope.multiplier;
     const featureCost = selectedFeatures.reduce((sum, id) => {
@@ -70,6 +64,9 @@ export function BathroomCalculator() {
       featureCost,
     };
   }, [type, scope, selectedFeatures]);
+
+  const baseCostValue = estimate.baseCost ?? 0;
+  const featureCostValue = estimate.featureCost ?? 0;
 
   return (
     <Card className="max-w-4xl mx-auto">
@@ -164,13 +161,13 @@ export function BathroomCalculator() {
             <div>
               <div className="text-sm text-cyan-700 mb-1">Base Remodel</div>
               <div className="text-2xl font-bold text-cyan-600">
-                ${(estimate.baseCost ?? 0).toLocaleString()}
+                ${baseCostValue.toLocaleString()}
               </div>
             </div>
             <div>
               <div className="text-sm text-cyan-700 mb-1">Premium Features</div>
               <div className="text-2xl font-bold text-cyan-600">
-                +${(estimate.featureCost ?? 0).toLocaleString()}
+                +${featureCostValue.toLocaleString()}
               </div>
             </div>
             <div>
