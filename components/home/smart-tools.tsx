@@ -5,13 +5,12 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { 
   Wand2, 
-  Calculator, 
-  TrendingUp, 
   LayoutGrid, 
   ArrowRight,
   Sparkles,
   DollarSign,
-  PieChart
+  PieChart,
+  TrendingUp
 } from "lucide-react";
 
 const tools = [
@@ -24,25 +23,11 @@ const tools = [
     featured: true,
   },
   {
-    icon: Calculator,
-    title: "ADU Price Calculator",
-    description: "Get an instant estimate based on your specific requirements and preferences.",
-    href: "/calculators/adu",
-    color: "bg-secondary",
-  },
-  {
-    icon: TrendingUp,
-    title: "ROI Calculator",
-    description: "Calculate your potential return on investment from rental income or property value increase.",
-    href: "/calculators/roi",
-    color: "bg-accent",
-  },
-  {
     icon: LayoutGrid,
     title: "Floor Plans Library",
     description: "Browse our collection of pre-designed floor plans with detailed specifications and pricing.",
     href: "/floor-plans",
-    color: "bg-primary-dark",
+    color: "bg-secondary",
   },
 ];
 
@@ -119,27 +104,29 @@ export function SmartTools() {
           </Card>
         </div>
 
-        {/* Secondary Tools Grid */}
-        <div className="grid md:grid-cols-3 gap-6 mb-16">
-          {tools.slice(1).map((tool) => (
-            <Link key={tool.title} href={tool.href}>
-              <Card className="h-full hover:shadow-lg transition-all hover:-translate-y-1 cursor-pointer group">
-                <CardContent className="p-6">
-                  <div className={`w-12 h-12 rounded-xl ${tool.color} flex items-center justify-center mb-4`}>
-                    <tool.icon className="h-6 w-6 text-white" />
-                  </div>
-                  <h3 className="text-lg font-bold text-secondary mb-2 group-hover:text-primary transition-colors">
-                    {tool.title}
+        {/* Secondary Tool - Floor Plans */}
+        <div className="mb-16">
+          <Link href="/floor-plans">
+            <Card className="hover:shadow-lg transition-all hover:-translate-y-1 cursor-pointer group">
+              <CardContent className="p-8 flex flex-col md:flex-row items-center gap-6">
+                <div className="w-16 h-16 rounded-xl bg-secondary flex items-center justify-center shrink-0">
+                  <LayoutGrid className="h-8 w-8 text-white" />
+                </div>
+                <div className="flex-1 text-center md:text-left">
+                  <h3 className="text-xl font-bold text-secondary mb-2 group-hover:text-primary transition-colors">
+                    Floor Plans Library
                   </h3>
-                  <p className="text-sm text-muted-foreground mb-4">{tool.description}</p>
-                  <span className="inline-flex items-center text-sm font-medium text-primary">
-                    Try Now
-                    <ArrowRight className="h-4 w-4 ml-1 group-hover:translate-x-1 transition-transform" />
-                  </span>
-                </CardContent>
-              </Card>
-            </Link>
-          ))}
+                  <p className="text-muted-foreground">
+                    Browse our collection of pre-designed floor plans with detailed specifications and pricing.
+                  </p>
+                </div>
+                <span className="inline-flex items-center text-sm font-medium text-primary shrink-0">
+                  Browse Plans
+                  <ArrowRight className="h-4 w-4 ml-1 group-hover:translate-x-1 transition-transform" />
+                </span>
+              </CardContent>
+            </Card>
+          </Link>
         </div>
 
         {/* Quick Stats */}
