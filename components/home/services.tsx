@@ -163,19 +163,7 @@ export function Services() {
           ))}
         </div>
 
-        {/* Bottom CTA */}
-        <div className="text-center mt-16">
-          <p className="text-white/70 mb-6 max-w-xl mx-auto">
-            Explore project options, pricing tools, and planning resources to
-            see what you can build.
-          </p>
-          <Link href="/build-your-adu">
-            <Button variant="secondary" size="lg" rounded="full" className="group">
-              Explore Planning Tools
-              <ArrowRight className="h-5 w-5 group-hover:translate-x-1 transition-transform" />
-            </Button>
-          </Link>
-        </div>
+
       </div>
     </section>
   );
