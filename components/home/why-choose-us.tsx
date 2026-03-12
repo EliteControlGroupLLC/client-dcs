@@ -15,69 +15,86 @@ const features = [
   {
     icon: DollarSign,
     title: "Transparent Pricing",
-    description: "No hidden fees or surprise costs. Get detailed, itemized quotes upfront so you know exactly what you're paying for.",
+    description: "No hidden fees or surprise costs. We provide clear project guidance and realistic pricing so you understand exactly what to expect before construction begins.",
   },
   {
     icon: Shield,
     title: "Fixed-Price Contracts",
-    description: "Lock in your price from the start. Our contracts protect you from cost overruns and unexpected expenses.",
+    description: "Lock in your project price from the start. Our contracts are designed to protect homeowners from unexpected cost increases and scope confusion.",
   },
   {
     icon: Users,
     title: "In-House Team",
-    description: "From architects to craftsmen, our entire team is in-house. Better communication, quality control, and accountability.",
+    description: "From architects to builders, our team works together under one roof. This improves communication, quality control, and accountability throughout your project.",
   },
   {
     icon: Clock,
-    title: "On-Time Delivery",
-    description: "We respect your timeline. Our project management ensures milestones are met and your project stays on schedule.",
+    title: "Reliable Project Delivery",
+    description: "Our project management system keeps construction organized and on schedule while maintaining high standards of quality.",
   },
   {
     icon: Award,
     title: "Quality Guaranteed",
-    description: "Premium materials and expert craftsmanship backed by comprehensive warranties. We stand behind our work.",
+    description: "Our experienced builders use proven construction methods and quality materials, backed by strong warranties and clear accountability.",
   },
   {
     icon: Headphones,
-    title: "Dedicated Support",
-    description: "Your dedicated project manager is always just a call away. Real-time updates and responsive communication.",
+    title: "Dedicated Project Support",
+    description: "Your project manager remains your primary point of contact throughout construction, providing updates, guidance, and responsive communication.",
   },
 ];
 
 const testimonial = {
-  quote: "DCS made our ADU project seamless from start to finish. Their transparent pricing and professional team exceeded our expectations. We're now earning $2,800/month in rental income!",
+  quote: "DCS made our ADU project seamless from start to finish. Their transparent pricing and professional team exceeded our expectations. We're now earning $2,800/month in rental income.",
   author: "Sarah & Michael Thompson",
   location: "La Mesa, CA",
   project: "650 sq ft ADU",
   rating: 5,
 };
 
+const satisfactionStats = [
+  { label: "Communication", value: 100 },
+  { label: "Quality of Work", value: 99 },
+  { label: "On-Time Delivery", value: 95 },
+  { label: "Would Recommend", value: 100 },
+];
+
+const bottomMetrics = [
+  "500+ Projects",
+  "15+ Years Experience",
+  "$50M+ Project Value Delivered",
+];
+
 export function WhyChooseUs() {
   return (
-    <section className="py-24 bg-secondary text-white">
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+    <section className="py-24 bg-gradient-to-b from-secondary via-secondary-light/20 to-secondary text-white relative overflow-hidden">
+      {/* Subtle lighting texture overlay */}
+      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,rgba(62,205,162,0.08),transparent_50%)]" />
+      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom_right,rgba(62,205,162,0.05),transparent_50%)]" />
+      
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 relative z-10">
         {/* Header */}
         <div className="text-center max-w-3xl mx-auto mb-16">
           <span className="inline-flex items-center gap-2 text-primary font-semibold text-sm uppercase tracking-wider mb-4">
             Why Choose Us
           </span>
           <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold mb-6 text-balance">
-            The DCS Difference
+            The Distinct Construction Solutions Difference
           </h2>
           <p className="text-lg text-white/70 leading-relaxed">
-            We're not just contractors—we're your partners in bringing your vision to life. 
-            Here's what sets us apart from the rest.
+            We're not just contractors — we're your partners in bringing your vision to life. 
+            Here's what sets Distinct Construction Solutions apart.
           </p>
         </div>
 
         {/* Features Grid */}
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 mb-16">
+        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 mb-16">
           {features.map((feature) => (
             <div 
               key={feature.title} 
-              className="bg-white/5 backdrop-blur-sm rounded-2xl p-6 border border-white/10 hover:bg-white/10 transition-colors"
+              className="bg-white/5 backdrop-blur-sm rounded-2xl p-6 border border-white/10 hover:bg-white/10 hover:border-white/20 transition-all duration-300 group"
             >
-              <div className="w-12 h-12 rounded-xl bg-primary/20 flex items-center justify-center mb-4">
+              <div className="w-12 h-12 rounded-xl bg-primary/20 flex items-center justify-center mb-4 group-hover:bg-primary/30 transition-colors shadow-lg shadow-primary/10">
                 <feature.icon className="h-6 w-6 text-primary" />
               </div>
               <h3 className="text-lg font-bold mb-2">{feature.title}</h3>
@@ -104,20 +121,15 @@ export function WhyChooseUs() {
                 </div>
                 <div>
                   <p className="font-semibold">{testimonial.author}</p>
-                  <p className="text-sm text-white/60">{testimonial.location} • {testimonial.project}</p>
+                  <p className="text-sm text-white/60">{testimonial.location} — {testimonial.project}</p>
                 </div>
               </div>
             </div>
             <div className="lg:col-span-2">
-              <div className="bg-white/10 rounded-2xl p-6">
-                <h4 className="font-semibold mb-4 text-center">What Our Clients Say</h4>
+              <div className="bg-white/10 rounded-2xl p-6 border border-white/10">
+                <h4 className="font-semibold mb-4 text-center">Client Satisfaction</h4>
                 <div className="space-y-4">
-                  {[
-                    { label: "Communication", value: 98 },
-                    { label: "Quality of Work", value: 99 },
-                    { label: "On-Time Delivery", value: 97 },
-                    { label: "Would Recommend", value: 100 },
-                  ].map((stat) => (
+                  {satisfactionStats.map((stat) => (
                     <div key={stat.label}>
                       <div className="flex justify-between text-sm mb-1">
                         <span className="text-white/70">{stat.label}</span>
@@ -137,9 +149,9 @@ export function WhyChooseUs() {
           </div>
         </div>
 
-        {/* Trust Badges */}
+        {/* Bottom Metrics */}
         <div className="flex flex-wrap justify-center gap-8 mt-12">
-          {["500+ Projects", "15+ Years", "4.9★ Rating", "$50M+ Value"].map((badge) => (
+          {bottomMetrics.map((badge) => (
             <div key={badge} className="flex items-center gap-2 text-white/60">
               <CheckCircle className="h-5 w-5 text-primary" />
               <span className="font-medium">{badge}</span>
