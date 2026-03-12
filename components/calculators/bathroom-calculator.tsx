@@ -45,7 +45,7 @@ export function BathroomCalculator() {
     const selectedType = bathroomTypes.find(t => t.id === type);
     const selectedScope = scopeLevels.find(s => s.id === scope);
     
-    if (!selectedType || !selectedScope) return { low: 0, high: 0 };
+    if (!selectedType || !selectedScope) return { low: 0, high: 0, baseCost: 0, featureCost: 0 };
 
     const baseCost = selectedType.baseCost * selectedScope.multiplier;
     const featureCost = selectedFeatures.reduce((sum, id) => {
