@@ -137,7 +137,7 @@ export function Header() {
               }`}
             >
               <Phone className="h-4 w-4" />
-              858-833-0705
+              +1 (858) - 833 - 0705 | Text
             </a>
             <Link
               href="/contact"
