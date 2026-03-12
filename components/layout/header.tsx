@@ -2,7 +2,13 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { Menu, X, ChevronDown, Phone } from "lucide-react";
+
+// Logo configuration - set to true when you have logo images ready
+const USE_IMAGE_LOGO = false;
+const LOGO_LIGHT = "/images/logo-light.png"; // White/light version for dark backgrounds
+const LOGO_DARK = "/images/logo-dark.png";   // Dark version for light backgrounds
 
 const navigation = [
   { name: "Home", href: "/" },
@@ -54,16 +60,31 @@ export function Header() {
     >
       <nav className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="flex h-20 items-center justify-between">
-          {/* Logo */}
-          <Link href="/" className="flex items-center gap-3">
-            <div>
-              <span className={`text-lg font-bold tracking-tight ${scrolled ? "text-secondary" : "text-white"}`}>
-                DISTINCT
-              </span>
-              <span className={`block text-xs tracking-widest ${scrolled ? "text-muted-foreground" : "text-white/80"}`}>
-                CONSTRUCTION SOLUTIONS
-              </span>
-            </div>
+          {/* Logo - Robust container that handles any logo size */}
+          <Link href="/" className="flex items-center shrink-0">
+            {USE_IMAGE_LOGO ? (
+              // Image logo with automatic sizing
+              <div className="relative h-10 sm:h-12 w-auto max-w-[180px]">
+                <Image
+                  src={scrolled ? LOGO_DARK : LOGO_LIGHT}
+                  alt="Distinct Construction Solutions"
+                  width={180}
+                  height={48}
+                  className="h-full w-auto object-contain"
+                  priority
+                />
+              </div>
+            ) : (
+              // Text fallback logo
+              <div>
+                <span className={`text-lg font-bold tracking-tight ${scrolled ? "text-secondary" : "text-white"}`}>
+                  DISTINCT
+                </span>
+                <span className={`block text-xs tracking-widest ${scrolled ? "text-muted-foreground" : "text-white/80"}`}>
+                  CONSTRUCTION SOLUTIONS
+                </span>
+              </div>
+            )}
           </Link>
 
           {/* Desktop Navigation */}
