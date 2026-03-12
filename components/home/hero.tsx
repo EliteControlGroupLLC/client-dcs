@@ -2,13 +2,12 @@
 
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { ArrowRight, Star, Shield, Clock } from "lucide-react";
+import { ArrowRight, Shield, Clock, Users, Palette, Bitcoin } from "lucide-react";
 import { useState, useRef, useEffect } from "react";
 
 const stats = [
   { value: "500+", label: "Projects Completed" },
   { value: "15+", label: "Years Experience" },
-  { value: "4.9", label: "Client Rating", icon: Star },
   { value: "$50M+", label: "Value Delivered" },
 ];
 
@@ -43,7 +42,7 @@ export function Hero() {
   useEffect(() => {
     const video = videoRef.current;
     if (video) {
-      video.playbackRate = 0.7; // Velocidad más lenta
+      video.playbackRate = 0.7;
       video.load();
       video.play().catch(() => {});
     }
@@ -92,11 +91,17 @@ export function Hero() {
               <span className="block">With Confidence</span>
             </h1>
 
-            <p className="text-lg text-white/80 max-w-xl mb-8 leading-relaxed">
-              From concept to completion, we handle everything. Transparent pricing, 
-              expert craftsmanship, and a dedicated team to bring your vision to life. 
-              ADUs starting at $175,000.
+            <p className="text-lg text-white/80 max-w-xl mb-4 leading-relaxed">
+              From concept to completion, we manage the entire process — design, permitting, 
+              and construction. Transparent pricing, thoughtful design, and a dedicated team 
+              focused on delivering exceptional results.
             </p>
+
+            {/* Pricing info */}
+            <div className="mb-8 space-y-1">
+              <p className="text-white/90 font-medium">ADUs starting at <span className="text-primary font-bold">$175,000</span></p>
+              <p className="text-white/90 font-medium">Garage conversions starting at <span className="text-primary font-bold">$120,000</span></p>
+            </div>
 
             {/* Key benefits */}
             <div className="flex flex-wrap gap-6 mb-8">
@@ -110,7 +115,7 @@ export function Hero() {
               </div>
               <div className="flex items-center gap-2 text-sm text-white/70">
                 <Clock className="h-4 w-4 text-primary" />
-                Average 6-Month Build
+                Average 4-Month Build
               </div>
             </div>
 
@@ -122,20 +127,19 @@ export function Hero() {
                   <ArrowRight className="h-5 w-5 group-hover:translate-x-1 transition-transform" />
                 </Button>
               </Link>
-              <Link href="/contact">
+              <Link href="/showroom">
                 <Button variant="outlineWhite" size="lg" rounded="full">
-                  Free Consultation
+                  Visit Our Showroom
                 </Button>
               </Link>
             </div>
 
             {/* Stats */}
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-6">
+            <div className="grid grid-cols-3 gap-6">
               {stats.map((stat) => (
                 <div key={stat.label} className="text-center sm:text-left">
                   <div className="flex items-center justify-center sm:justify-start gap-1">
                     <span className="text-2xl sm:text-3xl font-bold text-white">{stat.value}</span>
-                    {stat.icon && <stat.icon className="h-5 w-5 text-primary fill-primary" />}
                   </div>
                   <span className="text-xs sm:text-sm text-white/60">{stat.label}</span>
                 </div>
@@ -169,39 +173,66 @@ export function Hero() {
               <div className="space-y-4 mb-6">
                 <div className="flex items-start gap-3">
                   <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center flex-shrink-0 mt-0.5">
-                    <Shield className="h-4 w-4 text-primary" />
+                    <Users className="h-4 w-4 text-primary" />
                   </div>
                   <div>
-                    <p className="font-semibold text-white">Licensed & Insured</p>
-                    <p className="text-sm text-white/60">CA License #1234567</p>
+                    <p className="font-semibold text-white">Integrated Design-Build Team</p>
+                    <p className="text-sm text-white/60">Architects, designers, and builders working together under one team for a seamless process from concept to completion.</p>
                   </div>
                 </div>
                 <div className="flex items-start gap-3">
                   <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center flex-shrink-0 mt-0.5">
-                    <Clock className="h-4 w-4 text-primary" />
+                    <Palette className="h-4 w-4 text-primary" />
                   </div>
                   <div>
-                    <p className="font-semibold text-white">On-Time Delivery</p>
-                    <p className="text-sm text-white/60">95% projects on schedule</p>
+                    <p className="font-semibold text-white">Interactive Online Showroom</p>
+                    <p className="text-sm text-white/60">Explore materials, finishes, fixtures, and design options through our online showroom platform.</p>
                   </div>
                 </div>
                 <div className="flex items-start gap-3">
                   <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center flex-shrink-0 mt-0.5">
-                    <Star className="h-4 w-4 text-primary" />
+                    <Bitcoin className="h-4 w-4 text-primary" />
                   </div>
                   <div>
-                    <p className="font-semibold text-white">Top Rated</p>
-                    <p className="text-sm text-white/60">4.9/5 from 200+ reviews</p>
+                    <p className="font-semibold text-white">Cryptocurrency Payments Accepted</p>
+                    <p className="text-sm text-white/60">We accept Bitcoin, Ethereum, and USDC for construction projects.</p>
                   </div>
                 </div>
               </div>
 
-              <Link href="/contact" className="block">
-                <Button className="w-full" size="lg" rounded="full">
-                  Get Free Quote
-                  <ArrowRight className="h-5 w-5" />
-                </Button>
-              </Link>
+              {/* Crypto Badge */}
+              <div className="bg-white/5 backdrop-blur-sm rounded-xl p-4 border border-white/10">
+                <p className="text-xs text-white/50 uppercase tracking-wider mb-2">We Accept Cryptocurrency</p>
+                <div className="flex items-center gap-4">
+                  <div className="flex items-center gap-2">
+                    <div className="w-8 h-8 rounded-full bg-[#F7931A]/20 flex items-center justify-center">
+                      <svg className="w-4 h-4 text-[#F7931A]" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M23.638 14.904c-1.602 6.43-8.113 10.34-14.542 8.736C2.67 22.05-1.244 15.525.362 9.105 1.962 2.67 8.475-1.243 14.9.358c6.43 1.605 10.342 8.115 8.738 14.546z"/>
+                        <path fill="#fff" d="M14.625 10.19c.206-1.376-.842-2.115-2.275-2.61l.465-1.866-1.135-.283-.453 1.815c-.298-.074-.603-.144-.91-.214l.456-1.827-1.134-.283-.465 1.865c-.247-.056-.49-.112-.724-.171l.001-.007-1.565-.391-.302 1.212s.842.193.825.205c.459.115.542.418.528.659l-.529 2.122c.032.008.073.02.118.038l-.12-.03-.742 2.975c-.056.14-.199.35-.52.27.012.017-.825-.206-.825-.206l-.564 1.3 1.478.368c.275.069.544.141.81.209l-.47 1.887 1.133.283.465-1.865c.31.084.61.161.903.234l-.464 1.858 1.134.283.47-1.883c1.934.366 3.388.218 4.002-1.532.495-1.407-.025-2.219-1.041-2.749.74-.17 1.297-.656 1.446-1.661zm-2.588 3.628c-.352 1.413-2.73.649-3.503.457l.625-2.505c.772.193 3.246.574 2.878 2.048zm.352-3.65c-.32 1.285-2.3.632-2.943.472l.567-2.273c.642.16 2.712.46 2.376 1.8z"/>
+                      </svg>
+                    </div>
+                    <span className="text-white/70 text-sm">Bitcoin</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <div className="w-8 h-8 rounded-full bg-[#627EEA]/20 flex items-center justify-center">
+                      <svg className="w-4 h-4 text-[#627EEA]" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M11.944 17.97L4.58 13.62 11.943 24l7.37-10.38-7.372 4.35h.003zM12.056 0L4.69 12.223l7.365 4.354 7.365-4.35L12.056 0z"/>
+                      </svg>
+                    </div>
+                    <span className="text-white/70 text-sm">Ethereum</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <div className="w-8 h-8 rounded-full bg-[#2775CA]/20 flex items-center justify-center">
+                      <svg className="w-4 h-4 text-[#2775CA]" viewBox="0 0 24 24" fill="currentColor">
+                        <circle cx="12" cy="12" r="10"/>
+                        <path fill="#fff" d="M15.5 10.5c0-1.9-1.1-2.6-3.3-2.9V5h-1.4v2.5h-1.1V5H8.3v2.6H5.5v1.6h1.2c.5 0 .7.2.7.5v5.8c0 .2-.1.4-.5.4H5.5V18h2.8v2.6h1.4V18h1.1v2.6h1.4V18c2.5-.2 3.8-1.1 3.8-3.2 0-1.6-.9-2.5-2.3-2.8 1-.4 1.8-1.1 1.8-2.5zm-4.7-.4c1.5.2 2.2.6 2.2 1.6 0 .9-.6 1.4-2.2 1.5v-3.1zm0 7.1v-3.3c1.8.2 2.7.6 2.7 1.7 0 1.1-.9 1.5-2.7 1.6z"/>
+                      </svg>
+                    </div>
+                    <span className="text-white/70 text-sm">USDC</span>
+                  </div>
+                </div>
+                <p className="text-xs text-white/40 mt-2">Pay for your construction project using major cryptocurrencies.</p>
+              </div>
             </div>
 
             {/* Decorative elements */}
