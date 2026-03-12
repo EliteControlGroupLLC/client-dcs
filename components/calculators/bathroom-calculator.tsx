@@ -41,7 +41,7 @@ export function BathroomCalculator() {
     }
   };
 
-  const estimate = useMemo(() => {
+  const estimate = useMemo((): { low: number; high: number; baseCost: number; featureCost: number } => {
     const selectedType = bathroomTypes.find(t => t.id === type);
     const selectedScope = scopeLevels.find(s => s.id === scope);
     
