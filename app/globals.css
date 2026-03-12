@@ -66,6 +66,11 @@ body {
   font-family: var(--font-sans);
 }
 
+/* Justified text for paragraphs */
+p {
+  text-align: justify;
+}
+
 /* Smooth scrolling */
 html {
   scroll-behavior: smooth;
