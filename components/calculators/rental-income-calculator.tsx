@@ -23,7 +23,7 @@ export function RentalIncomeCalculator() {
 
   const estimate = useMemo(() => {
     const selectedArea = sanDiegoAreas.find(a => a.id === area);
-    if (!selectedArea) return { monthly: 0, annual: 0 };
+    if (!selectedArea) return { monthly: 0, annual: 0, low: 0, high: 0 };
 
     const baseRent = squareFeet * selectedArea.rentPerSqFt;
     const bedroomBonus = bedrooms * 100;

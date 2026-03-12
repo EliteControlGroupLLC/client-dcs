@@ -45,7 +45,7 @@ export function KitchenCalculator() {
     const selectedSize = kitchenSizes.find(s => s.id === size);
     const selectedFinish = finishLevels.find(f => f.id === finish);
     
-    if (!selectedSize || !selectedFinish) return { low: 0, high: 0 };
+    if (!selectedSize || !selectedFinish) return { low: 0, high: 0, baseCost: 0, upgradeCost: 0 };
 
     const baseCost = selectedSize.baseCost * selectedFinish.multiplier;
     const upgradeCost = selectedUpgrades.reduce((sum, id) => {
