@@ -1,5 +1,6 @@
 import Link from "next/link";
-import { Facebook, Instagram, Linkedin, Youtube, Mail, Phone, MapPin } from "lucide-react";
+import { Facebook, Instagram, Linkedin, Youtube, Mail, Phone, MapPin, Star, ArrowRight, Shield, CheckCircle2, Building2, CreditCard } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 const footerLinks = {
   services: [
@@ -22,10 +23,9 @@ const footerLinks = {
   ],
   resources: [
     { name: "ADU Guide", href: "/guides/adu" },
+    { name: "ADU Cost Calculator", href: "/adu-calculator" },
     { name: "FAQ", href: "/faq" },
     { name: "Blog", href: "/blog" },
-    { name: "Privacy Policy", href: "/privacy" },
-    { name: "Terms of Service", href: "/terms" },
   ],
 };
 
@@ -34,13 +34,69 @@ const socialLinks = [
   { name: "Instagram", href: "#", icon: Instagram },
   { name: "LinkedIn", href: "#", icon: Linkedin },
   { name: "YouTube", href: "#", icon: Youtube },
+  { name: "Google Reviews", href: "#", icon: Star },
+];
+
+const trustBadges = [
+  { icon: Shield, label: "CSLB Licensed #1098531" },
+  { icon: CheckCircle2, label: "Bonded & Insured" },
+  { icon: Building2, label: "Serving San Diego County" },
+  { icon: CreditCard, label: "Financing Available" },
 ];
 
 export function Footer() {
   return (
-    <footer className="bg-secondary text-white">
+    <footer className="relative bg-secondary text-white overflow-hidden">
+      {/* Subtle architectural grid pattern */}
+      <div className="absolute inset-0 opacity-[0.03]">
+        <svg className="w-full h-full" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <pattern id="footer-grid" width="60" height="60" patternUnits="userSpaceOnUse">
+              <path d="M 60 0 L 0 0 0 60" fill="none" stroke="white" strokeWidth="0.5" />
+            </pattern>
+          </defs>
+          <rect width="100%" height="100%" fill="url(#footer-grid)" />
+        </svg>
+      </div>
+
+      {/* Soft CTA Section - Replaces Newsletter */}
+      <div className="relative border-b border-white/10">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-12">
+          <div className="flex flex-col md:flex-row items-center justify-between gap-6">
+            <div className="text-center md:text-left">
+              <h3 className="text-xl font-semibold mb-2">Still Exploring Your Options?</h3>
+              <p className="text-white/70 max-w-md">
+                Explore what you can build on your property in minutes using our interactive ADU builder.
+              </p>
+            </div>
+            <Link href="/build-your-adu">
+              <Button variant="default" size="lg" rounded="full" className="group">
+                Start Building Your ADU
+                <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />
+              </Button>
+            </Link>
+          </div>
+        </div>
+      </div>
+
+      {/* Trust Badges */}
+      <div className="relative border-b border-white/10">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-6">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            {trustBadges.map((badge) => (
+              <div key={badge.label} className="flex items-center gap-3 text-sm text-white/80">
+                <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center shrink-0">
+                  <badge.icon className="h-4 w-4 text-primary" />
+                </div>
+                <span>{badge.label}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+
       {/* Main Footer */}
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-16">
+      <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-16">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-12">
           {/* Brand Column */}
           <div className="lg:col-span-2">
@@ -58,8 +114,9 @@ export function Footer() {
               </div>
             </Link>
             <p className="text-white/70 text-sm leading-relaxed mb-6 max-w-sm">
-              San Diego&apos;s premier design-build construction company. Specializing in ADUs, 
-              custom homes, and renovations with transparent pricing and exceptional craftsmanship.
+              San Diego&apos;s premier design-build construction company specializing in ADUs, 
+              custom homes, and high-quality residential construction. Transparent pricing, 
+              professional project management, and exceptional results.
             </p>
             
             {/* Contact Info */}
@@ -87,7 +144,7 @@ export function Footer() {
             </div>
 
             {/* Social Links */}
-            <div className="flex gap-4 mt-6">
+            <div className="flex gap-3 mt-6">
               {socialLinks.map((social) => (
                 <a
                   key={social.name}
@@ -155,31 +212,48 @@ export function Footer() {
                 </li>
               ))}
             </ul>
+            {/* Legal links separately */}
+            <div className="mt-6 pt-4 border-t border-white/10">
+              <ul className="space-y-3">
+                <li>
+                  <Link href="/privacy" className="text-xs text-white/50 hover:text-primary transition-colors">
+                    Privacy Policy
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/terms" className="text-xs text-white/50 hover:text-primary transition-colors">
+                    Terms of Service
+                  </Link>
+                </li>
+              </ul>
+            </div>
           </div>
         </div>
       </div>
 
       {/* Bottom Bar */}
-      <div className="border-t border-white/10">
+      <div className="relative border-t border-white/10">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-6">
-          <div className="flex flex-col md:flex-row justify-between items-center gap-4">
-            <p className="text-sm text-white/50">
-              © {new Date().getFullYear()} Distinct Construction Solutions. All rights reserved | Desarrollado por{" "}
+          <div className="flex flex-col md:flex-row justify-between items-center gap-4 text-center md:text-left">
+            <div className="space-y-1">
+              <p className="text-sm text-white/70">
+                © {new Date().getFullYear()} Distinct Construction Solutions
+              </p>
+              <p className="text-xs text-white/50">
+                California CSLB License #1098531 • Bonded & Insured
+              </p>
+            </div>
+            <p className="text-xs text-white/40">
+              Designed & Developed by{" "}
               <a 
                 href="https://www.ikingdom.org" 
                 target="_blank" 
                 rel="noopener noreferrer"
-                className="relative inline-block text-[#2DD4BF] hover:text-[#5EEAD4] transition-colors font-medium"
+                className="text-white/50 hover:text-primary transition-colors"
               >
                 iKingdom
-                <span className="absolute -bottom-0.5 left-0 w-full h-[3px] bg-gradient-to-r from-transparent via-[#2DD4BF]/60 to-transparent rounded-full" />
               </a>
             </p>
-            <div className="flex items-center gap-4">
-              <span className="text-xs text-white/50">License #123456</span>
-              <span className="text-xs text-white/50">•</span>
-              <span className="text-xs text-white/50">Bonded & Insured</span>
-            </div>
           </div>
         </div>
       </div>
