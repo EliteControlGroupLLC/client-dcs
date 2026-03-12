@@ -2,92 +2,142 @@
 
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { ArrowRight, Phone, Calendar, MessageSquare } from "lucide-react";
+import { ArrowRight, Building2, Home, Users } from "lucide-react";
 
 const ctaOptions = [
   {
-    icon: Calendar,
-    title: "Schedule Consultation",
-    description: "Free 30-minute call to discuss your project",
-    href: "/contact",
+    icon: Building2,
+    title: "Build Your ADU",
+    description:
+      "Use our interactive ADU builder to explore what you can build on your property, customize layouts, and see real-time pricing.",
+    buttonText: "Start Building Your ADU",
+    href: "/build-your-adu",
     primary: true,
   },
   {
-    icon: Phone,
-    title: "Call Us Now",
-    description: "858-833-0705",
-    href: "tel:+18588330705",
+    icon: Home,
+    title: "Design Your Home",
+    description:
+      "Planning a remodel or custom home? Explore layouts, design ideas, and project possibilities with our planning tools.",
+    buttonText: "Start Designing",
+    href: "/design",
     primary: false,
   },
   {
-    icon: MessageSquare,
-    title: "Start Online",
-    description: "Use our Build Your ADU tool",
-    href: "/build-your-adu",
+    icon: Users,
+    title: "Speak With Our Team",
+    description:
+      "Have questions or want expert guidance? Our team is ready to help you move forward with confidence.",
+    buttonText: "Schedule Consultation",
+    href: "/contact",
     primary: false,
   },
 ];
 
 export function CTASection() {
   return (
-    <section className="py-24 bg-gradient-to-br from-primary via-primary to-primary-dark text-white relative overflow-hidden">
-      {/* Background pattern */}
-      <div 
-        className="absolute inset-0 opacity-10"
+    <section className="py-24 relative overflow-hidden">
+      {/* Gradient background - green to deep blue */}
+      <div className="absolute inset-0 bg-gradient-to-br from-primary via-primary-dark to-secondary" />
+
+      {/* Architectural grid pattern overlay */}
+      <div
+        className="absolute inset-0 opacity-[0.07]"
         style={{
-          backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='1'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`,
+          backgroundImage: `
+            linear-gradient(rgba(255,255,255,0.1) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(255,255,255,0.1) 1px, transparent 1px),
+            linear-gradient(rgba(255,255,255,0.05) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(255,255,255,0.05) 1px, transparent 1px)
+          `,
+          backgroundSize: "100px 100px, 100px 100px, 20px 20px, 20px 20px",
         }}
       />
 
+      {/* Subtle glow effects */}
+      <div className="absolute top-0 left-1/4 w-96 h-96 bg-primary/20 rounded-full blur-3xl" />
+      <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-secondary/30 rounded-full blur-3xl" />
+
       <div className="relative z-10 mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div className="text-center max-w-3xl mx-auto mb-12">
-          <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold mb-6 text-balance">
-            Ready to Start Your Project?
+        {/* Header */}
+        <div className="text-center max-w-3xl mx-auto mb-16">
+          <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold mb-6 text-white text-balance">
+            Start Designing Your ADU Today
           </h2>
-          <p className="text-lg text-white/80 leading-relaxed">
-            Take the first step toward your dream space. Whether you're considering an ADU, 
-            planning a remodel, or building a custom home, we're here to help make it happen.
+          <p className="text-lg text-white/80 leading-relaxed mb-2">
+            Explore what you can build on your property, see real pricing, and
+            design your future space in minutes.
+          </p>
+          <p className="text-white/60">
+            No pressure. No obligations. Just clarity.
           </p>
         </div>
 
-        {/* CTA Options */}
-        <div className="grid md:grid-cols-3 gap-6 max-w-4xl mx-auto">
+        {/* CTA Cards */}
+        <div className="grid md:grid-cols-3 gap-6 max-w-5xl mx-auto">
           {ctaOptions.map((option) => (
-            <Link
+            <div
               key={option.title}
-              href={option.href}
-              className={`group rounded-2xl p-6 text-center transition-all hover:-translate-y-1 ${
-                option.primary 
-                  ? "bg-white text-secondary shadow-xl" 
-                  : "bg-white/10 backdrop-blur-sm border border-white/20 hover:bg-white/20"
+              className={`group rounded-2xl p-8 transition-all duration-300 hover:-translate-y-2 ${
+                option.primary
+                  ? "bg-white text-secondary shadow-2xl shadow-black/20 ring-2 ring-white/50"
+                  : "bg-white/10 backdrop-blur-md border border-white/20 hover:bg-white/15"
               }`}
             >
-              <div className={`w-14 h-14 rounded-full flex items-center justify-center mx-auto mb-4 ${
-                option.primary ? "bg-primary/10" : "bg-white/10"
-              }`}>
-                <option.icon className={`h-7 w-7 ${option.primary ? "text-primary" : "text-white"}`} />
+              {/* Icon */}
+              <div
+                className={`w-16 h-16 rounded-2xl flex items-center justify-center mb-6 ${
+                  option.primary
+                    ? "bg-gradient-to-br from-primary to-primary-dark shadow-lg shadow-primary/30"
+                    : "bg-white/10"
+                }`}
+              >
+                <option.icon
+                  className={`h-8 w-8 ${
+                    option.primary ? "text-white" : "text-white"
+                  }`}
+                />
               </div>
-              <h3 className={`text-lg font-bold mb-2 ${option.primary ? "text-secondary" : "text-white"}`}>
+
+              {/* Title */}
+              <h3
+                className={`text-xl font-bold mb-3 ${
+                  option.primary ? "text-secondary" : "text-white"
+                }`}
+              >
                 {option.title}
               </h3>
-              <p className={`text-sm ${option.primary ? "text-muted-foreground" : "text-white/70"}`}>
+
+              {/* Description */}
+              <p
+                className={`text-sm leading-relaxed mb-6 ${
+                  option.primary ? "text-muted-foreground" : "text-white/70"
+                }`}
+              >
                 {option.description}
               </p>
-              {option.primary && (
-                <div className="mt-4">
-                  <Button size="sm" rounded="full" className="group/btn">
-                    Get Started
-                    <ArrowRight className="h-4 w-4 group-hover/btn:translate-x-1 transition-transform" />
-                  </Button>
-                </div>
-              )}
-            </Link>
+
+              {/* Button */}
+              <Link href={option.href}>
+                <Button
+                  variant={option.primary ? "default" : "outlineWhite"}
+                  size="default"
+                  rounded="full"
+                  className={`w-full group/btn ${
+                    option.primary ? "" : "hover:bg-white hover:text-secondary"
+                  }`}
+                >
+                  {option.buttonText}
+                  <ArrowRight className="h-4 w-4 group-hover/btn:translate-x-1 transition-transform" />
+                </Button>
+              </Link>
+            </div>
           ))}
         </div>
 
-        {/* Bottom text */}
-        <p className="text-center text-white/60 text-sm mt-12">
-          No pressure, no obligations. Just honest advice from experienced professionals.
+        {/* Footer reassurance text */}
+        <p className="text-center text-white/50 text-sm mt-16">
+          No pressure. No obligations. Just expert guidance when you're ready.
         </p>
       </div>
     </section>
