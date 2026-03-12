@@ -119,7 +119,7 @@ export function ADUPriceSidebar() {
           <a href="tel:+18588330705">
             <Button variant="outline" className="w-full">
               <Phone className="h-4 w-4" />
-              858-833-0705
+              +1 (858) - 833 - 0705 | Text
             </Button>
           </a>
         </CardContent>

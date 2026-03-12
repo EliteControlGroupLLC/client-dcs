@@ -87,7 +87,7 @@ export default function ContactPage() {
                   </div>
                   <div>
                     <h3 className="font-semibold text-secondary">Phone</h3>
-                    <p className="text-muted-foreground">858-833-0705</p>
+                    <p className="text-muted-foreground">+1 (858) - 833 - 0705 | Text</p>
                     <p className="text-sm text-muted-foreground">Mon-Fri 8am-6pm</p>
                   </div>
                 </div>
