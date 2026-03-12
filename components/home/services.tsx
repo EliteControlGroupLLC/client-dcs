@@ -1,117 +1,178 @@
 "use client";
 
 import Link from "next/link";
-import { Card, CardContent } from "@/components/ui/card";
+import Image from "next/image";
 import { Button } from "@/components/ui/button";
-import { Home, Building2, Hammer, ArrowRight, Sparkles } from "lucide-react";
+import { Home, Building2, Hammer, ArrowRight, Check } from "lucide-react";
 
 const services = [
   {
     icon: Home,
     title: "ADU Solutions",
-    description: "Complete accessory dwelling units from permits to keys. Maximize your property value with a rental unit or guest house.",
-    features: ["Detached & Attached ADUs", "Garage Conversions", "JADUs", "Full Permits Included"],
-    price: "Starting at $175,000",
+    badge: "Most Popular",
+    description:
+      "Complete accessory dwelling units from permits to keys. Maximize your property value with a rental unit, guest house, or multigenerational living space.",
+    features: [
+      "Detached ADUs",
+      "Garage Conversions",
+      "Junior ADUs",
+      "Full Permits Included",
+    ],
+    price: "Starting at $120,000",
     href: "/services/adu-solutions",
     featured: true,
   },
   {
     icon: Building2,
     title: "New Construction",
-    description: "Custom homes built to your specifications. From modern minimalist to traditional designs, we bring your vision to life.",
-    features: ["Custom Homes", "Spec Homes", "Multi-Family", "Commercial"],
+    description:
+      "Custom homes designed and built to your vision. From architectural planning to final construction, our team manages the entire process under one roof.",
+    features: [
+      "Custom Homes",
+      "Spec Homes",
+      "Multi-Family",
+      "Ground-Up Construction",
+    ],
     price: "Custom Pricing",
     href: "/services/new-construction",
   },
   {
     icon: Hammer,
     title: "Remodeling",
-    description: "Transform your existing space with expert renovation services. Kitchens, bathrooms, whole-home makeovers and more.",
-    features: ["Kitchen Remodels", "Bathroom Renovations", "Room Additions", "Whole Home"],
-    price: "Starting at $50,000",
+    description:
+      "Transform your existing space with thoughtful renovation and modernization services designed to improve functionality, comfort, and value.",
+    features: [
+      "Kitchen Remodels",
+      "Bathroom Renovations",
+      "Room Additions",
+      "Whole Home Renovations",
+    ],
+    price: "Starting at $18,000",
     href: "/services/remodeling",
   },
 ];
 
 export function Services() {
   return (
-    <section className="py-24 bg-white">
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+    <section className="relative py-24 overflow-hidden">
+      {/* Background Image */}
+      <div className="absolute inset-0">
+        <Image
+          src="/images/services-bg.jpg"
+          alt=""
+          fill
+          className="object-cover"
+          priority
+        />
+        {/* Overlay for readability */}
+        <div className="absolute inset-0 bg-secondary/85" />
+        <div className="absolute inset-0 bg-gradient-to-b from-secondary/90 via-secondary/70 to-secondary/90" />
+      </div>
+
+      <div className="relative z-10 mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         {/* Header */}
         <div className="text-center max-w-3xl mx-auto mb-16">
-          <span className="inline-flex items-center gap-2 text-primary font-semibold text-sm uppercase tracking-wider mb-4">
-            <Sparkles className="h-4 w-4" />
-            Our Services
+          <span className="inline-block text-primary font-semibold text-sm uppercase tracking-wider mb-4">
+            OUR SERVICES
           </span>
-          <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-secondary mb-6 text-balance">
+          <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-white mb-6 text-balance">
             Full-Service Design-Build Solutions
           </h2>
-          <p className="text-lg text-muted-foreground leading-relaxed">
-            From initial concept to final walkthrough, we handle every aspect of your construction project 
-            with transparent pricing and exceptional craftsmanship.
+          <p className="text-lg text-white/70 leading-relaxed">
+            From concept to completion, we manage design, permits, and
+            construction with one coordinated team focused on delivering
+            well-planned, high-quality building solutions.
           </p>
         </div>
 
         {/* Services Grid */}
-        <div className="grid md:grid-cols-3 gap-8">
+        <div className="grid md:grid-cols-3 gap-6 lg:gap-8">
           {services.map((service) => (
-            <Card 
-              key={service.title} 
-              className={`relative overflow-hidden group hover:shadow-xl transition-all duration-300 ${
-                service.featured ? "ring-2 ring-primary shadow-lg" : ""
+            <div
+              key={service.title}
+              className={`group relative rounded-2xl overflow-hidden transition-all duration-500 hover:-translate-y-1 ${
+                service.featured
+                  ? "bg-white/15 backdrop-blur-xl border border-white/30 shadow-2xl ring-1 ring-primary/50"
+                  : "bg-white/10 backdrop-blur-lg border border-white/20 hover:bg-white/15 hover:border-white/30"
               }`}
             >
-              {service.featured && (
-                <div className="absolute top-0 right-0 bg-primary text-white text-xs font-semibold px-4 py-1 rounded-bl-lg">
-                  Most Popular
+              {/* Badge for featured */}
+              {service.badge && (
+                <div className="absolute top-4 right-4 z-10">
+                  <span className="bg-primary text-white text-xs font-semibold px-3 py-1.5 rounded-full">
+                    {service.badge}
+                  </span>
                 </div>
               )}
-              <CardContent className="p-8">
-                <div className={`w-14 h-14 rounded-2xl flex items-center justify-center mb-6 ${
-                  service.featured ? "bg-primary text-white" : "bg-primary/10 text-primary"
-                }`}>
+
+              <div className="p-8">
+                {/* Icon */}
+                <div
+                  className={`w-14 h-14 rounded-xl flex items-center justify-center mb-6 transition-colors ${
+                    service.featured
+                      ? "bg-primary text-white"
+                      : "bg-white/10 text-primary group-hover:bg-primary/20"
+                  }`}
+                >
                   <service.icon className="h-7 w-7" />
                 </div>
 
-                <h3 className="text-xl font-bold text-secondary mb-3">{service.title}</h3>
-                <p className="text-muted-foreground mb-6 leading-relaxed">{service.description}</p>
+                {/* Title */}
+                <h3 className="text-xl font-bold text-white mb-3">
+                  {service.title}
+                </h3>
+
+                {/* Description */}
+                <p className="text-white/70 mb-6 leading-relaxed text-sm">
+                  {service.description}
+                </p>
 
                 {/* Features */}
-                <ul className="space-y-2 mb-6">
+                <ul className="space-y-2.5 mb-6">
                   {service.features.map((feature) => (
-                    <li key={feature} className="flex items-center gap-2 text-sm text-secondary">
-                      <div className="w-1.5 h-1.5 rounded-full bg-primary" />
+                    <li
+                      key={feature}
+                      className="flex items-center gap-3 text-sm text-white/80"
+                    >
+                      <Check className="h-4 w-4 text-primary flex-shrink-0" />
                       {feature}
                     </li>
                   ))}
                 </ul>
 
                 {/* Price */}
-                <div className="mb-6 pb-6 border-b border-border">
-                  <span className="text-lg font-bold text-primary">{service.price}</span>
+                <div className="mb-6 pb-6 border-b border-white/10">
+                  <span className="text-lg font-bold text-primary">
+                    {service.price}
+                  </span>
                 </div>
 
                 {/* CTA */}
                 <Link href={service.href}>
-                  <Button 
-                    variant={service.featured ? "default" : "outline"} 
+                  <Button
+                    variant={service.featured ? "default" : "outlineWhite"}
                     className="w-full group/btn"
+                    rounded="full"
                   >
                     Learn More
                     <ArrowRight className="h-4 w-4 group-hover/btn:translate-x-1 transition-transform" />
                   </Button>
                 </Link>
-              </CardContent>
-            </Card>
+              </div>
+            </div>
           ))}
         </div>
 
         {/* Bottom CTA */}
-        <div className="text-center mt-12">
-          <p className="text-muted-foreground mb-4">Not sure which service is right for you?</p>
-          <Link href="/contact">
-            <Button variant="secondary" size="lg" rounded="full">
-              Schedule a Free Consultation
+        <div className="text-center mt-16">
+          <p className="text-white/70 mb-6 max-w-xl mx-auto">
+            Explore project options, pricing tools, and planning resources to
+            see what you can build.
+          </p>
+          <Link href="/build-your-adu">
+            <Button variant="secondary" size="lg" rounded="full" className="group">
+              Explore Planning Tools
+              <ArrowRight className="h-5 w-5 group-hover:translate-x-1 transition-transform" />
             </Button>
           </Link>
         </div>
