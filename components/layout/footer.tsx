@@ -1,5 +1,4 @@
 import Link from "next/link";
-import Image from "next/image";
 import { Facebook, Instagram, Linkedin, Youtube, Mail, Phone, MapPin } from "lucide-react";
 
 const footerLinks = {
@@ -48,13 +47,9 @@ export function Footer() {
           {/* Brand Column */}
           <div className="lg:col-span-2">
             <Link href="/" className="flex items-center gap-3 mb-6">
-              <Image
-                src="/images/logo-icon.png"
-                alt="DCS Logo"
-                width={56}
-                height={56}
-                className="h-14 w-14"
-              />
+              <div className="w-14 h-14 rounded-xl bg-primary flex items-center justify-center">
+                <span className="text-2xl font-bold text-white">D</span>
+              </div>
               <div>
                 <span className="text-xl font-bold tracking-tight text-white">
                   DISTINCT
