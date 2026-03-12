@@ -72,9 +72,9 @@ export default function ADUSolutionsPage() {
                   Start Your ADU Project
                 </Button>
               </Link>
-              <Link href="/calculators">
+              <Link href="/contact">
                 <Button size="lg" variant="outline" className="border-white text-white hover:bg-white/10">
-                  Calculate Your ROI
+                  Free Consultation
                 </Button>
               </Link>
             </div>

@@ -20,12 +20,10 @@ const navigation = [
   { name: "Gallery", href: "/gallery" },
   {
     name: "Tools",
-    href: "/tools",
+    href: "/build-your-adu",
     children: [
       { name: "Build Your ADU", href: "/build-your-adu" },
-      { name: "ADU Calculator", href: "/calculators/adu" },
-      { name: "ROI Calculator", href: "/calculators/roi" },
-      { name: "All Calculators", href: "/calculators" },
+      { name: "Floor Plans", href: "/floor-plans" },
     ],
   },
   { name: "Process", href: "/process" },

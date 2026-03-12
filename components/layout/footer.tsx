@@ -11,8 +11,6 @@ const footerLinks = {
   ],
   tools: [
     { name: "Build Your ADU", href: "/build-your-adu" },
-    { name: "ADU Calculator", href: "/calculators/adu" },
-    { name: "ROI Calculator", href: "/calculators/roi" },
     { name: "Floor Plans Library", href: "/floor-plans" },
   ],
   company: [
