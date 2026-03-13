@@ -127,9 +127,9 @@ export function Hero() {
                   <ArrowRight className="h-5 w-5 group-hover:translate-x-1 transition-transform" />
                 </Button>
               </Link>
-              <Link href="/showroom">
+              <Link href="/floor-plans">
                 <Button variant="outlineWhite" size="lg" rounded="full">
-                  Visit Our Showroom
+                  Explore Floor Plans
                 </Button>
               </Link>
             </div>
@@ -149,7 +149,7 @@ export function Hero() {
 
           {/* Right Content - Featured Info Card */}
           <div className="relative hidden lg:block">
-            <div className="relative rounded-3xl overflow-hidden shadow-2xl bg-white/10 backdrop-blur-md border border-white/20 p-8">
+            <div className="relative rounded-3xl overflow-hidden shadow-2xl bg-white/10 backdrop-blur-md border border-white/20 p-8 animate-pulse-glow">
               {/* Video progress indicator */}
               <div className="flex gap-2 mb-6">
                 {heroVideos.map((_, index) => (

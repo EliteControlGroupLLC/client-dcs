@@ -5,10 +5,10 @@ import Link from "next/link";
 import Image from "next/image";
 import { Menu, X, ChevronDown, Phone } from "lucide-react";
 
-// Logo configuration - set to true when you have logo images ready
-const USE_IMAGE_LOGO = false;
+// Logo configuration
+const USE_IMAGE_LOGO = true;
 const LOGO_LIGHT = "/images/logo-light.png"; // White/light version for dark backgrounds
-const LOGO_DARK = "/images/logo-dark.png";   // Dark version for light backgrounds
+const LOGO_DARK = "/images/logo-dark.png";   // Dark version for light/white backgrounds
 
 const navigation = [
   { name: "Home", href: "/" },
@@ -23,15 +23,8 @@ const navigation = [
     ],
   },
   { name: "Floor Plans", href: "/floor-plans" },
+  { name: "Build Your ADU", href: "/build-your-adu" },
   { name: "Gallery", href: "/gallery" },
-  {
-    name: "Tools",
-    href: "/build-your-adu",
-    children: [
-      { name: "Build Your ADU", href: "/build-your-adu" },
-      { name: "Floor Plans", href: "/floor-plans" },
-    ],
-  },
   { name: "Process", href: "/process" },
   { name: "About", href: "/about" },
   { name: "Contact", href: "/contact" },

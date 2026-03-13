@@ -137,7 +137,7 @@ export function CTASection() {
 
         {/* Footer reassurance text */}
         <p className="text-center text-white/50 text-sm mt-16">
-          No pressure. No obligations. Just expert guidance when you're ready.
+          No pressure. No obligations. Just expert guidance when you&apos;re ready.
         </p>
       </div>
     </section>

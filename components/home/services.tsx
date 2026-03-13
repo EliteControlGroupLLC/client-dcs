@@ -169,12 +169,20 @@ export function Services() {
             Explore project options, pricing tools, and planning resources to
             see what you can build.
           </p>
-          <Link href="/build-your-adu">
-            <Button variant="secondary" size="lg" rounded="full" className="group">
-              Explore Planning Tools
-              <ArrowRight className="h-5 w-5 group-hover:translate-x-1 transition-transform" />
-            </Button>
-          </Link>
+          <div className="flex flex-wrap justify-center gap-4">
+            <Link href="/build-your-adu">
+              <Button variant="default" size="lg" rounded="full" className="group">
+                Build Your ADU
+                <ArrowRight className="h-5 w-5 group-hover:translate-x-1 transition-transform" />
+              </Button>
+            </Link>
+            <Link href="/floor-plans">
+              <Button variant="outlineWhite" size="lg" rounded="full" className="group">
+                Explore Floor Plans
+                <ArrowRight className="h-5 w-5 group-hover:translate-x-1 transition-transform" />
+              </Button>
+            </Link>
+          </div>
         </div>
       </div>
     </section>
