@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import { Facebook, Instagram, Linkedin, Youtube, Mail, Phone, MapPin, Star, ArrowRight, Shield, CheckCircle2, Building2, CreditCard } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
@@ -47,17 +48,8 @@ const trustBadges = [
 export function Footer() {
   return (
     <footer className="relative bg-secondary text-white overflow-hidden">
-      {/* Subtle architectural grid pattern */}
-      <div className="absolute inset-0 opacity-[0.03]">
-        <svg className="w-full h-full" xmlns="http://www.w3.org/2000/svg">
-          <defs>
-            <pattern id="footer-grid" width="60" height="60" patternUnits="userSpaceOnUse">
-              <path d="M 60 0 L 0 0 0 60" fill="none" stroke="white" strokeWidth="0.5" />
-            </pattern>
-          </defs>
-          <rect width="100%" height="100%" fill="url(#footer-grid)" />
-        </svg>
-      </div>
+      {/* Architectural grid pattern */}
+      <div className="absolute inset-0 architectural-grid" />
 
       {/* Soft CTA Section - Replaces Newsletter */}
       <div className="relative border-b border-white/10">
@@ -101,16 +93,14 @@ export function Footer() {
           {/* Brand Column */}
           <div className="lg:col-span-2">
             <Link href="/" className="flex items-center gap-3 mb-6">
-              <div className="w-14 h-14 rounded-xl bg-primary flex items-center justify-center">
-                <span className="text-2xl font-bold text-white">D</span>
-              </div>
-              <div>
-                <span className="text-xl font-bold tracking-tight text-white">
-                  DISTINCT
-                </span>
-                <span className="block text-xs tracking-widest text-white/70">
-                  CONSTRUCTION SOLUTIONS
-                </span>
+              <div className="relative h-12 w-auto">
+                <Image
+                  src="/images/logo-light.png"
+                  alt="Distinct Construction Solutions"
+                  width={200}
+                  height={48}
+                  className="h-full w-auto object-contain"
+                />
               </div>
             </Link>
             <p className="text-white/70 text-sm leading-relaxed mb-6 max-w-sm">
@@ -244,15 +234,7 @@ export function Footer() {
               </p>
             </div>
             <p className="text-xs text-white/40">
-              Designed & Developed by{" "}
-              <a 
-                href="https://www.ikingdom.org" 
-                target="_blank" 
-                rel="noopener noreferrer"
-                className="text-white/50 hover:text-primary transition-colors"
-              >
-                iKingdom
-              </a>
+              San Diego Design-Build Experts
             </p>
           </div>
         </div>

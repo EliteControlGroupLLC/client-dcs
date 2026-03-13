@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { ArrowRight, Building2, Home, Users } from "lucide-react";
+import { useScrollAnimation, useStaggeredAnimation } from "@/hooks/use-scroll-animation";
 
 const ctaOptions = [
   {
@@ -35,6 +36,9 @@ const ctaOptions = [
 ];
 
 export function CTASection() {
+  const { ref: headerRef, isVisible: headerVisible } = useScrollAnimation();
+  const { ref: cardsRef, isVisible: cardsVisible, getDelay } = useStaggeredAnimation(150);
+
   return (
     <section className="py-24 relative overflow-hidden">
       {/* Gradient background - green to deep blue */}
@@ -60,7 +64,10 @@ export function CTASection() {
 
       <div className="relative z-10 mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         {/* Header */}
-        <div className="text-center max-w-3xl mx-auto mb-16">
+        <div
+          ref={headerRef}
+          className={`text-center max-w-3xl mx-auto mb-16 transition-all duration-700 ${headerVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"}`}
+        >
           <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold mb-6 text-white text-balance">
             Start Designing Your ADU Today
           </h2>
@@ -74,11 +81,12 @@ export function CTASection() {
         </div>
 
         {/* CTA Cards */}
-        <div className="grid md:grid-cols-3 gap-6 max-w-5xl mx-auto">
-          {ctaOptions.map((option) => (
+        <div ref={cardsRef} className="grid md:grid-cols-3 gap-6 max-w-5xl mx-auto">
+          {ctaOptions.map((option, index) => (
             <div
               key={option.title}
-              className={`group rounded-2xl p-8 transition-all duration-300 hover:-translate-y-2 ${
+              style={{ transitionDelay: cardsVisible ? getDelay(index) : "0ms" }}
+              className={`group rounded-2xl p-8 transition-all duration-500 hover:-translate-y-2 ${cardsVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"} ${
                 option.primary
                   ? "bg-white text-secondary shadow-2xl shadow-black/20 ring-2 ring-white/50"
                   : "bg-white/10 backdrop-blur-md border border-white/20 hover:bg-white/15"
@@ -137,7 +145,7 @@ export function CTASection() {
 
         {/* Footer reassurance text */}
         <p className="text-center text-white/50 text-sm mt-16">
-          No pressure. No obligations. Just expert guidance when you're ready.
+          No pressure. No obligations. Just expert guidance when you&apos;re ready.
         </p>
       </div>
     </section>

@@ -45,6 +45,47 @@ export const viewport: Viewport = {
   initialScale: 1,
 };
 
+const jsonLd = {
+  "@context": "https://schema.org",
+  "@type": "LocalBusiness",
+  "name": "Distinct Construction Solutions",
+  "description": "San Diego's premier design-build construction company specializing in ADUs, custom homes, remodeling, and renovations.",
+  "url": "https://distinctconstructionsolutions.com",
+  "logo": "https://distinctconstructionsolutions.com/images/logo-light.png",
+  "image": "https://distinctconstructionsolutions.com/images/logo-light.png",
+  "telephone": "+1-619-555-0123",
+  "address": {
+    "@type": "PostalAddress",
+    "addressLocality": "San Diego",
+    "addressRegion": "CA",
+    "addressCountry": "US",
+  },
+  "geo": {
+    "@type": "GeoCoordinates",
+    "latitude": 32.7157,
+    "longitude": -117.1611,
+  },
+  "areaServed": {
+    "@type": "City",
+    "name": "San Diego",
+  },
+  "serviceType": [
+    "ADU Construction",
+    "Custom Home Building",
+    "Home Remodeling",
+    "Garage Conversions",
+    "Room Additions",
+  ],
+  "priceRange": "$$",
+  "openingHoursSpecification": {
+    "@type": "OpeningHoursSpecification",
+    "dayOfWeek": ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"],
+    "opens": "08:00",
+    "closes": "18:00",
+  },
+  "sameAs": [],
+};
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -52,6 +93,12 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className="scroll-smooth">
+      <head>
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        />
+      </head>
       <body
         className={`${inter.variable} ${geistMono.variable} font-sans antialiased`}
       >

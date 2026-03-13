@@ -6,7 +6,6 @@ import { SmartTools } from "@/components/home/smart-tools";
 import { WhyChooseUs } from "@/components/home/why-choose-us";
 import { GalleryPreview } from "@/components/home/gallery-preview";
 import { CTASection } from "@/components/home/cta-section";
-import { Newsletter } from "@/components/home/newsletter";
 
 export default function Home() {
   return (
@@ -19,7 +18,6 @@ export default function Home() {
       <WhyChooseUs />
       <GalleryPreview />
       <CTASection />
-      <Newsletter />
     </>
   );
 }

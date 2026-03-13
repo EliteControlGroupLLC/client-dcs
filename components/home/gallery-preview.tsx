@@ -4,6 +4,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { ArrowRight, ExternalLink } from "lucide-react";
+import { useScrollAnimation } from "@/hooks/use-scroll-animation";
 
 const projects = [
   {
@@ -12,7 +13,7 @@ const projects = [
     location: "La Jolla, CA",
     sqft: "450 sq ft",
     type: "ADU",
-    image: null,
+    image: "/images/projects/adu-exterior-balcony.png",
   },
   {
     id: 2,
@@ -20,7 +21,7 @@ const projects = [
     location: "Pacific Beach, CA",
     sqft: "800 sq ft",
     type: "ADU",
-    image: null,
+    image: "/images/projects/adu-exterior-yard.png",
   },
   {
     id: 3,
@@ -28,7 +29,7 @@ const projects = [
     location: "Chula Vista, CA",
     sqft: "600 sq ft",
     type: "ADU",
-    image: null,
+    image: "/images/projects/adu-exterior-side.png",
   },
   {
     id: 4,
@@ -36,7 +37,7 @@ const projects = [
     location: "Carlsbad, CA",
     sqft: "Kitchen",
     type: "Remodel",
-    image: null,
+    image: "/images/projects/kitchen-remodel.png",
   },
   {
     id: 5,
@@ -44,7 +45,7 @@ const projects = [
     location: "Encinitas, CA",
     sqft: "3,200 sq ft",
     type: "New Construction",
-    image: null,
+    image: "/images/projects/bedroom-interior.png",
   },
   {
     id: 6,
@@ -52,7 +53,7 @@ const projects = [
     location: "Del Mar, CA",
     sqft: "Bathroom",
     type: "Remodel",
-    image: null,
+    image: "/images/projects/bathroom-renovation.png",
   },
 ];
 
@@ -64,6 +65,10 @@ const projectStats = [
 ];
 
 export function GalleryPreview() {
+  const { ref: headerRef, isVisible: headerVisible } = useScrollAnimation();
+  const { ref: gridRef, isVisible: gridVisible } = useScrollAnimation();
+  const { ref: statsRef, isVisible: statsVisible } = useScrollAnimation();
+
   return (
     <section className="py-24 relative overflow-hidden">
       {/* Subtle architectural background */}
@@ -80,7 +85,10 @@ export function GalleryPreview() {
 
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 relative z-10">
         {/* Header */}
-        <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-6 mb-12">
+        <div
+          ref={headerRef}
+          className={`flex flex-col md:flex-row md:items-end md:justify-between gap-6 mb-12 transition-all duration-700 ${headerVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"}`}
+        >
           <div>
             <span className="inline-flex items-center gap-2 text-primary font-semibold text-sm uppercase tracking-wider mb-4">
               Our Work
@@ -98,7 +106,7 @@ export function GalleryPreview() {
         </div>
 
         {/* Gallery Grid */}
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div ref={gridRef} className={`grid md:grid-cols-2 lg:grid-cols-3 gap-6 transition-all duration-700 delay-200 ${gridVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"}`}>
           {projects.map((project, index) => (
             <Link 
               key={project.id} 
@@ -107,8 +115,18 @@ export function GalleryPreview() {
                 index === 0 ? "md:col-span-2 md:row-span-2 md:aspect-square" : ""
               }`}
             >
-              {/* Placeholder background with gradient */}
-              <div className="absolute inset-0 bg-gradient-to-br from-secondary/90 to-secondary" />
+              {/* Project image */}
+              {project.image ? (
+                <Image
+                  src={project.image}
+                  alt={project.title}
+                  fill
+                  className="object-cover group-hover:scale-105 transition-transform duration-500"
+                  sizes={index === 0 ? "(max-width: 768px) 100vw, 66vw" : "(max-width: 768px) 100vw, 33vw"}
+                />
+              ) : (
+                <div className="absolute inset-0 bg-gradient-to-br from-secondary/90 to-secondary" />
+              )}
               
               {/* Glass-style content overlay */}
               <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent opacity-80 group-hover:opacity-90 transition-opacity" />
@@ -133,17 +151,12 @@ export function GalleryPreview() {
                   </div>
                 </div>
               </div>
-
-              {/* Placeholder indicator */}
-              <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                <span className="text-white/20 text-sm font-medium">Project Image</span>
-              </div>
             </Link>
           ))}
         </div>
 
         {/* Stats bar with glass styling */}
-        <div className="mt-12 bg-white/80 backdrop-blur-sm rounded-2xl p-8 shadow-lg border border-white/50">
+        <div ref={statsRef} className={`mt-12 bg-white/80 backdrop-blur-sm rounded-2xl p-8 shadow-lg border border-white/50 transition-all duration-700 delay-300 ${statsVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"}`}>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
             {projectStats.map((stat) => (
               <div key={stat.label} className="group">

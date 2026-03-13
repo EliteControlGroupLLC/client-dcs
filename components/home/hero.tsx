@@ -76,7 +76,7 @@ export function Hero() {
       <div className="absolute bottom-40 left-10 w-96 h-96 bg-primary/10 rounded-full blur-3xl animate-pulse delay-1000" />
 
       <div className="relative z-10 mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-32 w-full">
-        <div className="grid lg:grid-cols-2 gap-12 items-center">
+        <div className="grid md:grid-cols-2 gap-8 lg:gap-12 items-center">
           {/* Left Content */}
           <div className="text-white">
             {/* Trust badge */}
@@ -148,8 +148,8 @@ export function Hero() {
           </div>
 
           {/* Right Content - Featured Info Card */}
-          <div className="relative hidden lg:block">
-            <div className="relative rounded-3xl overflow-hidden shadow-2xl bg-white/10 backdrop-blur-md border border-white/20 p-8">
+          <div className="relative hidden md:block">
+            <div className="relative rounded-3xl overflow-hidden shadow-2xl bg-white/10 backdrop-blur-md border border-white/20 p-8 animate-pulse-glow">
               {/* Video progress indicator */}
               <div className="flex gap-2 mb-6">
                 {heroVideos.map((_, index) => (

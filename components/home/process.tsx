@@ -9,6 +9,7 @@ import {
   Key,
   ArrowRight,
 } from "lucide-react";
+import { useScrollAnimation, useStaggeredAnimation } from "@/hooks/use-scroll-animation";
 
 const steps = [
   {
@@ -54,6 +55,9 @@ const steps = [
 ];
 
 export function Process() {
+  const { ref: headerRef, isVisible: headerVisible } = useScrollAnimation();
+  const { ref: stepsRef, isVisible: stepsVisible, getDelay } = useStaggeredAnimation(120);
+
   return (
     <section className="relative py-24 overflow-hidden">
       {/* Background Image */}
@@ -65,14 +69,18 @@ export function Process() {
           className="object-cover"
           priority
         />
-        {/* Overlay for readability */}
         <div className="absolute inset-0 bg-secondary/90" />
         <div className="absolute inset-0 bg-gradient-to-b from-secondary/95 via-secondary/85 to-secondary/95" />
       </div>
+      {/* Architectural grid overlay */}
+      <div className="absolute inset-0 architectural-grid" />
 
       <div className="relative z-10 mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         {/* Header */}
-        <div className="text-center max-w-3xl mx-auto mb-16">
+        <div
+          ref={headerRef}
+          className={`text-center max-w-3xl mx-auto mb-16 transition-all duration-700 ${headerVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"}`}
+        >
           <span className="inline-block text-primary font-semibold text-sm uppercase tracking-wider mb-4">
             OUR PROCESS
           </span>
@@ -91,11 +99,15 @@ export function Process() {
           {/* Connection line - desktop */}
           <div className="hidden lg:block absolute top-[60px] left-[10%] right-[10%] h-0.5 bg-gradient-to-r from-primary/30 via-primary/60 to-primary/30" />
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6">
+          <div ref={stepsRef} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6">
             {steps.map((step, index) => (
-              <div key={step.number} className="relative">
+              <div
+                key={step.number}
+                className="relative"
+                style={{ transitionDelay: stepsVisible ? getDelay(index) : "0ms" }}
+              >
                 {/* Step card */}
-                <div className="bg-white/10 backdrop-blur-lg border border-white/20 rounded-2xl p-6 h-full hover:bg-white/15 hover:border-white/30 transition-all duration-300">
+                <div className={`bg-white/10 backdrop-blur-lg border border-white/20 rounded-2xl p-6 h-full hover:bg-white/15 hover:border-white/30 transition-all duration-500 ${stepsVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"}`}>
                   {/* Icon circle */}
                   <div className="relative z-10 w-14 h-14 rounded-full bg-primary/20 border-2 border-primary flex items-center justify-center mb-5 mx-auto">
                     <step.icon className="h-6 w-6 text-primary" />
