@@ -10,6 +10,7 @@ import {
   CheckCircle,
   Star
 } from "lucide-react";
+import { useScrollAnimation, useStaggeredAnimation } from "@/hooks/use-scroll-animation";
 
 const features = [
   {
@@ -66,6 +67,10 @@ const bottomMetrics = [
 ];
 
 export function WhyChooseUs() {
+  const { ref: headerRef, isVisible: headerVisible } = useScrollAnimation();
+  const { ref: gridRef, isVisible: gridVisible, getDelay } = useStaggeredAnimation(100);
+  const { ref: testimonialRef, isVisible: testimonialVisible } = useScrollAnimation();
+
   return (
     <section className="py-24 bg-gradient-to-b from-secondary via-secondary-light/20 to-secondary text-white relative overflow-hidden">
       {/* Subtle lighting texture overlay */}
@@ -74,7 +79,10 @@ export function WhyChooseUs() {
       
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 relative z-10">
         {/* Header */}
-        <div className="text-center max-w-3xl mx-auto mb-16">
+        <div
+          ref={headerRef}
+          className={`text-center max-w-3xl mx-auto mb-16 transition-all duration-700 ${headerVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"}`}
+        >
           <span className="inline-flex items-center gap-2 text-primary font-semibold text-sm uppercase tracking-wider mb-4">
             Why Choose Us
           </span>
@@ -88,11 +96,12 @@ export function WhyChooseUs() {
         </div>
 
         {/* Features Grid */}
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 mb-16">
-          {features.map((feature) => (
+        <div ref={gridRef} className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 mb-16">
+          {features.map((feature, index) => (
             <div 
-              key={feature.title} 
-              className="bg-white/5 backdrop-blur-sm rounded-2xl p-6 border border-white/10 hover:bg-white/10 hover:border-white/20 transition-all duration-300 group"
+              key={feature.title}
+              style={{ transitionDelay: gridVisible ? getDelay(index) : "0ms" }}
+              className={`bg-white/5 backdrop-blur-sm rounded-2xl p-6 border border-white/10 hover:bg-white/10 hover:border-white/20 transition-all duration-500 group ${gridVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"}`}
             >
               <div className="w-12 h-12 rounded-xl bg-primary/20 flex items-center justify-center mb-4 group-hover:bg-primary/30 transition-colors shadow-lg shadow-primary/10">
                 <feature.icon className="h-6 w-6 text-primary" />
@@ -104,7 +113,7 @@ export function WhyChooseUs() {
         </div>
 
         {/* Testimonial */}
-        <div className="bg-white/10 backdrop-blur-sm rounded-3xl p-8 lg:p-12 border border-white/10">
+        <div ref={testimonialRef} className={`bg-white/10 backdrop-blur-sm rounded-3xl p-8 lg:p-12 border border-white/10 transition-all duration-700 delay-200 ${testimonialVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"}`}>
           <div className="grid lg:grid-cols-5 gap-8 items-center">
             <div className="lg:col-span-3">
               <div className="flex gap-1 mb-4">

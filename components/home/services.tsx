@@ -4,6 +4,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { Home, Building2, Hammer, ArrowRight, Check } from "lucide-react";
+import { useScrollAnimation, useStaggeredAnimation } from "@/hooks/use-scroll-animation";
 
 const services = [
   {
@@ -53,6 +54,10 @@ const services = [
 ];
 
 export function Services() {
+  const { ref: headerRef, isVisible: headerVisible } = useScrollAnimation();
+  const { ref: gridRef, isVisible: gridVisible, getDelay } = useStaggeredAnimation(150);
+  const { ref: ctaRef, isVisible: ctaVisible } = useScrollAnimation();
+
   return (
     <section className="relative py-24 overflow-hidden">
       {/* Background Image */}
@@ -71,7 +76,10 @@ export function Services() {
 
       <div className="relative z-10 mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         {/* Header */}
-        <div className="text-center max-w-3xl mx-auto mb-16">
+        <div
+          ref={headerRef}
+          className={`text-center max-w-3xl mx-auto mb-16 transition-all duration-700 ${headerVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"}`}
+        >
           <span className="inline-block text-primary font-semibold text-sm uppercase tracking-wider mb-4">
             OUR SERVICES
           </span>
@@ -86,11 +94,12 @@ export function Services() {
         </div>
 
         {/* Services Grid */}
-        <div className="grid md:grid-cols-3 gap-6 lg:gap-8">
-          {services.map((service) => (
+        <div ref={gridRef} className="grid md:grid-cols-3 gap-6 lg:gap-8">
+          {services.map((service, index) => (
             <div
               key={service.title}
-              className={`group relative rounded-2xl overflow-hidden transition-all duration-500 hover:-translate-y-1 ${
+              style={{ transitionDelay: gridVisible ? getDelay(index) : "0ms" }}
+              className={`group relative rounded-2xl overflow-hidden transition-all duration-500 hover:-translate-y-1 ${gridVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"} ${
                 service.featured
                   ? "bg-white/15 backdrop-blur-xl border border-white/30 shadow-2xl ring-1 ring-primary/50"
                   : "bg-white/10 backdrop-blur-lg border border-white/20 hover:bg-white/15 hover:border-white/30"
@@ -164,7 +173,7 @@ export function Services() {
         </div>
 
         {/* Bottom CTA */}
-        <div className="text-center mt-16">
+        <div ref={ctaRef} className={`text-center mt-16 transition-all duration-700 delay-300 ${ctaVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"}`}>
           <p className="text-white/70 mb-6 max-w-xl mx-auto">
             Explore project options, pricing tools, and planning resources to
             see what you can build.

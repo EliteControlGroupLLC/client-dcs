@@ -15,6 +15,7 @@ import {
   Home,
   Clock,
 } from "lucide-react";
+import { useScrollAnimation } from "@/hooks/use-scroll-animation";
 
 const features = [
   { icon: MapPin, label: "Property Analysis" },
@@ -42,6 +43,10 @@ const metrics = [
 ];
 
 export function SmartTools() {
+  const { ref: headerRef, isVisible: headerVisible } = useScrollAnimation();
+  const { ref: mainRef, isVisible: mainVisible } = useScrollAnimation();
+  const { ref: metricsRef, isVisible: metricsVisible } = useScrollAnimation();
+
   return (
     <section className="relative py-24 overflow-hidden">
       {/* Background Image */}
@@ -61,7 +66,10 @@ export function SmartTools() {
 
       <div className="relative z-10 mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         {/* Header */}
-        <div className="text-center max-w-3xl mx-auto mb-16">
+        <div
+          ref={headerRef}
+          className={`text-center max-w-3xl mx-auto mb-16 transition-all duration-700 ${headerVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"}`}
+        >
           <span className="inline-block text-primary font-semibold text-sm uppercase tracking-wider mb-4">
             SMART PLANNING TOOLS
           </span>
@@ -75,7 +83,7 @@ export function SmartTools() {
         </div>
 
         {/* Main Feature Module - Design Your ADU */}
-        <div className="mb-8">
+        <div ref={mainRef} className={`mb-8 transition-all duration-700 delay-200 ${mainVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"}`}>
           <div className="bg-white/10 backdrop-blur-xl border border-white/20 rounded-3xl overflow-hidden shadow-2xl">
             <div className="grid lg:grid-cols-2 gap-0">
               {/* Left Content */}
@@ -160,7 +168,7 @@ export function SmartTools() {
         </div>
 
         {/* ADU Value Metrics */}
-        <div className="bg-white/10 backdrop-blur-lg border border-white/20 rounded-2xl p-8 lg:p-10">
+        <div ref={metricsRef} className={`bg-white/10 backdrop-blur-lg border border-white/20 rounded-2xl p-8 lg:p-10 transition-all duration-700 delay-200 ${metricsVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"}`}>
           <div className="grid md:grid-cols-3 gap-8 lg:gap-12">
             {metrics.map((metric, index) => (
               <div
