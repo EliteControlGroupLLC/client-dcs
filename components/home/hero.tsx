@@ -127,9 +127,9 @@ export function Hero() {
                   <ArrowRight className="h-5 w-5 group-hover:translate-x-1 transition-transform" />
                 </Button>
               </Link>
-              <Link href="/floor-plans">
+              <Link href="/showroom">
                 <Button variant="outlineWhite" size="lg" rounded="full">
-                  Explore Floor Plans
+                  Visit Our Showroom
                 </Button>
               </Link>
             </div>

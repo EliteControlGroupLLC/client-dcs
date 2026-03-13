@@ -13,7 +13,7 @@ const projects = [
     location: "La Jolla, CA",
     sqft: "450 sq ft",
     type: "ADU",
-    image: null,
+    image: "/images/projects/adu-exterior-balcony.png",
   },
   {
     id: 2,
@@ -21,7 +21,7 @@ const projects = [
     location: "Pacific Beach, CA",
     sqft: "800 sq ft",
     type: "ADU",
-    image: null,
+    image: "/images/projects/adu-exterior-yard.png",
   },
   {
     id: 3,
@@ -29,7 +29,7 @@ const projects = [
     location: "Chula Vista, CA",
     sqft: "600 sq ft",
     type: "ADU",
-    image: null,
+    image: "/images/projects/adu-exterior-side.png",
   },
   {
     id: 4,
@@ -37,7 +37,7 @@ const projects = [
     location: "Carlsbad, CA",
     sqft: "Kitchen",
     type: "Remodel",
-    image: null,
+    image: "/images/projects/kitchen-remodel.png",
   },
   {
     id: 5,
@@ -45,7 +45,7 @@ const projects = [
     location: "Encinitas, CA",
     sqft: "3,200 sq ft",
     type: "New Construction",
-    image: null,
+    image: "/images/projects/bedroom-interior.png",
   },
   {
     id: 6,
@@ -53,7 +53,7 @@ const projects = [
     location: "Del Mar, CA",
     sqft: "Bathroom",
     type: "Remodel",
-    image: null,
+    image: "/images/projects/bathroom-renovation.png",
   },
 ];
 
@@ -115,8 +115,18 @@ export function GalleryPreview() {
                 index === 0 ? "md:col-span-2 md:row-span-2 md:aspect-square" : ""
               }`}
             >
-              {/* Placeholder background with gradient */}
-              <div className="absolute inset-0 bg-gradient-to-br from-secondary/90 to-secondary" />
+              {/* Project image */}
+              {project.image ? (
+                <Image
+                  src={project.image}
+                  alt={project.title}
+                  fill
+                  className="object-cover group-hover:scale-105 transition-transform duration-500"
+                  sizes={index === 0 ? "(max-width: 768px) 100vw, 66vw" : "(max-width: 768px) 100vw, 33vw"}
+                />
+              ) : (
+                <div className="absolute inset-0 bg-gradient-to-br from-secondary/90 to-secondary" />
+              )}
               
               {/* Glass-style content overlay */}
               <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent opacity-80 group-hover:opacity-90 transition-opacity" />
@@ -140,11 +150,6 @@ export function GalleryPreview() {
                     <ExternalLink className="h-4 w-4 text-white group-hover:text-primary transition-colors" />
                   </div>
                 </div>
-              </div>
-
-              {/* Placeholder indicator */}
-              <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                <span className="text-white/20 text-sm font-medium">Project Image</span>
               </div>
             </Link>
           ))}
