@@ -3,7 +3,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
-import { Home, Building2, Hammer, ArrowRight, Check } from "lucide-react";
+import { Home, Building2, Hammer, ArrowRight, Check, Layers, SquareStack, Sun, Paintbrush, Wrench } from "lucide-react";
 import { useScrollAnimation, useStaggeredAnimation } from "@/hooks/use-scroll-animation";
 
 const services = [
@@ -50,6 +50,44 @@ const services = [
     ],
     price: "Starting at $18,000",
     href: "/services/remodeling",
+  },
+];
+
+const additionalServices = [
+  {
+    icon: Layers,
+    title: "Roofing",
+    description: "Shingles, tile, and metal roofing with professional installation.",
+    href: "/services/roofing",
+    price: "From $8,500",
+  },
+  {
+    icon: SquareStack,
+    title: "Concrete",
+    description: "Driveways, patios, retaining walls, and foundations.",
+    href: "/services/concrete",
+    price: "From $17.50/sq ft",
+  },
+  {
+    icon: Sun,
+    title: "Windows",
+    description: "Energy-efficient window replacement and installation.",
+    href: "/services/windows",
+    price: "From $450/window",
+  },
+  {
+    icon: Paintbrush,
+    title: "Exterior Improvements",
+    description: "Painting, siding, decks, fencing, and outdoor living.",
+    href: "/services/exterior",
+    price: "From $3,500",
+  },
+  {
+    icon: Wrench,
+    title: "General Construction",
+    description: "Additions, structural work, electrical, plumbing, and repairs.",
+    href: "/services/general-construction",
+    price: "From $500",
   },
 ];
 
@@ -170,6 +208,26 @@ export function Services() {
               </div>
             </div>
           ))}
+        </div>
+
+        {/* Additional Services */}
+        <div className="mt-12 border-t border-white/10 pt-12">
+          <h3 className="text-center text-lg font-semibold text-white/60 uppercase tracking-wider mb-8">
+            More Services
+          </h3>
+          <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+            {additionalServices.map((service) => (
+              <Link key={service.title} href={service.href} className="group">
+                <div className="bg-white/5 backdrop-blur-lg border border-white/10 rounded-xl p-4 hover:bg-white/10 hover:border-white/20 transition-all duration-300 text-center h-full">
+                  <div className="w-10 h-10 rounded-lg bg-white/10 flex items-center justify-center mx-auto mb-3 group-hover:bg-primary/20 transition-colors">
+                    <service.icon className="h-5 w-5 text-primary" />
+                  </div>
+                  <h4 className="text-sm font-bold text-white group-hover:text-primary transition-colors mb-1">{service.title}</h4>
+                  <p className="text-xs text-white/40">{service.price}</p>
+                </div>
+              </Link>
+            ))}
+          </div>
         </div>
 
         {/* Bottom CTA */}
