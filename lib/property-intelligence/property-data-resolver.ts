@@ -8,6 +8,7 @@ import {
   getConfidenceStatus,
 } from "./types";
 import type { OSMPropertyData } from "./osm-service";
+import type { AttomPropertyData } from "./attom-service";
 
 // Seed a deterministic pseudo-random number from address string
 function hashAddress(address: string): number {
@@ -60,7 +61,8 @@ export function resolvePropertyData(
   address: string,
   geocodedAddress?: string,
   slopeData?: { slope: string; confidence: number; sources: string[] },
-  osmData?: OSMPropertyData
+  osmData?: OSMPropertyData,
+  attomData?: AttomPropertyData
 ): ResolvedPropertyData {
   const seed = hashAddress(address);
   const r = (i: number) => seededRandom(seed, i);
@@ -69,14 +71,19 @@ export function resolvePropertyData(
   const zoneIndex = seed % SD_ZONES.length;
   const zone = SD_ZONES[zoneIndex];
 
+  const hasAttom = attomData?.available === true;
   const hasOSMBuildings = osmData?.parcel && osmData.parcel.buildings.length > 0;
 
-  // ── Building Footprint (REAL from OSM if available) ──
+  // ── Building Footprint (prefer ATTOM > OSM > estimate) ──
   let footprintSqFt: number;
   let footprintConfidence: number;
   let footprintSources: string[];
 
-  if (hasOSMBuildings) {
+  if (hasAttom && attomData.footprintSqFt) {
+    footprintSqFt = attomData.footprintSqFt;
+    footprintConfidence = 92;
+    footprintSources = ["ATTOM Property Data"];
+  } else if (hasOSMBuildings) {
     footprintSqFt = osmData.parcel!.mainBuildingFootprintSqFt;
     footprintConfidence = 82;
     footprintSources = ["OpenStreetMap building outline"];
@@ -88,12 +95,19 @@ export function resolvePropertyData(
     footprintSources = ["Estimated from zone averages"];
   }
 
-  // ── Home Area / Living Space (REAL from OSM if available) ──
+  // ── Home Area / Living Space (prefer ATTOM > OSM > estimate) ──
   let homeAreaSqFt: number;
   let homeConfidence: number;
   let homeSources: string[];
 
-  if (hasOSMBuildings) {
+  if (hasAttom && attomData.homeAreaSqFt) {
+    homeAreaSqFt = attomData.homeAreaSqFt;
+    homeConfidence = 95;
+    homeSources = ["ATTOM Property Data"];
+    if (attomData.stories && attomData.stories > 1) {
+      homeSources.push(`${attomData.stories} stories recorded`);
+    }
+  } else if (hasOSMBuildings) {
     homeAreaSqFt = osmData.parcel!.mainBuildingAreaSqFt;
     homeConfidence = 76;
     homeSources = ["OpenStreetMap footprint × levels"];
@@ -108,14 +122,16 @@ export function resolvePropertyData(
     homeSources = ["Estimated from zone averages"];
   }
 
-  // ── Lot Size ──
-  // OSM does not reliably have parcel boundaries, so we estimate from zone
-  // but use bounding box if available from Nominatim
+  // ── Lot Size (prefer ATTOM > Nominatim bbox > zone estimate) ──
   let lotSizeSqFt: number;
   let lotConfidence: number;
   let lotSources: string[];
 
-  if (osmData?.boundingBox) {
+  if (hasAttom && attomData.lotSizeSqFt) {
+    lotSizeSqFt = attomData.lotSizeSqFt;
+    lotConfidence = 95;
+    lotSources = ["ATTOM Property Data"];
+  } else if (osmData?.boundingBox) {
     // Use Nominatim bounding box as a rough parcel estimate
     const [minLat, maxLat, minLon, maxLon] = osmData.boundingBox;
     const latM = (maxLat - minLat) * 111320;
@@ -159,11 +175,23 @@ export function resolvePropertyData(
   // ── Zoning ──
   const zoningConfidence = 88 + Math.round(r(12) * 8);
 
-  // ── APN ──
-  const apnPart1 = 400 + Math.round(r(13) * 200);
-  const apnPart2 = 100 + Math.round(r(14) * 900);
-  const apnPart3 = 10 + Math.round(r(15) * 40);
-  const apn = `${apnPart1}-${apnPart2}-${String(apnPart3).padStart(2, "0")}`;
+  // ── APN (prefer ATTOM > estimated) ──
+  let apn: string;
+  let apnConfidence: number;
+  let apnSources: string[];
+
+  if (hasAttom && attomData.apn) {
+    apn = attomData.apn;
+    apnConfidence = 97;
+    apnSources = ["ATTOM Property Data"];
+  } else {
+    const apnPart1 = 400 + Math.round(r(13) * 200);
+    const apnPart2 = 100 + Math.round(r(14) * 900);
+    const apnPart3 = 10 + Math.round(r(15) * 40);
+    apn = `${apnPart1}-${apnPart2}-${String(apnPart3).padStart(2, "0")}`;
+    apnConfidence = 55;
+    apnSources = ["Estimated — pending County Assessor lookup"];
+  }
 
   // ── Slope ──
   const slopeField = slopeData
@@ -185,9 +213,9 @@ export function resolvePropertyData(
   const allowsJadu = zone.zone.startsWith("RS");
   const aduAllowanceStr = `ADU up to ${maxAduSize} sq ft${allowsJadu ? " + JADU up to 500 sq ft" : ""}`;
 
-  // ── Parcel shape ──
-  const lotWidth = Math.round(Math.sqrt(lotSizeSqFt * (0.4 + r(16) * 0.2)));
-  const lotDepth = Math.round(lotSizeSqFt / lotWidth);
+  // ── Parcel shape (prefer ATTOM dimensions > derived) ──
+  const lotWidth = (hasAttom && attomData.lotWidth) ? Math.round(attomData.lotWidth) : Math.round(Math.sqrt(lotSizeSqFt * (0.4 + r(16) * 0.2)));
+  const lotDepth = (hasAttom && attomData.lotDepth) ? Math.round(attomData.lotDepth) : Math.round(lotSizeSqFt / lotWidth);
   const ratio = lotDepth / lotWidth;
   const shapeDesc = ratio > 2.5 ? "Deep narrow lot" : ratio > 1.5 ? "Rectangular" : "Nearly square";
   const parcelStr = `${shapeDesc} (${lotWidth}ft \u00d7 ${lotDepth}ft approx.)`;
@@ -202,7 +230,7 @@ export function resolvePropertyData(
 
   const intelligence: PropertyIntelligence = {
     address: makeField(displayAddress, addressConfidence, addressSources),
-    apn: makeField(apn, 55, ["Estimated — pending County Assessor lookup"]),
+    apn: makeField(apn, apnConfidence, apnSources),
     lotSizeSqFt: makeField(lotSizeSqFt, lotConfidence, lotSources),
     homeAreaSqFt: makeField(homeAreaSqFt, homeConfidence, homeSources),
     footprintSqFt: makeField(footprintSqFt, footprintConfidence, footprintSources),
