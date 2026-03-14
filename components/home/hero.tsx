@@ -86,8 +86,8 @@ export function Hero() {
             </div>
 
             <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold leading-tight mb-6">
-              Build Your Dream
-              <span className="block text-primary">ADU or Home</span>
+              Build Your
+              <span className="block text-primary">ADU or Dream Home</span>
               <span className="block">With Confidence</span>
             </h1>
 
