@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 const footerLinks = {
   services: [
     { name: "ADU Solutions", href: "/services/adu-solutions" },
-    { name: "New Construction", href: "/services/new-construction" },
+    { name: "Custom Homes", href: "/services/new-construction" },
     { name: "Remodeling", href: "/services/remodeling" },
     { name: "Kitchen Remodeling", href: "/services/kitchen" },
     { name: "Bathroom Remodeling", href: "/services/bathroom" },

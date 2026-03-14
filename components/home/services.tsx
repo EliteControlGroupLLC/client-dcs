@@ -25,7 +25,7 @@ const services = [
   },
   {
     icon: Building2,
-    title: "New Construction",
+    title: "Custom Homes",
     description:
       "Custom homes designed and built to your vision. From architectural planning to final construction, our team manages the entire process under one roof.",
     features: [
