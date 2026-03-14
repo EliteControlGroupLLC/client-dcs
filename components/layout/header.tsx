@@ -57,12 +57,12 @@ export function Header() {
           <Link href="/" className="flex items-center shrink-0">
             {USE_IMAGE_LOGO ? (
               // Image logo with automatic sizing
-              <div className="relative h-12 sm:h-14 w-auto max-w-[220px]">
+              <div className="relative h-14 sm:h-16 w-auto max-w-[250px]">
                 <Image
                   src={scrolled ? LOGO_DARK : LOGO_LIGHT}
                   alt="Distinct Construction Solutions"
-                  width={220}
-                  height={56}
+                  width={250}
+                  height={64}
                   className="h-full w-auto object-contain"
                   priority
                 />
@@ -121,8 +121,15 @@ export function Header() {
             ))}
           </div>
 
-          {/* Spacer for alignment */}
-          <div className="hidden lg:block" />
+          {/* Visit Our Showroom CTA */}
+          <div className="hidden lg:flex lg:items-center">
+            <Link
+              href="/showroom"
+              className="inline-flex items-center justify-center rounded-full bg-primary px-6 py-2.5 text-sm font-semibold text-white shadow-lg shadow-primary/25 hover:bg-primary-dark transition-all hover:scale-105"
+            >
+              Visit Our Showroom
+            </Link>
+          </div>
 
           {/* Mobile menu button */}
           <button
