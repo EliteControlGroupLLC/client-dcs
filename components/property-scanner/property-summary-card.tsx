@@ -38,7 +38,7 @@ const fields: FieldDef[] = [
     },
   },
   {
-    label: "Existing Home Area",
+    label: "Existing Home Square Footage",
     icon: Home,
     getField: (d) => d.homeAreaSqFt,
     formatValue: (f) => {

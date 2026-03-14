@@ -13,14 +13,16 @@ import { resolvePropertyData } from "./property-data-resolver";
 import { geocodeAddress } from "./geocoding-service";
 import { getElevationData } from "./elevation-service";
 import { getOSMPropertyData } from "./osm-service";
+import { getAttomPropertyData } from "./attom-service";
 
 export async function analyzeProperty(address: string): Promise<PropertyAnalysisResult> {
   // Step 1: Geocode the address
   const geocoded = await geocodeAddress(address);
 
-  // Step 2: Get elevation/slope data AND OSM data in parallel if we have coordinates
+  // Step 2: Get ATTOM data, elevation/slope data, AND OSM data in parallel
   let slopeData: { slope: string; confidence: number; sources: string[] } | undefined;
   let osmData: Awaited<ReturnType<typeof getOSMPropertyData>> | undefined;
+  const attomData = await getAttomPropertyData(address);
 
   if (geocoded) {
     const [slope, osm] = await Promise.all([
@@ -31,12 +33,13 @@ export async function analyzeProperty(address: string): Promise<PropertyAnalysis
     osmData = osm;
   }
 
-  // Step 3: Resolve property data from all sources (OSM + estimates)
+  // Step 3: Resolve property data from all sources (ATTOM + OSM + estimates)
   const resolved = resolvePropertyData(
     address,
     geocoded?.formattedAddress,
     slopeData,
-    osmData
+    osmData,
+    attomData
   );
 
   const { intelligence, rawLotSizeSqFt, rawFootprintSqFt } = resolved;
@@ -80,14 +83,20 @@ export async function analyzeProperty(address: string): Promise<PropertyAnalysis
 }
 
 function calculateBuildableArea(lotSizeSqFt: number, footprintSqFt: number): BuildableAnalysis {
+  // San Diego ADU setback rules:
+  // - 3 ft setbacks from property lines (side and rear for ADUs)
+  // - 6 ft minimum separation from main house
   const separationFt = 6;
-  const setbackFt = lotSizeSqFt > 8000 ? 4 : 3;
+  const setbackFt = 3;
 
   // Estimate buildable envelope
   const lotWidth = Math.round(Math.sqrt(lotSizeSqFt * 0.5));
   const lotDepth = Math.round(lotSizeSqFt / lotWidth);
+  // Subtract 3ft setback from each side (left + right)
   const usableWidth = Math.max(0, lotWidth - 2 * setbackFt);
-  const usableDepth = Math.max(0, lotDepth - setbackFt - separationFt - Math.round(footprintSqFt / lotWidth));
+  // Subtract rear setback (3ft) + separation from main home (6ft) + main home footprint depth
+  const mainHomeDepthEst = Math.round(footprintSqFt / lotWidth);
+  const usableDepth = Math.max(0, lotDepth - setbackFt - separationFt - mainHomeDepthEst);
   const buildableEnvelope = Math.max(0, usableWidth * usableDepth);
   const cappedEnvelope = Math.min(buildableEnvelope, 1200); // CA ADU max
 
