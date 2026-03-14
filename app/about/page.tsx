@@ -45,7 +45,7 @@ const testimonials = [
     name: "Sarah M.",
     location: "La Jolla",
     project: "ADU Construction",
-    quote: "DCS built an incredible ADU in our backyard. The team was professional, communicative, and the quality exceeded our expectations. Now we have rental income that covers our mortgage!",
+    quote: "The team built an incredible ADU in our backyard. They were professional, communicative, and the quality exceeded our expectations. Now we have rental income that covers our mortgage!",
     rating: 5,
   },
   {
@@ -59,7 +59,7 @@ const testimonials = [
     name: "Jennifer L.",
     location: "Pacific Beach",
     project: "New Construction",
-    quote: "Building our dream home was a big decision. DCS made it easy with their transparent pricing and expert guidance. We couldn&apos;t be happier with the result.",
+    quote: "Building our dream home was a big decision. The team made it easy with their transparent pricing and expert guidance. We couldn&apos;t be happier with the result.",
     rating: 5,
   },
 ];
@@ -149,13 +149,13 @@ export default function AboutPage() {
         </div>
       </section>
 
-      {/* Why Choose DCS */}
+      {/* Why Choose Us */}
       <section className="py-20">
         <div className="container mx-auto px-4">
           <div className="grid md:grid-cols-2 gap-12 items-center">
             <div>
               <h2 className="text-3xl md:text-4xl font-bold text-secondary mb-6">
-                Why Choose DCS?
+                Why Homeowners Choose Us
               </h2>
               <ul className="space-y-4">
                 {[

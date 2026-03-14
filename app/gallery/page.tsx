@@ -47,7 +47,7 @@ export default function GalleryPage() {
   const selectedProjectData = projects.find(p => p.id === selectedProject);
 
   return (
-    <div className="min-h-screen bg-muted py-12">
+    <div className="min-h-screen bg-muted pt-28 pb-12">
       <div className="container mx-auto px-4">
         {/* Header */}
         <div className="text-center mb-12">

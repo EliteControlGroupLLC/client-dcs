@@ -46,7 +46,7 @@ const features = [
 ];
 
 const testimonial = {
-  quote: "DCS made our ADU project seamless from start to finish. Their transparent pricing and professional team exceeded our expectations. We're now earning $2,800/month in rental income.",
+  quote: "Our ADU project was seamless from start to finish. The transparent pricing and professional team exceeded our expectations. We're now earning $2,800/month in rental income.",
   author: "Sarah & Michael Thompson",
   location: "La Mesa, CA",
   project: "650 sq ft ADU",
@@ -72,7 +72,9 @@ export function WhyChooseUs() {
   const { ref: testimonialRef, isVisible: testimonialVisible } = useScrollAnimation();
 
   return (
-    <section className="py-24 bg-gradient-to-b from-secondary via-secondary-light/20 to-secondary text-white relative overflow-hidden">
+    <section className="py-24 bg-secondary text-white relative overflow-hidden">
+      {/* Subtle premium grid pattern */}
+      <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.03)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.03)_1px,transparent_1px)] bg-[size:40px_40px]" />
       {/* Subtle lighting texture overlay */}
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,rgba(62,205,162,0.08),transparent_50%)]" />
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom_right,rgba(62,205,162,0.05),transparent_50%)]" />

@@ -7,13 +7,13 @@ const reviews = [
     author: "Michael T.",
     date: "2 weeks ago",
     rating: 5,
-    text: "DCS built our ADU from start to finish. The team was professional, on time, and the quality exceeded our expectations. Highly recommend!",
+    text: "They built our ADU from start to finish. The team was professional, on time, and the quality exceeded our expectations. Highly recommend!",
   },
   {
     author: "Patricia G.",
     date: "1 month ago",
     rating: 5,
-    text: "We hired DCS for a complete kitchen remodel. They stayed on budget and finished ahead of schedule. The design team was incredibly helpful.",
+    text: "We hired them for a complete kitchen remodel. They stayed on budget and finished ahead of schedule. The design team was incredibly helpful.",
   },
   {
     author: "David & Lisa K.",
@@ -25,7 +25,7 @@ const reviews = [
     author: "Robert S.",
     date: "3 months ago",
     rating: 5,
-    text: "From permits to final walkthrough, DCS handled everything. Their fixed-price contract gave us peace of mind throughout the whole process.",
+    text: "From permits to final walkthrough, they handled everything. Their fixed-price contract gave us peace of mind throughout the whole process.",
   },
 ];
 
