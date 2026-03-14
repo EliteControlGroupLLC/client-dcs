@@ -49,17 +49,17 @@ export interface ADUConfiguration {
 }
 
 export const ADU_SIZES = {
-  studio: { label: "Studio", sqft: 400, beds: 0, baths: 1, price: 175000 },
-  "1-bed": { label: "1 Bedroom", sqft: 600, beds: 1, baths: 1, price: 225000 },
-  "2-bed": { label: "2 Bedroom", sqft: 800, beds: 2, baths: 2, price: 285000 },
+  studio: { label: "Studio", sqft: 400, beds: 0, baths: 1, price: 170800 },
+  "1-bed": { label: "1 Bedroom", sqft: 600, beds: 1, baths: 1, price: 256200 },
+  "2-bed": { label: "2 Bedroom", sqft: 800, beds: 2, baths: 2, price: 341600 },
   custom: { label: "Custom", sqft: 0, beds: 0, baths: 0, price: 0 },
 };
 
 export const ADU_TYPES = {
   detached: { label: "Detached ADU", description: "Standalone structure in your backyard", multiplier: 1 },
-  attached: { label: "Attached ADU", description: "Connected to your main home", multiplier: 0.95 },
-  "garage-conversion": { label: "Garage Conversion", description: "Convert existing garage", multiplier: 0.8 },
-  jadu: { label: "JADU", description: "Junior ADU within existing home (500 sq ft max)", multiplier: 0.7 },
+  attached: { label: "Attached ADU", description: "Connected to your main home", multiplier: 1.04 },
+  "garage-conversion": { label: "Garage Conversion", description: "Convert existing garage", multiplier: 0.7 },
+  jadu: { label: "JADU", description: "Junior ADU within existing home (500 sq ft max)", multiplier: 0.65 },
 };
 
 export const ADU_STYLES = {
@@ -99,7 +99,7 @@ export function calculateADUPrice(config: Partial<ADUConfiguration>): { base: nu
   if (config.size && config.size !== "custom") {
     base = ADU_SIZES[config.size].price;
   } else if (config.sqft) {
-    base = config.sqft * 350; // $350 per sq ft for custom
+    base = config.sqft * 427; // $427 per sq ft for custom (detached rate)
   }
   
   // Apply type multiplier

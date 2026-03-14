@@ -98,7 +98,7 @@ export function Hero() {
 
             {/* Pricing info */}
             <div className="mb-8 space-y-1">
-              <p className="text-white/90 font-medium">ADUs starting at <span className="text-primary font-bold">$175,000</span></p>
+              <p className="text-white/90 font-medium">Detached ADUs at <span className="text-primary font-bold">$427/sq ft</span></p>
               <p className="text-white/90 font-medium">Garage conversions starting at <span className="text-primary font-bold">$120,000</span></p>
             </div>
 

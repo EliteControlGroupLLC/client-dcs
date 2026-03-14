@@ -130,7 +130,7 @@ export function StepSize() {
         {config.size === "custom" && config.sqft && config.sqft > 0 && (
           <div className="mt-4 pt-4 border-t border-border">
             <p className="text-sm text-muted-foreground">
-              Estimated price: <span className="font-bold text-primary">{formatCurrency(config.sqft * 350)}</span>
+              Estimated price: <span className="font-bold text-primary">{formatCurrency(config.sqft * 427)}</span>
             </p>
           </div>
         )}

@@ -19,7 +19,7 @@ const services = [
       "Junior ADUs",
       "Full Permits Included",
     ],
-    price: "Starting at $120,000",
+    price: "From $427/sq ft",
     href: "/services/adu-solutions",
     featured: true,
   },

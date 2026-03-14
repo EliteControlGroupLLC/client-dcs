@@ -7,10 +7,11 @@ import { Card, CardContent } from "@/components/ui/card";
 import { ArrowRight, Zap, Check, X } from "lucide-react";
 
 const aduTypes = [
-  { label: "Detached ADU (New Build)", perSqFt: 375, id: "detached" },
-  { label: "Garage Conversion (2-Car)", perSqFt: 0, flatCost: 100000, id: "garage-2" },
-  { label: "Garage Conversion (3-Car)", perSqFt: 0, flatCost: 120000, id: "garage-3" },
-  { label: "Two-Story ADU", perSqFt: 400, id: "two-story" },
+  { label: "Detached ADU (New Build)", perSqFt: 427, id: "detached" },
+  { label: "Attached ADU", perSqFt: 444, id: "attached" },
+  { label: "Garage Conversion (2-Car)", perSqFt: 0, flatCost: 120000, id: "garage-2" },
+  { label: "Garage Conversion (3-Car)", perSqFt: 0, flatCost: 150000, id: "garage-3" },
+  { label: "Two-Story ADU", perSqFt: 450, id: "two-story" },
 ];
 
 const sizeOptions = [400, 500, 700, 1000, 1200];

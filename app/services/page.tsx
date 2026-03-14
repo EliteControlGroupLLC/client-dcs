@@ -8,7 +8,7 @@ const services = [
     icon: Home,
     title: "ADU Solutions",
     description: "Detached ADUs, attached ADUs, garage conversions, and JADUs. Full design-build service from permits to completion.",
-    starting: "$120,000",
+    starting: "From $427/sq ft",
     href: "/services/adu-solutions",
     badge: "Most Popular",
   },
