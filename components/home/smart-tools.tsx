@@ -178,10 +178,10 @@ export function SmartTools() {
           {[
             { icon: Zap, title: "Instant ADU Estimator", desc: "Quick price estimates", href: "/tools/instant-adu-estimator" },
             { icon: DollarSign, title: "ADU Income Calculator", desc: "Rental potential & ROI", href: "/tools/adu-income-calculator" },
-            { icon: BarChart3, title: "ADU ROI Simulator", desc: "Investment projections", href: "/tools/adu-roi-simulator" },
+            { icon: BarChart3, title: "ADU ROI Simulator", desc: "Return on investment projections", href: "/tools/adu-roi-simulator" },
             { icon: ArrowLeftRight, title: "Compare ADU Sizes", desc: "Side-by-side comparison", href: "/tools/compare-adu-sizes" },
             { icon: Home, title: "Roof Price Calculator", desc: "Estimate roof costs", href: "/tools/roof-calculator" },
-            { icon: Layers, title: "Concrete Calculator", desc: "Slab & wall estimates", href: "/tools/concrete-calculator" },
+            { icon: Layers, title: "Concrete Calculator", desc: "Slab and retaining wall estimates", href: "/tools/concrete-calculator" },
             { icon: ChefHat, title: "Kitchen Calculator", desc: "Remodel cost estimates", href: "/tools/kitchen-calculator" },
             { icon: Bath, title: "Bathroom Calculator", desc: "Renovation estimates", href: "/tools/bathroom-calculator" },
             { icon: Wand2, title: "Design Inspiration", desc: "Build your style profile", href: "/tools/adu-design-inspiration" },

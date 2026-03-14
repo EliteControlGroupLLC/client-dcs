@@ -21,22 +21,22 @@ const features = [
   {
     icon: Shield,
     title: "Fixed-Price Contracts",
-    description: "Lock in your project price from the start. Our contracts are designed to protect homeowners from unexpected cost increases and scope confusion.",
+    description: "Because we design every project in-house before construction begins, we can offer true fixed pricing. Your contract locks in the cost from day one — no surprises, no change-order confusion.",
   },
   {
     icon: Users,
     title: "In-House Team",
-    description: "From architects to builders, our team works together under one roof. This improves communication, quality control, and accountability throughout your project.",
+    description: "We operate as a full ecosystem — design, estimating, planning, project coordination, and construction all under one roof. This means faster decisions, fewer delays, and full accountability at every stage.",
   },
   {
     icon: Clock,
     title: "Reliable Project Delivery",
-    description: "Our project management system keeps construction organized and on schedule while maintaining high standards of quality.",
+    description: "Every project is managed through our internal project platform where clients can view schedules, progress photos, updates, RFIs, and change orders in real time — keeping you informed and in control.",
   },
   {
     icon: Award,
-    title: "Quality Guaranteed",
-    description: "Our experienced builders use proven construction methods and quality materials, backed by strong warranties and clear accountability.",
+    title: "Quality Control",
+    description: "We use internal quality control checklists and multiple inspections at every stage to ensure work meets our standards before moving forward. Nothing gets signed off until it passes our review process.",
   },
   {
     icon: Headphones,
