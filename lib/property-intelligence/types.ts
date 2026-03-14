@@ -75,6 +75,83 @@ export interface PropertyAnalysisResult {
   smartBanner: SmartBannerData;
   lotDimensions: LotDimensions;
   disclaimer: string;
+
+  // Enhanced layers (v2)
+  jurisdiction?: {
+    id: string;
+    name: string;
+    type: string;
+    confidence: number;
+    uncertain: boolean;
+    rulesVersion: string;
+    sourceUrls: string[];
+  };
+  aduRulesSnapshot?: {
+    detachedMaxSqft: number;
+    attachedMaxSqft: number;
+    jaduMaxSqft: number;
+    sideSetbackFt: number;
+    rearSetbackFt: number;
+    maxHeightFt: number;
+    twoStoryAllowed: boolean;
+    parkingRequired: boolean;
+    ownerOccupancyNotes: string;
+    bonusProgramNotes: string;
+  };
+  overlays?: {
+    type: string;
+    name: string;
+    detected: boolean;
+    confidence: number;
+    notes: string;
+  }[];
+  enhancedFeasibility?: {
+    type: string;
+    feasibility: string;
+    maxSizeSqft: number;
+    minSizeSqft: number;
+    estimatedSizeRange: string;
+    priceRange: string;
+    description: string;
+    constraints: string[];
+    confidence: number;
+  }[];
+  upsideDetected?: boolean;
+  upsideOpportunities?: {
+    triggerType: string;
+    title: string;
+    summary: string;
+    scenarioCount: number;
+    estimatedUpsideLevel: string;
+    recommendedFollowupFlow: string;
+  }[];
+  financialScenarios?: {
+    scenarioName: string;
+    scenarioType: string;
+    projectedUnits: number;
+    estimatedBuildCost: number;
+    estimatedSoftCost: number;
+    estimatedTotalCost: number;
+    estimatedLoanAmount: number;
+    estimatedDownPayment: number;
+    estimatedMonthlyPayment: number;
+    estimatedMonthlyIncome: number;
+    estimatedMonthlyCashflow: number;
+    estimatedAnnualGrossIncome: number;
+    estimatedAnnualNetCashflow: number;
+    estimatedRoi: number;
+    estimatedPaybackYears: number;
+    estimatedValueAdd: number;
+  }[];
+  confidenceScore?: number;
+  confidenceBand?: "high" | "moderate" | "low";
+  manualReviewRequired?: boolean;
+  manualReviewReasons?: string[];
+  confidenceSignals?: {
+    positive: string[];
+    negative: string[];
+  };
+  financialDisclaimer?: string;
 }
 
 // Source tier classification
