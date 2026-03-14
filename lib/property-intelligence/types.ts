@@ -152,6 +152,61 @@ export interface PropertyAnalysisResult {
     negative: string[];
   };
   financialDisclaimer?: string;
+
+  // New v3 layers
+  geocoded?: {
+    lat: number;
+    lng: number;
+    placeId: string;
+    formattedAddress: string;
+    city: string | null;
+    state: string | null;
+    zip: string | null;
+  };
+  parcelVisualization?: {
+    parcelBoundary: { type: string; coordinates: number[][][] } | null;
+    structureFootprint: { type: string; coordinates: number[][][] } | null;
+    setbackLines: { type: string; coordinates: number[][] }[];
+    buildableEnvelope: { type: string; coordinates: number[][][] } | null;
+    detachedCandidateZones: { type: string; coordinates: number[][][] }[];
+    attachedCandidateZones: { type: string; coordinates: number[][][] }[];
+    conversionCandidateZones: { type: string; coordinates: number[][][] }[];
+    uncertaintyShading: { type: string; coordinates: number[][][] } | null;
+    geometryConfidence: number;
+  };
+  staticMapUrl?: string;
+  zoningEnrichment?: {
+    zoningCode: string | null;
+    zoningDescription: string | null;
+    landUseCategory: string | null;
+    overlayDistricts: string[];
+    maxLotCoverage: number | null;
+    maxFAR: number | null;
+    interpretation: string | null;
+    confidence: number;
+    available: true;
+  };
+  rentData?: {
+    estimates: {
+      aduType: string;
+      monthlyRent: number;
+      annualRent: number;
+      rentRange: string;
+      pricePerSqft: number;
+      source: "rentcast" | "estimated";
+      confidence: number;
+    }[];
+    available: true;
+    source: "rentcast" | "estimated";
+  };
+  dataSources?: {
+    googlePlaces: boolean;
+    attom: boolean;
+    openStreetMap: boolean;
+    zoneomics: boolean;
+    rentCast: boolean;
+    mapbox: boolean;
+  };
 }
 
 // Source tier classification

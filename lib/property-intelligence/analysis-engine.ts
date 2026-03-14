@@ -1,6 +1,7 @@
 // Property Intelligence Analysis Engine
 // Orchestrates data resolution, elevation lookup, jurisdiction detection,
-// feasibility analysis, upside detection, financial scenarios, and confidence scoring
+// Zoneomics enrichment, feasibility analysis, upside detection,
+// RentCast-powered financial scenarios, Mapbox visualization, and confidence scoring
 
 import {
   type PropertyAnalysisResult,
@@ -17,27 +18,50 @@ import { getOSMPropertyData } from "./osm-service";
 import { getAttomPropertyData } from "./attom-service";
 import { detectJurisdictionFromAddress, detectOverlays } from "./jurisdictions/detector";
 import { COMMON_FINANCIAL_DISCLAIMER } from "./jurisdictions/profiles";
-import { evaluateFeasibility, determineRecommendedPath } from "./feasibility-engine";
+import { evaluateFeasibility } from "./feasibility-engine";
 import { detectUpsideOpportunities } from "./upside-detector";
 import { generateFinancialScenarios } from "./financial-scenarios";
 import { calculateConfidence } from "./confidence-model";
+import {
+  generateParcelVisualization,
+  getStaticMapUrl,
+  isMapboxAvailable,
+  type ParcelVisualization,
+} from "./mapbox-service";
+import {
+  getZoneomicsData,
+  enrichOverlaysFromZoneomics,
+  getZoningInterpretation,
+  isZoneomicsAvailable,
+  type ZoneomicsZoningData,
+} from "./zoneomics-service";
+import {
+  getRentEstimate,
+  inferUnitConfig,
+  isRentCastAvailable,
+  type RentEstimate,
+} from "./rentcast-service";
+import type { OverlayDetection } from "./jurisdictions/types";
 
 export async function analyzeProperty(address: string): Promise<PropertyAnalysisResult> {
   // Step 1: Geocode the address
   const geocoded = await geocodeAddress(address);
 
-  // Step 2: Get ATTOM data, elevation/slope data, AND OSM data in parallel
+  // Step 2: Get ATTOM data, elevation/slope data, OSM data, AND Zoneomics data in parallel
   let slopeData: { slope: string; confidence: number; sources: string[] } | undefined;
   let osmData: Awaited<ReturnType<typeof getOSMPropertyData>> | undefined;
+  let zoneomicsData: ZoneomicsZoningData | undefined;
   const attomData = await getAttomPropertyData(address);
 
   if (geocoded) {
-    const [slope, osm] = await Promise.all([
+    const [slope, osm, zoneomics] = await Promise.all([
       getElevationData(geocoded.lat, geocoded.lng),
       getOSMPropertyData(geocoded.lat, geocoded.lng),
+      getZoneomicsData(geocoded.lat, geocoded.lng),
     ]);
     slopeData = slope;
     osmData = osm;
+    zoneomicsData = zoneomics;
   }
 
   // Step 3: Resolve property data from all sources (ATTOM + OSM + estimates)
@@ -61,13 +85,50 @@ export async function analyzeProperty(address: string): Promise<PropertyAnalysis
   const jSeparation = profile.separation.minDistanceFromPrimaryHomeFt;
   const buildable = calculateBuildableArea(rawLotSizeSqFt, rawFootprintSqFt, jSetback, jSeparation);
 
-  // Step 6: Detect overlays
+  // Step 6: Detect overlays (base detection + Zoneomics enrichment)
   const slopeStr = intelligence.slope.value;
   let slopePercent: number | undefined;
   if (slopeStr === "Steep") slopePercent = 20;
   else if (slopeStr === "Moderate") slopePercent = 10;
   else if (slopeStr === "Mostly flat") slopePercent = 3;
-  const overlays = detectOverlays(formattedAddress, jurisdictionResult.jurisdictionId, slopePercent);
+  const baseOverlays = detectOverlays(formattedAddress, jurisdictionResult.jurisdictionId, slopePercent);
+
+  // Enrich overlays with Zoneomics data
+  let overlays = baseOverlays;
+  if (zoneomicsData?.available) {
+    const zEnrichment = enrichOverlaysFromZoneomics(zoneomicsData);
+    const additionalOverlays: OverlayDetection[] = [];
+
+    if (zEnrichment.designReview && !overlays.some((o) => o.type === "design-review")) {
+      additionalOverlays.push({
+        type: "design-review",
+        name: "Design Review Overlay",
+        detected: true,
+        confidence: 70,
+        notes: "Zoneomics indicates this property is in a design review area.",
+      });
+    }
+    if (zEnrichment.historicDistrict && !overlays.some((o) => o.type === "historic")) {
+      additionalOverlays.push({
+        type: "historic",
+        name: "Historic District",
+        detected: true,
+        confidence: 65,
+        notes: "Zoneomics indicates this property may be in a historic district.",
+      });
+    }
+    if (zEnrichment.coastalZone && !overlays.some((o) => o.type === "coastal")) {
+      additionalOverlays.push({
+        type: "coastal",
+        name: "Coastal Zone",
+        detected: true,
+        confidence: 65,
+        notes: "Zoneomics indicates this property may be in the Coastal Zone.",
+      });
+    }
+
+    overlays = [...baseOverlays, ...additionalOverlays];
+  }
 
   // Step 7: Enhanced feasibility analysis
   const lotWidth = Math.round(Math.sqrt(rawLotSizeSqFt * 0.5));
@@ -112,17 +173,69 @@ export async function analyzeProperty(address: string): Promise<PropertyAnalysis
     profile
   );
 
-  // Step 9: Generate financial scenarios
-  const financialScenarios = generateFinancialScenarios(enhancedFeasibility);
+  // Step 9: Get RentCast rent estimates for financial scenarios
+  let rentEstimates: Map<string, RentEstimate> | undefined;
+  const feasibleTypes = enhancedFeasibility.filter(
+    (r) => r.feasibility === "likely" || r.feasibility === "possible"
+  );
 
-  // Step 10: Calculate confidence score
+  if (feasibleTypes.length > 0) {
+    const rentPromises = feasibleTypes.map(async (f) => {
+      const midSqft = Math.round((f.minSizeSqft + f.maxSizeSqft) / 2);
+      const unitConfig = inferUnitConfig(midSqft);
+      const estimate = await getRentEstimate(
+        formattedAddress,
+        unitConfig.bedrooms,
+        unitConfig.bathrooms,
+        midSqft
+      );
+      return { type: f.type, estimate };
+    });
+
+    const results = await Promise.allSettled(rentPromises);
+    rentEstimates = new Map();
+    for (const result of results) {
+      if (result.status === "fulfilled") {
+        rentEstimates.set(result.value.type, result.value.estimate);
+      }
+    }
+  }
+
+  // Step 10: Generate financial scenarios (enhanced with RentCast data)
+  const financialScenarios = generateFinancialScenarios(enhancedFeasibility, rentEstimates);
+
+  // Step 11: Generate Mapbox parcel visualization
+  let parcelVisualization: ParcelVisualization | undefined;
+  let staticMapUrl: string | null = null;
+
+  if (geocoded) {
+    const mvHomeWidth = Math.round(Math.sqrt(rawFootprintSqFt * 0.7));
+    const mvHomeDepth = Math.round(rawFootprintSqFt / mvHomeWidth);
+
+    parcelVisualization = generateParcelVisualization(
+      geocoded.lat,
+      geocoded.lng,
+      lotWidth,
+      lotDepth,
+      mvHomeWidth,
+      mvHomeDepth,
+      profile.setbacks.sideSetbackFt,
+      profile.setbacks.rearSetbackFt,
+      15, // front setback estimate
+      profile.separation.minDistanceFromPrimaryHomeFt
+    );
+
+    staticMapUrl = getStaticMapUrl(geocoded.lat, geocoded.lng);
+  }
+
+  // Step 12: Calculate confidence score (enhanced with new data sources)
   const confidenceResult = calculateConfidence(
     {
       jurisdictionConfidence: jurisdictionResult.confidence,
       jurisdictionUncertain: jurisdictionResult.uncertain,
       lotSizeSqFt: rawLotSizeSqFt,
       footprintSqFt: rawFootprintSqFt,
-      hasGeometry: false,
+      hasGeometry: parcelVisualization !== undefined,
       hasDimensions: lotWidth > 0 && lotDepth > 0,
       hasAttomData: attomData?.available === true,
       hasOsmData: osmData?.parcel !== null && osmData?.parcel !== undefined,
@@ -136,12 +249,69 @@ export async function analyzeProperty(address: string): Promise<PropertyAnalysis
     profile
   );
 
-  // Step 11: Generate legacy recommendations (backward compatibility)
+  // Boost confidence if additional data sources are available
+  let adjustedScore = confidenceResult.score;
+  const additionalPositiveSignals = [...confidenceResult.positiveSignals];
+  const additionalNegativeSignals = [...confidenceResult.negativeSignals];
+
+  if (zoneomicsData?.available) {
+    adjustedScore = Math.min(100, adjustedScore + 3);
+    additionalPositiveSignals.push("Zoneomics zoning data available");
+  }
+  if (rentEstimates && rentEstimates.size > 0) {
+    const hasRentCast = Array.from(rentEstimates.values()).some((r) => r.source === "rentcast");
+    if (hasRentCast) {
+      adjustedScore = Math.min(100, adjustedScore + 2);
+      additionalPositiveSignals.push("RentCast market rent data available");
+    }
+  }
+  if (isMapboxAvailable()) {
+    adjustedScore = Math.min(100, adjustedScore + 2);
+    additionalPositiveSignals.push("Mapbox parcel visualization available");
+  }
+
+  const adjustedBand: "high" | "moderate" | "low" = adjustedScore >= 85 ? "high" : adjustedScore >= 65 ? "moderate" : "low";
+
+  // Step 13: Generate legacy recommendations (backward compatibility)
   const recommendations = generateRecommendations(rawLotSizeSqFt, openYard, buildable.estimatedBuildableEnvelopeSqFt);
   const bestRec = determineBestRecommendation(recommendations);
   const smartBanner = generateSmartBanner(bestRec, buildable, rawLotSizeSqFt, upsideOpportunities.length > 0);
 
-  // Step 12: Calculate lot dimensions for site diagram
+  // Build zoning enrichment summary
+  const zoningEnrichment = zoneomicsData?.available
+    ? {
+        zoningCode: zoneomicsData.zoningCode,
+        zoningDescription: zoneomicsData.zoningDescription,
+        landUseCategory: zoneomicsData.landUseCategory,
+        overlayDistricts: zoneomicsData.overlayDistricts,
+        maxLotCoverage: zoneomicsData.planningAttributes.maxLotCoverage,
+        maxFAR: zoneomicsData.planningAttributes.maxFAR,
+        interpretation: getZoningInterpretation(zoneomicsData),
+        confidence: zoneomicsData.confidence,
+        available: true as const,
+      }
+    : undefined;
+
+  // Build rent data summary
+  const rentData = rentEstimates
+    ? {
+        estimates: Array.from(rentEstimates.entries()).map(([type, est]) => ({
+          aduType: type,
+          monthlyRent: est.estimatedMonthlyRent,
+          annualRent: est.estimatedAnnualRent,
+          rentRange: `$${est.rentRangeLow.toLocaleString()} - $${est.rentRangeHigh.toLocaleString()}`,
+          pricePerSqft: est.pricePerSqft,
+          source: est.source,
+          confidence: est.confidence,
+        })),
+        available: true as const,
+        source: (Array.from(rentEstimates.values()).some((r) => r.source === "rentcast")
+          ? "rentcast"
+          : "estimated") as "rentcast" | "estimated",
+      }
+    : undefined;
+
+  // Step 14: Calculate lot dimensions for site diagram
   const mainHomeWidth = Math.round(Math.sqrt(rawFootprintSqFt * 0.7));
   const mainHomeDepth = Math.round(rawFootprintSqFt / mainHomeWidth);
 
@@ -189,15 +359,40 @@ export async function analyzeProperty(address: string): Promise<PropertyAnalysis
     upsideDetected: upsideOpportunities.length > 0,
     upsideOpportunities,
     financialScenarios,
-    confidenceScore: confidenceResult.score,
-    confidenceBand: confidenceResult.band,
+    confidenceScore: adjustedScore,
+    confidenceBand: adjustedBand,
     manualReviewRequired: confidenceResult.manualReviewRequired,
     manualReviewReasons: confidenceResult.manualReviewReasons,
     confidenceSignals: {
-      positive: confidenceResult.positiveSignals,
-      negative: confidenceResult.negativeSignals,
+      positive: additionalPositiveSignals,
+      negative: additionalNegativeSignals,
     },
     financialDisclaimer: COMMON_FINANCIAL_DISCLAIMER,
+
+    // New v3 layers
+    geocoded: geocoded
+      ? {
+          lat: geocoded.lat,
+          lng: geocoded.lng,
+          placeId: geocoded.placeId,
+          formattedAddress: geocoded.formattedAddress,
+          city: geocoded.components.city || null,
+          state: geocoded.components.state || null,
+          zip: geocoded.components.zip || null,
+        }
+      : undefined,
+    parcelVisualization: parcelVisualization || undefined,
+    staticMapUrl: staticMapUrl || undefined,
+    zoningEnrichment,
+    rentData,
+    dataSources: {
+      googlePlaces: Boolean(geocoded),
+      attom: attomData?.available === true,
+      openStreetMap: osmData?.parcel !== null && osmData?.parcel !== undefined,
+      zoneomics: zoneomicsData?.available === true,
+      rentCast: isRentCastAvailable(),
+      mapbox: isMapboxAvailable(),
+    },
   };
 }
 
