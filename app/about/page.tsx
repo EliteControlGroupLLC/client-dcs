@@ -58,7 +58,7 @@ const testimonials = [
   {
     name: "Jennifer L.",
     location: "Pacific Beach",
-    project: "New Construction",
+    project: "Custom Homes",
     quote: "Building our dream home was a big decision. The team made it easy with their transparent pricing and expert guidance. We couldn&apos;t be happier with the result.",
     rating: 5,
   },

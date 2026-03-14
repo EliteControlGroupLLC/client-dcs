@@ -17,7 +17,7 @@ const navigation = [
     href: "/services",
     children: [
       { name: "ADU Solutions", href: "/services/adu-solutions" },
-      { name: "New Construction", href: "/services/new-construction" },
+      { name: "Custom Homes", href: "/services/new-construction" },
       { name: "Remodeling", href: "/services/remodeling" },
       { name: "All Services", href: "/services" },
     ],

@@ -93,7 +93,7 @@ export function LeadForm({
         className="w-full h-12 px-4 rounded-xl border border-input bg-white text-base"
       >
         <option value="ADU">ADU / Guest House</option>
-        <option value="New Construction">New Home Construction</option>
+        <option value="Custom Homes">Custom Homes</option>
         <option value="Remodel">Home Remodeling</option>
         <option value="Garage Conversion">Garage Conversion</option>
         <option value="Other">Other</option>

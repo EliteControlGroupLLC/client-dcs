@@ -14,7 +14,7 @@ const services = [
   },
   {
     icon: Hammer,
-    title: "New Construction",
+    title: "Custom Homes",
     description: "Custom homes built from the ground up. Complete design-build with transparent pricing and professional project management.",
     starting: "Custom Pricing",
     href: "/services/new-construction",

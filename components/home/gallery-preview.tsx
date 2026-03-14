@@ -44,7 +44,7 @@ const projects = [
     title: "Custom Home Build",
     location: "Coronado, CA",
     sqft: "3,200 sq ft",
-    type: "New Construction",
+    type: "Custom Homes",
     image: "/images/projects/bedroom-interior.webp",
   },
   {
