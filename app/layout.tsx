@@ -23,15 +23,24 @@ export const metadata: Metadata = {
   openGraph: {
     title: "Distinct Construction Solutions | San Diego ADU & Home Construction",
     description: "San Diego's premier design-build construction company specializing in ADUs, custom homes, remodeling, and renovations.",
-    url: "https://distinctconstructionsolutions.com",
+    url: "https://client-dcs.vercel.app",
     siteName: "Distinct Construction Solutions",
     locale: "en_US",
     type: "website",
+    images: [
+      {
+        url: "/images/og-image.jpg",
+        width: 1200,
+        height: 630,
+        alt: "Distinct Construction Solutions - San Diego ADU & Home Builder",
+      },
+    ],
   },
   twitter: {
     card: "summary_large_image",
     title: "Distinct Construction Solutions",
     description: "San Diego's premier design-build construction company",
+    images: ["/images/og-image.jpg"],
   },
   robots: {
     index: true,
@@ -98,10 +107,50 @@ export default function RootLayout({
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
         />
+        {/* Google Tag Manager - Replace GTM-XXXXXXX with your actual GTM ID */}
+        {process.env.NEXT_PUBLIC_GTM_ID && (
+          <script
+            dangerouslySetInnerHTML={{
+              __html: `(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+              new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+              j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+              'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+              })(window,document,'script','dataLayer','${process.env.NEXT_PUBLIC_GTM_ID}');`,
+            }}
+          />
+        )}
+        {/* Meta Pixel - Replace with your actual Pixel ID */}
+        {process.env.NEXT_PUBLIC_META_PIXEL_ID && (
+          <script
+            dangerouslySetInnerHTML={{
+              __html: `!function(f,b,e,v,n,t,s)
+              {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+              n.callMethod.apply(n,arguments):n.queue.push(arguments)};
+              if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
+              n.queue=[];t=b.createElement(e);t.async=!0;
+              t.src=v;s=b.getElementsByTagName(e)[0];
+              s.parentNode.insertBefore(t,s)}(window, document,'script',
+              'https://connect.facebook.net/en_US/fbevents.js');
+              fbq('init', '${process.env.NEXT_PUBLIC_META_PIXEL_ID}');
+              fbq('track', 'PageView');`,
+            }}
+          />
+        )}
       </head>
       <body
         className={`${inter.variable} ${geistMono.variable} font-sans antialiased`}
       >
+        {/* Google Tag Manager (noscript) */}
+        {process.env.NEXT_PUBLIC_GTM_ID && (
+          <noscript>
+            <iframe
+              src={`https://www.googletagmanager.com/ns.html?id=${process.env.NEXT_PUBLIC_GTM_ID}`}
+              height="0"
+              width="0"
+              style={{ display: "none", visibility: "hidden" }}
+            />
+          </noscript>
+        )}
         <Header />
         <main className="min-h-screen">
           {children}

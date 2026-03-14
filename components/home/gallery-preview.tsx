@@ -13,7 +13,7 @@ const projects = [
     location: "La Jolla, CA",
     sqft: "450 sq ft",
     type: "ADU",
-    image: "/images/projects/adu-exterior-balcony.png",
+    image: "/images/projects/adu-exterior-balcony.webp",
   },
   {
     id: 2,
@@ -21,7 +21,7 @@ const projects = [
     location: "Pacific Beach, CA",
     sqft: "800 sq ft",
     type: "ADU",
-    image: "/images/projects/adu-exterior-yard.png",
+    image: "/images/projects/adu-exterior-yard.webp",
   },
   {
     id: 3,
@@ -29,7 +29,7 @@ const projects = [
     location: "Chula Vista, CA",
     sqft: "600 sq ft",
     type: "ADU",
-    image: "/images/projects/adu-exterior-side.png",
+    image: "/images/projects/adu-exterior-side.webp",
   },
   {
     id: 4,
@@ -37,7 +37,7 @@ const projects = [
     location: "Carlsbad, CA",
     sqft: "Kitchen",
     type: "Remodel",
-    image: "/images/projects/kitchen-remodel.png",
+    image: "/images/projects/kitchen-remodel.webp",
   },
   {
     id: 5,
@@ -45,7 +45,7 @@ const projects = [
     location: "Encinitas, CA",
     sqft: "3,200 sq ft",
     type: "New Construction",
-    image: "/images/projects/bedroom-interior.png",
+    image: "/images/projects/bedroom-interior.webp",
   },
   {
     id: 6,
@@ -53,7 +53,7 @@ const projects = [
     location: "Del Mar, CA",
     sqft: "Bathroom",
     type: "Remodel",
-    image: "/images/projects/bathroom-renovation.png",
+    image: "/images/projects/bathroom-renovation.webp",
   },
 ];
 
