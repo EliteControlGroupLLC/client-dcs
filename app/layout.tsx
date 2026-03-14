@@ -63,7 +63,7 @@ const jsonLd = {
   "url": "https://distinctconstructionsolutions.com",
   "logo": "https://distinctconstructionsolutions.com/images/logo-light.png",
   "image": "https://distinctconstructionsolutions.com/images/logo-light.png",
-  "telephone": "+1-619-555-0123",
+  "telephone": "+1-858-833-0705",
   "address": {
     "@type": "PostalAddress",
     "addressLocality": "San Diego",

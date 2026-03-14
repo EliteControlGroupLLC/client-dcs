@@ -25,6 +25,7 @@ import { LeadCaptureForm } from "./lead-capture-form";
 import { PropertyReportModal } from "./property-report-modal";
 import { analyzeProperty } from "@/lib/property-intelligence";
 import type { PropertyAnalysisResult } from "@/lib/property-intelligence";
+import { trackScanCompleted, trackLeadSubmitted } from "@/lib/analytics";
 
 type ScanPhase = "address" | "scanning" | "results";
 
@@ -63,7 +64,11 @@ export function PropertyScanner() {
 
   const handleScanComplete = useCallback(() => {
     setPhase("results");
-  }, []);
+    // Fire conversion events when scan completes
+    if (analysisData) {
+      trackScanCompleted(selectedAddress, analysisData.confidenceScore || 0);
+    }
+  }, [analysisData, selectedAddress]);
 
   const handleRescan = () => {
     setPhase("address");
@@ -252,6 +257,7 @@ export function PropertyScanner() {
               onReportGenerated={(data) => {
                 setReportData(data);
                 setShowReportModal(true);
+                trackLeadSubmitted("property-scanner-report", selectedAddress);
               }}
             />
 
