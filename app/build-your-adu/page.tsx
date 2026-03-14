@@ -1,15 +1,10 @@
-import { ADUProvider } from "@/lib/contexts/adu-context";
-import { ADUBuilder } from "@/components/adu-builder/adu-builder";
+import { PropertyScanner } from "@/components/property-scanner/property-scanner";
 
 export const metadata = {
-  title: "Build Your ADU | Distinct Construction Solutions",
-  description: "Design your perfect ADU with our interactive configurator. Get instant pricing, explore floor plans, and visualize your future space.",
+  title: "Build Your ADU | Property Eligibility Scanner | Distinct Construction Solutions",
+  description: "Scan your San Diego property to instantly see what ADU options may fit. Get estimated feasibility, buildable area analysis, and recommended ADU paths.",
 };
 
 export default function BuildYourADUPage() {
-  return (
-    <ADUProvider>
-      <ADUBuilder />
-    </ADUProvider>
-  );
+  return <PropertyScanner />;
 }
