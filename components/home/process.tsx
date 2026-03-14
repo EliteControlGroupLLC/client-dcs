@@ -15,9 +15,9 @@ const steps = [
   {
     number: "01",
     icon: Laptop,
-    title: "Design Your ADU & Get Pricing",
+    title: "Design Your Project & Get Pricing",
     description:
-      "Use our online planning tools to explore what you can build on your property. Choose your ADU type, layout, size, and style to see realistic pricing and project possibilities.",
+      "Use our online planning tools to explore what you can build on your property. Choose your project type, layout, size, and style to see realistic pricing and project possibilities.",
     timeline: "1 Day",
   },
   {

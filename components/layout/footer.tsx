@@ -104,9 +104,9 @@ export function Footer() {
               </div>
             </Link>
             <p className="text-white/70 text-sm leading-relaxed mb-6 max-w-sm">
-              San Diego&apos;s premier design-build construction company specializing in ADUs, 
-              custom homes, and high-quality residential construction. Transparent pricing, 
-              professional project management, and exceptional results.
+              A boutique design-build firm rooted in San Diego, specializing in ADUs, custom homes, 
+              and full-scale renovations. We combine organized systems, transparent pricing, and 
+              premium craftsmanship to deliver an experience as refined as the finished product.
             </p>
             
             {/* Contact Info */}

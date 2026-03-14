@@ -6,8 +6,8 @@ const steps = [
   {
     step: 1,
     icon: Pencil,
-    title: "Design Your ADU & Get Pricing",
-    description: "Use our online planning tools to explore what you can build on your property. Choose your ADU type, layout, size, and style to see realistic pricing and project possibilities.",
+    title: "Design Your Project & Get Pricing",
+    description: "Use our online planning tools to explore what you can build on your property. Choose your project type, layout, size, and style to see realistic pricing and project possibilities.",
     timeline: "1 Day",
   },
   {
