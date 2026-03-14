@@ -1,10 +1,30 @@
 // Regulation Scan API — Cron-compatible endpoint for automated rule monitoring
-// Designed to be called by Vercel Cron on a weekly schedule.
+// Called by Vercel Cron weekly (Mondays at 6am UTC) or manually via POST.
 
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { runRegulationScan, getMonitoringStatus } from "@/lib/property-intelligence/regulation-monitor";
 
-export async function GET() {
+export async function GET(request: NextRequest) {
+  // Vercel Cron sends a GET with Authorization: Bearer <CRON_SECRET>
+  const authHeader = request.headers.get("authorization");
+  const cronSecret = process.env.CRON_SECRET;
+
+  // Authenticated Cron request — run the full scan
+  if (cronSecret && authHeader === `Bearer ${cronSecret}`) {
+    try {
+      const result = await runRegulationScan();
+      console.log(`[CRON] Regulation scan complete: ${result.sourcesChecked} sources, ${result.changesDetected} changes, ${result.errors} errors`);
+      return NextResponse.json({ success: true, result });
+    } catch (error) {
+      console.error("[CRON] Regulation scan error:", error);
+      return NextResponse.json(
+        { error: "Failed to run regulation scan" },
+        { status: 500 }
+      );
+    }
+  }
+
+  // Unauthenticated GET — return read-only monitoring status
   try {
     const status = getMonitoringStatus();
     return NextResponse.json({ status });
