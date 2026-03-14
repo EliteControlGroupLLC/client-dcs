@@ -9,6 +9,20 @@ import {
   Shield
 } from "lucide-react";
 import Link from "next/link";
+import {
+  DetachedADUFloorPlan,
+  AttachedADUFloorPlan,
+  GarageConversionFloorPlan,
+  JADUFloorPlan,
+  FloorPlanLegend,
+} from "@/components/floor-plans";
+
+const floorPlanComponents = [
+  DetachedADUFloorPlan,
+  AttachedADUFloorPlan,
+  GarageConversionFloorPlan,
+  JADUFloorPlan,
+];
 
 const aduTypes = [
   {
@@ -86,11 +100,15 @@ export default function ADUSolutionsPage() {
             </p>
           </div>
 
+          <FloorPlanLegend className="mb-8" />
+
           <div className="grid md:grid-cols-2 gap-8">
-            {aduTypes.map((type) => (
+            {aduTypes.map((type, index) => {
+              const FloorPlan = floorPlanComponents[index];
+              return (
               <Card key={type.title} className="overflow-hidden">
-                <div className="bg-gradient-to-br from-primary/10 to-secondary/10 h-48 flex items-center justify-center">
-                  <Home className="h-16 w-16 text-primary/50" />
+                <div className="bg-gradient-to-br from-primary/5 to-secondary/5 p-4 flex items-center justify-center">
+                  <FloorPlan className="w-full max-w-[380px] h-auto" />
                 </div>
                 <CardContent className="p-6">
                   <h3 className="text-xl font-bold text-secondary mb-2">{type.title}</h3>
@@ -115,7 +133,8 @@ export default function ADUSolutionsPage() {
                   </ul>
                 </CardContent>
               </Card>
-            ))}
+              );
+            })}
           </div>
         </div>
       </section>

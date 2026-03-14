@@ -3,6 +3,7 @@
 
 import { NextRequest, NextResponse } from "next/server";
 import { runRegulationScan, getMonitoringStatus } from "@/lib/property-intelligence/regulation-monitor";
+import { checkRateLimit, getClientIp, RATE_LIMITS } from "@/lib/rate-limit";
 
 export async function GET(request: NextRequest) {
   // Vercel Cron sends a GET with Authorization: Bearer <CRON_SECRET>
@@ -22,6 +23,23 @@ export async function GET(request: NextRequest) {
         { status: 500 }
       );
     }
+  }
+
+  // Rate limit unauthenticated requests
+  const ip = getClientIp(request);
+  const limit = checkRateLimit(`regulation-status:${ip}`, RATE_LIMITS.regulationStatus);
+  if (!limit.allowed) {
+    return NextResponse.json(
+      { error: "Too many requests. Please try again later." },
+      {
+        status: 429,
+        headers: {
+          "Retry-After": String(limit.retryAfterSeconds),
+          "X-RateLimit-Remaining": "0",
+          "X-RateLimit-Reset": String(limit.resetAt),
+        },
+      }
+    );
   }
 
   // Unauthenticated GET — return read-only monitoring status
