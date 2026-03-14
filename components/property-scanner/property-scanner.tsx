@@ -12,6 +12,11 @@ import { SmartRecommendationBanner } from "./smart-recommendation-banner";
 import { NextStepCTA } from "./next-step-cta";
 import { SiteDiagram } from "./site-diagram";
 import { MapPreview } from "./map-preview";
+import { JurisdictionSnapshotCard } from "./jurisdiction-snapshot-card";
+import { AduRulesSnapshotCard } from "./adu-rules-snapshot-card";
+import { OpportunityDetectedCard } from "./opportunity-detected-card";
+import { FinancialPreviewCard } from "./financial-preview-card";
+import { ConfidenceScoreCard } from "./confidence-score-card";
 import { analyzeProperty } from "@/lib/property-intelligence";
 import type { PropertyAnalysisResult } from "@/lib/property-intelligence";
 
@@ -146,11 +151,34 @@ export function PropertyScanner() {
               details={analysisData.smartBanner.details}
             />
 
+            {/* Confidence Tag */}
+            {analysisData.confidenceScore !== undefined && analysisData.confidenceBand && (
+              <ConfidenceScoreCard
+                score={analysisData.confidenceScore}
+                band={analysisData.confidenceBand}
+                manualReviewRequired={analysisData.manualReviewRequired || false}
+                manualReviewReasons={analysisData.manualReviewReasons || []}
+                signals={analysisData.confidenceSignals || { positive: [], negative: [] }}
+              />
+            )}
+
             {/* Main grid: Property info + Map/Diagram */}
             <div className="grid lg:grid-cols-3 gap-6">
-              {/* Left column - Property Summary and Buildable Area */}
+              {/* Left column - Property Summary, Jurisdiction, and Rules */}
               <div className="lg:col-span-2 space-y-6">
                 <PropertySummaryCard data={analysisData.property} />
+
+                {/* Jurisdiction + Rules side by side on large screens */}
+                {analysisData.jurisdiction && analysisData.aduRulesSnapshot && (
+                  <div className="grid md:grid-cols-2 gap-6">
+                    <JurisdictionSnapshotCard data={analysisData.jurisdiction} />
+                    <AduRulesSnapshotCard
+                      data={analysisData.aduRulesSnapshot}
+                      jurisdictionName={analysisData.jurisdiction.name}
+                    />
+                  </div>
+                )}
+
                 <BuildableAreaCard data={analysisData.buildable} />
               </div>
 
@@ -160,6 +188,11 @@ export function PropertyScanner() {
                 <SiteDiagram {...analysisData.lotDimensions} />
               </div>
             </div>
+
+            {/* Opportunity Detected */}
+            {analysisData.upsideDetected && analysisData.upsideOpportunities && (
+              <OpportunityDetectedCard opportunities={analysisData.upsideOpportunities} />
+            )}
 
             {/* Recommended ADU Paths */}
             <div>
@@ -177,6 +210,21 @@ export function PropertyScanner() {
                   />
                 ))}
               </div>
+            </div>
+
+            {/* Financial Preview */}
+            {analysisData.financialScenarios && analysisData.financialScenarios.length > 0 && (
+              <FinancialPreviewCard
+                scenarios={analysisData.financialScenarios}
+                disclaimer={analysisData.financialDisclaimer}
+              />
+            )}
+
+            {/* Disclaimer */}
+            <div className="bg-muted/50 rounded-2xl border border-border/50 p-5">
+              <p className="text-[11px] text-muted-foreground leading-relaxed">
+                {analysisData.disclaimer}
+              </p>
             </div>
 
             {/* CTA Section */}

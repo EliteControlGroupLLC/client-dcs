@@ -1,5 +1,6 @@
 // Property Intelligence Analysis Engine
-// Orchestrates data resolution, elevation lookup, and ADU recommendation generation
+// Orchestrates data resolution, elevation lookup, jurisdiction detection,
+// feasibility analysis, upside detection, financial scenarios, and confidence scoring
 
 import {
   type PropertyAnalysisResult,
@@ -14,6 +15,12 @@ import { geocodeAddress } from "./geocoding-service";
 import { getElevationData } from "./elevation-service";
 import { getOSMPropertyData } from "./osm-service";
 import { getAttomPropertyData } from "./attom-service";
+import { detectJurisdictionFromAddress, detectOverlays } from "./jurisdictions/detector";
+import { COMMON_FINANCIAL_DISCLAIMER } from "./jurisdictions/profiles";
+import { evaluateFeasibility, determineRecommendedPath } from "./feasibility-engine";
+import { detectUpsideOpportunities } from "./upside-detector";
+import { generateFinancialScenarios } from "./financial-scenarios";
+import { calculateConfidence } from "./confidence-model";
 
 export async function analyzeProperty(address: string): Promise<PropertyAnalysisResult> {
   // Step 1: Geocode the address
@@ -44,22 +51,97 @@ export async function analyzeProperty(address: string): Promise<PropertyAnalysis
 
   const { intelligence, rawLotSizeSqFt, rawFootprintSqFt } = resolved;
 
-  // Step 4: Calculate buildable area
-  const buildable = calculateBuildableArea(rawLotSizeSqFt, rawFootprintSqFt);
+  // Step 4: Detect jurisdiction
+  const formattedAddress = geocoded?.formattedAddress || address;
+  const jurisdictionResult = detectJurisdictionFromAddress(formattedAddress);
+  const profile = jurisdictionResult.profile;
 
-  // Step 5: Generate ADU recommendations
-  const openYard = intelligence.openYardSqFt.value;
-  const recommendations = generateRecommendations(rawLotSizeSqFt, openYard, buildable.estimatedBuildableEnvelopeSqFt);
+  // Step 5: Calculate buildable area using jurisdiction-specific setbacks
+  const jSetback = Math.min(profile.setbacks.sideSetbackFt, profile.setbacks.rearSetbackFt);
+  const jSeparation = profile.separation.minDistanceFromPrimaryHomeFt;
+  const buildable = calculateBuildableArea(rawLotSizeSqFt, rawFootprintSqFt, jSetback, jSeparation);
 
-  // Step 6: Determine best recommendation
-  const bestRec = determineBestRecommendation(recommendations);
+  // Step 6: Detect overlays
+  const slopeStr = intelligence.slope.value;
+  let slopePercent: number | undefined;
+  if (slopeStr === "Steep") slopePercent = 20;
+  else if (slopeStr === "Moderate") slopePercent = 10;
+  else if (slopeStr === "Mostly flat") slopePercent = 3;
+  const overlays = detectOverlays(formattedAddress, jurisdictionResult.jurisdictionId, slopePercent);
 
-  // Step 7: Generate smart banner
-  const smartBanner = generateSmartBanner(bestRec, buildable, rawLotSizeSqFt);
-
-  // Step 8: Calculate lot dimensions for site diagram
+  // Step 7: Enhanced feasibility analysis
   const lotWidth = Math.round(Math.sqrt(rawLotSizeSqFt * 0.5));
   const lotDepth = Math.round(rawLotSizeSqFt / lotWidth);
+  const openYard = intelligence.openYardSqFt.value;
+  const zoning = intelligence.zoning.value;
+  const homeArea = intelligence.homeAreaSqFt.value;
+  const parcelShape = intelligence.parcelShape.value;
+
+  const enhancedFeasibility = evaluateFeasibility(
+    {
+      lotSizeSqFt: rawLotSizeSqFt,
+      footprintSqFt: rawFootprintSqFt,
+      homeAreaSqFt: homeArea,
+      openYardSqFt: openYard,
+      lotWidth,
+      lotDepth,
+      slope: slopeStr,
+      parcelShape,
+      cornerLot: false,
+      hasGarage: rawFootprintSqFt > 800,
+      yearBuilt: attomData?.yearBuilt || null,
+      zoning,
+      overlays: overlays.filter((o) => o.detected).map((o) => o.type),
+    },
+    profile
+  );
+
+  // Step 8: Detect upside opportunities
+  const upsideOpportunities = detectUpsideOpportunities(
+    {
+      lotSizeSqFt: rawLotSizeSqFt,
+      footprintSqFt: rawFootprintSqFt,
+      homeAreaSqFt: homeArea,
+      openYardSqFt: openYard,
+      lotWidth,
+      lotDepth,
+      zoning,
+      hasGarage: rawFootprintSqFt > 800,
+      feasibilityResults: enhancedFeasibility,
+    },
+    profile
+  );
+
+  // Step 9: Generate financial scenarios
+  const financialScenarios = generateFinancialScenarios(enhancedFeasibility);
+
+  // Step 10: Calculate confidence score
+  const confidenceResult = calculateConfidence(
+    {
+      jurisdictionConfidence: jurisdictionResult.confidence,
+      jurisdictionUncertain: jurisdictionResult.uncertain,
+      lotSizeSqFt: rawLotSizeSqFt,
+      footprintSqFt: rawFootprintSqFt,
+      hasGeometry: false,
+      hasDimensions: lotWidth > 0 && lotDepth > 0,
+      hasAttomData: attomData?.available === true,
+      hasOsmData: osmData?.parcel !== null && osmData?.parcel !== undefined,
+      slope: slopeStr,
+      parcelShape,
+      cornerLot: false,
+      overlays,
+      zoning,
+      rulesVersion: profile.identity.rulesVersion,
+    },
+    profile
+  );
+
+  // Step 11: Generate legacy recommendations (backward compatibility)
+  const recommendations = generateRecommendations(rawLotSizeSqFt, openYard, buildable.estimatedBuildableEnvelopeSqFt);
+  const bestRec = determineBestRecommendation(recommendations);
+  const smartBanner = generateSmartBanner(bestRec, buildable, rawLotSizeSqFt, upsideOpportunities.length > 0);
+
+  // Step 12: Calculate lot dimensions for site diagram
   const mainHomeWidth = Math.round(Math.sqrt(rawFootprintSqFt * 0.7));
   const mainHomeDepth = Math.round(rawFootprintSqFt / mainHomeWidth);
 
@@ -78,18 +160,54 @@ export async function analyzeProperty(address: string): Promise<PropertyAnalysis
     smartBanner,
     lotDimensions,
     disclaimer:
-      "Preliminary estimate only. Data sourced from public records and satellite analysis. Final feasibility depends on site verification, title review, zoning confirmation, utility conditions, and city approval.",
+      "Recommendations are based on parcel data, mapped jurisdiction standards, and publicly available regulations. Final feasibility depends on site conditions, utilities, easements, overlays, and formal city review.",
+
+    // Enhanced v2 layers
+    jurisdiction: {
+      id: jurisdictionResult.jurisdictionId,
+      name: jurisdictionResult.jurisdictionName,
+      type: profile.identity.type,
+      confidence: jurisdictionResult.confidence,
+      uncertain: jurisdictionResult.uncertain,
+      rulesVersion: profile.identity.rulesVersion,
+      sourceUrls: profile.identity.sourceUrls,
+    },
+    aduRulesSnapshot: {
+      detachedMaxSqft: profile.sizeRules.detachedAduMaxSqft,
+      attachedMaxSqft: profile.sizeRules.attachedAduMaxSqft,
+      jaduMaxSqft: profile.sizeRules.jaduMaxSqft,
+      sideSetbackFt: profile.setbacks.sideSetbackFt,
+      rearSetbackFt: profile.setbacks.rearSetbackFt,
+      maxHeightFt: profile.height.maxHeightFt,
+      twoStoryAllowed: profile.height.twoStoryAllowed,
+      parkingRequired: profile.parking.parkingRequired,
+      ownerOccupancyNotes: profile.eligibility.ownerOccupancyNotes,
+      bonusProgramNotes: profile.sizeRules.bonusProgramNotes,
+    },
+    overlays,
+    enhancedFeasibility,
+    upsideDetected: upsideOpportunities.length > 0,
+    upsideOpportunities,
+    financialScenarios,
+    confidenceScore: confidenceResult.score,
+    confidenceBand: confidenceResult.band,
+    manualReviewRequired: confidenceResult.manualReviewRequired,
+    manualReviewReasons: confidenceResult.manualReviewReasons,
+    confidenceSignals: {
+      positive: confidenceResult.positiveSignals,
+      negative: confidenceResult.negativeSignals,
+    },
+    financialDisclaimer: COMMON_FINANCIAL_DISCLAIMER,
   };
 }
 
-function calculateBuildableArea(lotSizeSqFt: number, footprintSqFt: number): BuildableAnalysis {
-  // San Diego ADU setback rules:
-  // - 3 ft setbacks from property lines (side and rear for ADUs)
-  // - 6 ft minimum separation from main house
-  const separationFt = 6;
-  const setbackFt = 3;
-
-  // Estimate buildable envelope
+function calculateBuildableArea(
+  lotSizeSqFt: number,
+  footprintSqFt: number,
+  setbackFt: number = 3,
+  separationFt: number = 6
+): BuildableAnalysis {
+  // Estimate buildable envelope using jurisdiction-specific setbacks
   const lotWidth = Math.round(Math.sqrt(lotSizeSqFt * 0.5));
   const lotDepth = Math.round(lotSizeSqFt / lotWidth);
   // Subtract 3ft setback from each side (left + right)
@@ -206,9 +324,19 @@ function determineBestRecommendation(recommendations: ADURecommendation[]): stri
 function generateSmartBanner(
   bestType: string,
   buildable: BuildableAnalysis,
-  lotSizeSqFt: number
+  lotSizeSqFt: number,
+  hasUpside: boolean = false
 ): SmartBannerData {
   const isLargeLot = lotSizeSqFt > 6500;
+
+  if (hasUpside) {
+    return {
+      recommendation: `This property may support more value than a standard single-ADU approach.`,
+      details: isLargeLot
+        ? `Based on this property's size and local rules, there may be a higher-yield development path worth reviewing. Scroll down to see your opportunity analysis and financial projections.`
+        : `Your property may qualify for additional development options beyond a single ADU. Review the opportunity analysis below for details.`,
+    };
+  }
 
   if (bestType === "Detached ADU") {
     return {
