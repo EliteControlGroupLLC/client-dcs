@@ -74,10 +74,10 @@ export function PropertyScanner() {
           </div>
 
           <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold mb-4">
-            Enter Your Property Address
+            Build Your Dream Home or ADU with confidence
           </h1>
           <p className="text-lg text-white/70 max-w-2xl mx-auto mb-10">
-            We&apos;ll scan your property to estimate what kind of ADU or garage conversion may fit.
+            Enter your property address and we&apos;ll scan it to estimate what you may be able to build.
           </p>
 
           {/* Address input */}
