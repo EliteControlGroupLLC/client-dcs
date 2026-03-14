@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { ArrowRight, Home, Hammer, Paintbrush } from "lucide-react";
+import { ArrowRight, Home, Hammer, Paintbrush, Layers, SquareStack, Sun, Wrench, ChefHat, Bath } from "lucide-react";
 
 const services = [
   {
@@ -28,6 +28,62 @@ const services = [
     href: "/services/remodeling",
     badge: null,
   },
+  {
+    icon: Layers,
+    title: "Roofing",
+    description: "Complete roof replacement, repairs, and new installations. Shingles, tile, and metal roofing with professional installation.",
+    starting: "$8,500",
+    href: "/services/roofing",
+    badge: null,
+  },
+  {
+    icon: SquareStack,
+    title: "Concrete",
+    description: "Driveways, patios, retaining walls, and foundations. Quality concrete work with decorative finish options.",
+    starting: "$17.50/sq ft",
+    href: "/services/concrete",
+    badge: null,
+  },
+  {
+    icon: Sun,
+    title: "Windows",
+    description: "Energy-efficient window replacement and installation. Vinyl, aluminum, and fiberglass options with proper weatherproofing.",
+    starting: "$450/window",
+    href: "/services/windows",
+    badge: null,
+  },
+  {
+    icon: Paintbrush,
+    title: "Exterior Improvements",
+    description: "Painting, siding, decks, fencing, and outdoor living spaces designed for San Diego homes.",
+    starting: "$3,500",
+    href: "/services/exterior",
+    badge: null,
+  },
+  {
+    icon: Wrench,
+    title: "General Construction",
+    description: "Room additions, structural repairs, electrical, plumbing, and general residential construction services.",
+    starting: "$500",
+    href: "/services/general-construction",
+    badge: null,
+  },
+  {
+    icon: ChefHat,
+    title: "Kitchen Remodeling",
+    description: "Custom cabinetry, premium countertops, modern appliances, and complete kitchen transformations.",
+    starting: "$18,000",
+    href: "/services/kitchen",
+    badge: null,
+  },
+  {
+    icon: Bath,
+    title: "Bathroom Renovation",
+    description: "Modern bathroom upgrades with custom tile, fixtures, vanities, and spa-like features.",
+    starting: "$12,000",
+    href: "/services/bathroom",
+    badge: null,
+  },
 ];
 
 export default function ServicesPage() {
@@ -52,7 +108,7 @@ export default function ServicesPage() {
 
       <section className="py-20">
         <div className="container mx-auto px-4">
-          <div className="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto">
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-6xl mx-auto">
             {services.map((service) => {
               const Icon = service.icon;
               return (
