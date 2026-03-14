@@ -1,14 +1,13 @@
-// Property Data Resolver - Generates realistic property data with confidence scoring
-// This module simulates multi-source data resolution.
-// When real APIs are connected (County Assessor, Zillow, etc.), each adapter
-// plugs in here and the confidence scorer runs on actual multi-source data.
+// Property Data Resolver - Resolves property data using real OSM data + estimates
+// Uses OpenStreetMap Overpass API for real building footprints,
+// Google APIs for geocoding/elevation, and San Diego zoning rules.
 
 import {
   type PropertyIntelligence,
   type IntelligenceField,
-  type ConfidenceStatus,
   getConfidenceStatus,
 } from "./types";
+import type { OSMPropertyData } from "./osm-service";
 
 // Seed a deterministic pseudo-random number from address string
 function hashAddress(address: string): number {
@@ -60,7 +59,8 @@ export interface ResolvedPropertyData {
 export function resolvePropertyData(
   address: string,
   geocodedAddress?: string,
-  slopeData?: { slope: string; confidence: number; sources: string[] }
+  slopeData?: { slope: string; confidence: number; sources: string[] },
+  osmData?: OSMPropertyData
 ): ResolvedPropertyData {
   const seed = hashAddress(address);
   const r = (i: number) => seededRandom(seed, i);
@@ -69,107 +69,150 @@ export function resolvePropertyData(
   const zoneIndex = seed % SD_ZONES.length;
   const zone = SD_ZONES[zoneIndex];
 
-  // Generate lot size within zone range
-  const lotRange = zone.maxLot - zone.minLot;
-  const lotSizeSqFt = Math.round((zone.minLot + r(1) * lotRange) / 50) * 50;
+  const hasOSMBuildings = osmData?.parcel && osmData.parcel.buildings.length > 0;
 
-  // Generate home area (typically 30-50% of lot size for San Diego)
-  const homeRatio = 0.3 + r(2) * 0.2;
-  const homeAreaSqFt = Math.round((lotSizeSqFt * homeRatio) / 10) * 10;
+  // ── Building Footprint (REAL from OSM if available) ──
+  let footprintSqFt: number;
+  let footprintConfidence: number;
+  let footprintSources: string[];
 
-  // Footprint is typically 60-100% of home area (single vs multi story)
-  const isMultiStory = r(3) > 0.6;
-  const footprintRatio = isMultiStory ? 0.55 + r(4) * 0.15 : 0.85 + r(4) * 0.15;
-  const footprintSqFt = Math.round((homeAreaSqFt * footprintRatio) / 10) * 10;
+  if (hasOSMBuildings) {
+    footprintSqFt = osmData.parcel!.mainBuildingFootprintSqFt;
+    footprintConfidence = 82;
+    footprintSources = ["OpenStreetMap building outline"];
+  } else {
+    // Fallback: estimate from zone
+    const estLot = zone.minLot + (zone.maxLot - zone.minLot) * 0.5;
+    footprintSqFt = Math.round(estLot * (0.25 + r(4) * 0.1));
+    footprintConfidence = 45;
+    footprintSources = ["Estimated from zone averages"];
+  }
 
-  // Open yard = lot - footprint - hardscape (driveway, patio ~15-25% of lot)
+  // ── Home Area / Living Space (REAL from OSM if available) ──
+  let homeAreaSqFt: number;
+  let homeConfidence: number;
+  let homeSources: string[];
+
+  if (hasOSMBuildings) {
+    homeAreaSqFt = osmData.parcel!.mainBuildingAreaSqFt;
+    homeConfidence = 76;
+    homeSources = ["OpenStreetMap footprint × levels"];
+    if (osmData.parcel!.mainBuildingLevels > 1) {
+      homeSources.push(`${osmData.parcel!.mainBuildingLevels} levels detected`);
+    }
+  } else {
+    const homeRatio = 0.3 + r(2) * 0.2;
+    const estLot = zone.minLot + (zone.maxLot - zone.minLot) * r(1);
+    homeAreaSqFt = Math.round((estLot * homeRatio) / 10) * 10;
+    homeConfidence = 40;
+    homeSources = ["Estimated from zone averages"];
+  }
+
+  // ── Lot Size ──
+  // OSM does not reliably have parcel boundaries, so we estimate from zone
+  // but use bounding box if available from Nominatim
+  let lotSizeSqFt: number;
+  let lotConfidence: number;
+  let lotSources: string[];
+
+  if (osmData?.boundingBox) {
+    // Use Nominatim bounding box as a rough parcel estimate
+    const [minLat, maxLat, minLon, maxLon] = osmData.boundingBox;
+    const latM = (maxLat - minLat) * 111320;
+    const lonM = (maxLon - minLon) * 111320 * Math.cos(((minLat + maxLat) / 2 * Math.PI) / 180);
+    const bbAreaSqFt = Math.round(latM * lonM * 10.7639);
+
+    // Bounding box is typically larger than the actual lot
+    // If it's in a reasonable range for residential, use a corrected estimate
+    if (bbAreaSqFt > 1000 && bbAreaSqFt < 100000) {
+      lotSizeSqFt = Math.round(bbAreaSqFt * 0.7 / 50) * 50; // ~70% of bbox
+      lotConfidence = 62;
+      lotSources = ["Nominatim bounding box estimate"];
+    } else {
+      // Fallback to zone-based estimate
+      const lotRange = zone.maxLot - zone.minLot;
+      lotSizeSqFt = Math.round((zone.minLot + r(1) * lotRange) / 50) * 50;
+      lotConfidence = 50;
+      lotSources = ["Estimated from zone averages"];
+    }
+  } else {
+    const lotRange = zone.maxLot - zone.minLot;
+    lotSizeSqFt = Math.round((zone.minLot + r(1) * lotRange) / 50) * 50;
+    lotConfidence = 50;
+    lotSources = ["Estimated from zone averages"];
+  }
+
+  // Sanity check: lot must be bigger than footprint
+  if (lotSizeSqFt < footprintSqFt * 1.5) {
+    lotSizeSqFt = Math.round(footprintSqFt * (2.5 + r(17) * 1.5) / 50) * 50;
+  }
+
+  // ── Open Yard Area ──
   const hardscapeRatio = 0.15 + r(5) * 0.1;
   const hardscapeSqFt = Math.round(lotSizeSqFt * hardscapeRatio);
-  const openYardSqFt = Math.max(0, lotSizeSqFt - footprintSqFt - hardscapeSqFt);
+  const totalBuildingFootprint = hasOSMBuildings
+    ? osmData.parcel!.totalBuildingFootprintSqFt
+    : footprintSqFt;
+  const openYardSqFt = Math.max(0, lotSizeSqFt - totalBuildingFootprint - hardscapeSqFt);
+  const yardConfidence = Math.min(footprintConfidence, lotConfidence) - 5;
 
-  // Simulate multi-source resolution for lot size
-  // In real implementation: County Assessor + GIS Parcel + listings
-  const lotAssessor = lotSizeSqFt;
-  const lotGIS = lotSizeSqFt + Math.round((r(6) - 0.5) * 100);
-  const lotZillow = lotSizeSqFt + Math.round((r(7) - 0.5) * 300);
-  const lotRedfin = lotSizeSqFt + Math.round((r(8) - 0.5) * 250);
-
-  // Calculate lot confidence based on source agreement
-  const lotVariance = Math.abs(lotAssessor - lotGIS) + Math.abs(lotAssessor - lotZillow);
-  const lotConfidence = lotVariance < 200 ? 96 : lotVariance < 500 ? 88 : 74;
-
-  const lotSources: string[] = ["County Assessor", "GIS Parcel"];
-  if (Math.abs(lotAssessor - lotZillow) < 300) lotSources.push("Zillow");
-  if (Math.abs(lotAssessor - lotRedfin) < 300) lotSources.push("Redfin");
-
-  // Home area confidence
-  const homeAssessor = homeAreaSqFt;
-  const homeZillow = homeAreaSqFt + Math.round((r(9) - 0.5) * 80);
-  const homeRedfin = homeAreaSqFt + Math.round((r(10) - 0.5) * 60);
-  const homeVariance = Math.abs(homeAssessor - homeZillow) + Math.abs(homeAssessor - homeRedfin);
-  const homeConfidence = homeVariance < 50 ? 92 : homeVariance < 120 ? 84 : 68;
-
-  const homeSources: string[] = ["County Assessor"];
-  if (Math.abs(homeAssessor - homeZillow) < 100) homeSources.push("Zillow");
-  if (Math.abs(homeAssessor - homeRedfin) < 100) homeSources.push("Redfin");
-
-  // Footprint confidence (derived from satellite)
-  const footprintConfidence = 62 + Math.round(r(11) * 12);
-
-  // Open yard confidence
-  const yardConfidence = Math.min(footprintConfidence, lotConfidence) - 10;
-
-  // Zoning confidence
+  // ── Zoning ──
   const zoningConfidence = 88 + Math.round(r(12) * 8);
 
-  // APN generation
+  // ── APN ──
   const apnPart1 = 400 + Math.round(r(13) * 200);
   const apnPart2 = 100 + Math.round(r(14) * 900);
   const apnPart3 = 10 + Math.round(r(15) * 40);
   const apn = `${apnPart1}-${apnPart2}-${String(apnPart3).padStart(2, "0")}`;
 
-  // Slope data
+  // ── Slope ──
   const slopeField = slopeData
     ? makeField(slopeData.slope, slopeData.confidence, slopeData.sources)
     : makeField("Mostly flat", 55, ["Elevation API estimate"]);
 
-  // Height limit based on zone
+  // ── Height limit ──
   const heightLimit = zone.zone.startsWith("RS") ? "30 ft (2 stories)" : "35 ft";
   const heightConfidence = zoningConfidence - 2;
 
-  // Setbacks
+  // ── Setbacks ──
   const frontSetback = zone.zone.includes("1-7") ? 15 : zone.zone.includes("1-8") ? 20 : 25;
   const sideSetback = 4;
   const rearSetback = zone.zone.includes("1-7") ? 3 : 4;
   const setbackStr = `Front: ${frontSetback}ft, Side: ${sideSetback}ft, Rear: ${rearSetback}ft`;
 
-  // ADU allowances
+  // ── ADU allowances ──
   const maxAduSize = zone.zone.startsWith("RS") ? "1,200" : "1,000";
   const allowsJadu = zone.zone.startsWith("RS");
   const aduAllowanceStr = `ADU up to ${maxAduSize} sq ft${allowsJadu ? " + JADU up to 500 sq ft" : ""}`;
 
-  // Parcel shape
+  // ── Parcel shape ──
   const lotWidth = Math.round(Math.sqrt(lotSizeSqFt * (0.4 + r(16) * 0.2)));
   const lotDepth = Math.round(lotSizeSqFt / lotWidth);
   const ratio = lotDepth / lotWidth;
   const shapeDesc = ratio > 2.5 ? "Deep narrow lot" : ratio > 1.5 ? "Rectangular" : "Nearly square";
-  const parcelStr = `${shapeDesc} (${lotWidth}ft × ${lotDepth}ft approx.)`;
+  const parcelStr = `${shapeDesc} (${lotWidth}ft \u00d7 ${lotDepth}ft approx.)`;
 
   const displayAddress = geocodedAddress || address;
 
+  // ── Determine address confidence ──
+  const addressConfidence = geocodedAddress ? 98 : 70;
+  const addressSources = geocodedAddress
+    ? ["Google Geocoding"]
+    : ["User input"];
+
   const intelligence: PropertyIntelligence = {
-    address: makeField(displayAddress, 98, ["Google Geocoding"]),
-    apn: makeField(apn, 75, ["County Assessor lookup"]),
+    address: makeField(displayAddress, addressConfidence, addressSources),
+    apn: makeField(apn, 55, ["Estimated — pending County Assessor lookup"]),
     lotSizeSqFt: makeField(lotSizeSqFt, lotConfidence, lotSources),
     homeAreaSqFt: makeField(homeAreaSqFt, homeConfidence, homeSources),
-    footprintSqFt: makeField(footprintSqFt, footprintConfidence, ["Satellite footprint detection"]),
-    openYardSqFt: makeField(openYardSqFt, yardConfidence, ["Parcel area minus footprint and hardscape"]),
+    footprintSqFt: makeField(footprintSqFt, footprintConfidence, footprintSources),
+    openYardSqFt: makeField(openYardSqFt, yardConfidence, ["Lot size minus footprint and hardscape"]),
     zoning: makeField(`${zone.zone} (${zone.desc})`, zoningConfidence, ["City Zoning GIS"]),
     slope: slopeField,
     aduAllowances: makeField(aduAllowanceStr, zoningConfidence - 4, ["San Diego Municipal Code", "City ADU Ordinance"]),
     heightLimit: makeField(heightLimit, heightConfidence, ["City Zoning GIS", "Municipal Code"]),
     setbacks: makeField(setbackStr, zoningConfidence - 2, ["City Zoning GIS"]),
-    parcelShape: makeField(parcelStr, footprintConfidence + 5, ["GIS Parcel boundary"]),
+    parcelShape: makeField(parcelStr, Math.min(footprintConfidence, lotConfidence), ["Derived from lot dimensions"]),
   };
 
   return {

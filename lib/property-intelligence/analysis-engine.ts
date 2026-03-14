@@ -12,22 +12,31 @@ import {
 import { resolvePropertyData } from "./property-data-resolver";
 import { geocodeAddress } from "./geocoding-service";
 import { getElevationData } from "./elevation-service";
+import { getOSMPropertyData } from "./osm-service";
 
 export async function analyzeProperty(address: string): Promise<PropertyAnalysisResult> {
   // Step 1: Geocode the address
   const geocoded = await geocodeAddress(address);
 
-  // Step 2: Get elevation/slope data if we have coordinates
+  // Step 2: Get elevation/slope data AND OSM data in parallel if we have coordinates
   let slopeData: { slope: string; confidence: number; sources: string[] } | undefined;
+  let osmData: Awaited<ReturnType<typeof getOSMPropertyData>> | undefined;
+
   if (geocoded) {
-    slopeData = await getElevationData(geocoded.lat, geocoded.lng);
+    const [slope, osm] = await Promise.all([
+      getElevationData(geocoded.lat, geocoded.lng),
+      getOSMPropertyData(geocoded.lat, geocoded.lng),
+    ]);
+    slopeData = slope;
+    osmData = osm;
   }
 
-  // Step 3: Resolve property data from all sources
+  // Step 3: Resolve property data from all sources (OSM + estimates)
   const resolved = resolvePropertyData(
     address,
     geocoded?.formattedAddress,
-    slopeData
+    slopeData,
+    osmData
   );
 
   const { intelligence, rawLotSizeSqFt, rawFootprintSqFt } = resolved;
