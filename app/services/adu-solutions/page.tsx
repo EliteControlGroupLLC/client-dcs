@@ -11,6 +11,7 @@ import {
   Shield
 } from "lucide-react";
 import Link from "next/link";
+import { CostCtaSection } from "@/components/calculators/cost-cta-section";
 
 const aduTypes = [
   {
@@ -198,6 +199,11 @@ export default function ADUSolutionsPage() {
           </div>
         </div>
       </section>
+
+      <CostCtaSection
+        calculatorHref="/adu-calculator"
+        calculatorLabel="Open ADU Calculator"
+      />
 
       {/* CTA */}
       <section className="py-20 bg-secondary text-white">

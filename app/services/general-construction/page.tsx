@@ -2,6 +2,7 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { ArrowRight, Shield, CheckCircle, Users, Award, Wrench, HardHat, ClipboardCheck } from "lucide-react";
+import { CostCtaSection } from "@/components/calculators/cost-cta-section";
 
 const serviceCategories = [
   {
@@ -160,6 +161,11 @@ export default function GeneralConstructionPage() {
           </div>
         </div>
       </section>
+
+      <CostCtaSection
+        calculatorHref="/planning-tools"
+        calculatorLabel="Open Project Calculator"
+      />
 
       <section className="py-20 bg-secondary text-white">
         <div className="container mx-auto px-4 text-center">

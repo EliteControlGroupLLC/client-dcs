@@ -3,6 +3,7 @@ import { Inter, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { Header } from "@/components/layout/header";
 import { Footer } from "@/components/layout/footer";
+import { FloatingEstimateButton } from "@/components/instant-estimate/floating-estimate-button";
 
 const inter = Inter({
   variable: "--font-inter",
@@ -150,6 +151,7 @@ export default function RootLayout({
           {children}
         </main>
         <Footer />
+        <FloatingEstimateButton />
       </body>
     </html>
   );

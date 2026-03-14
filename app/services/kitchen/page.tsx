@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { ArrowRight, CheckCircle } from "lucide-react";
+import { CostCtaSection } from "@/components/calculators/cost-cta-section";
 
 const features = [
   "Custom cabinetry design and installation",
@@ -63,6 +64,11 @@ export default function KitchenPage() {
           </div>
         </div>
       </section>
+
+      <CostCtaSection
+        calculatorHref="/tools/kitchen-calculator"
+        calculatorLabel="Open Kitchen Calculator"
+      />
 
       <section className="py-20 bg-secondary text-white">
         <div className="container mx-auto px-4 text-center">
