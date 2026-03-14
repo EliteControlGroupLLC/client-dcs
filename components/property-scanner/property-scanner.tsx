@@ -12,118 +12,40 @@ import { SmartRecommendationBanner } from "./smart-recommendation-banner";
 import { NextStepCTA } from "./next-step-cta";
 import { SiteDiagram } from "./site-diagram";
 import { MapPreview } from "./map-preview";
+import { analyzeProperty } from "@/lib/property-intelligence";
+import type { PropertyAnalysisResult } from "@/lib/property-intelligence";
 
 type ScanPhase = "address" | "scanning" | "results";
-
-// Mock analysis data - will be replaced with real API data
-function generateMockAnalysis(address: string) {
-  // Simulate different results based on address
-  const isLargeLot = address.includes("1234") || address.includes("7890");
-  const hasGarage = !address.includes("4567");
-
-  const lotSizeSqFt = isLargeLot ? 7200 : 5400;
-  const mainHomeFootprintSqFt = isLargeLot ? 1800 : 1400;
-  const estimatedOpenAreaSqFt = lotSizeSqFt - mainHomeFootprintSqFt - 800; // subtract driveway/patio
-  const estimatedBuildableEnvelopeSqFt = isLargeLot ? 950 : 520;
-
-  const detachedFeasibility = isLargeLot ? "Likely" as const : "Limited" as const;
-  const attachedFeasibility = "Possible" as const;
-  const garageFeasibility = hasGarage ? "Likely" as const : "Not Recommended" as const;
-  const secondStoryFeasibility = "Possible" as const;
-
-  const bestRecommendation = isLargeLot ? "Detached ADU" : hasGarage ? "Garage Conversion" : "Attached ADU";
-
-  return {
-    property: {
-      address,
-      lotSizeSqFt,
-      mainHomeFootprintSqFt,
-      estimatedOpenAreaSqFt,
-      zoning: "RS-1-7",
-      slope: "Mostly flat",
-    },
-    buildable: {
-      requiredMainHomeSeparationFt: 6,
-      requiredPropertyLineSetbackFt: 3,
-      estimatedBuildableEnvelopeSqFt,
-      oneStoryPotential: `Up to ${estimatedBuildableEnvelopeSqFt.toLocaleString()} sq ft estimated`,
-      twoStoryPotential: isLargeLot
-        ? "Up to 1,200 sq ft estimated depending on design/review"
-        : "Up to 800 sq ft estimated depending on design/review",
-    },
-    recommendations: [
-      {
-        type: "Detached ADU",
-        feasibility: detachedFeasibility,
-        estimatedSizeRange: isLargeLot ? "600 - 1,200 sq ft" : "400 - 600 sq ft",
-        priceRange: isLargeLot ? "$175K - $350K" : "$120K - $200K",
-        description: isLargeLot
-          ? "Based on this preliminary scan, a detached ADU appears feasible. Your lot has sufficient open area to accommodate a standalone unit with required setbacks."
-          : "Your lot appears tight for a detached ADU. Limited buildable area may restrict unit size, but a smaller detached unit may still be possible.",
-      },
-      {
-        type: "Attached ADU",
-        feasibility: attachedFeasibility,
-        estimatedSizeRange: "400 - 800 sq ft",
-        priceRange: "$130K - $250K",
-        description: "An attached ADU extends from your existing home. This option can work well when yard space is limited, as it shares a wall with the main residence.",
-      },
-      {
-        type: "Garage Conversion",
-        feasibility: garageFeasibility,
-        estimatedSizeRange: hasGarage ? "350 - 500 sq ft" : "N/A",
-        priceRange: hasGarage ? "$80K - $160K" : "N/A",
-        description: hasGarage
-          ? "Your property may qualify for a garage conversion. This is often the most cost-effective ADU option, converting existing structure into livable space."
-          : "No existing garage structure detected. A garage conversion would not apply to this property.",
-      },
-      {
-        type: "Second-Story ADU",
-        feasibility: secondStoryFeasibility,
-        estimatedSizeRange: "400 - 1,000 sq ft",
-        priceRange: "$200K - $400K",
-        description: "A second-story ADU is built above your existing home or garage. This option maximizes yard space while adding significant livable area.",
-      },
-    ],
-    bestRecommendation,
-    smartBanner: {
-      recommendation: isLargeLot
-        ? `Best fit for your property: Detached ADU up to approximately 800-1,200 sq ft`
-        : hasGarage
-        ? `Your lot appears limited for a detached ADU. A garage conversion may be the better path.`
-        : `Consider an attached ADU or second-story addition to maximize your property's potential.`,
-      details: isLargeLot
-        ? "Your property has sufficient open yard area and favorable lot dimensions to support a standalone ADU. With an estimated buildable envelope of 950 sq ft, you have strong potential for a comfortable 1-2 bedroom detached unit."
-        : hasGarage
-        ? "Your lot looks tight for a detached ADU, but you may still have strong conversion options. A garage conversion is typically the most affordable path and can deliver a beautiful, functional living space."
-        : "Based on the available buildable area, an attached ADU or second-story addition would maximize your property's ADU potential while working within the existing lot constraints.",
-    },
-    lotDimensions: {
-      lotWidth: isLargeLot ? 60 : 45,
-      lotDepth: isLargeLot ? 120 : 120,
-      mainHomeWidth: isLargeLot ? 35 : 30,
-      mainHomeDepth: isLargeLot ? 45 : 40,
-    },
-    disclaimer: "Preliminary estimate only. Final feasibility depends on site verification, title review, zoning, utility conditions, and city approval.",
-  };
-}
 
 export function PropertyScanner() {
   const [phase, setPhase] = useState<ScanPhase>("address");
   const [address, setAddress] = useState("");
   const [selectedAddress, setSelectedAddress] = useState("");
-  const [analysisData, setAnalysisData] = useState<ReturnType<typeof generateMockAnalysis> | null>(null);
+  const [analysisData, setAnalysisData] = useState<PropertyAnalysisResult | null>(null);
 
   const handleAddressSelect = (addr: string) => {
     setSelectedAddress(addr);
   };
 
-  const handleStartScan = () => {
+  const handleStartScan = async () => {
     if (!selectedAddress && !address) return;
     const finalAddress = selectedAddress || address;
     setSelectedAddress(finalAddress);
-    setAnalysisData(generateMockAnalysis(finalAddress));
     setPhase("scanning");
+
+    // Run the property intelligence engine (async)
+    try {
+      const result = await analyzeProperty(finalAddress);
+      setAnalysisData(result);
+    } catch {
+      // If analysis fails, try again as fallback
+      try {
+        const result = await analyzeProperty(finalAddress);
+        setAnalysisData(result);
+      } catch {
+        // Analysis completely failed - stay on scanning phase
+      }
+    }
   };
 
   const handleScanComplete = useCallback(() => {
@@ -158,7 +80,7 @@ export function PropertyScanner() {
             We&apos;ll scan your property to estimate what kind of ADU or garage conversion may fit.
           </p>
 
-          {/* Address input - always visible in header */}
+          {/* Address input */}
           {phase === "address" && (
             <div className="max-w-2xl mx-auto animate-fade-in">
               <AddressAutocompleteInput
@@ -226,13 +148,13 @@ export function PropertyScanner() {
 
             {/* Main grid: Property info + Map/Diagram */}
             <div className="grid lg:grid-cols-3 gap-6">
-              {/* Left column - Property Summary & Buildable Area */}
+              {/* Left column - Property Summary and Buildable Area */}
               <div className="lg:col-span-2 space-y-6">
                 <PropertySummaryCard data={analysisData.property} />
                 <BuildableAreaCard data={analysisData.buildable} />
               </div>
 
-              {/* Right column - Map & Site Diagram */}
+              {/* Right column - Map and Site Diagram */}
               <div className="space-y-6">
                 <MapPreview address={selectedAddress} />
                 <SiteDiagram {...analysisData.lotDimensions} />
