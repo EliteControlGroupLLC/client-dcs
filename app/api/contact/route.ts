@@ -1,8 +1,26 @@
 import { createClient } from "@/lib/supabase/server";
 import { NextRequest, NextResponse } from "next/server";
 import { notifyTeamContactForm } from "@/lib/email";
+import { checkRateLimit, getClientIp, RATE_LIMITS } from "@/lib/rate-limit";
 
 export async function POST(request: NextRequest) {
+  // Rate limit check
+  const ip = getClientIp(request);
+  const limit = checkRateLimit(`contact:${ip}`, RATE_LIMITS.formSubmission);
+  if (!limit.allowed) {
+    return NextResponse.json(
+      { error: "Too many requests. Please try again later." },
+      {
+        status: 429,
+        headers: {
+          "Retry-After": String(limit.retryAfterSeconds),
+          "X-RateLimit-Remaining": "0",
+          "X-RateLimit-Reset": String(limit.resetAt),
+        },
+      }
+    );
+  }
+
   try {
     const body = await request.json();
     const { name, email, phone, service, message } = body;
