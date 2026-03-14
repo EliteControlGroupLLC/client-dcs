@@ -23,16 +23,28 @@ type SortOption = "popular" | "size-asc" | "size-desc" | "price-asc" | "price-de
 
 const floorPlans = [
   {
-    id: "compact-studio",
-    name: "The Compact",
+    id: "garage-conversion",
+    name: "Garage Conversion",
     sqFt: 400,
     bedrooms: 0,
     bathrooms: 1,
     style: "Modern",
-    type: "Studio",
-    priceRange: "$95k - $120k",
+    type: "Garage Conversion",
+    priceRange: "$120k - $150k",
     popular: true,
-    features: ["Open floor plan", "Full kitchen", "Stackable W/D"],
+    features: ["Uses existing structure", "Open floor plan", "Full kitchen"],
+  },
+  {
+    id: "compact-detached",
+    name: "Compact Detached ADU",
+    sqFt: 400,
+    bedrooms: 0,
+    bathrooms: 1,
+    style: "Modern",
+    type: "Detached",
+    priceRange: "Starting at $175k",
+    popular: true,
+    features: ["Standalone structure", "Full kitchen", "Stackable W/D"],
   },
   {
     id: "efficient-one",
@@ -42,7 +54,7 @@ const floorPlans = [
     bathrooms: 1,
     style: "Contemporary",
     type: "Attached",
-    priceRange: "$120k - $160k",
+    priceRange: "$220k - $225k",
     popular: true,
     features: ["Separate bedroom", "Full kitchen", "In-unit laundry"],
   },
@@ -54,7 +66,7 @@ const floorPlans = [
     bathrooms: 1,
     style: "Craftsman",
     type: "Detached",
-    priceRange: "$150k - $190k",
+    priceRange: "$255k - $260k",
     popular: true,
     features: ["Private patio", "Walk-in closet", "Full kitchen"],
   },
@@ -66,7 +78,7 @@ const floorPlans = [
     bathrooms: 1,
     style: "Modern",
     type: "Detached",
-    priceRange: "$170k - $210k",
+    priceRange: "$275k - $280k",
     popular: false,
     features: ["High ceilings", "Large windows", "Open concept"],
   },
@@ -78,7 +90,7 @@ const floorPlans = [
     bathrooms: 1,
     style: "Traditional",
     type: "Detached",
-    priceRange: "$200k - $260k",
+    priceRange: "$320k - $325k",
     popular: true,
     features: ["2 bedrooms", "Full kitchen", "Private yard space"],
   },
@@ -90,7 +102,7 @@ const floorPlans = [
     bathrooms: 2,
     style: "Modern",
     type: "Detached",
-    priceRange: "$240k - $300k",
+    priceRange: "$360k - $365k",
     popular: false,
     features: ["Primary suite", "Guest bedroom", "2 full baths"],
   },
@@ -102,7 +114,7 @@ const floorPlans = [
     bathrooms: 2,
     style: "Contemporary",
     type: "Detached",
-    priceRange: "$280k - $360k",
+    priceRange: "$425k - $430k",
     popular: true,
     features: ["Spacious living", "Walk-in closets", "Premium finishes"],
   },
@@ -114,14 +126,14 @@ const floorPlans = [
     bathrooms: 2,
     style: "Modern",
     type: "Detached",
-    priceRange: "$340k - $420k",
+    priceRange: "$495k - $512k",
     popular: false,
     features: ["3 bedrooms", "2 full baths", "Premium upgrades"],
   },
 ];
 
 const styles = ["All Styles", "Modern", "Contemporary", "Traditional", "Craftsman"];
-const types = ["All Types", "Studio", "Attached", "Detached"];
+const types = ["All Types", "Studio", "Attached", "Detached", "Garage Conversion"];
 const bedroomOptions = ["Any", "Studio", "1", "2", "3+"];
 
 export default function FloorPlansPage() {

@@ -6,9 +6,9 @@ import Image from "next/image";
 export const metadata: Metadata = {
   title: "San Diego ADU Builder | Free Quote | Distinct Construction Solutions",
   description:
-    "Build your dream ADU in San Diego starting at $175,000. Licensed, bonded, and insured. Fixed-price contracts. Average 4-month build time. Get your free quote today.",
+    "Build your dream ADU in San Diego. Detached ADUs at $427/sq ft. Licensed, bonded, and insured. Fixed-price contracts. Average 4-month build time. Get your free quote today.",
   openGraph: {
-    title: "San Diego ADU Builder | ADUs Starting at $175K",
+    title: "San Diego ADU Builder | Detached ADUs at $427/sq ft",
     description:
       "Build your dream ADU in San Diego. Licensed & bonded. Fixed-price contracts. Free consultation.",
     images: ["/images/og-image.jpg"],
@@ -53,7 +53,7 @@ export default function ADUSanDiegoLP() {
               </h1>
 
               <p className="text-lg text-white/80 mb-6">
-                Starting at <span className="text-primary font-bold text-2xl">$175,000</span>.
+                Detached ADUs at <span className="text-primary font-bold text-2xl">$427/sq ft</span>. Garage conversions from <span className="text-primary font-bold text-2xl">$120,000</span>.
                 We handle everything — design, permits, and construction. One team, one price, zero stress.
               </p>
 

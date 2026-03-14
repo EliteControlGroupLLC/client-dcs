@@ -11,7 +11,7 @@ const sections = [
   {
     icon: DollarSign,
     title: "How Much Does an ADU Cost?",
-    content: "ADU costs in San Diego typically range from $120,000 to $350,000+ depending on size, type, and finishes. Garage conversions start around $120,000, while new detached ADUs start at $175,000. Costs include design, permits, construction, and finishes. We provide fixed-price contracts so you know exactly what to expect.",
+    content: "ADU costs in San Diego typically range from $120,000 to $512,000+ depending on size, type, and finishes. Garage conversions start at $120,000, while detached ADUs are priced at $427 per square foot and attached ADUs at $444 per square foot. Costs include design, permits, construction, and finishes. We provide fixed-price contracts so you know exactly what to expect.",
   },
   {
     icon: Clock,
