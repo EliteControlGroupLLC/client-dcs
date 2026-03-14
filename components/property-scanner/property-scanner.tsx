@@ -12,11 +12,17 @@ import { SmartRecommendationBanner } from "./smart-recommendation-banner";
 import { NextStepCTA } from "./next-step-cta";
 import { SiteDiagram } from "./site-diagram";
 import { MapPreview } from "./map-preview";
+import { MapboxMap } from "./mapbox-map";
 import { JurisdictionSnapshotCard } from "./jurisdiction-snapshot-card";
 import { AduRulesSnapshotCard } from "./adu-rules-snapshot-card";
 import { OpportunityDetectedCard } from "./opportunity-detected-card";
 import { FinancialPreviewCard } from "./financial-preview-card";
 import { ConfidenceScoreCard } from "./confidence-score-card";
+import { ZoningEnrichmentCard } from "./zoning-enrichment-card";
+import { RentEstimateCard } from "./rent-estimate-card";
+import { DataSourcesBadge } from "./data-sources-badge";
+import { LeadCaptureForm } from "./lead-capture-form";
+import { PropertyReportModal } from "./property-report-modal";
 import { analyzeProperty } from "@/lib/property-intelligence";
 import type { PropertyAnalysisResult } from "@/lib/property-intelligence";
 
@@ -27,6 +33,8 @@ export function PropertyScanner() {
   const [address, setAddress] = useState("");
   const [selectedAddress, setSelectedAddress] = useState("");
   const [analysisData, setAnalysisData] = useState<PropertyAnalysisResult | null>(null);
+  const [showReportModal, setShowReportModal] = useState(false);
+  const [reportData, setReportData] = useState<Record<string, unknown> | undefined>(undefined);
 
   const handleAddressSelect = (addr: string) => {
     setSelectedAddress(addr);
@@ -184,10 +192,27 @@ export function PropertyScanner() {
 
               {/* Right column - Map and Site Diagram */}
               <div className="space-y-6">
-                <MapPreview address={selectedAddress} />
+                {/* Premium Mapbox map if geocoded data available */}
+                {analysisData.geocoded ? (
+                  <MapboxMap analysisData={analysisData} />
+                ) : (
+                  <MapPreview address={selectedAddress} />
+                )}
                 <SiteDiagram {...analysisData.lotDimensions} />
               </div>
             </div>
+
+            {/* Zoning Enrichment + Rent Estimates row */}
+            {(analysisData.zoningEnrichment || analysisData.rentData) && (
+              <div className="grid md:grid-cols-2 gap-6">
+                {analysisData.zoningEnrichment && (
+                  <ZoningEnrichmentCard data={analysisData.zoningEnrichment} />
+                )}
+                {analysisData.rentData && (
+                  <RentEstimateCard data={analysisData.rentData} />
+                )}
+              </div>
+            )}
 
             {/* Opportunity Detected */}
             {analysisData.upsideDetected && analysisData.upsideOpportunities && (
@@ -220,6 +245,21 @@ export function PropertyScanner() {
               />
             )}
 
+            {/* Lead Capture Form / Property Report CTA */}
+            <LeadCaptureForm
+              propertyAddress={selectedAddress}
+              scanResults={analysisData as unknown as Record<string, unknown>}
+              onReportGenerated={(data) => {
+                setReportData(data);
+                setShowReportModal(true);
+              }}
+            />
+
+            {/* Data Sources */}
+            {analysisData.dataSources && (
+              <DataSourcesBadge data={analysisData.dataSources} />
+            )}
+
             {/* Disclaimer */}
             <div className="bg-muted/50 rounded-2xl border border-border/50 p-5">
               <p className="text-[11px] text-muted-foreground leading-relaxed">
@@ -229,6 +269,16 @@ export function PropertyScanner() {
 
             {/* CTA Section */}
             <NextStepCTA />
+
+            {/* Property Report Modal */}
+            {analysisData && (
+              <PropertyReportModal
+                isOpen={showReportModal}
+                onClose={() => setShowReportModal(false)}
+                analysisData={analysisData}
+                reportData={reportData}
+              />
+            )}
           </div>
         )}
 

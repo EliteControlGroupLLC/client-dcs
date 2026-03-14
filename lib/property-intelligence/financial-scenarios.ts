@@ -1,6 +1,8 @@
 // Financial Scenario Engine — Cost, Loan, Cash Flow, ROI modeling
+// Enhanced with RentCast market rent data when available
 
 import type { FeasibilityResult, FinancialScenario } from "./jurisdictions/types";
+import type { RentEstimate } from "./rentcast-service";
 
 // Configurable assumptions (admin-adjustable in future)
 const ASSUMPTIONS = {
@@ -63,7 +65,8 @@ function calculateMonthlyPayment(loanAmount: number, annualRate: number, termYea
  * Generate financial scenarios for each feasible ADU type
  */
 export function generateFinancialScenarios(
-  feasibilityResults: FeasibilityResult[]
+  feasibilityResults: FeasibilityResult[],
+  rentEstimates?: Map<string, RentEstimate>
 ): FinancialScenario[] {
   const scenarios: FinancialScenario[] = [];
 
@@ -89,7 +92,11 @@ export function generateFinancialScenarios(
       ASSUMPTIONS.loanTermYears
     );
 
-    const monthlyRent = estimateMonthlyRent(targetSqft);
+    // Use RentCast estimate if available, otherwise fallback to internal estimate
+    const rentCastEstimate = rentEstimates?.get(result.type);
+    const monthlyRent = rentCastEstimate
+      ? rentCastEstimate.estimatedMonthlyRent
+      : estimateMonthlyRent(targetSqft);
     const effectiveMonthlyRent = Math.round(monthlyRent * (1 - ASSUMPTIONS.vacancyRate));
 
     // Annual expenses
