@@ -1,19 +1,85 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
 import { MapPin, Search, Loader2 } from "lucide-react";
 
-// Mock address suggestions for demo - will be replaced with Google Places API
-const mockSuggestions = [
+// Extend Window to include google maps types
+declare global {
+  interface Window {
+    google?: {
+      maps: {
+        places: {
+          AutocompleteService: new () => GoogleAutocompleteService;
+          AutocompleteSessionToken: new () => object;
+          PlacesServiceStatus: { OK: string };
+        };
+      };
+    };
+    initGooglePlaces?: () => void;
+  }
+}
+
+interface GooglePrediction {
+  description: string;
+  place_id: string;
+  structured_formatting: {
+    main_text: string;
+    secondary_text: string;
+  };
+}
+
+interface GoogleAutocompleteService {
+  getPlacePredictions: (
+    request: {
+      input: string;
+      componentRestrictions?: { country: string };
+      types?: string[];
+      sessionToken?: object;
+    },
+    callback: (predictions: GooglePrediction[] | null, status: string) => void
+  ) => void;
+}
+
+// Fallback suggestions when Google API is not available
+const fallbackSuggestions = [
   "1234 Sample St, San Diego, CA 92101",
   "1250 Garnet Ave, San Diego, CA 92109",
   "4567 University Ave, San Diego, CA 92105",
   "7890 La Jolla Blvd, La Jolla, CA 92037",
   "2345 El Cajon Blvd, San Diego, CA 92104",
-  "3456 Adams Ave, San Diego, CA 92116",
-  "5678 Clairemont Mesa Blvd, San Diego, CA 92117",
-  "8901 Mira Mesa Blvd, San Diego, CA 92126",
 ];
+
+const GOOGLE_API_KEY = process.env.NEXT_PUBLIC_GOOGLE_PLACES_API_KEY;
+
+function loadGooglePlacesScript(): Promise<void> {
+  return new Promise((resolve, reject) => {
+    if (window.google?.maps?.places) {
+      resolve();
+      return;
+    }
+
+    // Check if script is already loading
+    const existingScript = document.querySelector('script[src*="maps.googleapis.com"]');
+    if (existingScript) {
+      existingScript.addEventListener("load", () => resolve());
+      return;
+    }
+
+    if (!GOOGLE_API_KEY) {
+      reject(new Error("Google Places API key not configured"));
+      return;
+    }
+
+    window.initGooglePlaces = () => resolve();
+
+    const script = document.createElement("script");
+    script.src = `https://maps.googleapis.com/maps/api/js?key=${GOOGLE_API_KEY}&libraries=places&callback=initGooglePlaces`;
+    script.async = true;
+    script.defer = true;
+    script.onerror = () => reject(new Error("Failed to load Google Places script"));
+    document.head.appendChild(script);
+  });
+}
 
 interface AddressAutocompleteInputProps {
   value: string;
@@ -32,9 +98,32 @@ export function AddressAutocompleteInput({
   const [isOpen, setIsOpen] = useState(false);
   const [isSearching, setIsSearching] = useState(false);
   const [highlightedIndex, setHighlightedIndex] = useState(-1);
+  const [useGoogleApi, setUseGoogleApi] = useState(false);
   const wrapperRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+  const autocompleteServiceRef = useRef<GoogleAutocompleteService | null>(null);
+  const sessionTokenRef = useRef<object | null>(null);
+  const debounceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
+  // Load Google Places API on mount
+  useEffect(() => {
+    if (!GOOGLE_API_KEY) return;
+
+    loadGooglePlacesScript()
+      .then(() => {
+        if (window.google?.maps?.places) {
+          autocompleteServiceRef.current = new window.google.maps.places.AutocompleteService();
+          sessionTokenRef.current = new window.google.maps.places.AutocompleteSessionToken();
+          setUseGoogleApi(true);
+        }
+      })
+      .catch(() => {
+        // Fall back to mock suggestions
+        setUseGoogleApi(false);
+      });
+  }, []);
+
+  // Click outside handler
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
       if (wrapperRef.current && !wrapperRef.current.contains(event.target as Node)) {
@@ -45,25 +134,59 @@ export function AddressAutocompleteInput({
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
+  const searchWithGoogle = useCallback((inputValue: string) => {
+    if (!autocompleteServiceRef.current) return;
+
+    autocompleteServiceRef.current.getPlacePredictions(
+      {
+        input: inputValue,
+        componentRestrictions: { country: "us" },
+        types: ["address"],
+        sessionToken: sessionTokenRef.current || undefined,
+      },
+      (predictions, status) => {
+        setIsSearching(false);
+        if (status === window.google?.maps?.places?.PlacesServiceStatus?.OK && predictions) {
+          setSuggestions(predictions.map((p) => p.description));
+          setIsOpen(true);
+        } else {
+          setSuggestions([]);
+          setIsOpen(false);
+        }
+      }
+    );
+  }, []);
+
+  const searchWithFallback = useCallback((inputValue: string) => {
+    const filtered = fallbackSuggestions.filter((s) =>
+      s.toLowerCase().includes(inputValue.toLowerCase())
+    );
+    setSuggestions(filtered.length > 0 ? filtered : fallbackSuggestions.slice(0, 5));
+    setIsOpen(true);
+    setIsSearching(false);
+  }, []);
+
   const handleInputChange = (inputValue: string) => {
     onChange(inputValue);
     setHighlightedIndex(-1);
 
+    if (debounceTimerRef.current) {
+      clearTimeout(debounceTimerRef.current);
+    }
+
     if (inputValue.length >= 3) {
       setIsSearching(true);
-      // Simulate API delay - replace with real Google Places API call
-      setTimeout(() => {
-        const filtered = mockSuggestions.filter((s) =>
-          s.toLowerCase().includes(inputValue.toLowerCase())
-        );
-        // If no exact matches, show all as "nearby" suggestions
-        setSuggestions(filtered.length > 0 ? filtered : mockSuggestions.slice(0, 5));
-        setIsOpen(true);
-        setIsSearching(false);
+      debounceTimerRef.current = setTimeout(() => {
+        if (useGoogleApi) {
+          searchWithGoogle(inputValue);
+        } else {
+          searchWithFallback(inputValue);
+        }
       }, 300);
     } else {
       setSuggestions([]);
       setIsOpen(false);
+      setIsSearching(false);
     }
   };
 
@@ -72,6 +195,10 @@ export function AddressAutocompleteInput({
     onSelect(address);
     setIsOpen(false);
     setSuggestions([]);
+    // Reset session token after selection for billing optimization
+    if (useGoogleApi && window.google?.maps?.places) {
+      sessionTokenRef.current = new window.google.maps.places.AutocompleteSessionToken();
+    }
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
@@ -135,6 +262,11 @@ export function AddressAutocompleteInput({
               <span className="text-sm font-medium">{suggestion}</span>
             </button>
           ))}
+          {useGoogleApi && (
+            <div className="px-5 py-2 bg-muted/30 border-t border-border/50">
+              <span className="text-[10px] text-muted-foreground">Powered by Google</span>
+            </div>
+          )}
         </div>
       )}
     </div>
