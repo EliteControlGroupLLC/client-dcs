@@ -75,12 +75,7 @@ export default function RoofingPage() {
               Complete roof replacement, repairs, and new installations for San Diego homes.
               From composition shingles to tile and metal — quality materials and expert installation.
             </p>
-            <p className="text-2xl font-bold text-primary mb-8">Starting at $8,500</p>
-            <a href="#calculator">
-              <button className="inline-flex items-center justify-center gap-2 bg-primary hover:bg-primary-dark text-secondary font-semibold px-8 py-4 rounded-lg text-lg transition-colors">
-                Open Roof Calculator
-              </button>
-            </a>
+            <p className="text-2xl font-bold text-primary">Starting at $8,500</p>
           </div>
         </div>
       </section>

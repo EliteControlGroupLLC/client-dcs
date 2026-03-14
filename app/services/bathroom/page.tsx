@@ -28,12 +28,7 @@ export default function BathroomPage() {
               Modern bathroom renovations with premium materials, expert craftsmanship, and transparent pricing.
               From simple updates to full renovations.
             </p>
-            <p className="text-2xl font-bold text-primary mb-8">$12,000 – $60,000+</p>
-            <a href="#calculator">
-              <button className="inline-flex items-center justify-center gap-2 bg-primary hover:bg-primary-dark text-secondary font-semibold px-8 py-4 rounded-lg text-lg transition-colors">
-                Open Bathroom Calculator
-              </button>
-            </a>
+            <p className="text-2xl font-bold text-primary">$12,000 – $60,000+</p>
           </div>
         </div>
       </section>
