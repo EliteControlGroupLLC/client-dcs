@@ -57,7 +57,7 @@ export function Header() {
           <Link href="/" className="flex items-center shrink-0">
             {USE_IMAGE_LOGO ? (
               // Image logo with automatic sizing
-              <div className="relative h-14 sm:h-16 w-auto max-w-[250px]">
+              <div className="relative h-16 sm:h-[72px] w-auto max-w-[280px]">
                 <Image
                   src={scrolled ? LOGO_DARK : LOGO_LIGHT}
                   alt="Distinct Construction Solutions"
