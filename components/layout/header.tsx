@@ -27,6 +27,7 @@ const navigation = [
   { name: "Gallery", href: "/gallery" },
   { name: "Process", href: "/process" },
   { name: "About", href: "/about" },
+  { name: "Tools", href: "/planning-tools" },
   { name: "Contact", href: "/contact" },
 ];
 

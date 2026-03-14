@@ -153,11 +153,11 @@ export default function PlanningToolsPage() {
               PLANNING TOOLS
             </span>
             <h1 className="text-4xl md:text-5xl font-bold mb-6">
-              Use Our Tools to Plan With Confidence
+              Estimate Your Project Instantly
             </h1>
             <p className="text-xl text-white/80 mb-8">
-              Explore possibilities, estimate costs, compare options, and visualize your
-              project before committing. Smarter planning starts here.
+              Use our smart tools to calculate pricing, feasibility, and options
+              before starting your project.
             </p>
           </div>
         </div>

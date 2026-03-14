@@ -2,6 +2,7 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { ArrowRight, Shield, CheckCircle, Ruler, Award, Layers } from "lucide-react";
+import { CostCtaSection } from "@/components/calculators/cost-cta-section";
 
 const concreteServices = [
   {
@@ -156,6 +157,11 @@ export default function ConcretePage() {
           </div>
         </div>
       </section>
+
+      <CostCtaSection
+        calculatorHref="/tools/concrete-calculator"
+        calculatorLabel="Open Concrete Calculator"
+      />
 
       <section className="py-20 bg-secondary text-white">
         <div className="container mx-auto px-4 text-center">

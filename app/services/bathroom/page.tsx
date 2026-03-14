@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { ArrowRight, CheckCircle } from "lucide-react";
+import { CostCtaSection } from "@/components/calculators/cost-cta-section";
 
 const features = [
   "Custom tile work (floor, shower, backsplash)",
@@ -63,6 +64,11 @@ export default function BathroomPage() {
           </div>
         </div>
       </section>
+
+      <CostCtaSection
+        calculatorHref="/tools/bathroom-calculator"
+        calculatorLabel="Open Bathroom Calculator"
+      />
 
       <section className="py-20 bg-secondary text-white">
         <div className="container mx-auto px-4 text-center">
