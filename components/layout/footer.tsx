@@ -234,7 +234,15 @@ export function Footer() {
               </p>
             </div>
             <p className="text-xs text-white/40">
-              San Diego Design-Build Experts
+              Made by{" "}
+              <a
+                href="https://www.ikingdom.org"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-white/60 hover:text-primary transition-colors"
+              >
+                iKingdom
+              </a>
             </p>
           </div>
         </div>
