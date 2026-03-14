@@ -42,7 +42,7 @@ export default function ContactPage() {
 
   if (submitted) {
     return (
-      <div className="min-h-screen bg-muted py-20">
+      <div className="min-h-screen bg-muted pt-28 pb-20">
         <div className="container mx-auto px-4">
           <Card className="max-w-lg mx-auto text-center p-12">
             <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-6">
@@ -64,7 +64,7 @@ export default function ContactPage() {
   }
 
   return (
-    <div className="min-h-screen bg-muted py-12">
+    <div className="min-h-screen bg-muted pt-28 pb-12">
       <div className="container mx-auto px-4">
         {/* Header */}
         <div className="text-center mb-12">

@@ -8,7 +8,7 @@ const testimonials = [
   {
     name: "Sarah M.",
     location: "La Jolla, CA",
-    text: "DCS built our 600 sq ft ADU in just 4 months. The whole process was seamless — from design to move-in.",
+    text: "They built our 600 sq ft ADU in just 4 months. The whole process was seamless — from design to move-in.",
     rating: 5,
   },
   {
@@ -20,7 +20,7 @@ const testimonials = [
   {
     name: "Maria L.",
     location: "Chula Vista, CA",
-    text: "Best decision we made. Our mother-in-law now has her own space right in our backyard. DCS made it easy.",
+    text: "Best decision we made. Our mother-in-law now has her own space right in our backyard. The team made it easy.",
     rating: 5,
   },
 ];
@@ -95,7 +95,7 @@ export default function ADUOfferLP() {
                   <span className="text-sm text-muted-foreground ml-1">5.0 rating</span>
                 </div>
                 <p className="text-xs text-muted-foreground">
-                  Join 500+ happy homeowners who built with DCS
+                  Join 500+ happy homeowners who built with us
                 </p>
               </div>
             </div>
