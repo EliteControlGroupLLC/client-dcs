@@ -17,14 +17,14 @@ const aduTypes = [
     title: "Detached ADU",
     description: "A standalone structure separate from your main home. Offers maximum privacy and flexibility.",
     sqFt: "400-1,200 sq ft",
-    timeline: "6-9 months",
+    timeline: "10-12 months",
     features: ["Complete privacy", "Flexible placement", "Highest rental potential"],
   },
   {
     title: "Attached ADU",
     description: "Built as an addition to your existing home, sharing one or more walls.",
     sqFt: "400-1,000 sq ft",
-    timeline: "5-7 months",
+    timeline: "11-13 months",
     features: ["Lower cost", "Shared utilities", "Easy access"],
   },
   {
@@ -70,11 +70,6 @@ export default function ADUSolutionsPage() {
               <Link href="/build-your-adu">
                 <Button size="lg" className="bg-primary hover:bg-primary-dark text-secondary font-semibold">
                   Start Your ADU Project
-                </Button>
-              </Link>
-              <Link href="/contact">
-                <Button size="lg" variant="outline" className="border-white text-white hover:bg-white/10">
-                  Free Consultation
                 </Button>
               </Link>
             </div>
