@@ -12,7 +12,7 @@ import Link from "next/link";
 
 const stats = [
   { value: "500+", label: "Projects Completed" },
-  { value: "15+", label: "Years Experience" },
+  { value: "12+", label: "Years in Construction" },
   { value: "98%", label: "Client Satisfaction" },
   { value: "50+", label: "ADUs Built" },
 ];
@@ -20,23 +20,23 @@ const stats = [
 const values = [
   {
     icon: Award,
-    title: "Quality Craftsmanship",
-    description: "We never cut corners. Every project meets our rigorous quality standards.",
+    title: "Precision-Built, Every Detail",
+    description: "We hold ourselves to a higher standard. Every joint, every finish, every material is selected and installed with intention.",
   },
   {
     icon: Users,
-    title: "Client-Focused",
-    description: "Your vision drives our work. We listen, collaborate, and deliver.",
+    title: "Your Project, Your Team",
+    description: "A dedicated project manager on every job. Direct communication, no runaround.",
   },
   {
     icon: Clock,
-    title: "On-Time Delivery",
-    description: "We respect your time with realistic timelines and consistent updates.",
+    title: "Timelines You Can Trust",
+    description: "We set realistic schedules, then we hit them. Weekly updates so you always know where things stand.",
   },
   {
     icon: Shield,
-    title: "Licensed & Insured",
-    description: "Full protection for you and your property throughout the project.",
+    title: "Licensed, Bonded, and Insured",
+    description: "Full liability coverage and workers comp on every project. Your investment is protected.",
   },
 ];
 
@@ -72,11 +72,11 @@ export default function AboutPage() {
         <div className="container mx-auto px-4">
           <div className="max-w-3xl">
             <h1 className="text-4xl md:text-5xl font-bold mb-6">
-              Building Dreams in San Diego Since 2009
+              12 Years in the Field. Built Different Since Day One.
             </h1>
             <p className="text-xl text-white/80 mb-8">
-              Distinct Construction Solutions is a family-owned, design-build company dedicated to 
-              transforming San Diego homes with quality craftsmanship and exceptional service.
+              Distinct Construction Solutions is a San Diego design-build firm founded by Jordan Talavera in 2022 &mdash; 
+              backed by over a decade of hands-on construction experience and a commitment to doing things the right way.
             </p>
           </div>
         </div>
@@ -101,25 +101,40 @@ export default function AboutPage() {
       {/* Our Story */}
       <section className="py-20">
         <div className="container mx-auto px-4">
-          <div className="max-w-3xl mx-auto text-center">
-            <h2 className="text-3xl md:text-4xl font-bold text-secondary mb-6">
+          <div className="max-w-3xl mx-auto">
+            <h2 className="text-3xl md:text-4xl font-bold text-secondary mb-6 text-center">
               Our Story
             </h2>
-            <div className="space-y-4 text-lg text-muted-foreground">
+            <div className="space-y-5 text-lg text-muted-foreground">
               <p>
-                Founded in 2009 by a team of passionate builders, Distinct Construction Solutions 
-                began with a simple mission: deliver exceptional construction services that 
-                transform houses into dream homes.
+                Jordan Talavera started in construction in 2014. Not behind a desk &mdash; on job sites, 
+                framing walls, pouring foundations, learning the trade from the ground up. Over the next 
+                several years, he worked on everything from small remodels to full-scale custom builds 
+                across San Diego.
               </p>
               <p>
-                Over the years, we&apos;ve grown from a small remodeling company to San Diego&apos;s 
-                trusted design-build partner for ADUs, custom homes, and renovations. Our success 
-                is built on a foundation of integrity, quality, and genuine care for our clients.
+                That experience taught him something most contractors never talk about: the gap between 
+                what homeowners are promised and what actually gets delivered. Missed timelines, vague pricing, 
+                disappearing project managers. He saw it happen over and over &mdash; and decided to build a 
+                company that did things differently.
               </p>
               <p>
-                Today, we&apos;re proud to be at the forefront of San Diego&apos;s ADU movement, helping 
-                homeowners maximize their property value while addressing the housing needs of 
-                our community.
+                In 2022, Jordan founded Distinct Construction Solutions. Not as another general contractor, 
+                but as a design-build firm with real systems in place: fixed-price contracts, dedicated 
+                project management, weekly client updates, and a process designed around transparency from 
+                the first call to the final walkthrough.
+              </p>
+              <p>
+                Every project we&apos;ve taken on has made us sharper. Early on, we learned that clear 
+                communication matters more than anything else. We built better scoping documents. We tightened 
+                our timelines. We invested in 3D design so clients could see exactly what they were getting 
+                before a single nail was driven.
+              </p>
+              <p>
+                Today, DCS is one of San Diego&apos;s most trusted ADU and residential construction firms. 
+                We&apos;ve helped homeowners add income-generating units to their properties, build custom homes 
+                from scratch, and renovate spaces that had been neglected for years. Our clients don&apos;t just 
+                hire us &mdash; they refer us. That&apos;s the standard we hold ourselves to.
               </p>
             </div>
           </div>
