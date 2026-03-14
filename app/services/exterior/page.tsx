@@ -1,8 +1,7 @@
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { ArrowRight, Shield, CheckCircle, Paintbrush, Sun, Home, Fence } from "lucide-react";
-import { CostCtaSection } from "@/components/calculators/cost-cta-section";
+import { ArrowRight, Shield, CheckCircle, Paintbrush, Sun, Home } from "lucide-react";
 
 const exteriorServices = [
   {
@@ -12,7 +11,7 @@ const exteriorServices = [
   },
   {
     title: "Siding & Stucco",
-    description: "New siding installation or stucco repair and re-coating. Protect and beautify your home&apos;s exterior.",
+    description: "New siding installation or stucco repair and re-coating. Protect and beautify your home's exterior.",
     price: "Starting at $8,000",
   },
   {
@@ -41,7 +40,7 @@ const features = [
   {
     icon: Sun,
     title: "Weather Resistant",
-    description: "Materials and techniques selected for San Diego&apos;s climate. Built to withstand sun, salt air, and seasonal rain.",
+    description: "Materials and techniques selected for San Diego's climate. Built to withstand sun, salt air, and seasonal rain.",
   },
   {
     icon: Home,
@@ -56,7 +55,7 @@ const features = [
   {
     icon: Paintbrush,
     title: "Custom Design",
-    description: "Tailored designs that complement your home&apos;s architecture and your personal style.",
+    description: "Tailored designs that complement your home's architecture and your personal style.",
   },
 ];
 
@@ -90,7 +89,7 @@ export default function ExteriorPage() {
             <p className="text-2xl font-bold text-primary mb-8">Starting at $3,500</p>
             <Link href="/contact">
               <Button size="lg" className="bg-primary hover:bg-primary-dark text-secondary font-semibold">
-                Get a Free Estimate <ArrowRight className="h-5 w-5 ml-2" />
+                Schedule On-Site Consultation <ArrowRight className="h-5 w-5 ml-2" />
               </Button>
             </Link>
           </div>
@@ -161,11 +160,6 @@ export default function ExteriorPage() {
         </div>
       </section>
 
-      <CostCtaSection
-        calculatorHref="/planning-tools"
-        calculatorLabel="Open Project Calculator"
-      />
-
       <section className="py-20 bg-secondary text-white">
         <div className="container mx-auto px-4 text-center">
           <h2 className="text-3xl md:text-4xl font-bold mb-4">Ready to Upgrade Your Exterior?</h2>
@@ -174,7 +168,7 @@ export default function ExteriorPage() {
           </p>
           <Link href="/contact">
             <Button size="lg" className="bg-primary hover:bg-primary-dark text-secondary font-semibold">
-              Schedule Free Consultation <ArrowRight className="h-5 w-5 ml-2" />
+              Schedule On-Site Consultation <ArrowRight className="h-5 w-5 ml-2" />
             </Button>
           </Link>
         </div>

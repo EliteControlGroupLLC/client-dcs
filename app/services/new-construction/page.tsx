@@ -1,8 +1,7 @@
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { ArrowRight, Home, Shield, Users, CheckCircle, Ruler, Lightbulb } from "lucide-react";
-import { CostCtaSection } from "@/components/calculators/cost-cta-section";
+import { ArrowRight, Shield, CheckCircle, Users, Ruler, Lightbulb } from "lucide-react";
 
 const features = [
   {
@@ -53,18 +52,11 @@ export default function NewConstructionPage() {
               From the ground up, we build custom homes that reflect your lifestyle.
               Full design-build service with transparent pricing and professional project management.
             </p>
-            <div className="flex flex-col sm:flex-row gap-4">
-              <Link href="/contact">
-                <Button size="lg" className="bg-primary hover:bg-primary-dark text-secondary font-semibold">
-                  Get a Custom Quote <ArrowRight className="h-5 w-5 ml-2" />
-                </Button>
-              </Link>
-              <Link href="/gallery">
-                <Button size="lg" variant="outline" className="border-white text-white hover:bg-white/10">
-                  View Our Work
-                </Button>
-              </Link>
-            </div>
+            <Link href="/contact">
+              <Button size="lg" className="bg-primary hover:bg-primary-dark text-secondary font-semibold">
+                Schedule On-Site Consultation <ArrowRight className="h-5 w-5 ml-2" />
+              </Button>
+            </Link>
           </div>
         </div>
       </section>
@@ -111,11 +103,6 @@ export default function NewConstructionPage() {
         </div>
       </section>
 
-      <CostCtaSection
-        calculatorHref="/planning-tools"
-        calculatorLabel="Open Project Calculator"
-      />
-
       <section className="py-20 bg-secondary text-white">
         <div className="container mx-auto px-4 text-center">
           <h2 className="text-3xl md:text-4xl font-bold mb-4">Let&apos;s Build Your Dream Home</h2>
@@ -124,7 +111,7 @@ export default function NewConstructionPage() {
           </p>
           <Link href="/contact">
             <Button size="lg" className="bg-primary hover:bg-primary-dark text-secondary font-semibold">
-              Start Your Project <ArrowRight className="h-5 w-5 ml-2" />
+              Schedule On-Site Consultation <ArrowRight className="h-5 w-5 ml-2" />
             </Button>
           </Link>
         </div>

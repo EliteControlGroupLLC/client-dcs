@@ -1,7 +1,5 @@
-import Link from "next/link";
-import { Button } from "@/components/ui/button";
-import { ArrowRight, CheckCircle } from "lucide-react";
-import { CostCtaSection } from "@/components/calculators/cost-cta-section";
+import { CheckCircle } from "lucide-react";
+import { KitchenCalculatorInline } from "@/components/calculators/kitchen-calculator-inline";
 
 const features = [
   "Custom cabinetry design and installation",
@@ -30,22 +28,17 @@ export default function KitchenPage() {
               From layout redesign to premium finishes, we build kitchens that are beautiful,
               functional, and built to last. Transparent pricing with no hidden costs.
             </p>
-            <p className="text-2xl font-bold text-primary mb-8">Starting at $18,000</p>
-            <div className="flex flex-col sm:flex-row gap-4">
-              <Link href="/contact">
-                <Button size="lg" className="bg-primary hover:bg-primary-dark text-secondary font-semibold">
-                  Get a Free Quote <ArrowRight className="h-5 w-5 ml-2" />
-                </Button>
-              </Link>
-              <Link href="/gallery">
-                <Button size="lg" variant="outline" className="border-white text-white hover:bg-white/10">
-                  View Kitchen Projects
-                </Button>
-              </Link>
-            </div>
+            <p className="text-2xl font-bold text-primary mb-8">$18,000 – $75,000+</p>
+            <a href="#calculator">
+              <button className="inline-flex items-center justify-center gap-2 bg-primary hover:bg-primary-dark text-secondary font-semibold px-8 py-4 rounded-lg text-lg transition-colors">
+                Open Kitchen Calculator
+              </button>
+            </a>
           </div>
         </div>
       </section>
+
+      <KitchenCalculatorInline />
 
       <section className="py-20">
         <div className="container mx-auto px-4">
@@ -62,25 +55,6 @@ export default function KitchenPage() {
               ))}
             </ul>
           </div>
-        </div>
-      </section>
-
-      <CostCtaSection
-        calculatorHref="/tools/kitchen-calculator"
-        calculatorLabel="Open Kitchen Calculator"
-      />
-
-      <section className="py-20 bg-secondary text-white">
-        <div className="container mx-auto px-4 text-center">
-          <h2 className="text-3xl md:text-4xl font-bold mb-4">Ready for a New Kitchen?</h2>
-          <p className="text-lg text-white/80 mb-8 max-w-2xl mx-auto">
-            Schedule a free consultation and let&apos;s design the kitchen you&apos;ve always wanted.
-          </p>
-          <Link href="/contact">
-            <Button size="lg" className="bg-primary hover:bg-primary-dark text-secondary font-semibold">
-              Schedule Consultation <ArrowRight className="h-5 w-5 ml-2" />
-            </Button>
-          </Link>
         </div>
       </section>
     </div>

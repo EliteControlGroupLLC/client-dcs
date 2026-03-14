@@ -2,8 +2,6 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { 
   Home, 
-  Hammer, 
-  FileText, 
   Clock,
   CheckCircle,
   DollarSign,
@@ -11,7 +9,6 @@ import {
   Shield
 } from "lucide-react";
 import Link from "next/link";
-import { CostCtaSection } from "@/components/calculators/cost-cta-section";
 
 const aduTypes = [
   {
@@ -70,7 +67,7 @@ export default function ADUSolutionsPage() {
             <div className="flex flex-col sm:flex-row gap-4">
               <Link href="/build-your-adu">
                 <Button size="lg" className="bg-primary hover:bg-primary-dark text-secondary font-semibold">
-                  Start Your ADU Project
+                  Open ADU Calculator
                 </Button>
               </Link>
             </div>
@@ -199,11 +196,6 @@ export default function ADUSolutionsPage() {
           </div>
         </div>
       </section>
-
-      <CostCtaSection
-        calculatorHref="/adu-calculator"
-        calculatorLabel="Open ADU Calculator"
-      />
 
       {/* CTA */}
       <section className="py-20 bg-secondary text-white">
