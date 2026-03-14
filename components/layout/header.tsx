@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { Menu, X, ChevronDown, Phone } from "lucide-react";
+import { Menu, X, ChevronDown } from "lucide-react";
 
 // Logo configuration
 const USE_IMAGE_LOGO = true;
@@ -57,12 +57,12 @@ export function Header() {
           <Link href="/" className="flex items-center shrink-0">
             {USE_IMAGE_LOGO ? (
               // Image logo with automatic sizing
-              <div className="relative h-10 sm:h-12 w-auto max-w-[180px]">
+              <div className="relative h-12 sm:h-14 w-auto max-w-[220px]">
                 <Image
                   src={scrolled ? LOGO_DARK : LOGO_LIGHT}
                   alt="Distinct Construction Solutions"
-                  width={180}
-                  height={48}
+                  width={220}
+                  height={56}
                   className="h-full w-auto object-contain"
                   priority
                 />
@@ -121,24 +121,8 @@ export function Header() {
             ))}
           </div>
 
-          {/* CTA Button */}
-          <div className="hidden lg:flex lg:items-center lg:gap-4">
-            <a
-              href="tel:+18588330705"
-              className={`flex items-center gap-2 text-sm font-medium ${
-                scrolled ? "text-secondary" : "text-white"
-              }`}
-            >
-              <Phone className="h-4 w-4" />
-              +1 (858) - 833 - 0705 | Text
-            </a>
-            <Link
-              href="/contact"
-              className="inline-flex items-center justify-center rounded-full bg-primary px-6 py-2.5 text-sm font-semibold text-white shadow-lg shadow-primary/25 hover:bg-primary-dark transition-all hover:scale-105"
-            >
-              Free Consultation
-            </Link>
-          </div>
+          {/* Spacer for alignment */}
+          <div className="hidden lg:block" />
 
           {/* Mobile menu button */}
           <button
@@ -183,15 +167,6 @@ export function Header() {
                   )}
                 </div>
               ))}
-            </div>
-            <div className="mt-4 pt-4 border-t border-border">
-              <Link
-                href="/contact"
-                className="block w-full text-center rounded-full bg-primary px-6 py-3 text-sm font-semibold text-white shadow-lg"
-                onClick={() => setIsOpen(false)}
-              >
-                Free Consultation
-              </Link>
             </div>
           </div>
         )}
