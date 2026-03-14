@@ -12,6 +12,7 @@ import {
   Send,
   CheckCircle
 } from "lucide-react";
+import { trackContactFormSubmitted } from "@/lib/analytics";
 
 const serviceTypes = [
   "ADU / Accessory Dwelling Unit",
@@ -35,8 +36,16 @@ export default function ContactPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Here we would submit to Supabase
-    console.log("Form submitted:", formData);
+    try {
+      await fetch("/api/contact", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(formData),
+      });
+    } catch {
+      // Contact form still shows success even if API fails
+    }
+    trackContactFormSubmitted(formData.service);
     setSubmitted(true);
   };
 
