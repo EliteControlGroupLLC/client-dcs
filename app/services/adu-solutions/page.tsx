@@ -25,7 +25,7 @@ const aduTypes = [
     description: "Built as an addition to your existing home, sharing one or more walls.",
     sqFt: "400-1,000 sq ft",
     timeline: "11-13 months",
-    features: ["Lower cost", "Shared utilities", "Easy access"],
+    features: ["Perfect for family living", "Blends seamlessly with your home", "Smart solution for tighter lots"],
   },
   {
     title: "Garage Conversion",
