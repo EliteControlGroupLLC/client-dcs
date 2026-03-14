@@ -75,12 +75,7 @@ export default function ConcretePage() {
               Driveways, patios, retaining walls, and foundations — built to last with quality materials
               and expert craftsmanship. Serving San Diego homeowners with transparent pricing.
             </p>
-            <p className="text-2xl font-bold text-primary mb-8">Starting at $17.50/sq ft</p>
-            <a href="#calculator">
-              <button className="inline-flex items-center justify-center gap-2 bg-primary hover:bg-primary-dark text-secondary font-semibold px-8 py-4 rounded-lg text-lg transition-colors">
-                Open Concrete Calculator
-              </button>
-            </a>
+            <p className="text-2xl font-bold text-primary">Starting at $17.50/sq ft</p>
           </div>
         </div>
       </section>

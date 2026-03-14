@@ -28,12 +28,7 @@ export default function KitchenPage() {
               From layout redesign to premium finishes, we build kitchens that are beautiful,
               functional, and built to last. Transparent pricing with no hidden costs.
             </p>
-            <p className="text-2xl font-bold text-primary mb-8">$18,000 – $75,000+</p>
-            <a href="#calculator">
-              <button className="inline-flex items-center justify-center gap-2 bg-primary hover:bg-primary-dark text-secondary font-semibold px-8 py-4 rounded-lg text-lg transition-colors">
-                Open Kitchen Calculator
-              </button>
-            </a>
+            <p className="text-2xl font-bold text-primary">$18,000 – $75,000+</p>
           </div>
         </div>
       </section>
