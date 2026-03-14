@@ -1,8 +1,7 @@
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { ArrowRight, Shield, CheckCircle, Sun, Award, Thermometer, Eye } from "lucide-react";
-import { CostCtaSection } from "@/components/calculators/cost-cta-section";
+import { ArrowRight, Shield, CheckCircle, Sun, Thermometer, Eye } from "lucide-react";
 
 const windowTypes = [
   {
@@ -46,7 +45,7 @@ const features = [
   {
     icon: Eye,
     title: "Curb Appeal",
-    description: "Modern window designs that enhance your home&apos;s appearance and increase property value.",
+    description: "Modern window designs that enhance your home's appearance and increase property value.",
   },
 ];
 
@@ -80,7 +79,7 @@ export default function WindowsPage() {
             <p className="text-2xl font-bold text-primary mb-8">Starting at $450/window</p>
             <Link href="/contact">
               <Button size="lg" className="bg-primary hover:bg-primary-dark text-secondary font-semibold">
-                Get a Free Estimate <ArrowRight className="h-5 w-5 ml-2" />
+                Schedule On-Site Consultation <ArrowRight className="h-5 w-5 ml-2" />
               </Button>
             </Link>
           </div>
@@ -151,11 +150,6 @@ export default function WindowsPage() {
         </div>
       </section>
 
-      <CostCtaSection
-        calculatorHref="/planning-tools"
-        calculatorLabel="Open Project Calculator"
-      />
-
       <section className="py-20 bg-secondary text-white">
         <div className="container mx-auto px-4 text-center">
           <h2 className="text-3xl md:text-4xl font-bold mb-4">Ready for New Windows?</h2>
@@ -164,7 +158,7 @@ export default function WindowsPage() {
           </p>
           <Link href="/contact">
             <Button size="lg" className="bg-primary hover:bg-primary-dark text-secondary font-semibold">
-              Schedule Free Consultation <ArrowRight className="h-5 w-5 ml-2" />
+              Schedule On-Site Consultation <ArrowRight className="h-5 w-5 ml-2" />
             </Button>
           </Link>
         </div>

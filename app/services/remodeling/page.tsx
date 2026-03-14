@@ -1,8 +1,7 @@
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { ArrowRight, Home, Bath, ChefHat, Paintbrush, CheckCircle } from "lucide-react";
-import { CostCtaSection } from "@/components/calculators/cost-cta-section";
+import { ArrowRight, Home, Bath, ChefHat, Paintbrush } from "lucide-react";
 
 const remodelTypes = [
   {
@@ -54,7 +53,7 @@ export default function RemodelingPage() {
             <p className="text-2xl font-bold text-primary mb-8">Starting at $18,000</p>
             <Link href="/contact">
               <Button size="lg" className="bg-primary hover:bg-primary-dark text-secondary font-semibold">
-                Get a Free Quote <ArrowRight className="h-5 w-5 ml-2" />
+                Schedule On-Site Consultation <ArrowRight className="h-5 w-5 ml-2" />
               </Button>
             </Link>
           </div>
@@ -94,11 +93,6 @@ export default function RemodelingPage() {
         </div>
       </section>
 
-      <CostCtaSection
-        calculatorHref="/planning-tools"
-        calculatorLabel="Open Project Calculator"
-      />
-
       <section className="py-20 bg-secondary text-white">
         <div className="container mx-auto px-4 text-center">
           <h2 className="text-3xl md:text-4xl font-bold mb-4">Ready to Remodel?</h2>
@@ -107,7 +101,7 @@ export default function RemodelingPage() {
           </p>
           <Link href="/contact">
             <Button size="lg" className="bg-primary hover:bg-primary-dark text-secondary font-semibold">
-              Get Free Quote <ArrowRight className="h-5 w-5 ml-2" />
+              Schedule On-Site Consultation <ArrowRight className="h-5 w-5 ml-2" />
             </Button>
           </Link>
         </div>

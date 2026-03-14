@@ -1,8 +1,6 @@
-import Link from "next/link";
-import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { ArrowRight, Shield, CheckCircle, Ruler, Award, Layers } from "lucide-react";
-import { CostCtaSection } from "@/components/calculators/cost-cta-section";
+import { Shield, CheckCircle, Ruler, Award, Layers } from "lucide-react";
+import { ConcreteCalculatorInline } from "@/components/calculators/concrete-calculator-inline";
 
 const concreteServices = [
   {
@@ -78,21 +76,16 @@ export default function ConcretePage() {
               and expert craftsmanship. Serving San Diego homeowners with transparent pricing.
             </p>
             <p className="text-2xl font-bold text-primary mb-8">Starting at $17.50/sq ft</p>
-            <div className="flex flex-col sm:flex-row gap-4">
-              <Link href="/contact">
-                <Button size="lg" className="bg-primary hover:bg-primary-dark text-secondary font-semibold">
-                  Get a Free Estimate <ArrowRight className="h-5 w-5 ml-2" />
-                </Button>
-              </Link>
-              <Link href="/tools/concrete-calculator">
-                <Button size="lg" variant="outline" className="border-white text-white hover:bg-white/10">
-                  Concrete Calculator
-                </Button>
-              </Link>
-            </div>
+            <a href="#calculator">
+              <button className="inline-flex items-center justify-center gap-2 bg-primary hover:bg-primary-dark text-secondary font-semibold px-8 py-4 rounded-lg text-lg transition-colors">
+                Open Concrete Calculator
+              </button>
+            </a>
           </div>
         </div>
       </section>
+
+      <ConcreteCalculatorInline />
 
       <section className="py-20">
         <div className="container mx-auto px-4">
@@ -154,32 +147,6 @@ export default function ConcretePage() {
                 </li>
               ))}
             </ul>
-          </div>
-        </div>
-      </section>
-
-      <CostCtaSection
-        calculatorHref="/tools/concrete-calculator"
-        calculatorLabel="Open Concrete Calculator"
-      />
-
-      <section className="py-20 bg-secondary text-white">
-        <div className="container mx-auto px-4 text-center">
-          <h2 className="text-3xl md:text-4xl font-bold mb-4">Ready to Start Your Concrete Project?</h2>
-          <p className="text-lg text-white/80 mb-8 max-w-2xl mx-auto">
-            Get a free on-site estimate. We&apos;ll assess your project and provide transparent pricing.
-          </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Link href="/contact">
-              <Button size="lg" className="bg-primary hover:bg-primary-dark text-secondary font-semibold">
-                Get Free Estimate <ArrowRight className="h-5 w-5 ml-2" />
-              </Button>
-            </Link>
-            <Link href="/tools/concrete-calculator">
-              <Button size="lg" variant="outline" className="border-white text-white hover:bg-white/10">
-                Estimate Your Project
-              </Button>
-            </Link>
           </div>
         </div>
       </section>
