@@ -167,7 +167,7 @@ export function Hero() {
               </div>
 
               <h3 className="text-2xl font-bold text-white mb-4">
-                What Sets Us Apart
+                What Sets Us Apart?
               </h3>
 
               <div className="space-y-4 mb-6">
