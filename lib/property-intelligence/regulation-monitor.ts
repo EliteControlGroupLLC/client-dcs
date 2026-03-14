@@ -228,9 +228,64 @@ export function getLastScanTimestamp(): string | null {
   return lastScanTimestamp;
 }
 
+// ─── Content Snapshot Store (in-memory; persisted per serverless cold start) ───
+const contentSnapshots: Record<string, string> = {};
+
 /**
- * Simulate a regulation source check (production version would fetch + compare)
- * This is the core monitoring function that would run on a schedule.
+ * Simple content hash — produces a short deterministic digest of text content.
+ * Used to detect whether a page has changed since the last check.
+ */
+function simpleHash(text: string): string {
+  let hash = 0;
+  for (let i = 0; i < text.length; i++) {
+    const ch = text.charCodeAt(i);
+    hash = ((hash << 5) - hash + ch) | 0;
+  }
+  return hash.toString(36);
+}
+
+/**
+ * Strip HTML tags, collapse whitespace, and extract meaningful text content.
+ * This makes comparison resilient to cosmetic markup changes.
+ */
+function extractTextContent(html: string): string {
+  return html
+    .replace(/<script[\s\S]*?<\/script>/gi, "")
+    .replace(/<style[\s\S]*?<\/style>/gi, "")
+    .replace(/<[^>]+>/g, " ")
+    .replace(/\s+/g, " ")
+    .trim()
+    .toLowerCase();
+}
+
+/**
+ * ADU-related keywords that signal meaningful regulation content.
+ * If a page contains several of these, confidence in the extraction is higher.
+ */
+const ADU_KEYWORDS = [
+  "accessory dwelling unit",
+  "adu",
+  "jadu",
+  "setback",
+  "lot coverage",
+  "height limit",
+  "square feet",
+  "sq ft",
+  "parking",
+  "owner-occupied",
+  "sb 9",
+  "sb9",
+  "building permit",
+  "zoning",
+  "residential",
+  "detached",
+  "attached",
+  "garage conversion",
+];
+
+/**
+ * Check a regulation source by fetching its page content, comparing against the
+ * stored snapshot, and detecting meaningful ADU-related changes.
  */
 export async function checkRegulationSource(
   source: RegulationSource
@@ -238,23 +293,90 @@ export async function checkRegulationSource(
   changed: boolean;
   confidence: number;
   details: string;
+  contentPreview?: string;
 }> {
-  // In production, this would:
-  // 1. Fetch the source URL content
-  // 2. Compare against stored snapshot
-  // 3. Detect meaningful changes
-  // 4. Extract updated rule values
-  // 5. Queue changes for review
-
-  // For now, return a "no change detected" result
   const now = new Date().toISOString();
   source.lastChecked = now;
 
-  return {
-    changed: false,
-    confidence: source.extractionConfidence,
-    details: `Source checked at ${now}. No changes detected.`,
-  };
+  try {
+    const response = await fetch(source.sourceUrl, {
+      headers: {
+        "User-Agent": "DCS-RegulationMonitor/1.0 (ADU compliance check)",
+        Accept: "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+      },
+      signal: AbortSignal.timeout(15000),
+    });
+
+    if (!response.ok) {
+      return {
+        changed: false,
+        confidence: 0,
+        details: `Source returned HTTP ${response.status}. Will retry next cycle.`,
+      };
+    }
+
+    const html = await response.text();
+    const textContent = extractTextContent(html);
+    const currentHash = simpleHash(textContent);
+
+    // Count ADU-related keyword matches for confidence scoring
+    const keywordMatches = ADU_KEYWORDS.filter((kw) => textContent.includes(kw));
+    const keywordConfidence = Math.min(
+      100,
+      Math.round((keywordMatches.length / 6) * source.extractionConfidence)
+    );
+
+    const previousHash = contentSnapshots[source.id];
+    contentSnapshots[source.id] = currentHash;
+
+    if (!previousHash) {
+      // First check — store baseline snapshot
+      return {
+        changed: false,
+        confidence: keywordConfidence,
+        details: `Baseline snapshot stored at ${now}. ${keywordMatches.length} ADU keywords detected.`,
+        contentPreview: textContent.substring(0, 500),
+      };
+    }
+
+    if (currentHash === previousHash) {
+      return {
+        changed: false,
+        confidence: keywordConfidence,
+        details: `No changes detected at ${now}. Content hash matches previous snapshot.`,
+      };
+    }
+
+    // Change detected — log it
+    source.lastChangeDetected = now;
+
+    const change: RegulationChange = {
+      id: `change-${source.id}-${Date.now()}`,
+      jurisdictionId: source.jurisdictionId,
+      fieldName: "page_content",
+      oldValue: `hash:${previousHash}`,
+      newValue: `hash:${currentHash}`,
+      sourceUrl: source.sourceUrl,
+      updateTimestamp: now,
+      extractionConfidence: keywordConfidence,
+      reviewStatus: "pending",
+    };
+    regulationHistory.push(change);
+
+    return {
+      changed: true,
+      confidence: keywordConfidence,
+      details: `CHANGE DETECTED at ${now}. ${keywordMatches.length} ADU keywords found. Content hash changed from ${previousHash} to ${currentHash}. Queued for review.`,
+      contentPreview: textContent.substring(0, 500),
+    };
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "Unknown error";
+    return {
+      changed: false,
+      confidence: 0,
+      details: `Failed to fetch source at ${now}: ${message}`,
+    };
+  }
 }
 
 /**

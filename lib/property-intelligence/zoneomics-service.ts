@@ -5,6 +5,57 @@
 const ZONEOMICS_API_KEY = process.env.NEXT_PUBLIC_ZONEOMICS_API_KEY;
 const ZONEOMICS_BASE_URL = "https://api.zoneomics.com/v2";
 
+// Zoneomics API response can vary — support multiple response shapes
+interface ZoneomicsApiResponse {
+  status?: string;
+  zoning_code?: string;
+  zone_code?: string;
+  zone_name?: string;
+  zone_type?: string;
+  zone_description?: string;
+  land_use?: string;
+  land_use_category?: string;
+  land_use_description?: string;
+  overlay_districts?: string[];
+  overlays?: string[];
+  min_lot_size?: number;
+  max_lot_coverage?: number;
+  max_far?: number;
+  max_height?: number;
+  max_density?: string;
+  parking_required?: boolean;
+  landscaping_required?: boolean;
+  design_review?: boolean;
+  historic_district?: boolean;
+  coastal_zone?: boolean;
+  source_url?: string;
+  data?: {
+    zoning_code?: string;
+    zone_code?: string;
+    zone_name?: string;
+    zone_type?: string;
+    zoning_description?: string;
+    zone_description?: string;
+    land_use_category?: string;
+    land_use_description?: string;
+    land_use?: string;
+    zoning_district?: string;
+    overlay_districts?: string[];
+    overlays?: string[];
+    min_lot_size?: number;
+    max_lot_coverage?: number;
+    max_far?: number;
+    max_height?: number;
+    max_density?: string;
+    parking_required?: boolean;
+    landscaping_required?: boolean;
+    design_review?: boolean;
+    historic_district?: boolean;
+    coastal_zone?: boolean;
+    source_url?: string;
+  };
+}
+
 export interface ZoneomicsZoningData {
   zoningCode: string | null;
   zoningDescription: string | null;
@@ -31,29 +82,6 @@ export interface ZoneomicsZoningData {
   available: boolean;
 }
 
-interface ZoneomicsResponse {
-  status?: string;
-  data?: {
-    zoning_code?: string;
-    zoning_description?: string;
-    land_use_category?: string;
-    land_use_description?: string;
-    zoning_district?: string;
-    overlay_districts?: string[];
-    min_lot_size?: number;
-    max_lot_coverage?: number;
-    max_far?: number;
-    max_height?: number;
-    max_density?: string;
-    parking_required?: boolean;
-    landscaping_required?: boolean;
-    design_review?: boolean;
-    historic_district?: boolean;
-    coastal_zone?: boolean;
-    source_url?: string;
-  };
-}
-
 /**
  * Check if Zoneomics API is configured
  */
@@ -62,93 +90,129 @@ export function isZoneomicsAvailable(): boolean {
 }
 
 /**
- * Fetch zoning data from Zoneomics for a given location
+ * Normalize fields from a Zoneomics response — handles both top-level
+ * and nested `data` shapes, plus field name variations (zone_code vs zoning_code, etc.)
+ */
+function normalizeZoneomicsFields(raw: ZoneomicsApiResponse) {
+  const d = raw.data ?? raw;
+  return {
+    zoning_code: d.zoning_code || d.zone_code || null,
+    zoning_description: d.zone_description || (raw.data ? raw.data.zoning_description : null) || d.zone_name || null,
+    land_use_category: d.land_use_category || d.land_use || null,
+    land_use_description: d.land_use_description || null,
+    zoning_district: (raw.data ? raw.data.zoning_district : null) || d.zone_type || null,
+    overlay_districts: d.overlay_districts || d.overlays || [],
+    min_lot_size: d.min_lot_size ?? null,
+    max_lot_coverage: d.max_lot_coverage ?? null,
+    max_far: d.max_far ?? null,
+    max_height: d.max_height ?? null,
+    max_density: d.max_density ?? null,
+    parking_required: d.parking_required ?? null,
+    landscaping_required: d.landscaping_required ?? null,
+    design_review: d.design_review ?? null,
+    historic_district: d.historic_district ?? null,
+    coastal_zone: d.coastal_zone ?? null,
+    source_url: d.source_url ?? null,
+  };
+}
+
+const EMPTY_ZONEOMICS_RESULT: ZoneomicsZoningData = {
+  zoningCode: null,
+  zoningDescription: null,
+  landUseCategory: null,
+  landUseDescription: null,
+  zoningDistrict: null,
+  overlayDistricts: [],
+  planningAttributes: {
+    minLotSize: null,
+    maxLotCoverage: null,
+    maxFAR: null,
+    maxHeight: null,
+    maxDensity: null,
+  },
+  controls: {
+    parkingRequired: null,
+    landscapingRequired: null,
+    designReview: null,
+    historicDistrict: null,
+    coastalZone: null,
+  },
+  sourceUrl: null,
+  confidence: 0,
+  available: false,
+};
+
+/**
+ * Fetch zoning data from Zoneomics for a given location.
+ * Tries `zoneDetail` (primary) then falls back to `zoning` endpoint.
  */
 export async function getZoneomicsData(
   lat: number,
   lng: number
 ): Promise<ZoneomicsZoningData> {
-  const emptyResult: ZoneomicsZoningData = {
-    zoningCode: null,
-    zoningDescription: null,
-    landUseCategory: null,
-    landUseDescription: null,
-    zoningDistrict: null,
-    overlayDistricts: [],
-    planningAttributes: {
-      minLotSize: null,
-      maxLotCoverage: null,
-      maxFAR: null,
-      maxHeight: null,
-      maxDensity: null,
-    },
-    controls: {
-      parkingRequired: null,
-      landscapingRequired: null,
-      designReview: null,
-      historicDistrict: null,
-      coastalZone: null,
-    },
-    sourceUrl: null,
-    confidence: 0,
-    available: false,
-  };
+  if (!ZONEOMICS_API_KEY) return EMPTY_ZONEOMICS_RESULT;
 
-  if (!ZONEOMICS_API_KEY) return emptyResult;
+  // Endpoints to try in order (zoneDetail is the documented v2 endpoint)
+  const endpoints = [
+    `${ZONEOMICS_BASE_URL}/zoneDetail?lat=${lat}&lng=${lng}&api_key=${ZONEOMICS_API_KEY}`,
+    `${ZONEOMICS_BASE_URL}/zoning?lat=${lat}&lng=${lng}&api_key=${ZONEOMICS_API_KEY}`,
+  ];
 
-  try {
-    const url = `${ZONEOMICS_BASE_URL}/zoning?lat=${lat}&lng=${lng}&api_key=${ZONEOMICS_API_KEY}`;
-    const response = await fetch(url, {
-      headers: { Accept: "application/json" },
-    });
+  for (const url of endpoints) {
+    try {
+      const response = await fetch(url, {
+        headers: { Accept: "application/json" },
+        signal: AbortSignal.timeout(8000),
+      });
 
-    if (!response.ok) return emptyResult;
+      if (!response.ok) continue;
 
-    const data: ZoneomicsResponse = await response.json();
+      const raw: ZoneomicsApiResponse = await response.json();
+      const z = normalizeZoneomicsFields(raw);
 
-    if (!data.data) return emptyResult;
+      // Count available fields
+      let fieldsAvailable = 0;
+      const totalFields = 6;
+      if (z.zoning_code) fieldsAvailable++;
+      if (z.zoning_description) fieldsAvailable++;
+      if (z.land_use_category) fieldsAvailable++;
+      if (z.zoning_district) fieldsAvailable++;
+      if (z.min_lot_size || z.max_lot_coverage || z.max_far) fieldsAvailable++;
+      if (z.overlay_districts && z.overlay_districts.length > 0) fieldsAvailable++;
 
-    const zData = data.data;
-    let fieldsAvailable = 0;
-    const totalFields = 6;
+      if (fieldsAvailable === 0) continue;
 
-    if (zData.zoning_code) fieldsAvailable++;
-    if (zData.zoning_description) fieldsAvailable++;
-    if (zData.land_use_category) fieldsAvailable++;
-    if (zData.zoning_district) fieldsAvailable++;
-    if (zData.min_lot_size || zData.max_lot_coverage || zData.max_far) fieldsAvailable++;
-    if (zData.overlay_districts && zData.overlay_districts.length > 0) fieldsAvailable++;
-
-    const confidence = Math.round((fieldsAvailable / totalFields) * 100);
-
-    return {
-      zoningCode: zData.zoning_code || null,
-      zoningDescription: zData.zoning_description || null,
-      landUseCategory: zData.land_use_category || null,
-      landUseDescription: zData.land_use_description || null,
-      zoningDistrict: zData.zoning_district || null,
-      overlayDistricts: zData.overlay_districts || [],
-      planningAttributes: {
-        minLotSize: zData.min_lot_size || null,
-        maxLotCoverage: zData.max_lot_coverage || null,
-        maxFAR: zData.max_far || null,
-        maxHeight: zData.max_height || null,
-        maxDensity: zData.max_density || null,
-      },
-      controls: {
-        parkingRequired: zData.parking_required ?? null,
-        landscapingRequired: zData.landscaping_required ?? null,
-        designReview: zData.design_review ?? null,
-        historicDistrict: zData.historic_district ?? null,
-        coastalZone: zData.coastal_zone ?? null,
-      },
-      sourceUrl: zData.source_url || null,
-      confidence,
-      available: fieldsAvailable > 0,
-    };
-  } catch {
-    return emptyResult;
+      return {
+        zoningCode: z.zoning_code,
+        zoningDescription: z.zoning_description,
+        landUseCategory: z.land_use_category,
+        landUseDescription: z.land_use_description,
+        zoningDistrict: z.zoning_district,
+        overlayDistricts: z.overlay_districts || [],
+        planningAttributes: {
+          minLotSize: z.min_lot_size,
+          maxLotCoverage: z.max_lot_coverage,
+          maxFAR: z.max_far,
+          maxHeight: z.max_height,
+          maxDensity: z.max_density,
+        },
+        controls: {
+          parkingRequired: z.parking_required,
+          landscapingRequired: z.landscaping_required,
+          designReview: z.design_review,
+          historicDistrict: z.historic_district,
+          coastalZone: z.coastal_zone,
+        },
+        sourceUrl: z.source_url,
+        confidence: Math.round((fieldsAvailable / totalFields) * 100),
+        available: true,
+      };
+    } catch {
+      continue;
+    }
   }
+
+  return EMPTY_ZONEOMICS_RESULT;
 }
 
 /**

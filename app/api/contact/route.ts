@@ -1,5 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import { NextRequest, NextResponse } from "next/server";
+import { notifyTeamContactForm } from "@/lib/email";
 
 export async function POST(request: NextRequest) {
   try {
@@ -46,6 +47,9 @@ export async function POST(request: NextRequest) {
       source: "contact_form",
       status: "new",
     });
+
+    // Send email notification to the team (fire-and-forget)
+    notifyTeamContactForm({ name, email, phone, service, message }).catch(() => {});
 
     return NextResponse.json({ success: true, data });
   } catch (error) {

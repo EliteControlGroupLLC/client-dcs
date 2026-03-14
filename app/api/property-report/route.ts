@@ -2,6 +2,7 @@
 // Saves lead info and generates a property development report.
 
 import { NextRequest, NextResponse } from "next/server";
+import { notifyTeamNewLead, sendUserConfirmation } from "@/lib/email";
 
 export async function POST(request: NextRequest) {
   try {
@@ -99,6 +100,21 @@ export async function POST(request: NextRequest) {
       // Supabase not available — lead not saved but report still generated
       leadSaved = false;
     }
+
+    // Send email notifications (fire-and-forget, don't block the response)
+    const emailPromises = [
+      notifyTeamNewLead({
+        name,
+        email,
+        phone,
+        propertyAddress,
+        source: "property-scanner-report",
+        confidenceScore: reportData.confidenceScore,
+        recommendedPath: reportData.feasibilitySummary.recommendedPath,
+      }),
+      sendUserConfirmation({ name, email, propertyAddress }),
+    ];
+    Promise.allSettled(emailPromises).catch(() => {});
 
     return NextResponse.json({
       success: true,
