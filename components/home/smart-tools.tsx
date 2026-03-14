@@ -14,6 +14,12 @@ import {
   TrendingUp,
   Home,
   Clock,
+  Zap,
+  BarChart3,
+  ArrowLeftRight,
+  Layers,
+  ChefHat,
+  Bath,
 } from "lucide-react";
 import { useScrollAnimation } from "@/hooks/use-scroll-animation";
 
@@ -164,6 +170,44 @@ export function SmartTools() {
                 </span>
               </div>
             </div>
+          </Link>
+        </div>
+
+        {/* More Tools Grid */}
+        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-12">
+          {[
+            { icon: Zap, title: "Instant ADU Estimator", desc: "Quick price estimates", href: "/tools/instant-adu-estimator" },
+            { icon: DollarSign, title: "ADU Income Calculator", desc: "Rental potential & ROI", href: "/tools/adu-income-calculator" },
+            { icon: BarChart3, title: "ADU ROI Simulator", desc: "Investment projections", href: "/tools/adu-roi-simulator" },
+            { icon: ArrowLeftRight, title: "Compare ADU Sizes", desc: "Side-by-side comparison", href: "/tools/compare-adu-sizes" },
+            { icon: Home, title: "Roof Price Calculator", desc: "Estimate roof costs", href: "/tools/roof-calculator" },
+            { icon: Layers, title: "Concrete Calculator", desc: "Slab & wall estimates", href: "/tools/concrete-calculator" },
+            { icon: ChefHat, title: "Kitchen Calculator", desc: "Remodel cost estimates", href: "/tools/kitchen-calculator" },
+            { icon: Bath, title: "Bathroom Calculator", desc: "Renovation estimates", href: "/tools/bathroom-calculator" },
+            { icon: Wand2, title: "Design Inspiration", desc: "Build your style profile", href: "/tools/adu-design-inspiration" },
+          ].map((tool) => (
+            <Link key={tool.title} href={tool.href} className="group">
+              <div className="bg-white/10 backdrop-blur-lg border border-white/20 rounded-xl p-5 hover:bg-white/15 hover:border-white/30 transition-all duration-300 h-full">
+                <div className="flex items-center gap-4">
+                  <div className="w-10 h-10 rounded-lg bg-primary/20 border border-primary/30 flex items-center justify-center shrink-0">
+                    <tool.icon className="h-5 w-5 text-primary" />
+                  </div>
+                  <div>
+                    <h4 className="text-sm font-bold text-white group-hover:text-primary transition-colors">{tool.title}</h4>
+                    <p className="text-xs text-white/50">{tool.desc}</p>
+                  </div>
+                </div>
+              </div>
+            </Link>
+          ))}
+        </div>
+
+        <div className="text-center mb-12">
+          <Link href="/planning-tools">
+            <Button variant="outlineWhite" rounded="full" className="group">
+              View All Planning Tools
+              <ArrowRight className="h-4 w-4 group-hover:translate-x-1 transition-transform" />
+            </Button>
           </Link>
         </div>
 
