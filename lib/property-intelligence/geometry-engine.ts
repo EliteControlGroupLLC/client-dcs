@@ -798,6 +798,151 @@ function determineSuitableAduTypes(
   return types;
 }
 
+// ─── Intelligent Footprint Merger (OSM + Microsoft) ───
+
+export interface MergedFootprintResult {
+  buildings: Array<{
+    areaSqFt: number;
+    buildingType?: string;
+    nodes: Array<{ lat: number; lon: number }>;
+    levels?: number;
+  }>;
+  source: string;
+  mergeNotes: string[];
+}
+
+/**
+ * Intelligently merge OSM and Microsoft building footprints.
+ * - If only one source has data, use it.
+ * - If both have data, compare and select best polygons per structure.
+ * - Uses overlap detection, shape quality, and area plausibility.
+ */
+export function mergeFootprintSources(
+  osmBuildings: Array<{
+    areaSqFt: number;
+    buildingType?: string;
+    nodes: Array<{ lat: number; lon: number }>;
+    levels?: number;
+  }>,
+  msBuildings: Array<{
+    areaSqFt: number;
+    buildingType?: string;
+    nodes: Array<{ lat: number; lon: number }>;
+    levels?: number;
+  }>,
+  parcelAreaSqFt: number
+): MergedFootprintResult {
+  const notes: string[] = [];
+
+  // Case 1: No data from either source
+  if (osmBuildings.length === 0 && msBuildings.length === 0) {
+    return { buildings: [], source: "none", mergeNotes: ["No footprint data from OSM or Microsoft"] };
+  }
+
+  // Case 2: Only one source has data
+  if (osmBuildings.length === 0) {
+    notes.push(`Using Microsoft footprints only (${msBuildings.length} buildings)`);
+    return { buildings: msBuildings, source: "Microsoft Building Footprints", mergeNotes: notes };
+  }
+  if (msBuildings.length === 0) {
+    notes.push(`Using OSM footprints only (${osmBuildings.length} buildings)`);
+    return { buildings: osmBuildings, source: "OpenStreetMap", mergeNotes: notes };
+  }
+
+  // Case 3: Both sources have data — intelligent merge
+  notes.push(`Merging: OSM has ${osmBuildings.length} buildings, Microsoft has ${msBuildings.length} buildings`);
+
+  // Score each source's overall quality
+  const osmTotalArea = osmBuildings.reduce((s, b) => s + b.areaSqFt, 0);
+  const msTotalArea = msBuildings.reduce((s, b) => s + b.areaSqFt, 0);
+
+  // Plausibility: total footprint should be < 60% of parcel
+  const osmPlausible = osmTotalArea < parcelAreaSqFt * 0.6 && osmTotalArea > 0;
+  const msPlausible = msTotalArea < parcelAreaSqFt * 0.6 && msTotalArea > 0;
+
+  // Shape quality: more nodes = better polygon shape (OSM often has better detail)
+  const osmAvgNodes = osmBuildings.reduce((s, b) => s + b.nodes.length, 0) / osmBuildings.length;
+  const msAvgNodes = msBuildings.reduce((s, b) => s + b.nodes.length, 0) / msBuildings.length;
+
+  // Building type metadata (OSM has richer tagging)
+  const osmHasTypes = osmBuildings.some(b => b.buildingType && b.buildingType !== "yes");
+  const osmHasLevels = osmBuildings.some(b => b.levels && b.levels > 0);
+
+  // Score each source
+  let osmScore = 0;
+  let msScore = 0;
+
+  if (osmPlausible) osmScore += 20; else osmScore -= 10;
+  if (msPlausible) msScore += 20; else msScore -= 10;
+  if (osmAvgNodes > msAvgNodes) osmScore += 10; else msScore += 10;
+  if (osmHasTypes) osmScore += 10;
+  if (osmHasLevels) osmScore += 5;
+
+  // Microsoft footprints have consistent ML quality
+  msScore += 5;
+
+  // More buildings detected = potentially more complete coverage
+  if (osmBuildings.length > msBuildings.length) osmScore += 5;
+  if (msBuildings.length > osmBuildings.length) msScore += 5;
+
+  // Check for overlap: if main buildings are similar area (within 20%), sources agree
+  const osmMain = osmBuildings.reduce((best, b) => b.areaSqFt > best.areaSqFt ? b : best, osmBuildings[0]);
+  const msMain = msBuildings.reduce((best, b) => b.areaSqFt > best.areaSqFt ? b : best, msBuildings[0]);
+  const mainAreaDiff = Math.abs(osmMain.areaSqFt - msMain.areaSqFt) / Math.max(osmMain.areaSqFt, msMain.areaSqFt);
+
+  if (mainAreaDiff < 0.2) {
+    notes.push(`Main building area agrees within ${(mainAreaDiff * 100).toFixed(0)}% — sources consistent`);
+    // Both agree — prefer the one with better polygon quality
+  } else {
+    notes.push(`Main building area differs by ${(mainAreaDiff * 100).toFixed(0)}% — using higher-scoring source`);
+  }
+
+  // Select primary source
+  const usedBuildings = osmScore >= msScore ? osmBuildings : msBuildings;
+  const primarySource = osmScore >= msScore ? "OpenStreetMap" : "Microsoft Building Footprints";
+  const secondarySource = osmScore >= msScore ? "Microsoft Building Footprints" : "OpenStreetMap";
+  const secondaryBuildings = osmScore >= msScore ? msBuildings : osmBuildings;
+
+  notes.push(`Primary: ${primarySource} (score ${Math.max(osmScore, msScore)}), Secondary: ${secondarySource} (score ${Math.min(osmScore, msScore)})`);
+
+  // Check if secondary source detected structures the primary missed
+  // (e.g., a detached garage or ADU that only one source found)
+  const merged = [...usedBuildings];
+
+  if (secondaryBuildings.length > usedBuildings.length) {
+    // Secondary found more buildings — check for unique structures
+    for (const secBuilding of secondaryBuildings) {
+      const hasOverlap = usedBuildings.some(primary => {
+        const areaDiff = Math.abs(primary.areaSqFt - secBuilding.areaSqFt) / Math.max(primary.areaSqFt, secBuilding.areaSqFt);
+        // Check centroid proximity
+        if (primary.nodes.length > 0 && secBuilding.nodes.length > 0) {
+          const pCentLat = primary.nodes.reduce((s, n) => s + n.lat, 0) / primary.nodes.length;
+          const pCentLon = primary.nodes.reduce((s, n) => s + n.lon, 0) / primary.nodes.length;
+          const sCentLat = secBuilding.nodes.reduce((s, n) => s + n.lat, 0) / secBuilding.nodes.length;
+          const sCentLon = secBuilding.nodes.reduce((s, n) => s + n.lon, 0) / secBuilding.nodes.length;
+          const distM = Math.sqrt(
+            Math.pow((pCentLat - sCentLat) * 111320, 2) +
+            Math.pow((pCentLon - sCentLon) * 111320 * Math.cos(pCentLat * Math.PI / 180), 2)
+          );
+          return distM < 15 || areaDiff < 0.3; // Within 15m or similar area
+        }
+        return areaDiff < 0.3;
+      });
+
+      if (!hasOverlap && secBuilding.areaSqFt > 100) {
+        merged.push(secBuilding);
+        notes.push(`Added unique structure from ${secondarySource}: ${secBuilding.areaSqFt} sq ft`);
+      }
+    }
+  }
+
+  return {
+    buildings: merged,
+    source: `${primarySource} + ${secondarySource} (merged)`,
+    mergeNotes: notes,
+  };
+}
+
 // ─── Structure Classification ───
 
 /**

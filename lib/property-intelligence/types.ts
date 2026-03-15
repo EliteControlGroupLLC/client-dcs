@@ -45,6 +45,39 @@ export interface BuildableAnalysis {
   twoStoryPotential: string;
 }
 
+// ─── FinalBuildabilityResult: Single Source of Truth ───
+// All downstream systems (recommendations, banner, financial, report) MUST read from this.
+// When polygon geometry is available, it drives these values.
+// Rectangle fallback is only used when geometry engine fails or confidence is too low.
+
+export interface FinalBuildabilityResult {
+  totalBuildableAreaSqFt: number;
+  bestAduZoneAreaSqFt: number;
+  bestAduZonePolygon: { type: string; coordinates: number[][][] } | null;
+  candidateZones: {
+    polygon: { type: string; coordinates: number[][][] };
+    areaSqFt: number;
+    position: string;
+    buildQuality: number;
+    minWidthFt: number;
+    minDepthFt: number;
+    suitableFor: string[];
+  }[];
+  candidateZoneCount: number;
+  buildabilityConfidence: number;
+  structurePlacementConfidence: number;
+  geometryMethodUsed: "polygon-verified" | "polygon-estimated" | "rectangle-fallback";
+  notes: string[];
+  warnings: string[];
+  // Debug comparison: shows rectangle result alongside polygon result
+  debugComparison?: {
+    rectangleBuildableAreaSqFt: number;
+    polygonBuildableAreaSqFt: number;
+    deltaPercent: number;
+    polygonIsSource: boolean;
+  };
+}
+
 export type FeasibilityLevel = "Likely" | "Possible" | "Limited" | "Not Recommended";
 
 export interface ADURecommendation {
@@ -70,6 +103,7 @@ export interface LotDimensions {
 export interface PropertyAnalysisResult {
   property: PropertyIntelligence;
   buildable: BuildableAnalysis;
+  finalBuildability: FinalBuildabilityResult;
   recommendations: ADURecommendation[];
   bestRecommendation: string;
   smartBanner: SmartBannerData;
@@ -311,6 +345,9 @@ export interface PropertyAnalysisResult {
       adjustedConfidence: number;
     };
   };
+
+  // Footprint merge audit trail (OSM + Microsoft intelligent merge)
+  footprintMergeNotes?: string[];
 
   // v7.1 layers — Microsoft Building Footprints
   microsoftFootprints?: {

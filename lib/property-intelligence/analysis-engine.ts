@@ -47,8 +47,10 @@ import { analyzeSiteConstraints } from "./site-constraint-engine";
 import {
   analyzePropertyGeometry,
   runGeometrySanityChecks,
+  mergeFootprintSources,
   type GeometryAnalysis,
 } from "./geometry-engine";
+import type { FinalBuildabilityResult } from "./types";
 import { reconcileAllSources } from "./source-reconciliation-engine";
 import {
   getMicrosoftBuildingFootprints,
@@ -173,24 +175,29 @@ export async function analyzeProperty(address: string): Promise<PropertyAnalysis
 
   // Step 3d (cont.): v7 — Polygon-based geometry analysis
   // Runs after jurisdiction profile is loaded so we can use real setback values.
-  // Building footprint detection hierarchy:
-  //   1. OSM building polygon vectors (real shape, community-sourced)
-  //   2. Microsoft Building Footprints (ML-derived, high-quality polygons)
-  //   3. ATTOM footprint area (rectangle approximation)
-  //   4. Fallback low-confidence rectangle from estimated lot dimensions
+  // SURGICAL FIX: Intelligent merge of OSM + Microsoft footprints (not OSM-only blocker)
+  let footprintMergeNotes: string[] = [];
   try {
-    let osmBuildings = (osmData?.parcel?.buildings || []).map(b => ({
+    const rawOsmBuildings = (osmData?.parcel?.buildings || []).map(b => ({
       areaSqFt: b.areaSqFt,
       buildingType: b.buildingType,
       nodes: b.nodes,
       levels: b.levels,
     }));
 
-    // If no OSM buildings but Microsoft footprints available, use Microsoft data
-    if (osmBuildings.length === 0 && msFootprints?.available && msFootprints.buildings.length > 0) {
-      osmBuildings = msFootprintsToOSMFormat(msFootprints.buildings);
-      console.log(`[GEOMETRY-ENGINE] Using Microsoft Building Footprints (${msFootprints.buildings.length} buildings) — OSM had no data`);
-    }
+    const rawMsBuildings = msFootprints?.available
+      ? msFootprintsToOSMFormat(msFootprints.buildings)
+      : [];
+
+    // Intelligent merge: both sources contribute, best polygons selected
+    const mergedFootprints = mergeFootprintSources(
+      rawOsmBuildings,
+      rawMsBuildings,
+      rawLotSizeSqFt
+    );
+    const osmBuildings = mergedFootprints.buildings;
+    footprintMergeNotes = mergedFootprints.mergeNotes;
+    console.log(`[FOOTPRINT-MERGE] Source: ${mergedFootprints.source}, buildings: ${osmBuildings.length}, notes: ${mergedFootprints.mergeNotes.join('; ')}`);
 
     geometryAnalysis = analyzePropertyGeometry({
       lat: geocoded?.lat || 0,
@@ -274,10 +281,32 @@ export async function analyzeProperty(address: string): Promise<PropertyAnalysis
     overlayTypes: [],
   });
 
-  // Step 5: Calculate buildable area using jurisdiction-specific setbacks
+  // Step 5: Calculate buildable area
+  // SURGICAL FIX: Rectangle method is retained ONLY as debug fallback.
+  // The polygon engine is the single source of truth for all user-facing buildable area.
   const jSetback = Math.min(profile.setbacks.sideSetbackFt, profile.setbacks.rearSetbackFt);
   const jSeparation = profile.separation.minDistanceFromPrimaryHomeFt;
-  const buildable = calculateBuildableArea(rawLotSizeSqFt, rawFootprintSqFt, jSetback, jSeparation);
+  const rectangleFallback = calculateBuildableArea(rawLotSizeSqFt, rawFootprintSqFt, jSetback, jSeparation);
+
+  // SURGICAL FIX: Build FinalBuildabilityResult — single source of truth
+  const finalBuildability = buildFinalBuildabilityResult(geometryAnalysis, rectangleFallback, rawLotSizeSqFt);
+
+  // GEOMETRY ASSERTION: If polygon geometry exists with valid zones,
+  // user-facing buildable area MUST come from polygon, not rectangle.
+  if (geometryAnalysis && geometryAnalysis.leftoverZones.length > 0 && finalBuildability.geometryMethodUsed === 'rectangle-fallback') {
+    console.error('[GEOMETRY-ASSERTION] BUG: Polygon geometry available with valid zones but rectangle fallback was used. This should not happen.');
+  }
+
+  // The buildable object used downstream — driven by polygon when available
+  const buildable: BuildableAnalysis = {
+    requiredMainHomeSeparationFt: rectangleFallback.requiredMainHomeSeparationFt,
+    requiredPropertyLineSetbackFt: rectangleFallback.requiredPropertyLineSetbackFt,
+    estimatedBuildableEnvelopeSqFt: finalBuildability.totalBuildableAreaSqFt,
+    oneStoryPotential: `Up to ${finalBuildability.totalBuildableAreaSqFt.toLocaleString()} sq ft (${finalBuildability.geometryMethodUsed})`,
+    twoStoryPotential: finalBuildability.totalBuildableAreaSqFt > 400
+      ? `Up to ${Math.min(1200, finalBuildability.totalBuildableAreaSqFt * 1.5).toLocaleString()} sq ft estimated depending on design/review`
+      : 'Limited — lot constraints may restrict two-story options',
+  };
 
   // Step 6: Detect overlays (base detection + Zoneomics enrichment)
   const baseOverlays = detectOverlays(formattedAddress, jurisdictionResult.jurisdictionId, slopePercent);
@@ -538,10 +567,18 @@ export async function analyzeProperty(address: string): Promise<PropertyAnalysis
 
   const adjustedBand: "high" | "moderate" | "low" = adjustedScore >= 85 ? "high" : adjustedScore >= 65 ? "moderate" : "low";
 
-  // Step 13: Generate legacy recommendations (backward compatibility)
-  const recommendations = generateRecommendations(rawLotSizeSqFt, openYard, buildable.estimatedBuildableEnvelopeSqFt);
+  // Step 13: Generate recommendations — SURGICAL FIX: uses polygon-derived buildable area
+  // The buildable.estimatedBuildableEnvelopeSqFt now comes from finalBuildability (polygon when available)
+  const recommendations = generateRecommendations(rawLotSizeSqFt, openYard, finalBuildability.totalBuildableAreaSqFt);
   const bestRec = determineBestRecommendation(recommendations);
   const smartBanner = generateSmartBanner(bestRec, buildable, rawLotSizeSqFt, upsideOpportunities.length > 0);
+
+  // FAIL-CLOSED RULE: If polygon geometry missing or low-confidence,
+  // mark scan as low confidence and warn user
+  if (finalBuildability.geometryMethodUsed === 'rectangle-fallback') {
+    smartBanner.recommendation = `[Estimated] ${smartBanner.recommendation}`;
+    smartBanner.details = `Note: This analysis used simplified geometry (rectangle fallback). Polygon-based analysis was not available. Results should be verified with a professional site review. ${smartBanner.details}`;
+  }
 
   // Build zoning enrichment summary
   const zoningEnrichment = zoneomicsData?.available
@@ -591,6 +628,7 @@ export async function analyzeProperty(address: string): Promise<PropertyAnalysis
   return {
     property: intelligence,
     buildable,
+    finalBuildability,
     recommendations,
     bestRecommendation: bestRec,
     smartBanner,
@@ -684,6 +722,9 @@ export async function analyzeProperty(address: string): Promise<PropertyAnalysis
       quadkey: msFootprints.quadkey,
       source: msFootprints.source,
     } : undefined,
+
+    // Footprint merge audit trail
+    footprintMergeNotes,
 
     // v7.2 layers — LiDAR / Enhanced Terrain Intelligence
     lidarTerrain: lidarTerrain ? {
@@ -792,6 +833,102 @@ function buildRentScenarios(
       premium: { monthlyRent: premiumRent, annualRent: premiumRent * 12 },
     };
   });
+}
+
+// ─── SURGICAL FIX: Build FinalBuildabilityResult ───
+// This is the single source of truth for all downstream systems.
+// When polygon geometry is available, it drives the values.
+// Rectangle fallback is only used when geometry engine fails.
+function buildFinalBuildabilityResult(
+  geometryAnalysis: GeometryAnalysis | null,
+  rectangleFallback: BuildableAnalysis,
+  _lotSizeSqFt: number
+): FinalBuildabilityResult {
+  const notes: string[] = [];
+  const warnings: string[] = [];
+
+  // Case 1: Polygon geometry available with valid candidate zones
+  if (geometryAnalysis && geometryAnalysis.leftoverZones.length > 0 && geometryAnalysis.geometryConfidence > 30) {
+    const bestZone = geometryAnalysis.bestAduZone || geometryAnalysis.leftoverZones[0];
+    const bestZoneArea = Math.min(bestZone.areaSqFt, 1200); // CA ADU max cap
+
+    const methodUsed: FinalBuildabilityResult['geometryMethodUsed'] =
+      geometryAnalysis.geometryStatus === 'polygon-verified' ? 'polygon-verified' : 'polygon-estimated';
+
+    notes.push(`Polygon engine: ${geometryAnalysis.leftoverZones.length} candidate zones found`);
+    notes.push(`Geometry status: ${geometryAnalysis.geometryStatus}, confidence: ${geometryAnalysis.geometryConfidence}%`);
+    notes.push(`Parcel source: ${geometryAnalysis.parcelSource}, footprint source: ${geometryAnalysis.footprintSource}`);
+
+    if (geometryAnalysis.geometryConfidence < 60) {
+      warnings.push('Geometry confidence below 60% — results should be verified with professional site review');
+    }
+
+    // Debug comparison with rectangle method
+    const rectArea = rectangleFallback.estimatedBuildableEnvelopeSqFt;
+    const polyArea = bestZoneArea;
+    const deltaPercent = rectArea > 0 ? Math.round(((polyArea - rectArea) / rectArea) * 100) : 0;
+
+    return {
+      totalBuildableAreaSqFt: bestZoneArea,
+      bestAduZoneAreaSqFt: bestZoneArea,
+      bestAduZonePolygon: bestZone.polygon,
+      candidateZones: geometryAnalysis.leftoverZones.map(z => ({
+        polygon: z.polygon,
+        areaSqFt: z.areaSqFt,
+        position: z.position,
+        buildQuality: z.buildQuality,
+        minWidthFt: z.minWidthFt,
+        minDepthFt: z.minDepthFt,
+        suitableFor: z.suitableFor,
+      })),
+      candidateZoneCount: geometryAnalysis.leftoverZones.length,
+      buildabilityConfidence: geometryAnalysis.geometryConfidence,
+      structurePlacementConfidence: geometryAnalysis.placement?.confidence || 0,
+      geometryMethodUsed: methodUsed,
+      notes,
+      warnings,
+      debugComparison: {
+        rectangleBuildableAreaSqFt: rectArea,
+        polygonBuildableAreaSqFt: polyArea,
+        deltaPercent,
+        polygonIsSource: true,
+      },
+    };
+  }
+
+  // Case 2: Geometry engine ran but no valid zones (e.g., lot too small, all zones below threshold)
+  if (geometryAnalysis && geometryAnalysis.leftoverZones.length === 0) {
+    warnings.push('Polygon geometry engine found no suitable ADU zones');
+    warnings.push('Falling back to rectangle estimation — manual review recommended');
+    notes.push(`Geometry ran but no zones: status=${geometryAnalysis.geometryStatus}, confidence=${geometryAnalysis.geometryConfidence}%`);
+  }
+
+  // Case 3: Geometry engine not available — rectangle fallback
+  if (!geometryAnalysis) {
+    warnings.push('Polygon geometry engine not available — using rectangle fallback estimate');
+    warnings.push('This is a low-confidence estimate. Manual review recommended.');
+  }
+
+  const fallbackArea = rectangleFallback.estimatedBuildableEnvelopeSqFt;
+
+  return {
+    totalBuildableAreaSqFt: fallbackArea,
+    bestAduZoneAreaSqFt: fallbackArea,
+    bestAduZonePolygon: null,
+    candidateZones: [],
+    candidateZoneCount: 0,
+    buildabilityConfidence: Math.min(40, geometryAnalysis?.geometryConfidence || 25),
+    structurePlacementConfidence: 0,
+    geometryMethodUsed: 'rectangle-fallback',
+    notes,
+    warnings,
+    debugComparison: {
+      rectangleBuildableAreaSqFt: fallbackArea,
+      polygonBuildableAreaSqFt: 0,
+      deltaPercent: 0,
+      polygonIsSource: false,
+    },
+  };
 }
 
 function calculateBuildableArea(
