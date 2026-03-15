@@ -40,7 +40,7 @@ export async function GET(request: NextRequest) {
   // 3. Cron Configuration
   const cronConfig = {
     regulationScan: { path: "/api/regulation-scan", schedule: "0 6 * * 1", description: "Weekly regulation scan (Mondays 6am UTC)" },
-    systemHealth: { path: "/api/system-health", schedule: "0 */6 * * *", description: "System health check every 6 hours" },
+    systemHealth: { path: "/api/system-health", schedule: "0 12 * * *", description: "Daily system health check (12pm UTC)" },
   };
 
   // 4. Environment Info
