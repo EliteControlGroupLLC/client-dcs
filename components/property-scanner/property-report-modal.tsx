@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { X, Download, FileText, Building, DollarSign, MapPin, Shield, TrendingUp } from "lucide-react";
+import { X, Download, FileText, Building, DollarSign, MapPin, Shield, TrendingUp, AlertTriangle, Home } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import type { PropertyAnalysisResult } from "@/lib/property-intelligence";
 
@@ -126,14 +126,53 @@ export function PropertyReportModal({
             </ReportSection>
           )}
 
+          {/* Rent Scenarios */}
+          {analysisData.rentScenarios && analysisData.rentScenarios.length > 0 && (
+            <ReportSection icon={DollarSign} title="Rent Scenarios">
+              {analysisData.rentScenarios.map((rs) => (
+                <div key={rs.aduType} className="mb-3 last:mb-0">
+                  <p className="text-xs font-semibold text-secondary mb-1 capitalize">{rs.aduType.replace(/-/g, " ")}</p>
+                  <div className="grid grid-cols-3 gap-1">
+                    <ReportRow label="Conservative" value={`$${rs.conservative.monthlyRent.toLocaleString()}/mo`} />
+                    <ReportRow label="Market" value={`$${rs.market.monthlyRent.toLocaleString()}/mo`} />
+                    <ReportRow label="Premium" value={`$${rs.premium.monthlyRent.toLocaleString()}/mo`} />
+                  </div>
+                </div>
+              ))}
+            </ReportSection>
+          )}
+
+          {/* Detected Structures */}
+          {analysisData.detectedStructures && analysisData.detectedStructures.length > 1 && (
+            <ReportSection icon={Home} title="Detected Structures">
+              {analysisData.detectedStructures.map((s, i) => (
+                <ReportRow key={`${s.type}-${i}`} label={s.type} value={`${s.areaSqFt.toLocaleString()} sq ft (${s.confidence}% conf.)`} />
+              ))}
+            </ReportSection>
+          )}
+
           {/* Confidence */}
           {analysisData.confidenceScore !== undefined && (
             <ReportSection icon={Shield} title="Confidence Score">
               <ReportRow label="Score" value={`${analysisData.confidenceScore}%`} />
-              <ReportRow label="Band" value={analysisData.confidenceBand || "—"} />
+              <ReportRow label="Band" value={analysisData.confidenceBand || "\u2014"} />
               {analysisData.manualReviewRequired && (
                 <p className="text-[11px] text-amber-600 mt-1">Manual review recommended</p>
               )}
+            </ReportSection>
+          )}
+
+          {/* Data Quality */}
+          {analysisData.sanityChecks && !analysisData.sanityChecks.passed && (
+            <ReportSection icon={AlertTriangle} title="Data Quality Notes">
+              {analysisData.sanityChecks.checks
+                .filter((c) => !c.passed)
+                .map((c) => (
+                  <div key={c.name} className="flex items-start gap-1.5 mb-1 last:mb-0">
+                    <span className={`text-[10px] mt-0.5 ${c.severity === "error" ? "text-red-500" : "text-amber-500"}`}>\u25CF</span>
+                    <p className="text-[11px] text-muted-foreground">{c.message}</p>
+                  </div>
+                ))}
             </ReportSection>
           )}
 
@@ -243,8 +282,38 @@ function generateReportText(
     lines.push("");
   }
 
+  // Rent Scenarios
+  if (data.rentScenarios && data.rentScenarios.length > 0) {
+    lines.push("─── RENT SCENARIOS ───");
+    for (const rs of data.rentScenarios) {
+      lines.push(`  ${rs.aduType.replace(/-/g, " ")}:`);
+      lines.push(`    Conservative: $${rs.conservative.monthlyRent.toLocaleString()}/mo ($${rs.conservative.annualRent.toLocaleString()}/yr)`);
+      lines.push(`    Market:       $${rs.market.monthlyRent.toLocaleString()}/mo ($${rs.market.annualRent.toLocaleString()}/yr)`);
+      lines.push(`    Premium:      $${rs.premium.monthlyRent.toLocaleString()}/mo ($${rs.premium.annualRent.toLocaleString()}/yr)`);
+    }
+    lines.push("");
+  }
+
+  // Detected Structures
+  if (data.detectedStructures && data.detectedStructures.length > 1) {
+    lines.push("─── DETECTED STRUCTURES ───");
+    for (const s of data.detectedStructures) {
+      lines.push(`  ${s.type}: ${s.areaSqFt.toLocaleString()} sq ft (${s.confidence}% confidence)`);
+    }
+    lines.push("");
+  }
+
   if (data.confidenceScore !== undefined) {
     lines.push(`Confidence Score: ${data.confidenceScore}% (${data.confidenceBand})`);
+    lines.push("");
+  }
+
+  // Data Quality
+  if (data.sanityChecks && !data.sanityChecks.passed) {
+    lines.push("─── DATA QUALITY NOTES ───");
+    for (const c of data.sanityChecks.checks.filter((ch) => !ch.passed)) {
+      lines.push(`  [${c.severity.toUpperCase()}] ${c.message}`);
+    }
     lines.push("");
   }
 

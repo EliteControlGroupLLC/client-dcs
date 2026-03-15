@@ -42,6 +42,7 @@ import {
   type RentEstimate,
 } from "./rentcast-service";
 import type { OverlayDetection } from "./jurisdictions/types";
+import { runSanityChecks } from "./sanity-check-engine";
 
 export async function analyzeProperty(address: string): Promise<PropertyAnalysisResult> {
   // Step 1: Geocode the address (Google Places API)
@@ -83,7 +84,60 @@ export async function analyzeProperty(address: string): Promise<PropertyAnalysis
     attomData
   );
 
-  const { intelligence, rawLotSizeSqFt, rawFootprintSqFt } = resolved;
+  let { intelligence, rawLotSizeSqFt, rawFootprintSqFt } = resolved;
+
+  // Step 3b: Run sanity checks before proceeding
+  const sanityResult = runSanityChecks({
+    lotSizeSqFt: rawLotSizeSqFt,
+    footprintSqFt: rawFootprintSqFt,
+    homeAreaSqFt: intelligence.homeAreaSqFt.value,
+    openYardSqFt: intelligence.openYardSqFt.value,
+    lotWidth: 0, // computed later
+    lotDepth: 0,
+    zoning: intelligence.zoning.value,
+    slope: intelligence.slope.value,
+    parcelShape: intelligence.parcelShape.value,
+    hasAttomData: attomData?.available === true,
+    hasOsmData: osmData?.parcel !== null && osmData?.parcel !== undefined,
+    hasGeocoded: Boolean(geocoded),
+  });
+
+  // Apply sanity adjustments
+  for (const adj of sanityResult.adjustments) {
+    if (adj.field === "footprintSqFt") {
+      rawFootprintSqFt = adj.adjustedValue;
+      console.warn(`[SANITY-CHECK] Adjusted footprint: ${adj.originalValue} -> ${adj.adjustedValue} (${adj.reason})`);
+    }
+  }
+
+  if (!sanityResult.passed) {
+    const failures = sanityResult.checks.filter((c) => !c.passed && c.severity === "error");
+    for (const f of failures) {
+      console.warn(`[SANITY-CHECK] FAILED: ${f.name} — ${f.message}`);
+    }
+  }
+
+  // Step 3c: Multi-structure detection from OSM data
+  const detectedStructures: { type: string; areaSqFt: number; confidence: number }[] = [];
+  if (osmData?.parcel && osmData.parcel.buildings.length > 0) {
+    const sorted = [...osmData.parcel.buildings].sort((a, b) => b.areaSqFt - a.areaSqFt);
+    for (let i = 0; i < sorted.length; i++) {
+      const b = sorted[i];
+      let structureType = "accessory structure";
+      if (i === 0) {
+        structureType = "main residence";
+      } else if (b.buildingType === "garage" || (b.areaSqFt >= 200 && b.areaSqFt <= 500)) {
+        structureType = "detached garage";
+      } else if (b.buildingType === "yes" && b.areaSqFt >= 400 && b.areaSqFt <= 1200) {
+        structureType = "possible detached ADU";
+      }
+      detectedStructures.push({
+        type: structureType,
+        areaSqFt: b.areaSqFt,
+        confidence: i === 0 ? 80 : 60,
+      });
+    }
+  }
 
   // Step 4: Detect jurisdiction
   const formattedAddress = geocoded?.formattedAddress || address;
@@ -290,6 +344,16 @@ export async function analyzeProperty(address: string): Promise<PropertyAnalysis
     additionalPositiveSignals.push("Mapbox parcel visualization available");
   }
 
+  // Apply sanity check confidence adjustment
+  if (sanityResult.overallConfidenceAdjustment !== 0) {
+    adjustedScore = Math.max(0, Math.min(100, adjustedScore + sanityResult.overallConfidenceAdjustment));
+    if (sanityResult.overallConfidenceAdjustment < 0) {
+      additionalNegativeSignals.push(`Data quality issues detected (${sanityResult.checks.filter((c) => !c.passed).length} checks flagged)`);
+    } else {
+      additionalPositiveSignals.push("Multi-source data cross-validation passed");
+    }
+  }
+
   const adjustedBand: "high" | "moderate" | "low" = adjustedScore >= 85 ? "high" : adjustedScore >= 65 ? "moderate" : "low";
 
   // Step 13: Generate legacy recommendations (backward compatibility)
@@ -413,7 +477,40 @@ export async function analyzeProperty(address: string): Promise<PropertyAnalysis
       rentCast: isRentCastAvailable(),
       mapbox: isMapboxAvailable(),
     },
+
+    // v4 layers — Architecture enhancements
+    sanityChecks: {
+      passed: sanityResult.passed,
+      checks: sanityResult.checks,
+      adjustments: sanityResult.adjustments,
+    },
+    detectedStructures: detectedStructures.length > 0 ? detectedStructures : undefined,
+    rentScenarios: buildRentScenarios(rentEstimates),
+    imageryWarning: "Aerial imagery may not reflect recent construction or site changes. A professional site visit is recommended to verify current conditions.",
   };
+}
+
+/** Build conservative / market / premium rent scenarios from RentCast data */
+function buildRentScenarios(
+  rentEstimates?: Map<string, RentEstimate>
+): { conservative: { monthlyRent: number; annualRent: number }; market: { monthlyRent: number; annualRent: number }; premium: { monthlyRent: number; annualRent: number }; source: "rentcast" | "estimated"; aduType: string }[] | undefined {
+  if (!rentEstimates || rentEstimates.size === 0) return undefined;
+
+  return Array.from(rentEstimates.entries()).map(([type, est]) => {
+    const marketRent = est.estimatedMonthlyRent;
+    // Conservative: use low end of range or 85% of market
+    const conservativeRent = est.rentRangeLow > 0 ? est.rentRangeLow : Math.round(marketRent * 0.85);
+    // Premium: use high end of range or 115% of market
+    const premiumRent = est.rentRangeHigh > 0 ? est.rentRangeHigh : Math.round(marketRent * 1.15);
+
+    return {
+      aduType: type,
+      source: est.source,
+      conservative: { monthlyRent: conservativeRent, annualRent: conservativeRent * 12 },
+      market: { monthlyRent: marketRent, annualRent: marketRent * 12 },
+      premium: { monthlyRent: premiumRent, annualRent: premiumRent * 12 },
+    };
+  });
 }
 
 function calculateBuildableArea(
