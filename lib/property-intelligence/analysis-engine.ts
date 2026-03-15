@@ -44,6 +44,18 @@ import {
 import type { OverlayDetection } from "./jurisdictions/types";
 import { runSanityChecks } from "./sanity-check-engine";
 import { analyzeSiteConstraints } from "./site-constraint-engine";
+import {
+  analyzePropertyGeometry,
+  runGeometrySanityChecks,
+  type GeometryAnalysis,
+} from "./geometry-engine";
+import { reconcileAllSources } from "./source-reconciliation-engine";
+import {
+  getMicrosoftBuildingFootprints,
+  msFootprintsToOSMFormat,
+  type MSFootprintResult,
+} from "./microsoft-footprint-service";
+import { analyzeLiDARTerrain, type LiDARTerrainResult } from "./lidar-elevation-service";
 
 export async function analyzeProperty(address: string): Promise<PropertyAnalysisResult> {
   // Step 1: Geocode the address (Google Places API)
@@ -52,27 +64,37 @@ export async function analyzeProperty(address: string): Promise<PropertyAnalysis
     console.error(`[PROVIDER-ERROR] Google Places: geocoding failed for address "${address}"`);
   }
 
-  // Step 2: Get ATTOM data, elevation/slope data, OSM data, AND Zoneomics data in parallel
+  // Step 2: Get ATTOM data, elevation/slope data, OSM data, Zoneomics data, AND Microsoft footprints in parallel
   let slopeData: { slope: string; confidence: number; sources: string[] } | undefined;
   let osmData: Awaited<ReturnType<typeof getOSMPropertyData>> | undefined;
   let zoneomicsData: ZoneomicsZoningData | undefined;
+  let msFootprints: MSFootprintResult | undefined;
+  let lidarTerrain: LiDARTerrainResult | undefined;
   const attomData = await getAttomPropertyData(address);
   if (!attomData.available) {
     console.error(`[PROVIDER-ERROR] ATTOM Property: no data returned for address "${address}"`);
   }
 
   if (geocoded) {
-    const [slope, osm, zoneomics] = await Promise.all([
+    const [slope, osm, zoneomics, msBuildings] = await Promise.all([
       getElevationData(geocoded.lat, geocoded.lng),
       getOSMPropertyData(geocoded.lat, geocoded.lng),
       getZoneomicsData(geocoded.lat, geocoded.lng),
+      getMicrosoftBuildingFootprints(geocoded.lat, geocoded.lng).catch((err) => {
+        console.error(`[PROVIDER-ERROR] Microsoft Building Footprints: ${err}`);
+        return undefined;
+      }),
     ]);
     slopeData = slope;
     osmData = osm;
     zoneomicsData = zoneomics;
+    msFootprints = msBuildings;
 
     if (!zoneomics.available) {
       console.error(`[PROVIDER-ERROR] Zoneomics: no zoning data returned for (${geocoded.lat}, ${geocoded.lng})`);
+    }
+    if (msFootprints?.available) {
+      console.log(`[MS-FOOTPRINTS] Found ${msFootprints.buildings.length} buildings, total ${msFootprints.totalFootprintSqFt} sq ft`);
     }
   }
 
@@ -85,7 +107,8 @@ export async function analyzeProperty(address: string): Promise<PropertyAnalysis
     attomData
   );
 
-  let { intelligence, rawLotSizeSqFt, rawFootprintSqFt } = resolved;
+  const { intelligence } = resolved;
+  let { rawLotSizeSqFt, rawFootprintSqFt } = resolved;
 
   // Step 3b: Run sanity checks before proceeding
   const sanityResult = runSanityChecks({
@@ -140,15 +163,96 @@ export async function analyzeProperty(address: string): Promise<PropertyAnalysis
     }
   }
 
+  // Step 3d declaration — geometry analysis runs after jurisdiction profile is loaded (Step 4)
+  let geometryAnalysis: GeometryAnalysis | null = null;
+
   // Step 4: Detect jurisdiction
   const formattedAddress = geocoded?.formattedAddress || address;
   const jurisdictionResult = detectJurisdictionFromAddress(formattedAddress);
   const profile = jurisdictionResult.profile;
 
+  // Step 3d (cont.): v7 — Polygon-based geometry analysis
+  // Runs after jurisdiction profile is loaded so we can use real setback values.
+  // Building footprint detection hierarchy:
+  //   1. OSM building polygon vectors (real shape, community-sourced)
+  //   2. Microsoft Building Footprints (ML-derived, high-quality polygons)
+  //   3. ATTOM footprint area (rectangle approximation)
+  //   4. Fallback low-confidence rectangle from estimated lot dimensions
+  try {
+    let osmBuildings = (osmData?.parcel?.buildings || []).map(b => ({
+      areaSqFt: b.areaSqFt,
+      buildingType: b.buildingType,
+      nodes: b.nodes,
+      levels: b.levels,
+    }));
+
+    // If no OSM buildings but Microsoft footprints available, use Microsoft data
+    if (osmBuildings.length === 0 && msFootprints?.available && msFootprints.buildings.length > 0) {
+      osmBuildings = msFootprintsToOSMFormat(msFootprints.buildings);
+      console.log(`[GEOMETRY-ENGINE] Using Microsoft Building Footprints (${msFootprints.buildings.length} buildings) — OSM had no data`);
+    }
+
+    geometryAnalysis = analyzePropertyGeometry({
+      lat: geocoded?.lat || 0,
+      lng: geocoded?.lng || 0,
+      attomLotSizeSqFt: attomData?.lotSizeSqFt || null,
+      attomLotWidth: attomData?.lotWidth || null,
+      attomLotDepth: attomData?.lotDepth || null,
+      attomFootprintSqFt: attomData?.footprintSqFt || null,
+      attomLivingAreaSqFt: attomData?.homeAreaSqFt || null,
+      attomStories: attomData?.stories || null,
+      osmBuildings,
+      osmBoundingBox: osmData?.boundingBox || null,
+      frontSetbackFt: 15,
+      rearSetbackFt: profile.setbacks.rearSetbackFt,
+      sideSetbackFt: profile.setbacks.sideSetbackFt,
+      separationFt: profile.separation.minDistanceFromPrimaryHomeFt,
+    });
+
+    const geoSanity = runGeometrySanityChecks(
+      geometryAnalysis,
+      attomData?.homeAreaSqFt || intelligence.homeAreaSqFt.value
+    );
+
+    (geometryAnalysis as GeometryAnalysis & { sanityChecks?: typeof geoSanity }).sanityChecks = geoSanity;
+
+    if (geometryAnalysis.areaSummary.mainFootprintSqFt > 0 && geometryAnalysis.geometryConfidence > 60) {
+      rawFootprintSqFt = geometryAnalysis.areaSummary.mainFootprintSqFt;
+    }
+    if (geometryAnalysis.areaSummary.parcelSqFt > 0 && geometryAnalysis.geometryConfidence > 60) {
+      rawLotSizeSqFt = geometryAnalysis.areaSummary.parcelSqFt;
+    }
+
+    console.log(`[GEOMETRY-ENGINE] Status: ${geometryAnalysis.geometryStatus}, confidence: ${geometryAnalysis.geometryConfidence}%, structures: ${geometryAnalysis.structures.length}`);
+  } catch (err) {
+    console.error("[GEOMETRY-ENGINE] Failed to run geometry analysis:", err);
+  }
+
+  // Step 4a.5: LiDAR / Enhanced Terrain Analysis
+  // Runs after geometry analysis to use real lot dimensions when available
+  if (geocoded) {
+    try {
+      const estLotWidth = attomData?.lotWidth || Math.round(Math.sqrt(rawLotSizeSqFt * 0.5));
+      const estLotDepth = attomData?.lotDepth || Math.round(rawLotSizeSqFt / estLotWidth);
+      const estAduFootprint = geometryAnalysis?.bestAduZone?.areaSqFt || 800;
+      lidarTerrain = await analyzeLiDARTerrain(
+        geocoded.lat, geocoded.lng, estLotWidth, estLotDepth, estAduFootprint
+      );
+      if (lidarTerrain.lidarAvailable) {
+        console.log(`[LIDAR-TERRAIN] LiDAR data available, ${lidarTerrain.terrainProfile.sampleCount} samples, slope: ${lidarTerrain.slopeAnalysis.averageSlopePercent}%`);
+      }
+    } catch (err) {
+      console.error("[LIDAR-TERRAIN] Failed to run LiDAR terrain analysis:", err);
+    }
+  }
+
   // Step 4b: Slope percent extraction for constraint analysis
   const slopeStr = intelligence.slope.value;
   let slopePercent: number = 0;
-  if (slopeStr === "Steep slope" || slopeStr === "Steep") slopePercent = 20;
+  // Use LiDAR slope data if available (higher resolution than Google Elevation basic)
+  if (lidarTerrain && lidarTerrain.confidence > 50) {
+    slopePercent = lidarTerrain.slopeAnalysis.averageSlopePercent;
+  } else if (slopeStr === "Steep slope" || slopeStr === "Steep") slopePercent = 20;
   else if (slopeStr === "Moderate slope" || slopeStr === "Moderate") slopePercent = 10;
   else if (slopeStr === "Mostly flat") slopePercent = 3;
   else if (slopeStr === "Flat") slopePercent = 1;
@@ -312,25 +416,48 @@ export async function analyzeProperty(address: string): Promise<PropertyAnalysis
   }
 
   // Step 11: Generate Mapbox parcel visualization
+  // v7: Use real polygon shapes from geometry analysis when available
   let parcelVisualization: ParcelVisualization | undefined;
   let staticMapUrl: string | null = null;
 
   if (geocoded) {
-    const mvHomeWidth = Math.round(Math.sqrt(rawFootprintSqFt * 0.7));
-    const mvHomeDepth = Math.round(rawFootprintSqFt / mvHomeWidth);
+    if (geometryAnalysis && geometryAnalysis.geometryConfidence > 40) {
+      // v7: Build visualization from real polygon geometry
+      parcelVisualization = {
+        parcelBoundary: geometryAnalysis.parcelPolygon,
+        structureFootprint: geometryAnalysis.mainStructure?.polygon || null,
+        setbackLines: [],
+        buildableEnvelope: geometryAnalysis.setbackEnvelope,
+        detachedCandidateZones: geometryAnalysis.leftoverZones
+          .filter(z => z.suitableFor.some(s => s.includes("ADU")))
+          .map(z => z.polygon),
+        attachedCandidateZones: [],
+        conversionCandidateZones: geometryAnalysis.garageConversionCandidate
+          ? [geometryAnalysis.garageConversionCandidate.polygon]
+          : [],
+        uncertaintyShading: geometryAnalysis.geometryStatus === "rectangle-fallback"
+          ? geometryAnalysis.parcelPolygon
+          : null,
+        geometryConfidence: geometryAnalysis.geometryConfidence,
+      };
+    } else {
+      // Fallback: estimated rectangular polygons
+      const mvHomeWidth = Math.round(Math.sqrt(rawFootprintSqFt * 0.7));
+      const mvHomeDepth = Math.round(rawFootprintSqFt / mvHomeWidth);
 
-    parcelVisualization = generateParcelVisualization(
-      geocoded.lat,
-      geocoded.lng,
-      lotWidth,
-      lotDepth,
-      mvHomeWidth,
-      mvHomeDepth,
-      profile.setbacks.sideSetbackFt,
-      profile.setbacks.rearSetbackFt,
-      15, // front setback estimate
-      profile.separation.minDistanceFromPrimaryHomeFt
-    );
+      parcelVisualization = generateParcelVisualization(
+        geocoded.lat,
+        geocoded.lng,
+        lotWidth,
+        lotDepth,
+        mvHomeWidth,
+        mvHomeDepth,
+        profile.setbacks.sideSetbackFt,
+        profile.setbacks.rearSetbackFt,
+        15,
+        profile.separation.minDistanceFromPrimaryHomeFt
+      );
+    }
 
     staticMapUrl = getStaticMapUrl(geocoded.lat, geocoded.lng);
   }
@@ -393,6 +520,19 @@ export async function analyzeProperty(address: string): Promise<PropertyAnalysis
       additionalNegativeSignals.push(`Data quality issues detected (${sanityResult.checks.filter((c) => !c.passed).length} checks flagged)`);
     } else {
       additionalPositiveSignals.push("Multi-source data cross-validation passed");
+    }
+  }
+
+  // v7: Apply geometry confidence signals
+  if (geometryAnalysis) {
+    if (geometryAnalysis.geometryStatus === "polygon-verified") {
+      adjustedScore = Math.min(100, adjustedScore + 4);
+      additionalPositiveSignals.push("Polygon-verified building footprints from OSM");
+    } else if (geometryAnalysis.geometryStatus === "polygon-estimated") {
+      adjustedScore = Math.min(100, adjustedScore + 2);
+      additionalPositiveSignals.push("Estimated polygon footprints from ATTOM data");
+    } else {
+      additionalNegativeSignals.push("Rectangle-fallback geometry — low confidence placement");
     }
   }
 
@@ -518,6 +658,8 @@ export async function analyzeProperty(address: string): Promise<PropertyAnalysis
       zoneomics: zoneomicsData?.available === true,
       rentCast: isRentCastAvailable(),
       mapbox: isMapboxAvailable(),
+      microsoftFootprints: msFootprints?.available === true,
+      lidar: lidarTerrain?.lidarAvailable === true,
     },
 
     // v4 layers — Architecture enhancements
@@ -532,6 +674,100 @@ export async function analyzeProperty(address: string): Promise<PropertyAnalysis
 
     // v5 layers — Site Constraint Intelligence
     siteConstraints,
+
+    // v7.1 layers — Microsoft Building Footprints
+    microsoftFootprints: msFootprints?.available ? {
+      buildingCount: msFootprints.buildings.length,
+      totalFootprintSqFt: msFootprints.totalFootprintSqFt,
+      mainBuildingSqFt: msFootprints.mainBuilding?.areaSqFt || null,
+      confidence: msFootprints.confidence,
+      quadkey: msFootprints.quadkey,
+      source: msFootprints.source,
+    } : undefined,
+
+    // v7.2 layers — LiDAR / Enhanced Terrain Intelligence
+    lidarTerrain: lidarTerrain ? {
+      slopeAnalysis: lidarTerrain.slopeAnalysis,
+      gradingEstimate: lidarTerrain.gradingEstimate,
+      foundationRecommendation: lidarTerrain.foundationRecommendation,
+      lidarAvailable: lidarTerrain.lidarAvailable,
+      sources: lidarTerrain.sources,
+      confidence: lidarTerrain.confidence,
+      summary: lidarTerrain.summary,
+    } : undefined,
+
+    // v6 layers — Source Cross-Reference & Reconciliation
+    sourceAudit: reconcileAllSources({
+      rawAddress: address,
+      geocodedAddress: geocoded?.formattedAddress || null,
+      attomData: attomData || null,
+      osmData: osmData || null,
+      zoneomicsData: zoneomicsData || null,
+      rentEstimates: rentEstimates || null,
+      slopeData: slopeData ? { slope: slopeData.slope, confidence: slopeData.confidence, sources: slopeData.sources } : null,
+      resolvedLotSizeSqFt: rawLotSizeSqFt,
+      resolvedHomeAreaSqFt: intelligence.homeAreaSqFt.value,
+      resolvedFootprintSqFt: rawFootprintSqFt,
+      resolvedOpenYardSqFt: intelligence.openYardSqFt.value,
+      resolvedZoning: intelligence.zoning.value,
+      resolvedParcelShape: intelligence.parcelShape.value,
+      resolvedApn: intelligence.apn.value,
+      bestRecommendation: bestRec,
+      geometryStatus: geometryAnalysis?.geometryStatus,
+      parcelSource: geometryAnalysis?.parcelSource,
+      footprintSource: geometryAnalysis?.footprintSource,
+      placementMethod: geometryAnalysis?.placement?.placementMethod,
+      geometryConfidence: geometryAnalysis?.geometryConfidence,
+    }),
+
+    // v7 layers — Polygon Geometry & Source Backbone
+    geometryAnalysis: geometryAnalysis ? {
+      parcelPolygon: geometryAnalysis.parcelPolygon,
+      structures: geometryAnalysis.structures.map(s => ({
+        classification: s.classification,
+        polygon: s.polygon,
+        areaSqFt: s.areaSqFt,
+        centroid: s.centroid,
+        confidence: s.confidence,
+        source: s.source,
+        levels: s.levels,
+      })),
+      placement: geometryAnalysis.placement ? {
+        measuredSetbacks: geometryAnalysis.placement.measuredSetbacks,
+        fitsWithinParcel: geometryAnalysis.placement.fitsWithinParcel,
+        confidence: geometryAnalysis.placement.confidence,
+        placementMethod: geometryAnalysis.placement.placementMethod,
+      } : null,
+      setbackEnvelope: geometryAnalysis.setbackEnvelope,
+      leftoverZones: geometryAnalysis.leftoverZones.map(z => ({
+        polygon: z.polygon,
+        areaSqFt: z.areaSqFt,
+        position: z.position,
+        buildQuality: z.buildQuality,
+        minWidthFt: z.minWidthFt,
+        minDepthFt: z.minDepthFt,
+        suitableFor: z.suitableFor,
+      })),
+      bestAduZoneIndex: geometryAnalysis.bestAduZone
+        ? geometryAnalysis.leftoverZones.indexOf(geometryAnalysis.bestAduZone)
+        : null,
+      attachedCandidateWalls: geometryAnalysis.attachedCandidateWalls,
+      garageConversionCandidate: geometryAnalysis.garageConversionCandidate ? {
+        classification: geometryAnalysis.garageConversionCandidate.classification,
+        areaSqFt: geometryAnalysis.garageConversionCandidate.areaSqFt,
+        confidence: geometryAnalysis.garageConversionCandidate.confidence,
+      } : null,
+      geometryConfidence: geometryAnalysis.geometryConfidence,
+      geometryStatus: geometryAnalysis.geometryStatus,
+      parcelSource: geometryAnalysis.parcelSource,
+      footprintSource: geometryAnalysis.footprintSource,
+      areaSummary: geometryAnalysis.areaSummary,
+      geometrySanityChecks: {
+        passed: true,
+        checks: [],
+        adjustedConfidence: geometryAnalysis.geometryConfidence,
+      },
+    } : undefined,
   };
 }
 

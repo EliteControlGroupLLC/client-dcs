@@ -53,10 +53,73 @@ export type {
   SmartBannerData,
   LotDimensions,
   SourceTier,
+  SourcePolicy,
   DataSource,
+  FieldVerificationStatus,
+  SourceCandidate,
+  ReconciledField,
+  SourceAudit,
+  DiscrepancyRecord,
 } from "./types";
 
 export { getConfidenceStatus, formatFieldValue } from "./types";
+
+// v7 — Geometry Engine
+export {
+  analyzePropertyGeometry,
+  runGeometrySanityChecks,
+  geoPolygonAreaSqFt,
+  measureSetbacksToParcel,
+  classifyStructures,
+  createRectPolygon,
+  osmNodesToPolygon,
+} from "./geometry-engine";
+export type {
+  GeometryAnalysis,
+  GeometryInput,
+  GeometryPolygon,
+  DetectedStructure,
+  StructureClassification,
+  SetbackDistances,
+  ParcelPlacement,
+  LeftoverZone,
+  BoundingBox,
+  GeometrySanityResult,
+} from "./geometry-engine";
+
+// v6 — Source Reconciliation Engine
+export { reconcileAllSources } from "./source-reconciliation-engine";
+export type { ReconciliationInput } from "./source-reconciliation-engine";
+
+// v7.1 — Microsoft Building Footprint Service
+export {
+  getMicrosoftBuildingFootprints,
+  msFootprintsToOSMFormat,
+  latLngToQuadkey,
+} from "./microsoft-footprint-service";
+export type { MSBuildingFootprint, MSFootprintResult } from "./microsoft-footprint-service";
+
+// v7.2 — LiDAR / Enhanced Terrain Intelligence
+export { analyzeLiDARTerrain } from "./lidar-elevation-service";
+export type {
+  LiDARTerrainResult,
+  TerrainProfile,
+  SlopeAnalysis,
+  GradingEstimate,
+  FoundationRecommendation,
+} from "./lidar-elevation-service";
+
+// v7.3 — Benchmark Testing System
+export {
+  runBenchmarkSuite,
+  runSingleBenchmark,
+  getBenchmarkProperties,
+} from "./benchmark-testing-service";
+export type {
+  BenchmarkProperty,
+  BenchmarkResult,
+  BenchmarkSuiteResult,
+} from "./benchmark-testing-service";
 
 // Data model types
 export type {
