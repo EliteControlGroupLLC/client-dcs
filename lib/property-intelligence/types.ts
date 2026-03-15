@@ -237,6 +237,54 @@ export interface PropertyAnalysisResult {
     aduType: string;
   }[];
   imageryWarning?: string;
+
+  // v5 layers — Site Constraint Intelligence
+  siteConstraints?: {
+    constraints: {
+      category: "flood" | "fire" | "terrain" | "coastal" | "easement";
+      classification: string;
+      severity: "none" | "low" | "moderate" | "high" | "very-high";
+      constructionImpact: string;
+      recommendation: string;
+      confidence: number;
+      source: string;
+    }[];
+    floodRisk: {
+      floodZone: string;
+      floodRisk: string;
+      baseFloodElevation: string | null;
+      developmentRestrictions: string;
+    };
+    fireHazard: {
+      hazardZone: string;
+      classification: string;
+      constructionImplications: string;
+    };
+    terrain: {
+      averageSlopePercent: number;
+      terrainClassification: string;
+      constructionImpact: string;
+      costMultiplier: number;
+    };
+    coastalZone: {
+      inCoastalZone: boolean;
+      permitRequirement: string;
+      additionalApprovalLayers: string[];
+    };
+    easements: {
+      possibleEasements: {
+        type: string;
+        description: string;
+        confidence: number;
+      }[];
+      buildableAreaImpact: string;
+    };
+    overallRiskLevel: "Low" | "Moderate" | "High";
+    overallRiskScore: number;
+    costAdjustmentPercent: number;
+    timelineAdjustmentMonths: number;
+    summary: string;
+  };
 }
 
 // Source tier classification

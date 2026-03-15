@@ -23,6 +23,7 @@ import { RentEstimateCard } from "./rent-estimate-card";
 import { RentScenariosCard } from "./rent-scenarios-card";
 import { DetectedStructuresCard } from "./detected-structures-card";
 import { ImageryWarningBanner } from "./imagery-warning-banner";
+import { SiteConstraintsCard } from "./site-constraints-card";
 import { DataSourcesBadge } from "./data-sources-badge";
 import { LeadCaptureForm } from "./lead-capture-form";
 import { PropertyReportModal } from "./property-report-modal";
@@ -230,6 +231,11 @@ export function PropertyScanner() {
                   <RentEstimateCard data={analysisData.rentData} />
                 )}
               </div>
+            )}
+
+            {/* Site Constraints */}
+            {analysisData.siteConstraints && (
+              <SiteConstraintsCard data={analysisData.siteConstraints} />
             )}
 
             {/* Rent Scenarios (Conservative / Market / Premium) */}
