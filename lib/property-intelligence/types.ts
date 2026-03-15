@@ -206,6 +206,8 @@ export interface PropertyAnalysisResult {
     zoneomics: boolean;
     rentCast: boolean;
     mapbox: boolean;
+    microsoftFootprints: boolean;
+    lidar: boolean;
   };
 
   // v4 layers — Architecture enhancements
@@ -308,6 +310,48 @@ export interface PropertyAnalysisResult {
       checks: { name: string; passed: boolean; severity: string; message: string }[];
       adjustedConfidence: number;
     };
+  };
+
+  // v7.1 layers — Microsoft Building Footprints
+  microsoftFootprints?: {
+    buildingCount: number;
+    totalFootprintSqFt: number;
+    mainBuildingSqFt: number | null;
+    confidence: number;
+    quadkey: string;
+    source: string;
+  };
+
+  // v7.2 layers — LiDAR / Enhanced Terrain Intelligence
+  lidarTerrain?: {
+    slopeAnalysis: {
+      averageSlopePercent: number;
+      maxSlopePercent: number;
+      minSlopePercent: number;
+      aspectDegrees: number;
+      aspectDirection: string;
+      category: string;
+      uniformity: string;
+    };
+    gradingEstimate: {
+      gradingRequired: boolean;
+      estimatedCutCuYd: number;
+      estimatedFillCuYd: number;
+      estimatedGradingCost: number;
+      retainingWallLikely: boolean;
+      estimatedRetainingWallLf: number;
+      estimatedRetainingWallCost: number;
+    };
+    foundationRecommendation: {
+      type: string;
+      reason: string;
+      additionalCostEstimate: number;
+      confidence: number;
+    };
+    lidarAvailable: boolean;
+    sources: string[];
+    confidence: number;
+    summary: string;
   };
 
   // v5 layers — Site Constraint Intelligence

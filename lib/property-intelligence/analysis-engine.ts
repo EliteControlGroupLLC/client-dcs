@@ -50,6 +50,12 @@ import {
   type GeometryAnalysis,
 } from "./geometry-engine";
 import { reconcileAllSources } from "./source-reconciliation-engine";
+import {
+  getMicrosoftBuildingFootprints,
+  msFootprintsToOSMFormat,
+  type MSFootprintResult,
+} from "./microsoft-footprint-service";
+import { analyzeLiDARTerrain, type LiDARTerrainResult } from "./lidar-elevation-service";
 
 export async function analyzeProperty(address: string): Promise<PropertyAnalysisResult> {
   // Step 1: Geocode the address (Google Places API)
@@ -58,27 +64,37 @@ export async function analyzeProperty(address: string): Promise<PropertyAnalysis
     console.error(`[PROVIDER-ERROR] Google Places: geocoding failed for address "${address}"`);
   }
 
-  // Step 2: Get ATTOM data, elevation/slope data, OSM data, AND Zoneomics data in parallel
+  // Step 2: Get ATTOM data, elevation/slope data, OSM data, Zoneomics data, AND Microsoft footprints in parallel
   let slopeData: { slope: string; confidence: number; sources: string[] } | undefined;
   let osmData: Awaited<ReturnType<typeof getOSMPropertyData>> | undefined;
   let zoneomicsData: ZoneomicsZoningData | undefined;
+  let msFootprints: MSFootprintResult | undefined;
+  let lidarTerrain: LiDARTerrainResult | undefined;
   const attomData = await getAttomPropertyData(address);
   if (!attomData.available) {
     console.error(`[PROVIDER-ERROR] ATTOM Property: no data returned for address "${address}"`);
   }
 
   if (geocoded) {
-    const [slope, osm, zoneomics] = await Promise.all([
+    const [slope, osm, zoneomics, msBuildings] = await Promise.all([
       getElevationData(geocoded.lat, geocoded.lng),
       getOSMPropertyData(geocoded.lat, geocoded.lng),
       getZoneomicsData(geocoded.lat, geocoded.lng),
+      getMicrosoftBuildingFootprints(geocoded.lat, geocoded.lng).catch((err) => {
+        console.error(`[PROVIDER-ERROR] Microsoft Building Footprints: ${err}`);
+        return undefined;
+      }),
     ]);
     slopeData = slope;
     osmData = osm;
     zoneomicsData = zoneomics;
+    msFootprints = msBuildings;
 
     if (!zoneomics.available) {
       console.error(`[PROVIDER-ERROR] Zoneomics: no zoning data returned for (${geocoded.lat}, ${geocoded.lng})`);
+    }
+    if (msFootprints?.available) {
+      console.log(`[MS-FOOTPRINTS] Found ${msFootprints.buildings.length} buildings, total ${msFootprints.totalFootprintSqFt} sq ft`);
     }
   }
 
@@ -157,13 +173,24 @@ export async function analyzeProperty(address: string): Promise<PropertyAnalysis
 
   // Step 3d (cont.): v7 — Polygon-based geometry analysis
   // Runs after jurisdiction profile is loaded so we can use real setback values.
+  // Building footprint detection hierarchy:
+  //   1. OSM building polygon vectors (real shape, community-sourced)
+  //   2. Microsoft Building Footprints (ML-derived, high-quality polygons)
+  //   3. ATTOM footprint area (rectangle approximation)
+  //   4. Fallback low-confidence rectangle from estimated lot dimensions
   try {
-    const osmBuildings = (osmData?.parcel?.buildings || []).map(b => ({
+    let osmBuildings = (osmData?.parcel?.buildings || []).map(b => ({
       areaSqFt: b.areaSqFt,
       buildingType: b.buildingType,
       nodes: b.nodes,
       levels: b.levels,
     }));
+
+    // If no OSM buildings but Microsoft footprints available, use Microsoft data
+    if (osmBuildings.length === 0 && msFootprints?.available && msFootprints.buildings.length > 0) {
+      osmBuildings = msFootprintsToOSMFormat(msFootprints.buildings);
+      console.log(`[GEOMETRY-ENGINE] Using Microsoft Building Footprints (${msFootprints.buildings.length} buildings) — OSM had no data`);
+    }
 
     geometryAnalysis = analyzePropertyGeometry({
       lat: geocoded?.lat || 0,
@@ -201,10 +228,31 @@ export async function analyzeProperty(address: string): Promise<PropertyAnalysis
     console.error("[GEOMETRY-ENGINE] Failed to run geometry analysis:", err);
   }
 
+  // Step 4a.5: LiDAR / Enhanced Terrain Analysis
+  // Runs after geometry analysis to use real lot dimensions when available
+  if (geocoded) {
+    try {
+      const estLotWidth = attomData?.lotWidth || Math.round(Math.sqrt(rawLotSizeSqFt * 0.5));
+      const estLotDepth = attomData?.lotDepth || Math.round(rawLotSizeSqFt / estLotWidth);
+      const estAduFootprint = geometryAnalysis?.bestAduZone?.areaSqFt || 800;
+      lidarTerrain = await analyzeLiDARTerrain(
+        geocoded.lat, geocoded.lng, estLotWidth, estLotDepth, estAduFootprint
+      );
+      if (lidarTerrain.lidarAvailable) {
+        console.log(`[LIDAR-TERRAIN] LiDAR data available, ${lidarTerrain.terrainProfile.sampleCount} samples, slope: ${lidarTerrain.slopeAnalysis.averageSlopePercent}%`);
+      }
+    } catch (err) {
+      console.error("[LIDAR-TERRAIN] Failed to run LiDAR terrain analysis:", err);
+    }
+  }
+
   // Step 4b: Slope percent extraction for constraint analysis
   const slopeStr = intelligence.slope.value;
   let slopePercent: number = 0;
-  if (slopeStr === "Steep slope" || slopeStr === "Steep") slopePercent = 20;
+  // Use LiDAR slope data if available (higher resolution than Google Elevation basic)
+  if (lidarTerrain && lidarTerrain.confidence > 50) {
+    slopePercent = lidarTerrain.slopeAnalysis.averageSlopePercent;
+  } else if (slopeStr === "Steep slope" || slopeStr === "Steep") slopePercent = 20;
   else if (slopeStr === "Moderate slope" || slopeStr === "Moderate") slopePercent = 10;
   else if (slopeStr === "Mostly flat") slopePercent = 3;
   else if (slopeStr === "Flat") slopePercent = 1;
@@ -610,6 +658,8 @@ export async function analyzeProperty(address: string): Promise<PropertyAnalysis
       zoneomics: zoneomicsData?.available === true,
       rentCast: isRentCastAvailable(),
       mapbox: isMapboxAvailable(),
+      microsoftFootprints: msFootprints?.available === true,
+      lidar: lidarTerrain?.lidarAvailable === true,
     },
 
     // v4 layers — Architecture enhancements
@@ -624,6 +674,27 @@ export async function analyzeProperty(address: string): Promise<PropertyAnalysis
 
     // v5 layers — Site Constraint Intelligence
     siteConstraints,
+
+    // v7.1 layers — Microsoft Building Footprints
+    microsoftFootprints: msFootprints?.available ? {
+      buildingCount: msFootprints.buildings.length,
+      totalFootprintSqFt: msFootprints.totalFootprintSqFt,
+      mainBuildingSqFt: msFootprints.mainBuilding?.areaSqFt || null,
+      confidence: msFootprints.confidence,
+      quadkey: msFootprints.quadkey,
+      source: msFootprints.source,
+    } : undefined,
+
+    // v7.2 layers — LiDAR / Enhanced Terrain Intelligence
+    lidarTerrain: lidarTerrain ? {
+      slopeAnalysis: lidarTerrain.slopeAnalysis,
+      gradingEstimate: lidarTerrain.gradingEstimate,
+      foundationRecommendation: lidarTerrain.foundationRecommendation,
+      lidarAvailable: lidarTerrain.lidarAvailable,
+      sources: lidarTerrain.sources,
+      confidence: lidarTerrain.confidence,
+      summary: lidarTerrain.summary,
+    } : undefined,
 
     // v6 layers — Source Cross-Reference & Reconciliation
     sourceAudit: reconcileAllSources({
