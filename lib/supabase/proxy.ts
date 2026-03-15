@@ -39,18 +39,10 @@ export async function updateSession(request: NextRequest) {
       },
     )
 
-    const {
-      data: { user },
-    } = await supabase.auth.getUser()
-
-    if (
-      request.nextUrl.pathname.startsWith('/admin') &&
-      !user
-    ) {
-      const url = request.nextUrl.clone()
-      url.pathname = '/auth/login'
-      return NextResponse.redirect(url)
-    }
+    // Refresh the Supabase session to keep cookies up to date.
+    // Note: /admin uses its own CRON_SECRET-based authentication,
+    // so we no longer redirect unauthenticated users to /auth/login.
+    await supabase.auth.getUser()
   } catch {
     // If there's an error with Supabase auth, just continue with the request
     return supabaseResponse
