@@ -207,7 +207,7 @@ export default function AdminDashboard() {
             <Shield className="h-6 w-6" />
             <div>
               <h1 className="text-lg font-bold">DCS Admin Dashboard</h1>
-              <p className="text-xs text-white/60">Property Intelligence System Monitor</p>
+              <p className="text-xs text-white/60">Property Intelligence System Monitor v1.0</p>
             </div>
           </div>
           <div className="flex items-center gap-3">
@@ -529,4 +529,3 @@ function StatCard({
     </div>
   );
 }
-
