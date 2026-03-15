@@ -4,12 +4,14 @@ import { useState } from "react";
 import { X, Download, FileText, Building, DollarSign, MapPin, Shield, TrendingUp, AlertTriangle, Home, Droplets, Flame, Mountain } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import type { PropertyAnalysisResult } from "@/lib/property-intelligence";
+import { ShowSourcesPanel } from "./show-sources-panel";
 
 interface PropertyReportModalProps {
   isOpen: boolean;
   onClose: () => void;
   analysisData: PropertyAnalysisResult;
   reportData?: Record<string, unknown>;
+  isAdmin?: boolean;
 }
 
 export function PropertyReportModal({
@@ -17,6 +19,7 @@ export function PropertyReportModal({
   onClose,
   analysisData,
   reportData,
+  isAdmin = false,
 }: PropertyReportModalProps) {
   const [downloading, setDownloading] = useState(false);
 
@@ -203,6 +206,11 @@ export function PropertyReportModal({
                   </div>
                 ))}
             </ReportSection>
+          )}
+
+          {/* Source Cross-Reference (Admin Only) */}
+          {analysisData.sourceAudit && (
+            <ShowSourcesPanel sourceAudit={analysisData.sourceAudit} isAdmin={isAdmin} />
           )}
 
           {/* Disclaimers */}

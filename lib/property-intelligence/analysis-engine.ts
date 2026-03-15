@@ -44,6 +44,7 @@ import {
 import type { OverlayDetection } from "./jurisdictions/types";
 import { runSanityChecks } from "./sanity-check-engine";
 import { analyzeSiteConstraints } from "./site-constraint-engine";
+import { reconcileAllSources } from "./source-reconciliation-engine";
 
 export async function analyzeProperty(address: string): Promise<PropertyAnalysisResult> {
   // Step 1: Geocode the address (Google Places API)
@@ -85,7 +86,8 @@ export async function analyzeProperty(address: string): Promise<PropertyAnalysis
     attomData
   );
 
-  let { intelligence, rawLotSizeSqFt, rawFootprintSqFt } = resolved;
+  const { intelligence, rawLotSizeSqFt } = resolved;
+  let { rawFootprintSqFt } = resolved;
 
   // Step 3b: Run sanity checks before proceeding
   const sanityResult = runSanityChecks({
@@ -437,7 +439,38 @@ export async function analyzeProperty(address: string): Promise<PropertyAnalysis
       }
     : undefined;
 
-  // Step 14: Calculate lot dimensions for site diagram
+  // Step 14: Source Cross-Reference & Reconciliation (v6)
+  // Collect ALL candidate values from every source, reconcile per-field,
+  // detect discrepancies, and build full audit trail.
+  const sourceAudit = reconcileAllSources({
+    rawAddress: address,
+    geocodedAddress: geocoded?.formattedAddress || null,
+    attomData: attomData || null,
+    osmData: osmData || null,
+    zoneomicsData: zoneomicsData || null,
+    rentEstimates: rentEstimates || null,
+    slopeData: slopeData || null,
+    resolvedLotSizeSqFt: rawLotSizeSqFt,
+    resolvedHomeAreaSqFt: intelligence.homeAreaSqFt.value,
+    resolvedFootprintSqFt: rawFootprintSqFt,
+    resolvedOpenYardSqFt: intelligence.openYardSqFt.value,
+    resolvedZoning: intelligence.zoning.value,
+    resolvedParcelShape: intelligence.parcelShape.value,
+    resolvedApn: intelligence.apn.value,
+    bestRecommendation: bestRec,
+  });
+
+  // Log reconciliation summary
+  console.log(
+    `[RECONCILIATION] ${sourceAudit.totalSourcesConsulted} sources consulted | ` +
+    `${sourceAudit.verifiedFieldCount}/${sourceAudit.fieldCount} verified | ` +
+    `${sourceAudit.discrepancies.length} discrepancies detected`
+  );
+  for (const d of sourceAudit.discrepancies) {
+    console.warn(`[DISCREPANCY] ${d.field}: ${d.description} (severity: ${d.severity})`);
+  }
+
+  // Step 15: Calculate lot dimensions for site diagram
   const mainHomeWidth = Math.round(Math.sqrt(rawFootprintSqFt * 0.7));
   const mainHomeDepth = Math.round(rawFootprintSqFt / mainHomeWidth);
 
@@ -529,6 +562,9 @@ export async function analyzeProperty(address: string): Promise<PropertyAnalysis
     detectedStructures: detectedStructures.length > 0 ? detectedStructures : undefined,
     rentScenarios: buildRentScenarios(rentEstimates),
     imageryWarning: "Aerial imagery may not reflect recent construction or site changes. A professional site visit is recommended to verify current conditions.",
+
+    // v6 layers — Source Cross-Reference & Reconciliation
+    sourceAudit,
 
     // v5 layers — Site Constraint Intelligence
     siteConstraints,

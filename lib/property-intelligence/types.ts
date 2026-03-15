@@ -238,6 +238,9 @@ export interface PropertyAnalysisResult {
   }[];
   imageryWarning?: string;
 
+  // v6 layers — Source Cross-Reference & Reconciliation
+  sourceAudit?: SourceAudit;
+
   // v5 layers — Site Constraint Intelligence
   siteConstraints?: {
     constraints: {
@@ -294,4 +297,68 @@ export interface DataSource {
   name: string;
   tier: SourceTier;
   timestamp: string;
+}
+
+// ─── v6: Source Cross-Reference & Reconciliation Types ───
+
+export type FieldVerificationStatus =
+  | "verified"
+  | "estimated"
+  | "inferred"
+  | "under-review"
+  | "rejected";
+
+export interface SourceCandidate<T = string | number> {
+  value: T;
+  sourceName: string;
+  sourceTier: SourceTier;
+  confidence: number;
+  timestamp: string | null;
+  status: FieldVerificationStatus;
+  rejectionReason?: string;
+}
+
+export interface ReconciledField<T = string | number> {
+  finalValue: T;
+  finalConfidence: number;
+  finalStatus: FieldVerificationStatus;
+  selectedSource: string;
+  selectionReason: string;
+  candidates: SourceCandidate<T>[];
+  discrepancyDetected: boolean;
+  discrepancyDetail?: string;
+}
+
+export interface SourceAudit {
+  address: ReconciledField<string>;
+  apn: ReconciledField<string>;
+  lotSizeSqFt: ReconciledField<number>;
+  zoning: ReconciledField<string>;
+  landUse: ReconciledField<string>;
+  homeAreaSqFt: ReconciledField<number>;
+  footprintSqFt: ReconciledField<number>;
+  openYardSqFt: ReconciledField<number>;
+  parcelShape: ReconciledField<string>;
+  slope: ReconciledField<string>;
+  rentEstimate: ReconciledField<number>;
+  recommendedAduPath: ReconciledField<string>;
+  discrepancies: DiscrepancyRecord[];
+  reconciliationTimestamp: string;
+  totalSourcesConsulted: number;
+  fieldCount: number;
+  verifiedFieldCount: number;
+  estimatedFieldCount: number;
+  underReviewFieldCount: number;
+}
+
+export interface DiscrepancyRecord {
+  field: string;
+  description: string;
+  severity: "low" | "medium" | "high";
+  sourceA: string;
+  sourceAValue: string;
+  sourceB: string;
+  sourceBValue: string;
+  resolution: string;
+  confidenceImpact: number;
 }

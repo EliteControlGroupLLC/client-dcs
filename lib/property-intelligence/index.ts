@@ -54,7 +54,15 @@ export type {
   LotDimensions,
   SourceTier,
   DataSource,
+  FieldVerificationStatus,
+  SourceCandidate,
+  ReconciledField,
+  SourceAudit,
+  DiscrepancyRecord,
 } from "./types";
+
+export { reconcileAllSources } from "./source-reconciliation-engine";
+export type { ReconciliationInput } from "./source-reconciliation-engine";
 
 export { getConfidenceStatus, formatFieldValue } from "./types";
 
