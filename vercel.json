@@ -3,6 +3,10 @@
     {
       "path": "/api/regulation-scan",
       "schedule": "0 6 * * 1"
+    },
+    {
+      "path": "/api/system-health",
+      "schedule": "0 */6 * * *"
     }
   ]
 }
