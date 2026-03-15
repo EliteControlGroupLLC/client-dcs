@@ -43,6 +43,7 @@ import {
 } from "./rentcast-service";
 import type { OverlayDetection } from "./jurisdictions/types";
 import { runSanityChecks } from "./sanity-check-engine";
+import { analyzeSiteConstraints } from "./site-constraint-engine";
 
 export async function analyzeProperty(address: string): Promise<PropertyAnalysisResult> {
   // Step 1: Geocode the address (Google Places API)
@@ -144,17 +145,37 @@ export async function analyzeProperty(address: string): Promise<PropertyAnalysis
   const jurisdictionResult = detectJurisdictionFromAddress(formattedAddress);
   const profile = jurisdictionResult.profile;
 
+  // Step 4b: Slope percent extraction for constraint analysis
+  const slopeStr = intelligence.slope.value;
+  let slopePercent: number = 0;
+  if (slopeStr === "Steep slope" || slopeStr === "Steep") slopePercent = 20;
+  else if (slopeStr === "Moderate slope" || slopeStr === "Moderate") slopePercent = 10;
+  else if (slopeStr === "Mostly flat") slopePercent = 3;
+  else if (slopeStr === "Flat") slopePercent = 1;
+
+  // Step 4c: Site Constraint Intelligence Layer
+  // Runs after zoning determination and before buildable-area calculations
+  const hasCoastalOverlay = false; // will be updated after overlay detection
+  const siteConstraints = analyzeSiteConstraints({
+    lat: geocoded?.lat || 0,
+    lng: geocoded?.lng || 0,
+    slopeCategory: slopeStr,
+    slopePercent,
+    jurisdictionId: jurisdictionResult.jurisdictionId,
+    formattedAddress,
+    lotSizeSqFt: rawLotSizeSqFt,
+    zoning: intelligence.zoning.value,
+    hasCoastalOverlay,
+    hasHillsideOverlay: slopePercent > 15,
+    overlayTypes: [],
+  });
+
   // Step 5: Calculate buildable area using jurisdiction-specific setbacks
   const jSetback = Math.min(profile.setbacks.sideSetbackFt, profile.setbacks.rearSetbackFt);
   const jSeparation = profile.separation.minDistanceFromPrimaryHomeFt;
   const buildable = calculateBuildableArea(rawLotSizeSqFt, rawFootprintSqFt, jSetback, jSeparation);
 
   // Step 6: Detect overlays (base detection + Zoneomics enrichment)
-  const slopeStr = intelligence.slope.value;
-  let slopePercent: number | undefined;
-  if (slopeStr === "Steep") slopePercent = 20;
-  else if (slopeStr === "Moderate") slopePercent = 10;
-  else if (slopeStr === "Mostly flat") slopePercent = 3;
   const baseOverlays = detectOverlays(formattedAddress, jurisdictionResult.jurisdictionId, slopePercent);
 
   // Enrich overlays with Zoneomics data
@@ -275,8 +296,20 @@ export async function analyzeProperty(address: string): Promise<PropertyAnalysis
     console.error("[PROVIDER-ERROR] Mapbox: token not configured — map visualization unavailable");
   }
 
-  // Step 10: Generate financial scenarios (enhanced with RentCast data)
+  // Step 10: Generate financial scenarios (enhanced with RentCast data + site constraint cost adjustments)
   const financialScenarios = generateFinancialScenarios(enhancedFeasibility, rentEstimates);
+
+  // Apply site constraint cost adjustments to financial scenarios
+  if (siteConstraints.costAdjustmentPercent > 0) {
+    const multiplier = 1 + siteConstraints.costAdjustmentPercent / 100;
+    for (const scenario of financialScenarios) {
+      scenario.estimatedBuildCost = Math.round(scenario.estimatedBuildCost * multiplier);
+      scenario.estimatedSoftCost = Math.round(scenario.estimatedSoftCost * multiplier);
+      scenario.estimatedTotalCost = scenario.estimatedBuildCost + scenario.estimatedSoftCost;
+      scenario.estimatedDownPayment = Math.round(scenario.estimatedTotalCost * 0.20);
+      scenario.estimatedLoanAmount = scenario.estimatedTotalCost - scenario.estimatedDownPayment;
+    }
+  }
 
   // Step 11: Generate Mapbox parcel visualization
   let parcelVisualization: ParcelVisualization | undefined;
@@ -342,6 +375,15 @@ export async function analyzeProperty(address: string): Promise<PropertyAnalysis
   if (isMapboxAvailable()) {
     adjustedScore = Math.min(100, adjustedScore + 2);
     additionalPositiveSignals.push("Mapbox parcel visualization available");
+  }
+
+  // Apply site constraint confidence signals
+  if (siteConstraints.overallRiskLevel === "High") {
+    adjustedScore = Math.max(0, adjustedScore - 3);
+    additionalNegativeSignals.push(`High site constraint risk: ${siteConstraints.summary}`);
+  } else if (siteConstraints.overallRiskLevel === "Low") {
+    adjustedScore = Math.min(100, adjustedScore + 2);
+    additionalPositiveSignals.push("Site constraint analysis: low risk conditions");
   }
 
   // Apply sanity check confidence adjustment
@@ -487,6 +529,9 @@ export async function analyzeProperty(address: string): Promise<PropertyAnalysis
     detectedStructures: detectedStructures.length > 0 ? detectedStructures : undefined,
     rentScenarios: buildRentScenarios(rentEstimates),
     imageryWarning: "Aerial imagery may not reflect recent construction or site changes. A professional site visit is recommended to verify current conditions.",
+
+    // v5 layers — Site Constraint Intelligence
+    siteConstraints,
   };
 }
 

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { X, Download, FileText, Building, DollarSign, MapPin, Shield, TrendingUp, AlertTriangle, Home } from "lucide-react";
+import { X, Download, FileText, Building, DollarSign, MapPin, Shield, TrendingUp, AlertTriangle, Home, Droplets, Flame, Mountain } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import type { PropertyAnalysisResult } from "@/lib/property-intelligence";
 
@@ -139,6 +139,35 @@ export function PropertyReportModal({
                   </div>
                 </div>
               ))}
+            </ReportSection>
+          )}
+
+          {/* Site Constraints */}
+          {analysisData.siteConstraints && (
+            <ReportSection icon={Shield} title="Site Conditions">
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-xs text-muted-foreground">Constraint Risk</span>
+                <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${
+                  analysisData.siteConstraints.overallRiskLevel === "Low" ? "bg-emerald-50 text-emerald-700" :
+                  analysisData.siteConstraints.overallRiskLevel === "Moderate" ? "bg-amber-50 text-amber-700" :
+                  "bg-red-50 text-red-700"
+                }`}>
+                  {analysisData.siteConstraints.overallRiskLevel}
+                </span>
+              </div>
+              {analysisData.siteConstraints.constraints.map((c) => (
+                <ReportRow
+                  key={c.category}
+                  label={c.category.charAt(0).toUpperCase() + c.category.slice(1)}
+                  value={c.severity === "none" ? "None" : `${c.severity.charAt(0).toUpperCase() + c.severity.slice(1)} — ${c.classification}`}
+                />
+              ))}
+              {analysisData.siteConstraints.costAdjustmentPercent > 0 && (
+                <ReportRow label="Est. Cost Impact" value={`+${analysisData.siteConstraints.costAdjustmentPercent}%`} />
+              )}
+              {analysisData.siteConstraints.timelineAdjustmentMonths > 0 && (
+                <ReportRow label="Est. Timeline Impact" value={`+${analysisData.siteConstraints.timelineAdjustmentMonths} months`} />
+              )}
             </ReportSection>
           )}
 
@@ -300,6 +329,25 @@ function generateReportText(
     for (const s of data.detectedStructures) {
       lines.push(`  ${s.type}: ${s.areaSqFt.toLocaleString()} sq ft (${s.confidence}% confidence)`);
     }
+    lines.push("");
+  }
+
+  // Site Constraints
+  if (data.siteConstraints) {
+    lines.push("─── SITE CONDITIONS ───");
+    lines.push(`  Overall Constraint Risk: ${data.siteConstraints.overallRiskLevel}`);
+    for (const c of data.siteConstraints.constraints) {
+      const label = c.category.charAt(0).toUpperCase() + c.category.slice(1);
+      const sev = c.severity === "none" ? "None" : c.severity.charAt(0).toUpperCase() + c.severity.slice(1);
+      lines.push(`  ${label}: ${sev} — ${c.classification}`);
+    }
+    if (data.siteConstraints.costAdjustmentPercent > 0) {
+      lines.push(`  Est. Cost Impact: +${data.siteConstraints.costAdjustmentPercent}%`);
+    }
+    if (data.siteConstraints.timelineAdjustmentMonths > 0) {
+      lines.push(`  Est. Timeline Impact: +${data.siteConstraints.timelineAdjustmentMonths} months`);
+    }
+    lines.push(`  Summary: ${data.siteConstraints.summary}`);
     lines.push("");
   }
 
