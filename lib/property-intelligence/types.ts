@@ -207,6 +207,36 @@ export interface PropertyAnalysisResult {
     rentCast: boolean;
     mapbox: boolean;
   };
+
+  // v4 layers — Architecture enhancements
+  sanityChecks?: {
+    passed: boolean;
+    checks: {
+      name: string;
+      passed: boolean;
+      severity: "error" | "warning" | "info";
+      message: string;
+    }[];
+    adjustments: {
+      field: string;
+      originalValue: number;
+      adjustedValue: number;
+      reason: string;
+    }[];
+  };
+  detectedStructures?: {
+    type: string;
+    areaSqFt: number;
+    confidence: number;
+  }[];
+  rentScenarios?: {
+    conservative: { monthlyRent: number; annualRent: number };
+    market: { monthlyRent: number; annualRent: number };
+    premium: { monthlyRent: number; annualRent: number };
+    source: "rentcast" | "estimated";
+    aduType: string;
+  }[];
+  imageryWarning?: string;
 }
 
 // Source tier classification

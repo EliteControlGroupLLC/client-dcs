@@ -20,6 +20,9 @@ import { FinancialPreviewCard } from "./financial-preview-card";
 import { ConfidenceScoreCard } from "./confidence-score-card";
 import { ZoningEnrichmentCard } from "./zoning-enrichment-card";
 import { RentEstimateCard } from "./rent-estimate-card";
+import { RentScenariosCard } from "./rent-scenarios-card";
+import { DetectedStructuresCard } from "./detected-structures-card";
+import { ImageryWarningBanner } from "./imagery-warning-banner";
 import { DataSourcesBadge } from "./data-sources-badge";
 import { LeadCaptureForm } from "./lead-capture-form";
 import { PropertyReportModal } from "./property-report-modal";
@@ -207,6 +210,16 @@ export function PropertyScanner() {
               </div>
             </div>
 
+            {/* Imagery Warning */}
+            {analysisData.imageryWarning && (
+              <ImageryWarningBanner message={analysisData.imageryWarning} />
+            )}
+
+            {/* Detected Structures */}
+            {analysisData.detectedStructures && analysisData.detectedStructures.length > 1 && (
+              <DetectedStructuresCard structures={analysisData.detectedStructures} />
+            )}
+
             {/* Zoning Enrichment + Rent Estimates row */}
             {(analysisData.zoningEnrichment || analysisData.rentData) && (
               <div className="grid md:grid-cols-2 gap-6">
@@ -217,6 +230,11 @@ export function PropertyScanner() {
                   <RentEstimateCard data={analysisData.rentData} />
                 )}
               </div>
+            )}
+
+            {/* Rent Scenarios (Conservative / Market / Premium) */}
+            {analysisData.rentScenarios && analysisData.rentScenarios.length > 0 && (
+              <RentScenariosCard scenarios={analysisData.rentScenarios} />
             )}
 
             {/* Opportunity Detected */}
