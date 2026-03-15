@@ -44,14 +44,20 @@ import {
 import type { OverlayDetection } from "./jurisdictions/types";
 
 export async function analyzeProperty(address: string): Promise<PropertyAnalysisResult> {
-  // Step 1: Geocode the address
+  // Step 1: Geocode the address (Google Places API)
   const geocoded = await geocodeAddress(address);
+  if (!geocoded) {
+    console.error(`[PROVIDER-ERROR] Google Places: geocoding failed for address "${address}"`);
+  }
 
   // Step 2: Get ATTOM data, elevation/slope data, OSM data, AND Zoneomics data in parallel
   let slopeData: { slope: string; confidence: number; sources: string[] } | undefined;
   let osmData: Awaited<ReturnType<typeof getOSMPropertyData>> | undefined;
   let zoneomicsData: ZoneomicsZoningData | undefined;
   const attomData = await getAttomPropertyData(address);
+  if (!attomData.available) {
+    console.error(`[PROVIDER-ERROR] ATTOM Property: no data returned for address "${address}"`);
+  }
 
   if (geocoded) {
     const [slope, osm, zoneomics] = await Promise.all([
@@ -62,6 +68,10 @@ export async function analyzeProperty(address: string): Promise<PropertyAnalysis
     slopeData = slope;
     osmData = osm;
     zoneomicsData = zoneomics;
+
+    if (!zoneomics.available) {
+      console.error(`[PROVIDER-ERROR] Zoneomics: no zoning data returned for (${geocoded.lat}, ${geocoded.lng})`);
+    }
   }
 
   // Step 3: Resolve property data from all sources (ATTOM + OSM + estimates)
@@ -197,8 +207,18 @@ export async function analyzeProperty(address: string): Promise<PropertyAnalysis
     for (const result of results) {
       if (result.status === "fulfilled") {
         rentEstimates.set(result.value.type, result.value.estimate);
+      } else {
+        console.error(`[PROVIDER-ERROR] RentCast: rent estimate failed — ${result.reason}`);
       }
     }
+  }
+
+  if (!isRentCastAvailable()) {
+    console.error("[PROVIDER-ERROR] RentCast: API key not configured — using fallback estimates");
+  }
+
+  if (!isMapboxAvailable()) {
+    console.error("[PROVIDER-ERROR] Mapbox: token not configured — map visualization unavailable");
   }
 
   // Step 10: Generate financial scenarios (enhanced with RentCast data)
