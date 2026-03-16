@@ -108,6 +108,8 @@ export function SiteDiagram({
         metrics={geometryResult.metrics}
         status={geometryResult.status}
         confidence={geometryResult.confidence}
+        parcelSource={geometryResult.parcelSource}
+        buildingSource={geometryResult.buildingSource}
       />
     );
   }
@@ -182,6 +184,8 @@ function RealGeometryDiagram({
   metrics,
   status,
   confidence,
+  parcelSource,
+  buildingSource,
 }: {
   parcelPolygon: GeometryPolygon | null;
   buildingPolygon: GeometryPolygon | null;
@@ -191,6 +195,8 @@ function RealGeometryDiagram({
   metrics: StrictGeometryResult["metrics"];
   status: StrictGeometryResult["status"];
   confidence: number;
+  parcelSource?: string;
+  buildingSource?: string;
 }) {
   // Calculate bounds from all polygons
   const bounds = calculateBounds([
@@ -441,7 +447,7 @@ function RealGeometryDiagram({
       {/* Data source attribution */}
       <div className="mt-3 pt-3 border-t border-border/50">
         <p className="text-[9px] text-muted-foreground text-center">
-          Parcel: Regrid Parcel API | Building: Microsoft Building Footprints
+          Parcel: {parcelSource === "regrid-parcel-api" ? "Regrid Parcel API" : parcelSource === "provided" ? "Polygon Engine" : parcelSource || "Polygon Engine"} | Building: {buildingSource === "microsoft-footprints" ? "Microsoft Building Footprints" : buildingSource === "provided" ? "Polygon Engine" : buildingSource || "Polygon Engine"}
         </p>
       </div>
     </div>

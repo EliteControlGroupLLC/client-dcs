@@ -260,14 +260,21 @@ export async function analyzeProperty(address: string): Promise<PropertyAnalysis
 
   // Step 4b: v8 — Run Strict Geometry Pipeline
   // This is the single-source-of-truth for site diagram rendering.
-  // Uses ONLY: Parcel GIS (Regrid) for parcel boundaries, Microsoft Building Footprints for structures.
-  // NO fallback guesses, NO OpenStreetMap, NO placeholder rectangles.
+  // Tries Regrid for parcel boundaries + Microsoft Building Footprints for structures.
+  // Falls back to existing polygon engine data when Regrid is unavailable.
   let strictGeometry: StrictGeometryResult | undefined;
   if (geocoded) {
     try {
+      // Pass existing polygon engine data as fallback so the strict pipeline
+      // can render the site diagram even without a Regrid API key.
+      const knownParcelPolygon = geometryAnalysis?.parcelPolygon || undefined;
+      const knownBuildingPolygon = geometryAnalysis?.mainStructure?.polygon || undefined;
+
       strictGeometry = await runStrictGeometryPipeline({
         lat: geocoded.lat,
         lng: geocoded.lng,
+        knownParcelPolygon,
+        knownBuildingPolygon,
       });
 
       console.log(`[STRICT-GEOMETRY] ${summarizeGeometryResult(strictGeometry).replace(/\n/g, " | ")}`);
