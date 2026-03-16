@@ -207,7 +207,10 @@ export function PropertyScanner() {
                 ) : (
                   <MapPreview address={selectedAddress} />
                 )}
-                <SiteDiagram {...analysisData.lotDimensions} />
+                <SiteDiagram
+                  geometryResult={analysisData.strictGeometry as Parameters<typeof SiteDiagram>[0]["geometryResult"]}
+                  {...analysisData.lotDimensions}
+                />
               </div>
             </div>
 

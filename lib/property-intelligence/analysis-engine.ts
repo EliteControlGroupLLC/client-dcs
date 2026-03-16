@@ -56,6 +56,11 @@ import {
   type MSFootprintResult,
 } from "./microsoft-footprint-service";
 import { analyzeLiDARTerrain, type LiDARTerrainResult } from "./lidar-elevation-service";
+import {
+  runStrictGeometryPipeline,
+  summarizeGeometryResult,
+  type StrictGeometryResult,
+} from "./strict-geometry-pipeline";
 
 export async function analyzeProperty(address: string): Promise<PropertyAnalysisResult> {
   // Step 1: Geocode the address (Google Places API)
@@ -246,7 +251,33 @@ export async function analyzeProperty(address: string): Promise<PropertyAnalysis
     }
   }
 
-  // Step 4b: Slope percent extraction for constraint analysis
+  // Step 4b: v8 — Run Strict Geometry Pipeline
+  // This is the single-source-of-truth for site diagram rendering.
+  // Uses ONLY: Parcel GIS (Regrid) for parcel boundaries, Microsoft Building Footprints for structures.
+  // NO fallback guesses, NO OpenStreetMap, NO placeholder rectangles.
+  let strictGeometry: StrictGeometryResult | undefined;
+  if (geocoded) {
+    try {
+      strictGeometry = await runStrictGeometryPipeline({
+        lat: geocoded.lat,
+        lng: geocoded.lng,
+      });
+
+      console.log(`[STRICT-GEOMETRY] ${summarizeGeometryResult(strictGeometry).replace(/\n/g, " | ")}`);
+
+      // Update metrics from strict geometry if verified
+      if (strictGeometry.status === "geometry-verified" && strictGeometry.metrics) {
+        if (strictGeometry.parcelAreaSqFt && strictGeometry.confidence > 80) {
+          // Only override if strict geometry is highly confident
+          console.log(`[STRICT-GEOMETRY] Overriding lot size: ${rawLotSizeSqFt} -> ${strictGeometry.parcelAreaSqFt}`);
+        }
+      }
+    } catch (err) {
+      console.error("[STRICT-GEOMETRY] Pipeline failed:", err);
+    }
+  }
+
+  // Step 4c: Slope percent extraction for constraint analysis
   const slopeStr = intelligence.slope.value;
   let slopePercent: number = 0;
   // Use LiDAR slope data if available (higher resolution than Google Elevation basic)
@@ -719,6 +750,28 @@ export async function analyzeProperty(address: string): Promise<PropertyAnalysis
       placementMethod: geometryAnalysis?.placement?.placementMethod,
       geometryConfidence: geometryAnalysis?.geometryConfidence,
     }),
+
+    // v8 layers — Strict Geometry Pipeline (single-source, for site diagram)
+    strictGeometry: strictGeometry ? {
+      status: strictGeometry.status,
+      canRenderDiagram: strictGeometry.canRenderDiagram,
+      fallbackMessage: strictGeometry.fallbackMessage,
+      parcelPolygon: strictGeometry.parcelPolygon,
+      buildingPolygon: strictGeometry.buildingPolygon,
+      metrics: strictGeometry.metrics,
+      buildableEnvelope: strictGeometry.buildableEnvelope ? {
+        parcelSetbackPolygon: strictGeometry.buildableEnvelope.parcelSetbackPolygon,
+        residenceSeparationPolygon: strictGeometry.buildableEnvelope.residenceSeparationPolygon,
+        buildablePolygon: strictGeometry.buildableEnvelope.buildablePolygon,
+        buildableAreaSqFt: strictGeometry.buildableEnvelope.buildableAreaSqFt,
+        bestZone: strictGeometry.buildableEnvelope.bestZone,
+        constraints: strictGeometry.buildableEnvelope.constraints,
+      } : null,
+      parcelSource: strictGeometry.parcelSource,
+      buildingSource: strictGeometry.buildingSource,
+      confidence: strictGeometry.confidence,
+      sourceAudit: strictGeometry.sourceAudit,
+    } : undefined,
 
     // v7 layers — Polygon Geometry & Source Backbone
     geometryAnalysis: geometryAnalysis ? {

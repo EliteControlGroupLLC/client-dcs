@@ -322,6 +322,61 @@ export interface PropertyAnalysisResult {
     source: string;
   };
 
+  // v8 layers — Strict Geometry Pipeline (single-source, no fallbacks)
+  strictGeometry?: {
+    /** Pipeline status: geometry-verified | building-only | parcel-only | unavailable */
+    status: "geometry-verified" | "building-only" | "parcel-only" | "unavailable";
+    /** Whether we have enough data to render a valid diagram */
+    canRenderDiagram: boolean;
+    /** Fallback message when diagram cannot be rendered */
+    fallbackMessage: string | null;
+    /** Real parcel boundary polygon (from Parcel GIS) */
+    parcelPolygon: { type: string; coordinates: number[][][] } | null;
+    /** Real main residence footprint (from Microsoft Building Footprints) */
+    buildingPolygon: { type: string; coordinates: number[][][] } | null;
+    /** Calculated property metrics (from real geometry only) */
+    metrics: {
+      parcelWidthFt: number;
+      parcelDepthFt: number;
+      buildingWidthFt: number;
+      buildingDepthFt: number;
+      frontYardDepthFt: number;
+      rearYardDepthFt: number;
+      leftSideYardFt: number;
+      rightSideYardFt: number;
+      openYardAreaSqFt: number;
+      buildingPlacement: {
+        offsetFromCenterXFt: number;
+        offsetFromCenterYFt: number;
+        isCentered: boolean;
+      };
+    } | null;
+    /** ADU buildable envelope (computed from real geometry) */
+    buildableEnvelope: {
+      parcelSetbackPolygon: { type: string; coordinates: number[][][] };
+      residenceSeparationPolygon: { type: string; coordinates: number[][][] };
+      buildablePolygon: { type: string; coordinates: number[][][] } | null;
+      buildableAreaSqFt: number;
+      bestZone: "rear" | "left-side" | "right-side" | "none";
+      constraints: string[];
+    } | null;
+    /** Parcel data source */
+    parcelSource: string;
+    /** Building data source */
+    buildingSource: string;
+    /** Confidence score (only high if both sources verified) */
+    confidence: number;
+    /** Source audit for debugging */
+    sourceAudit: {
+      parcelGISAvailable: boolean;
+      parcelGISReason: string | null;
+      microsoftFootprintsAvailable: boolean;
+      microsoftFootprintsReason: string | null;
+      geometryValidated: boolean;
+      validationErrors: string[];
+    };
+  };
+
   // v7.2 layers — LiDAR / Enhanced Terrain Intelligence
   lidarTerrain?: {
     slopeAnalysis: {
