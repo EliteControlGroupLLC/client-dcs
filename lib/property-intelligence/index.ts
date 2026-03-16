@@ -99,6 +99,27 @@ export {
 } from "./microsoft-footprint-service";
 export type { MSBuildingFootprint, MSFootprintResult } from "./microsoft-footprint-service";
 
+// v8 — Parcel GIS Service (Real Parcel Boundaries)
+export {
+  fetchParcelPolygon,
+  fetchParcelByAPN,
+  isParcelGISAvailable,
+} from "./parcel-gis-service";
+export type { ParcelGISResult } from "./parcel-gis-service";
+
+// v8 — Strict Geometry Pipeline (Single Source of Truth)
+export {
+  runStrictGeometryPipeline,
+  summarizeGeometryResult,
+} from "./strict-geometry-pipeline";
+export type {
+  StrictGeometryResult,
+  StrictPipelineInput,
+  StrictPipelineStatus,
+  StrictPropertyMetrics,
+  BuildableEnvelopeResult,
+} from "./strict-geometry-pipeline";
+
 // v7.2 — LiDAR / Enhanced Terrain Intelligence
 export { analyzeLiDARTerrain } from "./lidar-elevation-service";
 export type {
