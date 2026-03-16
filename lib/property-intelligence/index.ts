@@ -48,6 +48,7 @@ export type {
   IntelligenceField,
   ConfidenceStatus,
   BuildableAnalysis,
+  FinalBuildabilityResult,
   ADURecommendation,
   FeasibilityLevel,
   SmartBannerData,
@@ -97,6 +98,7 @@ export {
   msFootprintsToOSMFormat,
   latLngToQuadkey,
 } from "./microsoft-footprint-service";
+export type { MergedFootprintResult } from "./geometry-engine";
 export type { MSBuildingFootprint, MSFootprintResult } from "./microsoft-footprint-service";
 
 // v8 — Parcel GIS Service (Real Parcel Boundaries)

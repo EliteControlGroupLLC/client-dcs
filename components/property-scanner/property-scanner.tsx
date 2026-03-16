@@ -27,6 +27,7 @@ import { SiteConstraintsCard } from "./site-constraints-card";
 import { DataSourcesBadge } from "./data-sources-badge";
 import { LeadCaptureForm } from "./lead-capture-form";
 import { PropertyReportModal } from "./property-report-modal";
+import { ShowSourcesPanel } from "./show-sources-panel";
 import { analyzeProperty } from "@/lib/property-intelligence";
 import type { PropertyAnalysisResult } from "@/lib/property-intelligence";
 import { trackScanCompleted, trackLeadSubmitted } from "@/lib/analytics";
@@ -51,12 +52,26 @@ export function PropertyScanner() {
     setSelectedAddress(finalAddress);
     setPhase("scanning");
 
-    // Run the property intelligence engine (async)
+    // SURGICAL FIX: Try server-side route first (protects API keys),
+    // fall back to client-side if server route unavailable
     try {
+      const serverRes = await fetch('/api/analyze-property', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ address: finalAddress }),
+      });
+      if (serverRes.ok) {
+        const data = await serverRes.json();
+        if (data.success && data.result) {
+          setAnalysisData(data.result);
+          return;
+        }
+      }
+      // Server route failed — fall back to client-side
       const result = await analyzeProperty(finalAddress);
       setAnalysisData(result);
     } catch {
-      // If analysis fails, try again as fallback
+      // If server route fails, try client-side as fallback
       try {
         const result = await analyzeProperty(finalAddress);
         setAnalysisData(result);
@@ -287,6 +302,9 @@ export function PropertyScanner() {
                 trackLeadSubmitted("property-scanner-report", selectedAddress);
               }}
             />
+
+            {/* Show Sources Panel (Internal Debug) */}
+            <ShowSourcesPanel analysisData={analysisData} />
 
             {/* Data Sources */}
             {analysisData.dataSources && (
