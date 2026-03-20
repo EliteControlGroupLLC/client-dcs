@@ -2,63 +2,17 @@ import Link from "next/link";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, ArrowRight, MapPin, Ruler } from "lucide-react";
+import { GALLERY_PROJECTS } from "@/lib/data/site-data";
 
-const projects = [
-  {
-    id: "1",
-    title: "Modern Studio ADU",
-    location: "La Jolla, CA",
-    sqft: "450 sq ft",
-    type: "ADU",
-    image: "/images/projects/adu-exterior-balcony.png",
-    description: "A modern studio ADU featuring an open floor plan, high ceilings, and a private balcony. Designed for maximum natural light and comfortable living in a compact footprint.",
-  },
-  {
-    id: "2",
-    title: "Two-Bedroom ADU",
-    location: "Pacific Beach, CA",
-    sqft: "800 sq ft",
-    type: "ADU",
-    image: "/images/projects/adu-exterior-yard.png",
-    description: "A spacious two-bedroom ADU with a full kitchen, living area, and private yard access. Built as a detached unit with modern finishes and energy-efficient design.",
-  },
-  {
-    id: "3",
-    title: "Garage Conversion ADU",
-    location: "Chula Vista, CA",
-    sqft: "600 sq ft",
-    type: "ADU",
-    image: "/images/projects/adu-exterior-side.png",
-    description: "A complete garage-to-ADU conversion featuring a bedroom, full bathroom, kitchenette, and living area. An efficient transformation that maximizes existing space.",
-  },
-  {
-    id: "4",
-    title: "Modern Kitchen Remodel",
-    location: "Carlsbad, CA",
-    sqft: "Kitchen",
-    type: "Remodel",
-    image: "/images/projects/kitchen-remodel.png",
-    description: "A full kitchen remodel with custom cabinetry, quartz countertops, modern appliances, and an open layout. Designed for both functionality and style.",
-  },
-  {
-    id: "5",
-    title: "Custom Home Build",
-    location: "Encinitas, CA",
-    sqft: "3,200 sq ft",
-    type: "Custom Homes",
-    image: "/images/projects/bedroom-interior.png",
-    description: "A custom-built home featuring modern architecture, open living spaces, and premium finishes throughout. Designed for comfortable family living with attention to every detail.",
-  },
-  {
-    id: "6",
-    title: "Bathroom Renovation",
-    location: "Del Mar, CA",
-    sqft: "Bathroom",
-    type: "Remodel",
-    image: "/images/projects/bathroom-renovation.png",
-    description: "A complete bathroom renovation with custom tile work, a walk-in shower, modern vanity, and updated fixtures. Clean, contemporary design with premium materials.",
-  },
-];
+const projects = GALLERY_PROJECTS.map(p => ({
+  id: p.id,
+  title: p.title,
+  location: p.location,
+  sqft: p.sqft,
+  type: p.type,
+  image: p.image,
+  description: p.description,
+}));
 
 export function generateStaticParams() {
   return projects.map((project) => ({
