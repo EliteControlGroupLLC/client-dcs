@@ -30,12 +30,8 @@ export function RentEstimateCard({ data }: RentEstimateCardProps) {
           </div>
           <h3 className="font-semibold text-secondary text-sm">Rent Estimates</h3>
         </div>
-        <span className={`text-[10px] px-2 py-0.5 rounded-full ${
-          data.source === "rentcast"
-            ? "bg-emerald-50 text-emerald-600"
-            : "bg-amber-50 text-amber-600"
-        }`}>
-          {data.source === "rentcast" ? "RentCast Market Data" : "Estimated"}
+        <span className="text-[10px] px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-600">
+          San Diego Market Data
         </span>
       </div>
 
@@ -76,21 +72,10 @@ export function RentEstimateCard({ data }: RentEstimateCardProps) {
         ))}
       </div>
 
-      <div className="flex items-center justify-between mt-4 pt-3 border-t border-border/50">
+      <div className="mt-4 pt-3 border-t border-border/50">
         <span className="text-[10px] text-muted-foreground">
-          San Diego County market data
+          Based on current San Diego County rental market data
         </span>
-        {data.source === "rentcast" && (
-          <a
-            href="https://www.rentcast.io"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-[10px] text-emerald-500 hover:text-emerald-700 flex items-center gap-0.5"
-          >
-            Powered by RentCast
-            <ExternalLink className="h-2.5 w-2.5" />
-          </a>
-        )}
       </div>
     </div>
   );

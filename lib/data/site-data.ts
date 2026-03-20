@@ -73,7 +73,7 @@ export const FLOOR_PLANS: FloorPlan[] = [
     priceHigh: 150000,
     popular: true,
     features: ["Uses existing structure", "Open floor plan", "Full kitchen"],
-    rentEstimate: { low: 2000, high: 2700 },
+    rentEstimate: { low: 2000, high: 2400 },
   },
   {
     id: "compact-detached",
@@ -90,7 +90,7 @@ export const FLOOR_PLANS: FloorPlan[] = [
     priceHigh: 195000,
     popular: true,
     features: ["Standalone structure", "Full kitchen", "Stackable W/D"],
-    rentEstimate: { low: 2500, high: 2800 },
+    rentEstimate: { low: 2200, high: 2600 },
   },
   {
     id: "efficient-one",
@@ -107,7 +107,7 @@ export const FLOOR_PLANS: FloorPlan[] = [
     priceHigh: 225000,
     popular: true,
     features: ["Separate bedroom", "Full kitchen", "In-unit laundry"],
-    rentEstimate: { low: 2800, high: 3200 },
+    rentEstimate: { low: 2500, high: 2900 },
   },
   {
     id: "cozy-cottage",
@@ -264,10 +264,10 @@ export interface RentAssumption {
 }
 
 export const RENT_ASSUMPTIONS: RentAssumption[] = [
-  { sqFt: 400, type: "garage-conversion", bedrooms: 0, low: 2000, high: 2700, description: "2-car garage conversion" },
-  { sqFt: 400, type: "garage-conversion", bedrooms: 0, low: 2500, high: 3000, description: "3-car garage conversion" },
-  { sqFt: 400, type: "detached", bedrooms: 0, low: 2500, high: 2800, description: "400 sq ft detached ADU" },
-  { sqFt: 500, type: "detached", bedrooms: 1, low: 2800, high: 3200, description: "500 sq ft ADU" },
+  { sqFt: 400, type: "garage-conversion", bedrooms: 0, low: 2000, high: 2400, description: "2-car garage conversion" },
+  { sqFt: 400, type: "garage-conversion", bedrooms: 0, low: 2500, high: 2800, description: "3-car garage conversion" },
+  { sqFt: 400, type: "detached", bedrooms: 0, low: 2200, high: 2600, description: "400 sq ft detached ADU" },
+  { sqFt: 500, type: "detached", bedrooms: 1, low: 2500, high: 2900, description: "500 sq ft ADU" },
   { sqFt: 600, type: "detached", bedrooms: 1, low: 3000, high: 3500, description: "600 sq ft ADU" },
   { sqFt: 700, type: "detached", bedrooms: 1, low: 3000, high: 3700, description: "700-800 sq ft ADU" },
   { sqFt: 800, type: "detached", bedrooms: 2, low: 3200, high: 3800, description: "800 sq ft ADU" },
