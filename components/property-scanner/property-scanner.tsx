@@ -234,10 +234,7 @@ export function PropertyScanner() {
               <ImageryWarningBanner message={analysisData.imageryWarning} />
             )}
 
-            {/* Detected Structures */}
-            {analysisData.detectedStructures && analysisData.detectedStructures.length > 1 && (
-              <DetectedStructuresCard structures={analysisData.detectedStructures} />
-            )}
+            {/* Detected Structures - Removed from client-facing view */}
 
             {/* Zoning Enrichment + Rent Estimates row */}
             {(analysisData.zoningEnrichment || analysisData.rentData) && (
@@ -303,13 +300,7 @@ export function PropertyScanner() {
               }}
             />
 
-            {/* Show Sources Panel (Internal Debug) */}
-            <ShowSourcesPanel analysisData={analysisData} />
-
-            {/* Data Sources */}
-            {analysisData.dataSources && (
-              <DataSourcesBadge data={analysisData.dataSources} />
-            )}
+            {/* Data sources and debug info removed from client-facing view */}
 
             {/* Disclaimer */}
             <div className="bg-muted/50 rounded-2xl border border-border/50 p-5">

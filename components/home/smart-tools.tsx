@@ -132,14 +132,20 @@ export function SmartTools() {
               </div>
 
               {/* Right Preview */}
-              <div className="relative bg-white/5 border-l border-white/10 flex items-center justify-center min-h-[400px]">
-                <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-primary/10" />
-                <div className="relative text-center p-8">
-                  <div className="w-24 h-24 rounded-2xl bg-primary/20 border border-primary/30 flex items-center justify-center mx-auto mb-6">
-                    <Wand2 className="h-12 w-12 text-primary" />
-                  </div>
-                  <p className="text-white/50 text-sm font-medium uppercase tracking-wider">
-                    Interactive ADU Configurator Preview
+              <div className="relative bg-white/5 border-l border-white/10 flex items-center justify-center min-h-[400px] overflow-hidden">
+                <Image
+                  src="/images/adu-configurator-preview.jpg"
+                  alt="Modern ADU example"
+                  fill
+                  className="object-cover"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-secondary/80 via-secondary/30 to-transparent" />
+                <div className="absolute bottom-6 left-6 right-6 text-left">
+                  <p className="text-white/80 text-sm font-medium mb-1">
+                    Interactive ADU Configurator
+                  </p>
+                  <p className="text-white/50 text-xs">
+                    Design your ADU with real-time pricing and visualization
                   </p>
                 </div>
               </div>

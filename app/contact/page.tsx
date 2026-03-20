@@ -96,8 +96,8 @@ export default function ContactPage() {
                   </div>
                   <div>
                     <h3 className="font-semibold text-secondary">Phone</h3>
-                    <p className="text-muted-foreground">+1 (858) - 833 - 0705 | Text</p>
-                    <p className="text-sm text-muted-foreground">Mon-Fri 8am-6pm</p>
+                    <p className="text-muted-foreground">(858) 833-0705</p>
+                    <p className="text-sm text-muted-foreground">Mon-Fri 8am-4:30pm</p>
                   </div>
                 </div>
               </CardContent>
@@ -111,7 +111,7 @@ export default function ContactPage() {
                   </div>
                   <div>
                     <h3 className="font-semibold text-secondary">Email</h3>
-                    <p className="text-muted-foreground">Office@distinctcsolutions.com</p>
+                    <p className="text-muted-foreground">jtalavera@distinctcsolutions.com</p>
                     <p className="text-sm text-muted-foreground">We reply within 24 hours</p>
                   </div>
                 </div>
@@ -142,7 +142,7 @@ export default function ContactPage() {
                   <div>
                     <h3 className="font-semibold text-secondary">Business Hours</h3>
                     <p className="text-muted-foreground">Monday - Friday</p>
-                    <p className="text-muted-foreground">8:00 AM - 6:00 PM</p>
+                    <p className="text-muted-foreground">8:00 AM - 4:30 PM</p>
                     <p className="text-sm text-muted-foreground">Saturday by appointment</p>
                   </div>
                 </div>
