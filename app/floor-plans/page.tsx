@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useMemo } from "react";
+import Image from "next/image";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -13,26 +14,30 @@ import {
   Square,
   Heart,
   Eye,
-  Download
+  DollarSign,
 } from "lucide-react";
 import Link from "next/link";
 import { FLOOR_PLANS } from "@/lib/data/site-data";
+import { FloorPlanLayout } from "@/components/floor-plans/floor-plan-layout";
+import { FloorPlanDetailModal } from "@/components/floor-plans/floor-plan-detail-modal";
 
 type ViewMode = "grid" | "list";
 type SortOption = "size-asc" | "size-desc" | "price-asc" | "price-desc";
 
-const floorPlans = FLOOR_PLANS.map(plan => ({
-  id: plan.id,
-  name: plan.name,
-  sqFt: plan.sqFt,
-  bedrooms: plan.bedrooms,
-  bathrooms: plan.bathrooms,
-  style: plan.style,
-  type: plan.type,
-  priceRange: plan.priceRange,
-  popular: plan.popular,
-  features: plan.features,
-}));
+// Exterior image mapping
+const EXTERIOR_IMAGES: Record<string, string> = {
+  "garage-conversion": "/images/floor-plans/garage-conversion-exterior.jpg",
+  "compact-detached": "/images/floor-plans/compact-detached-exterior.jpg",
+  "efficient-one": "/images/floor-plans/efficient-one-exterior.jpg",
+  "cozy-cottage": "/images/floor-plans/cozy-cottage-exterior.jpg",
+  "urban-loft": "/images/floor-plans/urban-loft-exterior.jpg",
+  "family-suite": "/images/floor-plans/family-suite-exterior.jpg",
+  "deluxe-two": "/images/floor-plans/deluxe-two-exterior.jpg",
+  "compact-three": "/images/floor-plans/compact-three-exterior.jpg",
+  "grand-retreat": "/images/floor-plans/grand-retreat-exterior.jpg",
+  "luxury-suite": "/images/floor-plans/luxury-suite-exterior.jpg",
+  "modern-four": "/images/floor-plans/modern-four-exterior.jpg",
+};
 
 const styles = ["All Styles", "Modern", "Contemporary", "Traditional", "Craftsman"];
 const types = ["All Types", "Studio", "Attached", "Detached", "Garage Conversion", "Two-Story"];
@@ -46,6 +51,7 @@ export default function FloorPlansPage() {
   const [selectedBedrooms, setSelectedBedrooms] = useState("Any");
   const [sortBy, setSortBy] = useState<SortOption>("size-asc");
   const [favorites, setFavorites] = useState<string[]>([]);
+  const [selectedPlanIndex, setSelectedPlanIndex] = useState<number | null>(null);
 
   const toggleFavorite = (id: string) => {
     setFavorites(prev => 
@@ -54,7 +60,7 @@ export default function FloorPlansPage() {
   };
 
   const filteredPlans = useMemo(() => {
-    let plans = [...floorPlans];
+    let plans = [...FLOOR_PLANS];
 
     // Search filter
     if (searchQuery) {
@@ -92,15 +98,37 @@ export default function FloorPlansPage() {
         plans.sort((a, b) => b.sqFt - a.sqFt);
         break;
       case "price-asc":
-        plans.sort((a, b) => parseInt(a.priceRange.replace(/\D/g, "")) - parseInt(b.priceRange.replace(/\D/g, "")));
+        plans.sort((a, b) => a.priceLow - b.priceLow);
         break;
       case "price-desc":
-        plans.sort((a, b) => parseInt(b.priceRange.replace(/\D/g, "")) - parseInt(a.priceRange.replace(/\D/g, "")));
+        plans.sort((a, b) => b.priceLow - a.priceLow);
         break;
     }
 
     return plans;
   }, [searchQuery, selectedStyle, selectedType, selectedBedrooms, sortBy]);
+
+  const selectedPlan = selectedPlanIndex !== null ? filteredPlans[selectedPlanIndex] : null;
+
+  const handleOpenDetail = (index: number) => {
+    setSelectedPlanIndex(index);
+  };
+
+  const handleCloseDetail = () => {
+    setSelectedPlanIndex(null);
+  };
+
+  const handlePreviousPlan = () => {
+    if (selectedPlanIndex !== null && selectedPlanIndex > 0) {
+      setSelectedPlanIndex(selectedPlanIndex - 1);
+    }
+  };
+
+  const handleNextPlan = () => {
+    if (selectedPlanIndex !== null && selectedPlanIndex < filteredPlans.length - 1) {
+      setSelectedPlanIndex(selectedPlanIndex + 1);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-muted pt-28 pb-12">
@@ -111,7 +139,7 @@ export default function FloorPlansPage() {
             ADU Floor Plans Library
           </h1>
           <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-            Browse our curated collection of ADU designs. Each plan can be customized to fit your property and lifestyle.
+            Browse our curated collection of ADU designs with real floor plan layouts. Each plan can be customized to fit your property and lifestyle.
           </p>
         </div>
 
@@ -207,40 +235,68 @@ export default function FloorPlansPage() {
 
         {/* Floor Plans Grid/List */}
         <div className={viewMode === "grid" 
-          ? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"
+          ? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
           : "flex flex-col gap-4"
         }>
-          {filteredPlans.map((plan) => (
+          {filteredPlans.map((plan, index) => (
             <Card key={plan.id} className={`overflow-hidden hover:shadow-lg transition-shadow ${viewMode === "list" ? "flex flex-row" : ""}`}>
-              {/* Image Placeholder */}
-              <div className={`bg-gradient-to-br from-primary/20 to-secondary/20 relative ${viewMode === "list" ? "w-48 shrink-0" : "aspect-[4/3]"}`}>
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <div className="text-center">
-                    <Square className="h-12 w-12 text-primary/40 mx-auto mb-2" />
-                    <span className="text-sm text-muted-foreground">Floor Plan</span>
+              {/* Floor Plan Preview */}
+              <div className={`relative ${viewMode === "list" ? "w-72 shrink-0" : ""}`}>
+                {/* Exterior Image */}
+                <div className={`relative ${viewMode === "list" ? "h-full" : "aspect-[4/3]"}`}>
+                  <Image
+                    src={EXTERIOR_IMAGES[plan.id] || "/images/adu-configurator-preview.jpg"}
+                    alt={`${plan.name} exterior`}
+                    fill
+                    className="object-cover"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
+                  
+                  {/* Overlay Info */}
+                  <div className="absolute bottom-0 left-0 right-0 p-4">
+                    <div className="flex items-center gap-2 text-white text-sm">
+                      <Square className="h-4 w-4" />
+                      <span>{plan.sqFt.toLocaleString()} sq ft</span>
+                    </div>
                   </div>
                 </div>
+
                 {plan.popular && (
                   <div className="absolute top-2 left-2 bg-primary text-white text-xs font-medium px-2 py-1 rounded">
                     Popular
                   </div>
                 )}
                 <button
-                  onClick={() => toggleFavorite(plan.id)}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    toggleFavorite(plan.id);
+                  }}
                   className="absolute top-2 right-2 w-8 h-8 bg-white/90 rounded-full flex items-center justify-center hover:bg-white transition"
                 >
                   <Heart className={`h-4 w-4 ${favorites.includes(plan.id) ? "fill-red-500 text-red-500" : "text-muted-foreground"}`} />
                 </button>
               </div>
 
-              <CardContent className={`p-4 ${viewMode === "list" ? "flex-1 flex items-center justify-between" : ""}`}>
+              <CardContent className={`p-4 ${viewMode === "list" ? "flex-1 flex flex-col justify-between" : ""}`}>
                 <div>
-                  <h3 className="font-semibold text-secondary text-lg mb-1">{plan.name}</h3>
+                  <h3 className="font-semibold text-secondary text-lg mb-2">{plan.name}</h3>
+                  
+                  {/* Mini Floor Plan Layout */}
+                  {viewMode === "grid" && (
+                    <div className="mb-3 bg-muted/50 rounded-lg p-2">
+                      <FloorPlanLayout
+                        planId={plan.id}
+                        sqFt={plan.sqFt}
+                        bedrooms={plan.bedrooms}
+                        bathrooms={plan.bathrooms}
+                        showLabels={false}
+                        showDimensions={false}
+                        className="border-0 bg-transparent"
+                      />
+                    </div>
+                  )}
+
                   <div className="flex items-center gap-4 text-sm text-muted-foreground mb-3">
-                    <span className="flex items-center gap-1">
-                      <Square className="h-4 w-4" />
-                      {plan.sqFt.toLocaleString()} sq ft
-                    </span>
                     <span className="flex items-center gap-1">
                       <Bed className="h-4 w-4" />
                       {plan.bedrooms === 0 ? "Studio" : plan.bedrooms}
@@ -248,6 +304,10 @@ export default function FloorPlansPage() {
                     <span className="flex items-center gap-1">
                       <Bath className="h-4 w-4" />
                       {plan.bathrooms}
+                    </span>
+                    <span className="flex items-center gap-1">
+                      <DollarSign className="h-4 w-4" />
+                      ${plan.rentEstimate.low.toLocaleString()}-${plan.rentEstimate.high.toLocaleString()}/mo
                     </span>
                   </div>
                   <div className="flex flex-wrap gap-1 mb-3">
@@ -258,27 +318,39 @@ export default function FloorPlansPage() {
                 </div>
 
                 {viewMode === "list" && (
-                  <div className="flex gap-2">
-                    <Button variant="outline" size="sm">
+                  <div className="flex gap-2 mt-4">
+                    <Button 
+                      variant="outline" 
+                      size="sm"
+                      onClick={() => handleOpenDetail(index)}
+                    >
                       <Eye className="h-4 w-4 mr-1" />
-                      View
+                      View Details
                     </Button>
-                    <Button size="sm" className="bg-primary hover:bg-primary-dark text-secondary">
-                      <Download className="h-4 w-4 mr-1" />
-                      Download
-                    </Button>
+                    <Link href="/build-your-adu">
+                      <Button size="sm" className="bg-primary hover:bg-primary-dark text-secondary">
+                        Customize
+                      </Button>
+                    </Link>
                   </div>
                 )}
 
                 {viewMode === "grid" && (
                   <div className="flex gap-2 mt-4">
-                    <Button variant="outline" size="sm" className="flex-1">
+                    <Button 
+                      variant="outline" 
+                      size="sm" 
+                      className="flex-1"
+                      onClick={() => handleOpenDetail(index)}
+                    >
                       <Eye className="h-4 w-4 mr-1" />
                       Details
                     </Button>
-                    <Button size="sm" className="flex-1 bg-primary hover:bg-primary-dark text-secondary">
-                      Customize
-                    </Button>
+                    <Link href="/build-your-adu" className="flex-1">
+                      <Button size="sm" className="w-full bg-primary hover:bg-primary-dark text-secondary">
+                        Customize
+                      </Button>
+                    </Link>
                   </div>
                 )}
               </CardContent>
@@ -308,6 +380,17 @@ export default function FloorPlansPage() {
           </div>
         </div>
       </div>
+
+      {/* Detail Modal */}
+      <FloorPlanDetailModal
+        plan={selectedPlan}
+        isOpen={selectedPlanIndex !== null}
+        onClose={handleCloseDetail}
+        onPrevious={handlePreviousPlan}
+        onNext={handleNextPlan}
+        hasPrevious={selectedPlanIndex !== null && selectedPlanIndex > 0}
+        hasNext={selectedPlanIndex !== null && selectedPlanIndex < filteredPlans.length - 1}
+      />
     </div>
   );
 }
