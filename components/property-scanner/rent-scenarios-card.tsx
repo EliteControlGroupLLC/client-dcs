@@ -26,15 +26,11 @@ export function RentScenariosCard({ scenarios }: RentScenariosCardProps) {
           </div>
           <div>
             <h3 className="font-semibold text-secondary text-sm">Rent Scenarios</h3>
-            <p className="text-[10px] text-muted-foreground">Conservative / Market / Premium</p>
+            <p className="text-[10px] text-muted-foreground">Based on your recommended ADU</p>
           </div>
         </div>
-        <span className={`text-[10px] px-2 py-0.5 rounded-full ${
-          scenarios[0]?.source === "rentcast"
-            ? "bg-emerald-50 text-emerald-600"
-            : "bg-amber-50 text-amber-600"
-        }`}>
-          {scenarios[0]?.source === "rentcast" ? "RentCast Data" : "Estimated"}
+        <span className="text-[10px] px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-600">
+          San Diego Market Data
         </span>
       </div>
 

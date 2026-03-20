@@ -63,6 +63,12 @@ import {
   summarizeGeometryResult,
   type StrictGeometryResult,
 } from "./strict-geometry-pipeline";
+import {
+  generateUnifiedRecommendation,
+  buildUnifiedRentScenarios,
+  buildUnifiedFinancialScenarios,
+  type UnifiedRecommendation,
+} from "./unified-recommendation-engine";
 
 export async function analyzeProperty(address: string): Promise<PropertyAnalysisResult> {
   // Step 1: Geocode the address (Google Places API)
@@ -429,46 +435,65 @@ export async function analyzeProperty(address: string): Promise<PropertyAnalysis
     profile
   );
 
-  // Step 9: Get RentCast rent estimates for financial scenarios
-  let rentEstimates: Map<string, RentEstimate> | undefined;
-  const feasibleTypes = enhancedFeasibility.filter(
-    (r) => r.feasibility === "likely" || r.feasibility === "possible"
-  );
-
-  if (feasibleTypes.length > 0) {
-    const rentPromises = feasibleTypes.map(async (f) => {
-      const midSqft = Math.round((f.minSizeSqft + f.maxSizeSqft) / 2);
-      const unitConfig = inferUnitConfig(midSqft);
-      const estimate = await getRentEstimate(
-        formattedAddress,
-        unitConfig.bedrooms,
-        unitConfig.bathrooms,
-        midSqft
-      );
-      return { type: f.type, estimate };
+  // Step 9: Generate recommendations FIRST to determine primary recommendation
+  // This ensures all downstream outputs derive from the same recommendation
+  const recommendations = generateRecommendations(rawLotSizeSqFt, openYard, finalBuildability.totalBuildableAreaSqFt);
+  const bestRec = determineBestRecommendation(recommendations);
+  
+  // Step 9b: Generate UNIFIED recommendation that drives rent and financial scenarios
+  // This is the single source of truth for the entire page
+  const zipCode = geocoded?.zip || "92115"; // Default to standard San Diego zip if not found
+  let unifiedRecommendation: UnifiedRecommendation | undefined;
+  
+  try {
+    unifiedRecommendation = await generateUnifiedRecommendation({
+      address: formattedAddress,
+      zipCode,
+      lotSizeSqFt: rawLotSizeSqFt,
+      openYardSqFt: openYard,
+      buildableEnvelopeSqFt: finalBuildability.totalBuildableAreaSqFt,
+      hasGarage: rawFootprintSqFt > 800,
+      feasibilityResults: enhancedFeasibility,
+      bestRecommendationType: bestRec,
+      maxAllowedSqFt: profile.sizeRules.detachedAduMaxSqft,
+      jaduMaxSqFt: profile.sizeRules.jaduMaxSqft,
     });
-
-    const results = await Promise.allSettled(rentPromises);
-    rentEstimates = new Map();
-    for (const result of results) {
-      if (result.status === "fulfilled") {
-        rentEstimates.set(result.value.type, result.value.estimate);
-      } else {
-        console.error(`[PROVIDER-ERROR] RentCast: rent estimate failed — ${result.reason}`);
-      }
-    }
+  } catch (err) {
+    console.error("[UNIFIED-RECOMMENDATION] Failed to generate unified recommendation:", err);
   }
-
-  if (!isRentCastAvailable()) {
-    console.error("[PROVIDER-ERROR] RentCast: API key not configured — using fallback estimates");
+  
+  // Step 9c: Build rent estimates map from unified recommendation (for backward compatibility)
+  // This ensures rentData aligns with the primary recommendation
+  let rentEstimates: Map<string, RentEstimate> | undefined;
+  if (unifiedRecommendation) {
+    rentEstimates = new Map();
+    const primaryConfig = inferUnitConfig(unifiedRecommendation.primarySizeSqFt);
+    rentEstimates.set(unifiedRecommendation.primaryType, {
+      estimatedMonthlyRent: unifiedRecommendation.primaryRentEstimate.monthlyRent,
+      estimatedAnnualRent: unifiedRecommendation.primaryRentEstimate.annualRent,
+      rentRangeLow: unifiedRecommendation.primaryRentEstimate.rentRangeLow,
+      rentRangeHigh: unifiedRecommendation.primaryRentEstimate.rentRangeHigh,
+      pricePerSqft: unifiedRecommendation.primaryRentEstimate.pricePerSqft,
+      comparableCount: 0,
+      bedrooms: primaryConfig.bedrooms,
+      bathrooms: primaryConfig.bathrooms,
+      sqft: unifiedRecommendation.primarySizeSqFt,
+      propertyType: "apartment",
+      confidence: 75,
+      available: true,
+      source: "estimated",
+    });
   }
 
   if (!isMapboxAvailable()) {
     console.error("[PROVIDER-ERROR] Mapbox: token not configured — map visualization unavailable");
   }
 
-  // Step 10: Generate financial scenarios (enhanced with RentCast data + site constraint cost adjustments)
-  const financialScenarios = generateFinancialScenarios(enhancedFeasibility, rentEstimates);
+  // Step 10: Generate financial scenarios from UNIFIED recommendation
+  // This ensures financial preview matches the primary recommendation exactly
+  let financialScenarios = unifiedRecommendation 
+    ? buildUnifiedFinancialScenarios(unifiedRecommendation)
+    : generateFinancialScenarios(enhancedFeasibility, rentEstimates);
 
   // Apply site constraint cost adjustments to financial scenarios
   if (siteConstraints.costAdjustmentPercent > 0) {
@@ -605,11 +630,17 @@ export async function analyzeProperty(address: string): Promise<PropertyAnalysis
 
   const adjustedBand: "high" | "moderate" | "low" = adjustedScore >= 85 ? "high" : adjustedScore >= 65 ? "moderate" : "low";
 
-  // Step 13: Generate recommendations — SURGICAL FIX: uses polygon-derived buildable area
-  // The buildable.estimatedBuildableEnvelopeSqFt now comes from finalBuildability (polygon when available)
-  const recommendations = generateRecommendations(rawLotSizeSqFt, openYard, finalBuildability.totalBuildableAreaSqFt);
-  const bestRec = determineBestRecommendation(recommendations);
-  const smartBanner = generateSmartBanner(bestRec, buildable, rawLotSizeSqFt, upsideOpportunities.length > 0);
+  // Step 13: Generate smart banner from UNIFIED recommendation
+  // This ensures the banner text matches the rent and financial scenarios
+  let smartBanner: SmartBannerData;
+  if (unifiedRecommendation) {
+    smartBanner = {
+      recommendation: unifiedRecommendation.bannerRecommendation,
+      details: unifiedRecommendation.bannerDetails,
+    };
+  } else {
+    smartBanner = generateSmartBanner(bestRec, buildable, rawLotSizeSqFt, upsideOpportunities.length > 0);
+  }
 
   // FAIL-CLOSED RULE: If polygon geometry missing or low-confidence,
   // mark scan as low confidence and warn user
@@ -744,8 +775,16 @@ export async function analyzeProperty(address: string): Promise<PropertyAnalysis
       checks: sanityResult.checks,
       adjustments: sanityResult.adjustments,
     },
-    detectedStructures: detectedStructures.length > 0 ? detectedStructures : undefined,
-    rentScenarios: buildRentScenarios(rentEstimates),
+    detectedStructures: undefined, // Removed from client-facing UI per requirements
+    rentScenarios: unifiedRecommendation 
+      ? buildUnifiedRentScenarios(unifiedRecommendation).map(s => ({
+          aduType: s.aduType,
+          source: "estimated" as const,
+          conservative: s.conservative,
+          market: s.market,
+          premium: s.premium,
+        }))
+      : buildRentScenarios(rentEstimates),
     imageryWarning: "Aerial imagery may not reflect recent construction or site changes. A professional site visit is recommended to verify current conditions.",
 
     // v5 layers — Site Constraint Intelligence
