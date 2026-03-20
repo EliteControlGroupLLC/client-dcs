@@ -11,130 +11,32 @@ import {
   Bed, 
   Bath, 
   Square,
-  ArrowUpDown,
   Heart,
   Eye,
   Download
 } from "lucide-react";
 import Link from "next/link";
+import { FLOOR_PLANS } from "@/lib/data/site-data";
 
 type ViewMode = "grid" | "list";
-type SortOption = "popular" | "size-asc" | "size-desc" | "price-asc" | "price-desc";
+type SortOption = "size-asc" | "size-desc" | "price-asc" | "price-desc";
 
-const floorPlans = [
-  {
-    id: "garage-conversion",
-    name: "Garage Conversion",
-    sqFt: 400,
-    bedrooms: 0,
-    bathrooms: 1,
-    style: "Modern",
-    type: "Garage Conversion",
-    priceRange: "$120k - $150k",
-    popular: true,
-    features: ["Uses existing structure", "Open floor plan", "Full kitchen"],
-  },
-  {
-    id: "compact-detached",
-    name: "Compact Detached ADU",
-    sqFt: 400,
-    bedrooms: 0,
-    bathrooms: 1,
-    style: "Modern",
-    type: "Detached",
-    priceRange: "Starting at $175k",
-    popular: true,
-    features: ["Standalone structure", "Full kitchen", "Stackable W/D"],
-  },
-  {
-    id: "efficient-one",
-    name: "The Efficient",
-    sqFt: 500,
-    bedrooms: 1,
-    bathrooms: 1,
-    style: "Contemporary",
-    type: "Attached",
-    priceRange: "$220k - $225k",
-    popular: true,
-    features: ["Separate bedroom", "Full kitchen", "In-unit laundry"],
-  },
-  {
-    id: "cozy-cottage",
-    name: "Cozy Cottage",
-    sqFt: 600,
-    bedrooms: 1,
-    bathrooms: 1,
-    style: "Craftsman",
-    type: "Detached",
-    priceRange: "$255k - $260k",
-    popular: true,
-    features: ["Private patio", "Walk-in closet", "Full kitchen"],
-  },
-  {
-    id: "urban-loft",
-    name: "Urban Loft",
-    sqFt: 650,
-    bedrooms: 1,
-    bathrooms: 1,
-    style: "Modern",
-    type: "Detached",
-    priceRange: "$275k - $280k",
-    popular: false,
-    features: ["High ceilings", "Large windows", "Open concept"],
-  },
-  {
-    id: "family-suite",
-    name: "Family Suite",
-    sqFt: 750,
-    bedrooms: 2,
-    bathrooms: 1,
-    style: "Traditional",
-    type: "Detached",
-    priceRange: "$320k - $325k",
-    popular: true,
-    features: ["2 bedrooms", "Full kitchen", "Private yard space"],
-  },
-  {
-    id: "deluxe-two",
-    name: "Deluxe Two",
-    sqFt: 850,
-    bedrooms: 2,
-    bathrooms: 2,
-    style: "Modern",
-    type: "Detached",
-    priceRange: "$360k - $365k",
-    popular: false,
-    features: ["Primary suite", "Guest bedroom", "2 full baths"],
-  },
-  {
-    id: "grand-retreat",
-    name: "Grand Retreat",
-    sqFt: 1000,
-    bedrooms: 2,
-    bathrooms: 2,
-    style: "Contemporary",
-    type: "Detached",
-    priceRange: "$425k - $430k",
-    popular: true,
-    features: ["Spacious living", "Walk-in closets", "Premium finishes"],
-  },
-  {
-    id: "luxury-suite",
-    name: "Luxury Suite",
-    sqFt: 1200,
-    bedrooms: 3,
-    bathrooms: 2,
-    style: "Modern",
-    type: "Detached",
-    priceRange: "$495k - $512k",
-    popular: false,
-    features: ["3 bedrooms", "2 full baths", "Premium upgrades"],
-  },
-];
+const floorPlans = FLOOR_PLANS.map(plan => ({
+  id: plan.id,
+  name: plan.name,
+  sqFt: plan.sqFt,
+  bedrooms: plan.bedrooms,
+  bathrooms: plan.bathrooms,
+  style: plan.style,
+  type: plan.type,
+  priceRange: plan.priceRange,
+  popular: plan.popular,
+  features: plan.features,
+}));
 
 const styles = ["All Styles", "Modern", "Contemporary", "Traditional", "Craftsman"];
-const types = ["All Types", "Studio", "Attached", "Detached", "Garage Conversion"];
-const bedroomOptions = ["Any", "Studio", "1", "2", "3+"];
+const types = ["All Types", "Studio", "Attached", "Detached", "Garage Conversion", "Two-Story"];
+const bedroomOptions = ["Any", "Studio", "1", "2", "3", "4"];
 
 export default function FloorPlansPage() {
   const [searchQuery, setSearchQuery] = useState("");
@@ -142,7 +44,7 @@ export default function FloorPlansPage() {
   const [selectedStyle, setSelectedStyle] = useState("All Styles");
   const [selectedType, setSelectedType] = useState("All Types");
   const [selectedBedrooms, setSelectedBedrooms] = useState("Any");
-  const [sortBy, setSortBy] = useState<SortOption>("popular");
+  const [sortBy, setSortBy] = useState<SortOption>("size-asc");
   const [favorites, setFavorites] = useState<string[]>([]);
 
   const toggleFavorite = (id: string) => {
@@ -176,8 +78,6 @@ export default function FloorPlansPage() {
     if (selectedBedrooms !== "Any") {
       if (selectedBedrooms === "Studio") {
         plans = plans.filter(p => p.bedrooms === 0);
-      } else if (selectedBedrooms === "3+") {
-        plans = plans.filter(p => p.bedrooms >= 3);
       } else {
         plans = plans.filter(p => p.bedrooms === parseInt(selectedBedrooms));
       }
@@ -185,9 +85,6 @@ export default function FloorPlansPage() {
 
     // Sort
     switch (sortBy) {
-      case "popular":
-        plans.sort((a, b) => (b.popular ? 1 : 0) - (a.popular ? 1 : 0));
-        break;
       case "size-asc":
         plans.sort((a, b) => a.sqFt - b.sqFt);
         break;
@@ -271,7 +168,6 @@ export default function FloorPlansPage() {
               onChange={(e) => setSortBy(e.target.value as SortOption)}
               className="h-10 px-4 rounded-lg border border-input bg-background text-sm"
             >
-              <option value="popular">Most Popular</option>
               <option value="size-asc">Size: Small to Large</option>
               <option value="size-desc">Size: Large to Small</option>
               <option value="price-asc">Price: Low to High</option>
@@ -343,7 +239,7 @@ export default function FloorPlansPage() {
                   <div className="flex items-center gap-4 text-sm text-muted-foreground mb-3">
                     <span className="flex items-center gap-1">
                       <Square className="h-4 w-4" />
-                      {plan.sqFt} sq ft
+                      {plan.sqFt.toLocaleString()} sq ft
                     </span>
                     <span className="flex items-center gap-1">
                       <Bed className="h-4 w-4" />

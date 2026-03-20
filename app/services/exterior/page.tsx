@@ -6,56 +6,56 @@ import { ArrowRight, Shield, CheckCircle, Paintbrush, Sun, Home } from "lucide-r
 const exteriorServices = [
   {
     title: "Exterior Painting",
-    description: "Professional prep and paint with premium exterior coatings. Proper surface preparation for long-lasting results.",
-    price: "Starting at $4,500",
+    description: "Professional prep and paint with premium exterior coatings. Complete surface preparation, priming, and multiple finish coats for lasting results.",
+    price: "Starting at $12,500",
   },
   {
     title: "Siding & Stucco",
-    description: "New siding installation or stucco repair and re-coating. Protect and beautify your home's exterior.",
-    price: "Starting at $8,000",
+    description: "New siding installation or complete stucco repair and re-coating. Transform your home's exterior with materials built for San Diego's climate.",
+    price: "Starting at $15,000",
   },
   {
     title: "Decks & Pergolas",
-    description: "Custom wood and composite decking, pergolas, and outdoor structures for San Diego living.",
-    price: "Starting at $6,000",
+    description: "Custom wood and composite decking, pergolas, and outdoor structures designed for California outdoor living.",
+    price: "Starting at $12,000",
   },
   {
     title: "Fencing & Gates",
     description: "Privacy fencing, decorative gates, and property enclosures. Wood, vinyl, metal, and composite options.",
-    price: "Starting at $3,500",
+    price: "Starting at $5,000",
   },
   {
     title: "Outdoor Living Spaces",
     description: "Custom patios, outdoor kitchens, fire pits, and entertainment areas designed for year-round enjoyment.",
-    price: "Starting at $12,000",
+    price: "Starting at $75,000",
   },
   {
     title: "Landscape Hardscaping",
     description: "Pavers, retaining walls, walkways, and stone work to enhance your outdoor environment.",
-    price: "Starting at $5,000",
+    price: "Starting at $25,000",
   },
 ];
 
 const features = [
   {
     icon: Sun,
-    title: "Weather Resistant",
-    description: "Materials and techniques selected for San Diego's climate. Built to withstand sun, salt air, and seasonal rain.",
+    title: "Elevate Your Property Value",
+    description: "Strategic exterior improvements can add 5-15% to your home's resale value while making it the standout property on your street.",
   },
   {
     icon: Home,
-    title: "Curb Appeal",
-    description: "Exterior improvements that make a strong first impression and increase property value.",
+    title: "Transform Your Lifestyle",
+    description: "Unlock your outdoor spaces for entertaining, relaxation, and everyday living. San Diego's climate is perfect for outdoor rooms you'll actually use.",
   },
   {
     icon: Shield,
-    title: "Property Protection",
-    description: "Proper exterior maintenance prevents costly damage from moisture, UV, and wear.",
+    title: "Build a More Intentional Home",
+    description: "A well-designed exterior isn't just maintenance - it's the finishing touch that ties your entire property together into a cohesive, polished whole.",
   },
   {
     icon: Paintbrush,
-    title: "Custom Design",
-    description: "Tailored designs that complement your home's architecture and your personal style.",
+    title: "Invest in Better Living",
+    description: "Quality exterior work creates spaces that enhance how you live every day - from morning coffee on a custom deck to evening gatherings around a fire pit.",
   },
 ];
 
@@ -86,7 +86,7 @@ export default function ExteriorPage() {
               From painting and siding to decks, fencing, and outdoor living spaces — complete exterior
               improvement services designed for San Diego homes and lifestyles.
             </p>
-            <p className="text-2xl font-bold text-primary mb-8">Starting at $3,500</p>
+            <p className="text-2xl font-bold text-primary mb-8">Starting at $12,000</p>
             <Link href="/contact">
               <Button size="lg" className="bg-primary hover:bg-primary-dark text-secondary font-semibold">
                 Schedule On-Site Consultation <ArrowRight className="h-5 w-5 ml-2" />

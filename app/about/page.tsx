@@ -9,12 +9,13 @@ import {
   Star
 } from "lucide-react";
 import Link from "next/link";
+import { COMPANY_INFO } from "@/lib/data/site-data";
 
 const stats = [
-  { value: "500+", label: "Projects Completed" },
-  { value: "12+", label: "Years in Construction" },
+  { value: COMPANY_INFO.stats.projectsCompleted, label: "Projects Completed" },
+  { value: `${COMPANY_INFO.yearsExperience}+`, label: "Years in Construction" },
   { value: "98%", label: "Client Satisfaction" },
-  { value: "50+", label: "ADUs Built" },
+  { value: COMPANY_INFO.stats.adusBuilt, label: "ADUs Built" },
 ];
 
 const values = [
@@ -72,7 +73,7 @@ export default function AboutPage() {
         <div className="container mx-auto px-4">
           <div className="max-w-3xl">
             <h1 className="text-4xl md:text-5xl font-bold mb-6">
-              12 Years in the Field. Built Different Since Day One.
+              {COMPANY_INFO.yearsExperience} Years in the Field. Built Different Since Day One.
             </h1>
             <p className="text-xl text-white/80 mb-8">
               Distinct Construction Solutions is a San Diego design-build firm founded by Jordan Talavera in 2022 &mdash; 

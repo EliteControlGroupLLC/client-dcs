@@ -1,17 +1,18 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { ArrowRight, Zap, Check, X } from "lucide-react";
+import { FLOOR_PLANS, getRentEstimate } from "@/lib/data/site-data";
 
 const aduTypes = [
-  { label: "Detached ADU (New Build)", perSqFt: 427, id: "detached" },
-  { label: "Attached ADU", perSqFt: 444, id: "attached" },
-  { label: "Garage Conversion (2-Car)", perSqFt: 0, flatCost: 120000, id: "garage-2" },
-  { label: "Garage Conversion (3-Car)", perSqFt: 0, flatCost: 150000, id: "garage-3" },
-  { label: "Two-Story ADU", perSqFt: 450, id: "two-story" },
+  { label: "Detached ADU (New Build)", perSqFt: 427, id: "detached", type: "detached" },
+  { label: "Attached ADU", perSqFt: 444, id: "attached", type: "attached" },
+  { label: "Garage Conversion (2-Car)", perSqFt: 0, flatCost: 120000, id: "garage-2", type: "garage-conversion" },
+  { label: "Garage Conversion (3-Car)", perSqFt: 0, flatCost: 150000, id: "garage-3", type: "garage-conversion" },
+  { label: "Two-Story ADU", perSqFt: 450, id: "two-story", type: "two-story" },
 ];
 
 const sizeOptions = [400, 500, 700, 1000, 1200];
@@ -26,13 +27,62 @@ export default function InstantADUEstimatorPage() {
   const selected = aduTypes[typeIndex];
   const isGarage = selected.id.startsWith("garage");
 
-  const baseCost = isGarage
-    ? (selected as { flatCost: number }).flatCost
-    : size * selected.perSqFt;
+  // Calculate available bedroom options based on size
+  const maxBedrooms = useMemo(() => {
+    if (size <= 400) return 1;
+    if (size <= 500) return 1;
+    if (size <= 700) return 2;
+    if (size <= 1000) return 3;
+    return 4; // 1200 sq ft can support up to 4 bedrooms
+  }, [size]);
 
-  const lowEstimate = Math.round(baseCost * 0.95);
-  const highEstimate = Math.round(baseCost * 1.1);
-  const estimatedRent = Math.round(size * 4.2);
+  // Adjust bedrooms if current selection exceeds max
+  const effectiveBedrooms = Math.min(bedrooms, maxBedrooms);
+
+  // Calculate price based on floor plan data or formula
+  const { baseCost, lowEstimate, highEstimate } = useMemo(() => {
+    if (isGarage) {
+      const flat = (selected as { flatCost: number }).flatCost;
+      return {
+        baseCost: flat,
+        lowEstimate: Math.round(flat * 0.95),
+        highEstimate: Math.round(flat * 1.1),
+      };
+    }
+
+    // Try to find matching floor plan
+    const matchingPlan = FLOOR_PLANS.find(p => 
+      p.sqFt === size && 
+      (selected.type === "two-story" ? p.type === "Two-Story" : 
+       selected.type === "attached" ? p.type === "Attached" : p.type === "Detached")
+    );
+
+    if (matchingPlan) {
+      return {
+        baseCost: matchingPlan.priceLow,
+        lowEstimate: matchingPlan.priceLow,
+        highEstimate: matchingPlan.priceHigh,
+      };
+    }
+
+    // Fallback to per-sqft calculation
+    const base = size * selected.perSqFt;
+    return {
+      baseCost: base,
+      lowEstimate: Math.round(base * 0.95),
+      highEstimate: Math.round(base * 1.1),
+    };
+  }, [isGarage, selected, size]);
+
+  // Calculate rent based on unified rent assumptions
+  const rentEstimate = useMemo(() => {
+    const rent = getRentEstimate(
+      isGarage ? 400 : size,
+      selected.type,
+      effectiveBedrooms
+    );
+    return rent;
+  }, [isGarage, size, selected.type, effectiveBedrooms]);
 
   const included = [
     "Architectural plans & engineering",
@@ -116,12 +166,12 @@ export default function InstantADUEstimatorPage() {
               <div className="grid grid-cols-3 gap-4">
                 <div>
                   <label className="block text-sm font-semibold text-secondary mb-2">Bedrooms</label>
-                  <div className="flex gap-2">
-                    {[0, 1, 2, 3].map((b) => (
+                  <div className="flex flex-wrap gap-2">
+                    {[0, 1, 2, 3, 4].filter(b => b <= maxBedrooms || b === 0).map((b) => (
                       <button
                         key={b}
                         onClick={() => setBedrooms(b)}
-                        className={`flex-1 py-2 rounded-lg border text-sm font-medium transition-all ${
+                        className={`flex-1 min-w-[40px] py-2 rounded-lg border text-sm font-medium transition-all ${
                           bedrooms === b
                             ? "border-primary bg-primary/5 text-secondary"
                             : "border-gray-200 text-muted-foreground hover:border-primary/30"
@@ -180,13 +230,18 @@ export default function InstantADUEstimatorPage() {
                     ${lowEstimate.toLocaleString()} &ndash; ${highEstimate.toLocaleString()}
                   </p>
                   <p className="text-white/50 text-sm">
-                    {selected.label} &bull; {isGarage ? "Standard scope" : `${size.toLocaleString()} sq ft`} &bull; {bedrooms === 0 ? "Studio" : `${bedrooms} Bed`}, {bathrooms} Bath
+                    {selected.label} &bull; {isGarage ? "Standard scope" : `${size.toLocaleString()} sq ft`} &bull; {effectiveBedrooms === 0 ? "Studio" : `${effectiveBedrooms} Bed`}, {bathrooms} Bath
                   </p>
                 </div>
 
                 <div className="border-t border-white/10 pt-6 mb-4">
                   <p className="text-white/60 text-sm mb-2">Estimated Rental Potential</p>
-                  <p className="text-2xl font-bold text-white">${estimatedRent.toLocaleString()}/mo</p>
+                  <p className="text-2xl font-bold text-white">
+                    ${rentEstimate.low.toLocaleString()} - ${rentEstimate.high.toLocaleString()}/mo
+                  </p>
+                  <p className="text-white/40 text-xs mt-1">
+                    Based on San Diego market rates for {isGarage ? "garage conversion" : `${size.toLocaleString()} sq ft`} {selected.type === "two-story" ? "two-story " : ""}ADUs
+                  </p>
                 </div>
 
                 <div className="border-t border-white/10 pt-6 space-y-4 mb-6">

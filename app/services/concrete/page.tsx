@@ -16,7 +16,7 @@ const concreteServices = [
   {
     title: "Retaining Walls",
     description: "Engineered retaining walls for hillside properties, terracing, and landscape support. Block or poured concrete.",
-    price: "Starting at $85/linear ft",
+    price: "Starting at $200/linear ft",
   },
   {
     title: "Foundations & Slabs",

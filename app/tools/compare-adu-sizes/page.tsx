@@ -5,15 +5,17 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { ArrowRight, ArrowLeftRight, Check } from "lucide-react";
+import { FLOOR_PLANS_SORTED, getRentEstimate } from "@/lib/data/site-data";
 
+// Build comparison options from floor plans
 const aduOptions = [
   {
     sqFt: 400,
     label: "400 sq ft",
     bedBath: "Studio / 1 Bed, 1 Bath",
     useCase: "Compact rental, home office, guest suite",
-    estimatedCost: "$120K – $175K",
-    estimatedRent: "$1,600 – $2,000/mo",
+    estimatedCost: "$120K - $175K",
+    estimatedRent: "$2,000 - $2,800/mo",
     yardDemand: "Minimal (~500 sq ft footprint)",
     bestFor: "Garage conversions, tight lots, budget-conscious builds",
   },
@@ -22,40 +24,40 @@ const aduOptions = [
     label: "500 sq ft",
     bedBath: "1 Bed, 1 Bath",
     useCase: "Rental unit, young professional, in-law suite",
-    estimatedCost: "$213K – $222K",
-    estimatedRent: "$2,000 – $2,400/mo",
+    estimatedCost: "$220K - $225K",
+    estimatedRent: "$2,800 - $3,200/mo",
     yardDemand: "Low (~600 sq ft footprint)",
     bestFor: "First-time ADU builders, strong rental ROI",
   },
   {
     sqFt: 700,
     label: "700 sq ft",
-    bedBath: "1–2 Bed, 1 Bath",
+    bedBath: "1-2 Bed, 1 Bath",
     useCase: "Family ADU, long-term rental, multigenerational",
-    estimatedCost: "$299K – $311K",
-    estimatedRent: "$2,500 – $3,000/mo",
+    estimatedCost: "$299K - $311K",
+    estimatedRent: "$3,000 - $3,700/mo",
     yardDemand: "Moderate (~800 sq ft footprint)",
     bestFor: "Balanced size and ROI, flexible use",
   },
   {
     sqFt: 1000,
     label: "1,000 sq ft",
-    bedBath: "2 Bed, 1–2 Bath",
+    bedBath: "2-3 Bed, 2 Bath",
     useCase: "Full family unit, premium rental, aging parents",
-    estimatedCost: "$427K – $444K",
-    estimatedRent: "$3,200 – $3,800/mo",
+    estimatedCost: "$425K - $430K",
+    estimatedRent: "$4,000 - $4,500/mo",
     yardDemand: "Significant (~1,100 sq ft footprint)",
     bestFor: "Larger lots, family housing, higher rental income",
   },
   {
     sqFt: 1200,
     label: "1,200 sq ft",
-    bedBath: "2–3 Bed, 2 Bath",
+    bedBath: "3-4 Bed, 2-2.5 Bath",
     useCase: "Full-size home, two-story option, maximum rental",
-    estimatedCost: "$495K – $512K",
-    estimatedRent: "$3,800 – $4,200/mo",
+    estimatedCost: "$495K - $520K",
+    estimatedRent: "$5,000 - $6,500/mo",
     yardDemand: "High (~1,300 sq ft or two-story)",
-    bestFor: "Large lots, maximum livable space, two-story builds",
+    bestFor: "Large lots, maximum livable space, two-story builds, up to 4 bedrooms",
   },
 ];
 

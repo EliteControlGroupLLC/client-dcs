@@ -41,10 +41,10 @@ const finishLevels = [
 ];
 
 const addOns = [
-  { label: "Island Addition", cost: 5000 },
-  { label: "Open Floor Plan Conversion", cost: 8000 },
-  { label: "New Lighting Design", cost: 3000 },
-  { label: "Plumbing Relocation", cost: 4000 },
+  { label: "Island Addition", cost: 15000, displayCost: "Starting at $15,000" },
+  { label: "Open Floor Plan Conversion", cost: 15000, displayCost: "Starting at $15,000" },
+  { label: "New Lighting Design", cost: 5000, displayCost: "Starting at $5,000" },
+  { label: "Plumbing Relocation", cost: 4000, displayCost: "Starting at $4,000" },
 ];
 
 export default function KitchenCalculatorPage() {
