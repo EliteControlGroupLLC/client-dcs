@@ -125,7 +125,7 @@ export function Process() {
                     </h3>
 
                     {/* Description */}
-                    <p className="text-white/60 text-sm leading-relaxed mb-4">
+                    <p className="text-white/60 text-sm leading-relaxed mb-4 text-center text-balance">
                       {step.description}
                     </p>
 
