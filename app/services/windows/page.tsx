@@ -6,46 +6,46 @@ import { ArrowRight, Shield, CheckCircle, Sun, Thermometer, Eye } from "lucide-r
 const windowTypes = [
   {
     title: "Vinyl Windows",
-    description: "Energy-efficient vinyl frames with double-pane glass. Low maintenance, excellent insulation, and great value.",
-    price: "Starting at $450/window",
+    description: "Premium vinyl frames with advanced multi-chamber construction and Low-E glass. Exceptional thermal performance, minimal maintenance, and industry-leading warranties.",
+    price: "Starting at $750/window installed",
   },
   {
     title: "Aluminum Windows",
-    description: "Sleek, modern aluminum frames ideal for contemporary homes. Slim profiles with maximum glass area.",
-    price: "Starting at $600/window",
+    description: "Architectural-grade aluminum frames with thermal breaks for contemporary and mid-century modern homes. Ultra-slim sightlines maximize glass area and natural light.",
+    price: "Starting at $1,800/window installed",
   },
   {
     title: "Fiberglass Windows",
-    description: "Premium fiberglass frames with superior durability and thermal performance. Paintable and long-lasting.",
-    price: "Starting at $750/window",
+    description: "Premium composite fiberglass with the lowest expansion rate of any frame material. Superior structural integrity, paintable exteriors, and exceptional durability for decades.",
+    price: "Starting at $800/window installed",
   },
   {
     title: "Sliding Glass Doors",
-    description: "Large sliding glass doors for seamless indoor-outdoor living. Energy efficient with smooth operation.",
-    price: "Starting at $1,800/door",
+    description: "Premium multi-panel sliding systems for seamless indoor-outdoor California living. Smooth operation, tight seals, and maximum glass for unobstructed views.",
+    price: "Starting at $3,000/door installed",
   },
 ];
 
 const features = [
   {
     icon: Thermometer,
-    title: "Energy Efficient",
-    description: "Low-E glass and insulated frames reduce energy costs and keep your home comfortable year-round.",
+    title: "Lower Energy Bills",
+    description: "Dual-pane Low-E glass with argon fill cuts heat transfer by up to 50%. Your HVAC works less, and you feel the difference in comfort and monthly bills.",
   },
   {
     icon: Shield,
-    title: "Enhanced Security",
-    description: "Multi-point locking systems and impact-resistant glass options for safety and peace of mind.",
+    title: "Quiet Your Home",
+    description: "Premium multi-pane construction creates an acoustic barrier that dramatically reduces street noise, traffic, and neighborhood sounds.",
   },
   {
     icon: Sun,
-    title: "UV Protection",
-    description: "Advanced coatings block harmful UV rays while letting natural light flood your spaces.",
+    title: "Protect Your Interiors",
+    description: "Advanced UV-blocking coatings prevent fading of furniture, flooring, and artwork while still letting natural light flood your spaces.",
   },
   {
     icon: Eye,
-    title: "Curb Appeal",
-    description: "Modern window designs that enhance your home's appearance and increase property value.",
+    title: "Add Resale Value",
+    description: "Quality window replacements consistently rank among the highest-ROI home improvements, often returning 70-80% of investment at resale.",
   },
 ];
 
@@ -73,10 +73,12 @@ export default function WindowsPage() {
               Window Replacement & Installation
             </h1>
             <p className="text-xl text-white/80 mb-8">
-              Upgrade your home with energy-efficient windows. Professional installation of vinyl,
-              aluminum, and fiberglass windows with proper weatherproofing and trim work.
+              Transform your home with premium window systems from top manufacturers. We install 
+              high-performance vinyl, architectural aluminum, and composite fiberglass windows - each 
+              professionally measured, sealed, and trimmed to ensure years of trouble-free operation 
+              and maximum energy efficiency.
             </p>
-            <p className="text-2xl font-bold text-primary mb-8">Starting at $450/window</p>
+            <p className="text-2xl font-bold text-primary mb-8">Starting at $750/window installed</p>
             <Link href="/contact">
               <Button size="lg" className="bg-primary hover:bg-primary-dark text-secondary font-semibold">
                 Schedule On-Site Consultation <ArrowRight className="h-5 w-5 ml-2" />

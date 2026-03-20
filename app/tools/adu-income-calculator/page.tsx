@@ -5,13 +5,14 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { ArrowRight, DollarSign, TrendingUp } from "lucide-react";
+import { getRentEstimate } from "@/lib/data/site-data";
 
 const aduSizes = [
-  { label: "400 sq ft (Studio)", sqFt: 400, rent: 1800 },
-  { label: "500 sq ft (1 Bed)", sqFt: 500, rent: 2200 },
-  { label: "700 sq ft (1-2 Bed)", sqFt: 700, rent: 2800 },
-  { label: "1,000 sq ft (2 Bed)", sqFt: 1000, rent: 3500 },
-  { label: "1,200 sq ft (2-3 Bed)", sqFt: 1200, rent: 4000 },
+  { label: "400 sq ft (Studio)", sqFt: 400, bedrooms: 0, type: "detached" },
+  { label: "500 sq ft (1 Bed)", sqFt: 500, bedrooms: 1, type: "detached" },
+  { label: "700 sq ft (1-2 Bed)", sqFt: 700, bedrooms: 1, type: "detached" },
+  { label: "1,000 sq ft (2-3 Bed)", sqFt: 1000, bedrooms: 2, type: "detached" },
+  { label: "1,200 sq ft (3-4 Bed)", sqFt: 1200, bedrooms: 3, type: "detached" },
 ];
 
 export default function ADUIncomeCalculatorPage() {
@@ -20,7 +21,9 @@ export default function ADUIncomeCalculatorPage() {
   const [customRent, setCustomRent] = useState<number | null>(null);
 
   const size = aduSizes[sizeIndex];
-  const monthlyRent = customRent ?? size.rent;
+  const rentData = getRentEstimate(size.sqFt, size.type, size.bedrooms);
+  const baseRent = Math.round((rentData.low + rentData.high) / 2);
+  const monthlyRent = customRent ?? baseRent;
   const annualIncome = monthlyRent * 12;
   const monthsToBreakeven = Math.ceil(projectCost / monthlyRent);
   const yearsToBreakeven = Math.round(monthsToBreakeven / 12 * 10) / 10;
@@ -53,20 +56,26 @@ export default function ADUIncomeCalculatorPage() {
               <div>
                 <label className="block text-sm font-semibold text-secondary mb-3">ADU Size</label>
                 <div className="space-y-2">
-                  {aduSizes.map((s, i) => (
-                    <button
-                      key={s.label}
-                      onClick={() => { setSizeIndex(i); setCustomRent(null); }}
-                      className={`w-full text-left px-4 py-3 rounded-lg border transition-all ${
-                        sizeIndex === i
-                          ? "border-primary bg-primary/5 text-secondary font-medium"
-                          : "border-gray-200 text-muted-foreground hover:border-primary/30"
-                      }`}
-                    >
-                      <span>{s.label}</span>
-                      <span className="text-primary ml-2 text-sm font-semibold">~${s.rent.toLocaleString()}/mo</span>
-                    </button>
-                  ))}
+                  {aduSizes.map((s, i) => {
+                    const rent = getRentEstimate(s.sqFt, s.type, s.bedrooms);
+                    const avgRent = Math.round((rent.low + rent.high) / 2);
+                    return (
+                      <button
+                        key={s.label}
+                        onClick={() => { setSizeIndex(i); setCustomRent(null); }}
+                        className={`w-full text-left px-4 py-3 rounded-lg border transition-all ${
+                          sizeIndex === i
+                            ? "border-primary bg-primary/5 text-secondary font-medium"
+                            : "border-gray-200 text-muted-foreground hover:border-primary/30"
+                        }`}
+                      >
+                        <span>{s.label}</span>
+                        <span className="text-primary ml-2 text-sm font-semibold">
+                          ~${avgRent.toLocaleString()}/mo
+                        </span>
+                      </button>
+                    );
+                  })}
                 </div>
               </div>
 
@@ -77,7 +86,7 @@ export default function ADUIncomeCalculatorPage() {
                 <input
                   type="range"
                   min={80000}
-                  max={500000}
+                  max={800000}
                   step={5000}
                   value={projectCost}
                   onChange={(e) => setProjectCost(Number(e.target.value))}
@@ -85,7 +94,7 @@ export default function ADUIncomeCalculatorPage() {
                 />
                 <div className="flex justify-between text-xs text-muted-foreground mt-1">
                   <span>$80K</span>
-                  <span>$500K</span>
+                  <span>$800K</span>
                 </div>
               </div>
 
@@ -95,16 +104,16 @@ export default function ADUIncomeCalculatorPage() {
                 </label>
                 <input
                   type="range"
-                  min={800}
-                  max={6000}
+                  min={1500}
+                  max={7000}
                   step={100}
                   value={monthlyRent}
                   onChange={(e) => setCustomRent(Number(e.target.value))}
                   className="w-full accent-primary"
                 />
                 <div className="flex justify-between text-xs text-muted-foreground mt-1">
-                  <span>$800/mo</span>
-                  <span>$6,000/mo</span>
+                  <span>$1,500/mo</span>
+                  <span>$7,000/mo</span>
                 </div>
               </div>
             </div>

@@ -11,6 +11,7 @@ import {
   Star
 } from "lucide-react";
 import { useScrollAnimation, useStaggeredAnimation } from "@/hooks/use-scroll-animation";
+import { COMPANY_INFO } from "@/lib/data/site-data";
 
 const features = [
   {
@@ -61,9 +62,9 @@ const satisfactionStats = [
 ];
 
 const bottomMetrics = [
-  "500+ Projects",
-  "15+ Years Experience",
-  "$50M+ Project Value Delivered",
+  `${COMPANY_INFO.stats.projectsCompleted} Projects`,
+  `${COMPANY_INFO.yearsExperience}+ Years Experience`,
+  `${COMPANY_INFO.stats.valueDelivered} Project Value Delivered`,
 ];
 
 export function WhyChooseUs() {

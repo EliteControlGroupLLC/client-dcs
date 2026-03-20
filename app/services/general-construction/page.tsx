@@ -25,14 +25,9 @@ const serviceCategories = [
     price: "Starting at $2,500",
   },
   {
-    title: "Earthquake Retrofitting",
-    description: "Seismic upgrades to protect your home. Foundation bolting, cripple wall bracing, and soft-story retrofitting.",
-    price: "Starting at $5,000",
-  },
-  {
     title: "General Repairs & Maintenance",
     description: "Handyman-level to major repair services. Drywall, framing, doors, trim, and general home maintenance.",
-    price: "Starting at $500",
+    price: "Starting at $800",
   },
 ];
 
@@ -86,7 +81,7 @@ export default function GeneralConstructionPage() {
               Full-service residential construction for San Diego homeowners. Room additions, structural work,
               system upgrades, and general repairs — all handled by licensed professionals under one roof.
             </p>
-            <p className="text-2xl font-bold text-primary mb-8">Projects Starting at $500</p>
+            <p className="text-2xl font-bold text-primary mb-8">Projects Starting at $800</p>
             <Link href="/contact">
               <Button size="lg" className="bg-primary hover:bg-primary-dark text-secondary font-semibold">
                 Schedule On-Site Consultation <ArrowRight className="h-5 w-5 ml-2" />

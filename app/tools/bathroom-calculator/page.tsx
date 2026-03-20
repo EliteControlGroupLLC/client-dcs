@@ -42,11 +42,11 @@ const finishLevels = [
 ];
 
 const addOns = [
-  { label: "Heated Floor", cost: 2500 },
-  { label: "Frameless Glass Shower Door", cost: 2000 },
-  { label: "Freestanding Soaking Tub", cost: 3500 },
-  { label: "Double Vanity Upgrade", cost: 2000 },
-  { label: "Plumbing Relocation", cost: 3500 },
+  { label: "Heated Floor", cost: 10000, displayCost: "Starting at $10,000" },
+  { label: "Frameless Glass Shower Door", cost: 2500, displayCost: "Starting at $2,500" },
+  { label: "Freestanding Soaking Tub", cost: 3500, displayCost: "Starting at $3,500" },
+  { label: "Double Vanity Upgrade", cost: 2000, displayCost: "Starting at $2,000" },
+  { label: "Plumbing Relocation", cost: 3500, displayCost: "Starting at $3,500" },
 ];
 
 export default function BathroomCalculatorPage() {
