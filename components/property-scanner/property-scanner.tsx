@@ -21,13 +21,13 @@ import { ConfidenceScoreCard } from "./confidence-score-card";
 import { ZoningEnrichmentCard } from "./zoning-enrichment-card";
 import { RentEstimateCard } from "./rent-estimate-card";
 import { RentScenariosCard } from "./rent-scenarios-card";
-import { DetectedStructuresCard } from "./detected-structures-card";
+// Removed: DetectedStructuresCard - not client-facing per requirements
 import { ImageryWarningBanner } from "./imagery-warning-banner";
 import { SiteConstraintsCard } from "./site-constraints-card";
-import { DataSourcesBadge } from "./data-sources-badge";
+// Removed: DataSourcesBadge - not client-facing per requirements
 import { LeadCaptureForm } from "./lead-capture-form";
 import { PropertyReportModal } from "./property-report-modal";
-import { ShowSourcesPanel } from "./show-sources-panel";
+// Removed: ShowSourcesPanel - not client-facing per requirements
 import { analyzeProperty } from "@/lib/property-intelligence";
 import type { PropertyAnalysisResult } from "@/lib/property-intelligence";
 import { trackScanCompleted, trackLeadSubmitted } from "@/lib/analytics";
