@@ -442,7 +442,7 @@ export async function analyzeProperty(address: string): Promise<PropertyAnalysis
   
   // Step 9b: Generate UNIFIED recommendation that drives rent and financial scenarios
   // This is the single source of truth for the entire page
-  const zipCode = geocoded?.zip || "92115"; // Default to standard San Diego zip if not found
+  const zipCode = geocoded?.components?.zip || "92115"; // Default to standard San Diego zip if not found
   let unifiedRecommendation: UnifiedRecommendation | undefined;
   
   try {
