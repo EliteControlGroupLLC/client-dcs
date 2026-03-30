@@ -75,9 +75,23 @@ export function PropertyReportModal({
           <ReportSection icon={Building} title="Property Summary">
             <ReportRow label="Address" value={analysisData.property.address.value} />
             <ReportRow label="Lot Size" value={`${analysisData.property.lotSizeSqFt.value.toLocaleString()} sq ft`} />
-            <ReportRow label="Home Area" value={`${analysisData.property.homeAreaSqFt.value.toLocaleString()} sq ft`} />
+            <ReportRow label="Living Area" value={`${analysisData.property.homeAreaSqFt.value.toLocaleString()} sq ft`} />
+            {analysisData.geometryAnalysis?.areaSummary && (
+              <>
+                <ReportRow label="Main Footprint" value={`${analysisData.geometryAnalysis.areaSummary.mainFootprintSqFt.toLocaleString()} sq ft`} />
+                {analysisData.geometryAnalysis.areaSummary.mainLivingSqFt !== analysisData.geometryAnalysis.areaSummary.mainFootprintSqFt && (
+                  <ReportRow label="Main Living Area" value={`${analysisData.geometryAnalysis.areaSummary.mainLivingSqFt.toLocaleString()} sq ft`} />
+                )}
+              </>
+            )}
             <ReportRow label="Zoning" value={analysisData.property.zoning.value} />
             <ReportRow label="Slope" value={analysisData.property.slope.value} />
+            {analysisData.geometryAnalysis && (
+              <ReportRow
+                label="Geometry"
+                value={`${analysisData.geometryAnalysis.geometryStatus.replace(/-/g, " ")} (${analysisData.geometryAnalysis.geometryConfidence}%)`}
+              />
+            )}
           </ReportSection>
 
           {/* Jurisdiction */}
@@ -174,14 +188,47 @@ export function PropertyReportModal({
             </ReportSection>
           )}
 
-          {/* Detected Structures */}
-          {analysisData.detectedStructures && analysisData.detectedStructures.length > 1 && (
+          {/* Detected Structures (v7: polygon-based) */}
+          {analysisData.geometryAnalysis && analysisData.geometryAnalysis.structures.length > 0 ? (
+            <ReportSection icon={Home} title="Detected Structures (Polygon)">
+              {analysisData.geometryAnalysis.structures.map((s, i) => (
+                <ReportRow
+                  key={`${s.classification}-${i}`}
+                  label={s.classification.replace(/-/g, " ")}
+                  value={`${s.areaSqFt.toLocaleString()} sq ft (${s.confidence}% conf.) — ${s.source.split("(")[0].trim()}`}
+                />
+              ))}
+              {analysisData.geometryAnalysis.placement && (
+                <div className="mt-2 pt-2 border-t border-border">
+                  <p className="text-[10px] font-semibold text-secondary mb-1">Measured Setbacks</p>
+                  <div className="grid grid-cols-2 gap-1">
+                    <ReportRow label="Front" value={`${analysisData.geometryAnalysis.placement.measuredSetbacks.frontFt.toFixed(1)} ft`} />
+                    <ReportRow label="Rear" value={`${analysisData.geometryAnalysis.placement.measuredSetbacks.rearFt.toFixed(1)} ft`} />
+                    <ReportRow label="Left" value={`${analysisData.geometryAnalysis.placement.measuredSetbacks.leftFt.toFixed(1)} ft`} />
+                    <ReportRow label="Right" value={`${analysisData.geometryAnalysis.placement.measuredSetbacks.rightFt.toFixed(1)} ft`} />
+                  </div>
+                </div>
+              )}
+              {analysisData.geometryAnalysis.leftoverZones.length > 0 && (
+                <div className="mt-2 pt-2 border-t border-border">
+                  <p className="text-[10px] font-semibold text-secondary mb-1">Buildable Zones</p>
+                  {analysisData.geometryAnalysis.leftoverZones.map((z, i) => (
+                    <ReportRow
+                      key={`zone-${i}`}
+                      label={z.position.replace(/-/g, " ")}
+                      value={`${z.areaSqFt.toLocaleString()} sq ft — ${z.suitableFor.join(", ") || "limited"}`}
+                    />
+                  ))}
+                </div>
+              )}
+            </ReportSection>
+          ) : analysisData.detectedStructures && analysisData.detectedStructures.length > 1 ? (
             <ReportSection icon={Home} title="Detected Structures">
               {analysisData.detectedStructures.map((s, i) => (
                 <ReportRow key={`${s.type}-${i}`} label={s.type} value={`${s.areaSqFt.toLocaleString()} sq ft (${s.confidence}% conf.)`} />
               ))}
             </ReportSection>
-          )}
+          ) : null}
 
           {/* Confidence */}
           {analysisData.confidenceScore !== undefined && (
@@ -284,9 +331,19 @@ function generateReportText(
     "",
     "─── PROPERTY SUMMARY ───",
     `Lot Size: ${data.property.lotSizeSqFt.value.toLocaleString()} sq ft`,
-    `Home Area: ${data.property.homeAreaSqFt.value.toLocaleString()} sq ft`,
+    `Living Area: ${data.property.homeAreaSqFt.value.toLocaleString()} sq ft`,
+    ...(data.geometryAnalysis?.areaSummary ? [
+      `Main Footprint: ${data.geometryAnalysis.areaSummary.mainFootprintSqFt.toLocaleString()} sq ft`,
+      `Main Living Area: ${data.geometryAnalysis.areaSummary.mainLivingSqFt.toLocaleString()} sq ft`,
+      `Total Structure Footprint: ${data.geometryAnalysis.areaSummary.totalStructureFootprintSqFt.toLocaleString()} sq ft`,
+    ] : []),
     `Zoning: ${data.property.zoning.value}`,
     `Slope: ${data.property.slope.value}`,
+    ...(data.geometryAnalysis ? [
+      `Geometry: ${data.geometryAnalysis.geometryStatus} (${data.geometryAnalysis.geometryConfidence}% confidence)`,
+      `Parcel Source: ${data.geometryAnalysis.parcelSource}`,
+      `Footprint Source: ${data.geometryAnalysis.footprintSource}`,
+    ] : []),
     "",
   ];
 
@@ -331,8 +388,27 @@ function generateReportText(
     lines.push("");
   }
 
-  // Detected Structures
-  if (data.detectedStructures && data.detectedStructures.length > 1) {
+  // Detected Structures (v7 polygon-based)
+  if (data.geometryAnalysis && data.geometryAnalysis.structures.length > 0) {
+    lines.push("─── DETECTED STRUCTURES (POLYGON) ───");
+    for (const s of data.geometryAnalysis.structures) {
+      lines.push(`  ${s.classification}: ${s.areaSqFt.toLocaleString()} sq ft (${s.confidence}% confidence) — ${s.source}`);
+    }
+    if (data.geometryAnalysis.placement) {
+      lines.push("");
+      lines.push("  Measured Setbacks:");
+      const sb = data.geometryAnalysis.placement.measuredSetbacks;
+      lines.push(`    Front: ${sb.frontFt.toFixed(1)} ft | Rear: ${sb.rearFt.toFixed(1)} ft | Left: ${sb.leftFt.toFixed(1)} ft | Right: ${sb.rightFt.toFixed(1)} ft`);
+    }
+    if (data.geometryAnalysis.leftoverZones.length > 0) {
+      lines.push("");
+      lines.push("  Buildable Zones:");
+      for (const z of data.geometryAnalysis.leftoverZones) {
+        lines.push(`    ${z.position}: ${z.areaSqFt.toLocaleString()} sq ft — ${z.suitableFor.join(", ") || "limited"}`);
+      }
+    }
+    lines.push("");
+  } else if (data.detectedStructures && data.detectedStructures.length > 1) {
     lines.push("─── DETECTED STRUCTURES ───");
     for (const s of data.detectedStructures) {
       lines.push(`  ${s.type}: ${s.areaSqFt.toLocaleString()} sq ft (${s.confidence}% confidence)`);

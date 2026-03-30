@@ -1,11 +1,21 @@
-// Source Cross-Reference & Reconciliation Engine (v6)
+// Source Cross-Reference & Reconciliation Engine (v6 + v7)
 // Compares multiple data sources per field, applies tier-based priority,
 // detects discrepancies, scores confidence, and produces a full audit trail.
 //
-// Source Priority Hierarchy:
-//   Tier 1 — Primary / Trusted / Structured (Google Places, ATTOM, official jurisdiction, Zoneomics, RentCast)
-//   Tier 2 — Geometry / Visual Validation (parcel polygons, footprint vectors, OSM, slope/terrain)
-//   Tier 3 — Supplemental Reference (Zillow, Redfin, Realtor.com — context only, never primary)
+// Source Policy Hierarchy:
+//   PRIMARY BACKBONE (never overridden by reference-only sources):
+//     - ATTOM Property API (parcel/property facts)
+//     - Official city/county/state sources (zoning, ADU regulations, setbacks)
+//     - Parcel geometry / footprint vectors (assessor-linked structured data)
+//     - Zoneomics (zoning intelligence)
+//     - RentCast (market rent data)
+//     - Google Places (geocoding)
+//
+//   REFERENCE ONLY (never primary legal truth):
+//     - Zillow, Realtor.com, Redfin
+//     - May cross-check living area, bedroom/bath count, improvements, market context
+//     - Must NOT override backbone for: lot size, APN, parcel geometry, zoning,
+//       legal feasibility, setbacks, ADU/JADU rules
 
 import type {
   SourceAudit,
@@ -14,6 +24,7 @@ import type {
   DiscrepancyRecord,
   FieldVerificationStatus,
   SourceTier,
+  SourcePolicy,
 } from "./types";
 import type { AttomPropertyData } from "./attom-service";
 import type { OSMPropertyData } from "./osm-service";
@@ -38,9 +49,15 @@ export interface ReconciliationInput {
   resolvedParcelShape: string;
   resolvedApn: string;
   bestRecommendation: string;
+  // v7 geometry fields
+  geometryStatus?: "polygon-verified" | "polygon-estimated" | "rectangle-fallback";
+  parcelSource?: string;
+  footprintSource?: string;
+  placementMethod?: string;
+  geometryConfidence?: number;
 }
 
-// ─── Tier weights for confidence scoring ───
+// ─── Source Classification ───
 
 const TIER_WEIGHT: Record<SourceTier, number> = {
   tier1: 1.0,
@@ -48,563 +65,447 @@ const TIER_WEIGHT: Record<SourceTier, number> = {
   tier3: 0.4,
 };
 
-// ─── Helpers ───
+/** Classify a source name into its policy tier */
+function classifySource(sourceName: string): { tier: SourceTier; policy: SourcePolicy } {
+  const lower = sourceName.toLowerCase();
 
-function now(): string {
-  return new Date().toISOString();
+  // PRIMARY BACKBONE sources
+  if (lower.includes("attom")) return { tier: "tier1", policy: "primary-backbone" };
+  if (lower.includes("google") || lower.includes("geocod")) return { tier: "tier1", policy: "primary-backbone" };
+  if (lower.includes("zoneomics")) return { tier: "tier1", policy: "primary-backbone" };
+  if (lower.includes("rentcast")) return { tier: "tier1", policy: "primary-backbone" };
+  if (lower.includes("city") || lower.includes("municipal") || lower.includes("county") || lower.includes("state")) {
+    return { tier: "tier1", policy: "primary-backbone" };
+  }
+  if (lower.includes("assessor") || lower.includes("official")) return { tier: "tier1", policy: "primary-backbone" };
+
+  // TIER 2 — Geometry / Visual Validation
+  if (lower.includes("osm") || lower.includes("openstreetmap") || lower.includes("overpass")) {
+    return { tier: "tier2", policy: "primary-backbone" };
+  }
+  if (lower.includes("polygon") || lower.includes("footprint") || lower.includes("vector")) {
+    return { tier: "tier2", policy: "primary-backbone" };
+  }
+  if (lower.includes("nominatim")) return { tier: "tier2", policy: "primary-backbone" };
+  if (lower.includes("mapbox") || lower.includes("elevation")) return { tier: "tier2", policy: "primary-backbone" };
+
+  // REFERENCE ONLY sources
+  if (lower.includes("zillow") || lower.includes("redfin") || lower.includes("realtor")) {
+    return { tier: "tier3", policy: "reference-only" };
+  }
+
+  // Default to tier2 backbone for unknown sources
+  return { tier: "tier2", policy: "primary-backbone" };
 }
 
-function statusFromConfidence(confidence: number): FieldVerificationStatus {
-  if (confidence >= 90) return "verified";
-  if (confidence >= 70) return "estimated";
-  if (confidence >= 50) return "inferred";
-  return "under-review";
-}
+// ─── Reconciliation Helpers ───
 
-/**
- * Reconcile a numeric field from multiple source candidates.
- * Uses tier priority, then confidence, with discrepancy detection.
- */
 function reconcileNumeric(
   fieldName: string,
   candidates: SourceCandidate<number>[],
-  discrepancies: DiscrepancyRecord[],
-  tolerancePercent: number = 20
-): ReconciledField<number> {
+  tolerancePercent: number = 10,
+  isCritical: boolean = false
+): { field: ReconciledField<number>; discrepancies: DiscrepancyRecord[] } {
+  const discrepancies: DiscrepancyRecord[] = [];
+
   if (candidates.length === 0) {
     return {
-      finalValue: 0,
-      finalConfidence: 0,
-      finalStatus: "under-review",
-      selectedSource: "none",
-      selectionReason: "No source data available",
-      candidates: [],
-      discrepancyDetected: false,
+      field: {
+        finalValue: 0,
+        finalConfidence: 0,
+        finalStatus: isCritical ? "under-review" : "estimated",
+        selectedSource: "none",
+        selectionReason: "No data available",
+        candidates: [],
+        discrepancyDetected: false,
+      },
+      discrepancies,
     };
   }
 
-  // Sort by tier priority (tier1 first), then by confidence
-  const sorted = [...candidates]
-    .filter((c) => c.status !== "rejected")
-    .sort((a, b) => {
-      const tierDiff = TIER_WEIGHT[b.sourceTier] - TIER_WEIGHT[a.sourceTier];
-      if (Math.abs(tierDiff) > 0.01) return tierDiff > 0 ? 1 : -1;
-      return b.confidence - a.confidence;
-    });
+  // Sort by tier weight * confidence (backbone sources always preferred)
+  const sorted = [...candidates].sort((a, b) => {
+    // Primary backbone always beats reference-only for legal/property fields
+    if (a.sourcePolicy === "primary-backbone" && b.sourcePolicy === "reference-only") return -1;
+    if (a.sourcePolicy === "reference-only" && b.sourcePolicy === "primary-backbone") return 1;
+    return TIER_WEIGHT[b.sourceTier] * b.confidence - TIER_WEIGHT[a.sourceTier] * a.confidence;
+  });
 
-  const winner = sorted[0];
+  const best = sorted[0];
 
-  // Detect discrepancies between top candidates
-  let discrepancyDetected = false;
-  let discrepancyDetail: string | undefined;
-
+  // Check for discrepancies between backbone sources
   for (let i = 1; i < sorted.length; i++) {
     const other = sorted[i];
-    if (winner.value === 0 || other.value === 0) continue;
-    const diff = Math.abs(winner.value - other.value) / Math.max(winner.value, 1);
+    if (best.value === 0 || other.value === 0) continue;
+
+    const diff = Math.abs(best.value - other.value) / Math.max(best.value, 1);
     if (diff > tolerancePercent / 100) {
-      discrepancyDetected = true;
-      discrepancyDetail = `${fieldName}: ${winner.sourceName} reports ${winner.value.toLocaleString()} vs ${other.sourceName} reports ${other.value.toLocaleString()} (${Math.round(diff * 100)}% difference)`;
+      const severity: DiscrepancyRecord["severity"] = diff > 0.3 ? "high" : diff > 0.15 ? "medium" : "low";
 
       discrepancies.push({
         field: fieldName,
-        description: discrepancyDetail,
-        severity: diff > 0.5 ? "high" : diff > 0.3 ? "medium" : "low",
-        sourceA: winner.sourceName,
-        sourceAValue: winner.value.toLocaleString(),
+        description: `${fieldName} differs by ${(diff * 100).toFixed(1)}% between ${best.sourceName} and ${other.sourceName}`,
+        severity,
+        sourceA: best.sourceName,
+        sourceAValue: String(best.value),
         sourceB: other.sourceName,
-        sourceBValue: other.value.toLocaleString(),
-        resolution: `Selected ${winner.sourceName} (Tier ${winner.sourceTier.replace("tier", "")}, confidence ${winner.confidence}%)`,
-        confidenceImpact: diff > 0.5 ? -15 : diff > 0.3 ? -10 : -5,
+        sourceBValue: String(other.value),
+        resolution: `Using ${best.sourceName} (${best.sourcePolicy}, ${best.sourceTier})`,
+        confidenceImpact: severity === "high" ? -15 : severity === "medium" ? -8 : -3,
       });
-      break; // only record the most significant discrepancy per field
     }
   }
 
-  // Adjust confidence if discrepancy detected
-  let adjustedConfidence = winner.confidence;
-  if (discrepancyDetected) {
-    adjustedConfidence = Math.max(30, adjustedConfidence - 10);
+  // Determine status
+  let status: FieldVerificationStatus;
+  const confidenceImpact = discrepancies.reduce((s, d) => s + d.confidenceImpact, 0);
+  const adjustedConfidence = Math.max(10, best.confidence + confidenceImpact);
+
+  if (candidates.length >= 2 && discrepancies.length === 0) {
+    status = "verified";
+  } else if (discrepancies.some((d) => d.severity === "high")) {
+    status = isCritical ? "under-review" : "estimated";
+  } else if (best.sourcePolicy === "primary-backbone" && best.confidence >= 80) {
+    status = "verified";
+  } else {
+    status = "estimated";
   }
 
   return {
-    finalValue: winner.value,
-    finalConfidence: adjustedConfidence,
-    finalStatus: statusFromConfidence(adjustedConfidence),
-    selectedSource: winner.sourceName,
-    selectionReason: discrepancyDetected
-      ? `Selected highest-tier source (${winner.sourceName}) despite discrepancy with other sources`
-      : `Highest-tier source with confidence ${winner.confidence}%`,
-    candidates,
-    discrepancyDetected,
-    discrepancyDetail,
+    field: {
+      finalValue: best.value,
+      finalConfidence: adjustedConfidence,
+      finalStatus: status,
+      selectedSource: best.sourceName,
+      selectionReason: `Highest-priority ${best.sourcePolicy} source (${best.sourceTier})`,
+      candidates: sorted,
+      discrepancyDetected: discrepancies.length > 0,
+      discrepancyDetail: discrepancies.length > 0 ? discrepancies.map((d) => d.description).join("; ") : undefined,
+    },
+    discrepancies,
   };
 }
 
-/**
- * Reconcile a string field from multiple source candidates.
- */
 function reconcileString(
   fieldName: string,
   candidates: SourceCandidate<string>[],
-  discrepancies: DiscrepancyRecord[]
-): ReconciledField<string> {
+  isCritical: boolean = false
+): { field: ReconciledField<string>; discrepancies: DiscrepancyRecord[] } {
+  const discrepancies: DiscrepancyRecord[] = [];
+
   if (candidates.length === 0) {
     return {
-      finalValue: "",
-      finalConfidence: 0,
-      finalStatus: "under-review",
-      selectedSource: "none",
-      selectionReason: "No source data available",
-      candidates: [],
-      discrepancyDetected: false,
+      field: {
+        finalValue: "",
+        finalConfidence: 0,
+        finalStatus: isCritical ? "under-review" : "estimated",
+        selectedSource: "none",
+        selectionReason: "No data available",
+        candidates: [],
+        discrepancyDetected: false,
+      },
+      discrepancies,
     };
   }
 
-  const sorted = [...candidates]
-    .filter((c) => c.status !== "rejected")
-    .sort((a, b) => {
-      const tierDiff = TIER_WEIGHT[b.sourceTier] - TIER_WEIGHT[a.sourceTier];
-      if (Math.abs(tierDiff) > 0.01) return tierDiff > 0 ? 1 : -1;
-      return b.confidence - a.confidence;
-    });
+  // Sort by policy priority then tier weight * confidence
+  const sorted = [...candidates].sort((a, b) => {
+    if (a.sourcePolicy === "primary-backbone" && b.sourcePolicy === "reference-only") return -1;
+    if (a.sourcePolicy === "reference-only" && b.sourcePolicy === "primary-backbone") return 1;
+    return TIER_WEIGHT[b.sourceTier] * b.confidence - TIER_WEIGHT[a.sourceTier] * a.confidence;
+  });
 
-  const winner = sorted[0];
+  const best = sorted[0];
 
-  // Detect discrepancies
-  let discrepancyDetected = false;
-  let discrepancyDetail: string | undefined;
-
+  // Check for discrepancies
   for (let i = 1; i < sorted.length; i++) {
     const other = sorted[i];
-    if (!other.value || !winner.value) continue;
-    const winnerNorm = winner.value.toLowerCase().trim();
-    const otherNorm = other.value.toLowerCase().trim();
-    if (winnerNorm !== otherNorm && !winnerNorm.includes(otherNorm) && !otherNorm.includes(winnerNorm)) {
-      discrepancyDetected = true;
-      discrepancyDetail = `${fieldName}: ${winner.sourceName} reports "${winner.value}" vs ${other.sourceName} reports "${other.value}"`;
+    if (!best.value || !other.value) continue;
 
+    const normalize = (s: string) => s.toLowerCase().replace(/[^a-z0-9]/g, "");
+    if (normalize(best.value) !== normalize(other.value)) {
       discrepancies.push({
         field: fieldName,
-        description: discrepancyDetail,
-        severity: "medium",
-        sourceA: winner.sourceName,
-        sourceAValue: winner.value,
+        description: `${fieldName} differs between ${best.sourceName} ("${best.value}") and ${other.sourceName} ("${other.value}")`,
+        severity: isCritical ? "high" : "medium",
+        sourceA: best.sourceName,
+        sourceAValue: best.value,
         sourceB: other.sourceName,
         sourceBValue: other.value,
-        resolution: `Selected ${winner.sourceName} (Tier ${winner.sourceTier.replace("tier", "")}, confidence ${winner.confidence}%)`,
-        confidenceImpact: -5,
+        resolution: `Using ${best.sourceName} (${best.sourcePolicy}, ${best.sourceTier})`,
+        confidenceImpact: isCritical ? -15 : -5,
       });
-      break;
     }
   }
 
-  let adjustedConfidence = winner.confidence;
-  if (discrepancyDetected) {
-    adjustedConfidence = Math.max(30, adjustedConfidence - 10);
+  let status: FieldVerificationStatus;
+  const confidenceImpact = discrepancies.reduce((s, d) => s + d.confidenceImpact, 0);
+  const adjustedConfidence = Math.max(10, best.confidence + confidenceImpact);
+
+  if (candidates.length >= 2 && discrepancies.length === 0) {
+    status = "verified";
+  } else if (discrepancies.some((d) => d.severity === "high")) {
+    status = isCritical ? "under-review" : "estimated";
+  } else if (best.sourcePolicy === "primary-backbone" && best.confidence >= 80) {
+    status = "verified";
+  } else {
+    status = "estimated";
   }
 
   return {
-    finalValue: winner.value,
-    finalConfidence: adjustedConfidence,
-    finalStatus: statusFromConfidence(adjustedConfidence),
-    selectedSource: winner.sourceName,
-    selectionReason: discrepancyDetected
-      ? `Selected highest-tier source (${winner.sourceName}) despite discrepancy`
-      : `Highest-tier source with confidence ${winner.confidence}%`,
-    candidates,
-    discrepancyDetected,
-    discrepancyDetail,
+    field: {
+      finalValue: best.value,
+      finalConfidence: adjustedConfidence,
+      finalStatus: status,
+      selectedSource: best.sourceName,
+      selectionReason: `Highest-priority ${best.sourcePolicy} source (${best.sourceTier})`,
+      candidates: sorted,
+      discrepancyDetected: discrepancies.length > 0,
+      discrepancyDetail: discrepancies.length > 0 ? discrepancies.map((d) => d.description).join("; ") : undefined,
+    },
+    discrepancies,
+  };
+}
+
+function makeCandidate<T>(value: T, sourceName: string, confidence: number): SourceCandidate<T> {
+  const { tier, policy } = classifySource(sourceName);
+  return {
+    value,
+    sourceName,
+    sourceTier: tier,
+    sourcePolicy: policy,
+    confidence,
+    timestamp: new Date().toISOString(),
+    status: confidence >= 80 ? "verified" : confidence >= 50 ? "estimated" : "under-review",
   };
 }
 
 // ─── Main Reconciliation Function ───
 
 export function reconcileAllSources(input: ReconciliationInput): SourceAudit {
-  const discrepancies: DiscrepancyRecord[] = [];
-  const ts = now();
-  const hasAttom = input.attomData?.available === true;
-  const hasOSM = input.osmData?.parcel !== null && input.osmData?.parcel !== undefined;
-  const hasZoneomics = input.zoneomicsData?.available === true;
+  const allDiscrepancies: DiscrepancyRecord[] = [];
 
-  // ── ADDRESS ──
-  const addressCandidates: SourceCandidate<string>[] = [
-    { value: input.rawAddress, sourceName: "User Input", sourceTier: "tier3", confidence: 60, timestamp: ts, status: "inferred" },
-  ];
+  // ── Address ──
+  const addressCandidates: SourceCandidate<string>[] = [];
+  addressCandidates.push(makeCandidate(input.rawAddress, "User Input", 70));
   if (input.geocodedAddress) {
-    addressCandidates.push({
-      value: input.geocodedAddress,
-      sourceName: "Google Places API",
-      sourceTier: "tier1",
-      confidence: 98,
-      timestamp: ts,
-      status: "verified",
-    });
+    addressCandidates.push(makeCandidate(input.geocodedAddress, "Google Geocoding", 95));
   }
-  const address = reconcileString("address", addressCandidates, discrepancies);
+  if (input.osmData?.nominatimAddress) {
+    addressCandidates.push(makeCandidate(input.osmData.nominatimAddress, "OpenStreetMap Nominatim", 72));
+  }
+  const addressResult = reconcileString("address", addressCandidates);
+  allDiscrepancies.push(...addressResult.discrepancies);
 
   // ── APN ──
   const apnCandidates: SourceCandidate<string>[] = [];
-  if (hasAttom && input.attomData!.apn) {
-    apnCandidates.push({
-      value: input.attomData!.apn,
-      sourceName: "ATTOM Property Data",
-      sourceTier: "tier1",
-      confidence: 97,
-      timestamp: ts,
-      status: "verified",
-    });
+  if (input.attomData?.apn) {
+    apnCandidates.push(makeCandidate(input.attomData.apn, "ATTOM Property Data", 97));
   }
-  if (!hasAttom) {
-    apnCandidates.push({
-      value: input.resolvedApn,
-      sourceName: "Estimated (zone-based)",
-      sourceTier: "tier3",
-      confidence: 45,
-      timestamp: ts,
-      status: "estimated",
-    });
+  if (input.resolvedApn && !input.resolvedApn.includes("Estimated")) {
+    apnCandidates.push(makeCandidate(input.resolvedApn, "Resolved (multi-source)", 80));
   }
-  const apn = reconcileString("apn", apnCandidates, discrepancies);
+  const apnResult = reconcileString("apn", apnCandidates, true);
+  allDiscrepancies.push(...apnResult.discrepancies);
 
-  // ── LOT SIZE ──
+  // ── Lot Size (CRITICAL — backbone only) ──
   const lotCandidates: SourceCandidate<number>[] = [];
-  if (hasAttom && input.attomData!.lotSizeSqFt) {
-    lotCandidates.push({
-      value: input.attomData!.lotSizeSqFt,
-      sourceName: "ATTOM Property Data",
-      sourceTier: "tier1",
-      confidence: 95,
-      timestamp: ts,
-      status: "verified",
-    });
+  if (input.attomData?.lotSizeSqFt) {
+    lotCandidates.push(makeCandidate(input.attomData.lotSizeSqFt, "ATTOM Property Data", 95));
   }
-  if (hasOSM && input.osmData!.boundingBox) {
-    const [minLat, maxLat, minLon, maxLon] = input.osmData!.boundingBox;
+  if (input.osmData?.boundingBox) {
+    const [minLat, maxLat, minLon, maxLon] = input.osmData.boundingBox;
     const latM = (maxLat - minLat) * 111320;
-    const lonM = (maxLon - minLon) * 111320 * Math.cos(((minLat + maxLat) / 2 * Math.PI) / 180);
-    const bbAreaSqFt = Math.round(latM * lonM * 10.7639 * 0.7);
-    if (bbAreaSqFt > 1000 && bbAreaSqFt < 100000) {
-      lotCandidates.push({
-        value: bbAreaSqFt,
-        sourceName: "OpenStreetMap Bounding Box",
-        sourceTier: "tier2",
-        confidence: 62,
-        timestamp: ts,
-        status: "estimated",
-      });
+    const lonM = (maxLon - minLon) * 111320 * Math.cos((((minLat + maxLat) / 2) * Math.PI) / 180);
+    const bbSqFt = Math.round(latM * lonM * 10.7639 * 0.7);
+    if (bbSqFt > 1000 && bbSqFt < 100000) {
+      lotCandidates.push(makeCandidate(bbSqFt, "OpenStreetMap Nominatim (bbox)", 60));
     }
   }
-  if (lotCandidates.length === 0) {
-    lotCandidates.push({
-      value: input.resolvedLotSizeSqFt,
-      sourceName: "Zone-based estimate",
-      sourceTier: "tier3",
-      confidence: 50,
-      timestamp: ts,
-      status: "estimated",
-    });
-  }
-  const lotSizeSqFt = reconcileNumeric("lotSizeSqFt", lotCandidates, discrepancies, 25);
+  lotCandidates.push(makeCandidate(input.resolvedLotSizeSqFt, "Resolved (multi-source)", 75));
+  const lotResult = reconcileNumeric("lotSizeSqFt", lotCandidates, 15, true);
+  allDiscrepancies.push(...lotResult.discrepancies);
 
-  // ── ZONING ──
+  // ── Zoning (CRITICAL — backbone only) ──
   const zoningCandidates: SourceCandidate<string>[] = [];
-  if (hasZoneomics && input.zoneomicsData!.zoningCode) {
-    zoningCandidates.push({
-      value: input.zoneomicsData!.zoningCode,
-      sourceName: "Zoneomics",
-      sourceTier: "tier1",
-      confidence: input.zoneomicsData!.confidence,
-      timestamp: ts,
-      status: statusFromConfidence(input.zoneomicsData!.confidence),
-    });
+  if (input.zoneomicsData?.available && input.zoneomicsData.zoningCode) {
+    zoningCandidates.push(makeCandidate(input.zoneomicsData.zoningCode, "Zoneomics", 88));
   }
-  if (hasAttom && input.attomData!.zoning) {
-    zoningCandidates.push({
-      value: input.attomData!.zoning,
-      sourceName: "ATTOM Property Data",
-      sourceTier: "tier1",
-      confidence: 80,
-      timestamp: ts,
-      status: "estimated",
-    });
+  if (input.attomData?.zoning) {
+    zoningCandidates.push(makeCandidate(input.attomData.zoning, "ATTOM Property Data", 82));
   }
-  if (zoningCandidates.length === 0) {
-    zoningCandidates.push({
-      value: input.resolvedZoning,
-      sourceName: "Zone-based estimate (City GIS)",
-      sourceTier: "tier2",
-      confidence: 70,
-      timestamp: ts,
-      status: "estimated",
-    });
-  }
-  const zoning = reconcileString("zoning", zoningCandidates, discrepancies);
+  zoningCandidates.push(makeCandidate(input.resolvedZoning, "City Zoning GIS (estimated)", 75));
+  const zoningResult = reconcileString("zoning", zoningCandidates, true);
+  allDiscrepancies.push(...zoningResult.discrepancies);
 
-  // ── LAND USE ──
+  // ── Land Use ──
   const landUseCandidates: SourceCandidate<string>[] = [];
-  if (hasZoneomics && input.zoneomicsData!.landUseCategory) {
-    landUseCandidates.push({
-      value: input.zoneomicsData!.landUseCategory,
-      sourceName: "Zoneomics",
-      sourceTier: "tier1",
-      confidence: input.zoneomicsData!.confidence - 5,
-      timestamp: ts,
-      status: "estimated",
-    });
+  if (input.attomData?.landUse) {
+    landUseCandidates.push(makeCandidate(input.attomData.landUse, "ATTOM Property Data", 90));
   }
-  if (hasAttom && input.attomData!.landUse) {
-    landUseCandidates.push({
-      value: input.attomData!.landUse,
-      sourceName: "ATTOM Property Data",
-      sourceTier: "tier1",
-      confidence: 85,
-      timestamp: ts,
-      status: "verified",
-    });
+  if (input.zoneomicsData?.available && input.zoneomicsData.landUseCategory) {
+    landUseCandidates.push(makeCandidate(input.zoneomicsData.landUseCategory, "Zoneomics", 85));
   }
-  if (landUseCandidates.length === 0) {
-    landUseCandidates.push({
-      value: "Residential (assumed)",
-      sourceName: "Default assumption",
-      sourceTier: "tier3",
-      confidence: 40,
-      timestamp: ts,
-      status: "inferred",
-    });
+  if (input.osmData?.parcel?.landuse) {
+    landUseCandidates.push(makeCandidate(input.osmData.parcel.landuse, "OpenStreetMap", 65));
   }
-  const landUse = reconcileString("landUse", landUseCandidates, discrepancies);
+  const landUseResult = reconcileString("landUse", landUseCandidates);
+  allDiscrepancies.push(...landUseResult.discrepancies);
 
-  // ── HOME AREA (Living Space) ──
+  // ── Home Area (living sqft — distinguish from footprint) ──
   const homeAreaCandidates: SourceCandidate<number>[] = [];
-  if (hasAttom && input.attomData!.homeAreaSqFt) {
-    homeAreaCandidates.push({
-      value: input.attomData!.homeAreaSqFt,
-      sourceName: "ATTOM Property Data",
-      sourceTier: "tier1",
-      confidence: 95,
-      timestamp: ts,
-      status: "verified",
-    });
+  if (input.attomData?.homeAreaSqFt) {
+    homeAreaCandidates.push(makeCandidate(input.attomData.homeAreaSqFt, "ATTOM Property Data", 95));
   }
-  if (hasOSM && input.osmData!.parcel && input.osmData!.parcel.buildings.length > 0) {
-    homeAreaCandidates.push({
-      value: input.osmData!.parcel.mainBuildingAreaSqFt,
-      sourceName: "OpenStreetMap (footprint x levels)",
-      sourceTier: "tier2",
-      confidence: 72,
-      timestamp: ts,
-      status: "estimated",
-    });
+  if (input.osmData?.parcel?.mainBuildingAreaSqFt) {
+    homeAreaCandidates.push(makeCandidate(input.osmData.parcel.mainBuildingAreaSqFt, "OpenStreetMap (footprint × levels)", 72));
   }
-  if (homeAreaCandidates.length === 0) {
-    homeAreaCandidates.push({
-      value: input.resolvedHomeAreaSqFt,
-      sourceName: "Zone-based estimate",
-      sourceTier: "tier3",
-      confidence: 40,
-      timestamp: ts,
-      status: "estimated",
-    });
-  }
-  const homeAreaSqFt = reconcileNumeric("homeAreaSqFt", homeAreaCandidates, discrepancies);
+  homeAreaCandidates.push(makeCandidate(input.resolvedHomeAreaSqFt, "Resolved (multi-source)", 70));
+  const homeAreaResult = reconcileNumeric("homeAreaSqFt", homeAreaCandidates, 15);
+  allDiscrepancies.push(...homeAreaResult.discrepancies);
 
-  // ── FOOTPRINT ──
+  // ── Footprint (ground floor sqft — NOT living area) ──
   const footprintCandidates: SourceCandidate<number>[] = [];
-  if (hasAttom && input.attomData!.footprintSqFt) {
-    footprintCandidates.push({
-      value: input.attomData!.footprintSqFt,
-      sourceName: "ATTOM Property Data",
-      sourceTier: "tier1",
-      confidence: 92,
-      timestamp: ts,
-      status: "verified",
-    });
+  if (input.attomData?.footprintSqFt) {
+    footprintCandidates.push(makeCandidate(input.attomData.footprintSqFt, "ATTOM Property Data", 92));
   }
-  if (hasOSM && input.osmData!.parcel && input.osmData!.parcel.buildings.length > 0) {
-    footprintCandidates.push({
-      value: input.osmData!.parcel.mainBuildingFootprintSqFt,
-      sourceName: "OpenStreetMap building outline",
-      sourceTier: "tier2",
-      confidence: 82,
-      timestamp: ts,
-      status: "estimated",
-    });
+  if (input.osmData?.parcel?.mainBuildingFootprintSqFt) {
+    footprintCandidates.push(makeCandidate(input.osmData.parcel.mainBuildingFootprintSqFt, "OpenStreetMap building outline", 82));
   }
-  if (footprintCandidates.length === 0) {
-    footprintCandidates.push({
-      value: input.resolvedFootprintSqFt,
-      sourceName: "Zone-based estimate",
-      sourceTier: "tier3",
-      confidence: 45,
-      timestamp: ts,
-      status: "estimated",
-    });
-  }
-  const footprintSqFt = reconcileNumeric("footprintSqFt", footprintCandidates, discrepancies);
+  footprintCandidates.push(makeCandidate(input.resolvedFootprintSqFt, "Resolved (multi-source)", 65));
+  const footprintResult = reconcileNumeric("footprintSqFt", footprintCandidates, 20, true);
+  allDiscrepancies.push(...footprintResult.discrepancies);
 
-  // ── OPEN YARD AREA ──
-  // Derived from lot size minus footprint minus hardscape. Only calculated after
-  // lot size and footprint are reconciled.
-  const openYardCandidates: SourceCandidate<number>[] = [];
-  openYardCandidates.push({
-    value: input.resolvedOpenYardSqFt,
-    sourceName: "Derived (lot - footprint - hardscape)",
-    sourceTier: "tier2",
-    confidence: Math.min(lotSizeSqFt.finalConfidence, footprintSqFt.finalConfidence) - 5,
-    timestamp: ts,
-    status: statusFromConfidence(Math.min(lotSizeSqFt.finalConfidence, footprintSqFt.finalConfidence) - 5),
-  });
-  const openYardSqFt = reconcileNumeric("openYardSqFt", openYardCandidates, discrepancies);
+  // ── Open Yard ──
+  const yardCandidates: SourceCandidate<number>[] = [];
+  yardCandidates.push(makeCandidate(input.resolvedOpenYardSqFt, "Derived (lot - footprint - hardscape)", 60));
+  const yardResult = reconcileNumeric("openYardSqFt", yardCandidates, 20);
+  allDiscrepancies.push(...yardResult.discrepancies);
 
-  // ── PARCEL SHAPE ──
-  const parcelShapeCandidates: SourceCandidate<string>[] = [];
-  if (hasAttom && input.attomData!.lotWidth && input.attomData!.lotDepth) {
-    const ratio = input.attomData!.lotDepth / input.attomData!.lotWidth;
-    const shape = ratio > 2.5 ? "Deep narrow lot" : ratio > 1.5 ? "Rectangular" : "Nearly square";
-    parcelShapeCandidates.push({
-      value: `${shape} (${Math.round(input.attomData!.lotWidth)}ft x ${Math.round(input.attomData!.lotDepth)}ft)`,
-      sourceName: "ATTOM Property Data",
-      sourceTier: "tier1",
-      confidence: 90,
-      timestamp: ts,
-      status: "verified",
-    });
-  }
-  if (hasOSM && input.osmData!.boundingBox) {
-    parcelShapeCandidates.push({
-      value: input.resolvedParcelShape,
-      sourceName: "OpenStreetMap + derived dimensions",
-      sourceTier: "tier2",
-      confidence: 65,
-      timestamp: ts,
-      status: "estimated",
-    });
-  }
-  if (parcelShapeCandidates.length === 0) {
-    parcelShapeCandidates.push({
-      value: input.resolvedParcelShape,
-      sourceName: "Derived from lot dimensions",
-      sourceTier: "tier3",
-      confidence: 50,
-      timestamp: ts,
-      status: "inferred",
-    });
-  }
-  const parcelShape = reconcileString("parcelShape", parcelShapeCandidates, discrepancies);
+  // ── Parcel Shape ──
+  const shapeCandidates: SourceCandidate<string>[] = [];
+  shapeCandidates.push(makeCandidate(input.resolvedParcelShape, "Derived from lot dimensions", 65));
+  const shapeResult = reconcileString("parcelShape", shapeCandidates);
+  allDiscrepancies.push(...shapeResult.discrepancies);
 
-  // ── SLOPE ──
+  // ── Slope ──
   const slopeCandidates: SourceCandidate<string>[] = [];
   if (input.slopeData) {
-    slopeCandidates.push({
-      value: input.slopeData.slope,
-      sourceName: input.slopeData.sources.join(", "),
-      sourceTier: "tier2",
-      confidence: input.slopeData.confidence,
-      timestamp: ts,
-      status: statusFromConfidence(input.slopeData.confidence),
-    });
-  } else {
-    slopeCandidates.push({
-      value: "Mostly flat",
-      sourceName: "Default assumption",
-      sourceTier: "tier3",
-      confidence: 40,
-      timestamp: ts,
-      status: "inferred",
-    });
+    slopeCandidates.push(makeCandidate(input.slopeData.slope, input.slopeData.sources.join(", "), input.slopeData.confidence));
   }
-  const slope = reconcileString("slope", slopeCandidates, discrepancies);
+  const slopeResult = reconcileString("slope", slopeCandidates);
+  allDiscrepancies.push(...slopeResult.discrepancies);
 
-  // ── RENT ESTIMATE ──
+  // ── Rent Estimate ──
   const rentCandidates: SourceCandidate<number>[] = [];
   if (input.rentEstimates && input.rentEstimates.size > 0) {
-    for (const [type, est] of input.rentEstimates) {
-      if (est.source === "rentcast") {
-        rentCandidates.push({
-          value: est.estimatedMonthlyRent,
-          sourceName: `RentCast (${type})`,
-          sourceTier: "tier1",
-          confidence: est.confidence,
-          timestamp: ts,
-          status: statusFromConfidence(est.confidence),
-        });
-      } else {
-        rentCandidates.push({
-          value: est.estimatedMonthlyRent,
-          sourceName: `Estimated (${type})`,
-          sourceTier: "tier3",
-          confidence: est.confidence,
-          timestamp: ts,
-          status: "estimated",
-        });
-      }
+    const firstEst = Array.from(input.rentEstimates.values())[0];
+    rentCandidates.push(
+      makeCandidate(
+        firstEst.estimatedMonthlyRent,
+        firstEst.source === "rentcast" ? "RentCast" : "Estimated rent model",
+        firstEst.confidence
+      )
+    );
+  }
+  const rentResult = reconcileNumeric("rentEstimate", rentCandidates);
+  allDiscrepancies.push(...rentResult.discrepancies);
+
+  // ── Recommended ADU Path ──
+  const recCandidates: SourceCandidate<string>[] = [];
+  recCandidates.push(makeCandidate(input.bestRecommendation, "Feasibility Engine", 75));
+  const recResult = reconcileString("recommendedAduPath", recCandidates);
+  allDiscrepancies.push(...recResult.discrepancies);
+
+  // ── v7 Geometry Source Fields ──
+  const parcelGeoCandidates: SourceCandidate<string>[] = [];
+  if (input.parcelSource) {
+    parcelGeoCandidates.push(makeCandidate(input.parcelSource, input.parcelSource, input.geometryConfidence || 50));
+  }
+  const parcelGeoResult = reconcileString("parcelGeometry", parcelGeoCandidates, true);
+  allDiscrepancies.push(...parcelGeoResult.discrepancies);
+
+  const footprintGeoCandidates: SourceCandidate<string>[] = [];
+  if (input.footprintSource) {
+    footprintGeoCandidates.push(makeCandidate(input.footprintSource, input.footprintSource, input.geometryConfidence || 50));
+  }
+  const footprintGeoResult = reconcileString("footprintGeometry", footprintGeoCandidates, true);
+  allDiscrepancies.push(...footprintGeoResult.discrepancies);
+
+  const placementCandidates: SourceCandidate<string>[] = [];
+  if (input.placementMethod) {
+    placementCandidates.push(
+      makeCandidate(input.placementMethod, input.footprintSource || "Geometry Engine", input.geometryConfidence || 50)
+    );
+  }
+  const placementResult = reconcileString("structurePlacement", placementCandidates, true);
+  allDiscrepancies.push(...placementResult.discrepancies);
+
+  // ── Aggregate stats ──
+  const allFields = [
+    addressResult.field,
+    apnResult.field,
+    lotResult.field,
+    zoningResult.field,
+    landUseResult.field,
+    homeAreaResult.field,
+    footprintResult.field,
+    yardResult.field,
+    shapeResult.field,
+    slopeResult.field,
+    rentResult.field,
+    recResult.field,
+    parcelGeoResult.field,
+    footprintGeoResult.field,
+    placementResult.field,
+  ];
+
+  const fieldCount = allFields.length;
+  const verifiedCount = allFields.filter((f) => f.finalStatus === "verified").length;
+  const estimatedCount = allFields.filter((f) => f.finalStatus === "estimated").length;
+  const underReviewCount = allFields.filter((f) => f.finalStatus === "under-review").length;
+
+  // Determine total unique sources consulted
+  const allSources = new Set<string>();
+  for (const f of allFields) {
+    for (const c of f.candidates) {
+      allSources.add(c.sourceName);
     }
   }
-  if (rentCandidates.length === 0) {
-    rentCandidates.push({
-      value: 0,
-      sourceName: "No rent data available",
-      sourceTier: "tier3",
-      confidence: 0,
-      timestamp: ts,
-      status: "under-review",
-    });
-  }
-  const rentEstimate = reconcileNumeric("rentEstimate", rentCandidates, discrepancies, 30);
-
-  // ── RECOMMENDED ADU PATH ──
-  const recommendedAduPathCandidates: SourceCandidate<string>[] = [
-    {
-      value: input.bestRecommendation,
-      sourceName: "Feasibility Engine (multi-factor analysis)",
-      sourceTier: "tier1",
-      confidence: 80,
-      timestamp: ts,
-      status: "estimated",
-    },
-  ];
-  const recommendedAduPath = reconcileString("recommendedAduPath", recommendedAduPathCandidates, discrepancies);
-
-  // ── Count sources consulted ──
-  let totalSources = 1; // user input always present
-  if (input.geocodedAddress) totalSources++;
-  if (hasAttom) totalSources++;
-  if (hasOSM) totalSources++;
-  if (hasZoneomics) totalSources++;
-  if (input.rentEstimates && input.rentEstimates.size > 0) totalSources++;
-  if (input.slopeData) totalSources++;
-
-  // ── Count field statuses ──
-  const allFields = [
-    address, apn, lotSizeSqFt, zoning, landUse,
-    homeAreaSqFt, footprintSqFt, openYardSqFt,
-    parcelShape, slope, rentEstimate, recommendedAduPath,
-  ];
-  const fieldCount = allFields.length;
-  const verifiedFieldCount = allFields.filter((f) => f.finalStatus === "verified").length;
-  const estimatedFieldCount = allFields.filter((f) => f.finalStatus === "estimated" || f.finalStatus === "inferred").length;
-  const underReviewFieldCount = allFields.filter((f) => f.finalStatus === "under-review").length;
 
   return {
-    address,
-    apn,
-    lotSizeSqFt,
-    zoning,
-    landUse,
-    homeAreaSqFt,
-    footprintSqFt,
-    openYardSqFt,
-    parcelShape,
-    slope,
-    rentEstimate,
-    recommendedAduPath,
-    discrepancies,
-    reconciliationTimestamp: ts,
-    totalSourcesConsulted: totalSources,
+    address: addressResult.field,
+    apn: apnResult.field,
+    lotSizeSqFt: lotResult.field,
+    zoning: zoningResult.field,
+    landUse: landUseResult.field,
+    homeAreaSqFt: homeAreaResult.field,
+    footprintSqFt: footprintResult.field,
+    openYardSqFt: yardResult.field,
+    parcelShape: shapeResult.field,
+    slope: slopeResult.field,
+    rentEstimate: rentResult.field,
+    recommendedAduPath: recResult.field,
+    parcelGeometry: parcelGeoResult.field,
+    footprintGeometry: footprintGeoResult.field,
+    structurePlacement: placementResult.field,
+    discrepancies: allDiscrepancies,
+    reconciliationTimestamp: new Date().toISOString(),
+    totalSourcesConsulted: allSources.size,
     fieldCount,
-    verifiedFieldCount,
-    estimatedFieldCount,
-    underReviewFieldCount,
+    verifiedFieldCount: verifiedCount,
+    estimatedFieldCount: estimatedCount,
+    underReviewFieldCount: underReviewCount,
+    sourcePolicy: {
+      primaryBackbone: [
+        "ATTOM Property Data",
+        "Google Geocoding",
+        "Official city/county/state sources",
+        "Zoneomics",
+        "RentCast",
+        "OpenStreetMap building outlines",
+      ],
+      referenceOnly: ["Zillow", "Realtor.com", "Redfin"],
+    },
   };
 }

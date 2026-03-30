@@ -7,9 +7,9 @@ import { Card, CardContent } from "@/components/ui/card";
 import { ArrowRight, BarChart3 } from "lucide-react";
 
 export default function ADUROISimulatorPage() {
-  const [projectCost, setProjectCost] = useState(250000);
-  const [monthlyRent, setMonthlyRent] = useState(2800);
-  const [loanAmount, setLoanAmount] = useState(200000);
+  const [projectCost, setProjectCost] = useState(350000);
+  const [monthlyRent, setMonthlyRent] = useState(4000);
+  const [loanAmount, setLoanAmount] = useState(280000);
   const [interestRate, setInterestRate] = useState(7.0);
   const [loanTermYears, setLoanTermYears] = useState(30);
 
@@ -63,13 +63,13 @@ export default function ADUROISimulatorPage() {
                   Project Cost: ${projectCost.toLocaleString()}
                 </label>
                 <input
-                  type="range" min={80000} max={500000} step={5000}
+                  type="range" min={80000} max={800000} step={5000}
                   value={projectCost}
                   onChange={(e) => { setProjectCost(Number(e.target.value)); if (Number(e.target.value) < loanAmount) setLoanAmount(Number(e.target.value)); }}
                   className="w-full accent-primary"
                 />
                 <div className="flex justify-between text-xs text-muted-foreground mt-1">
-                  <span>$80K</span><span>$500K</span>
+                  <span>$80K</span><span>$800K</span>
                 </div>
               </div>
 
@@ -78,13 +78,13 @@ export default function ADUROISimulatorPage() {
                   Monthly Rent: ${monthlyRent.toLocaleString()}
                 </label>
                 <input
-                  type="range" min={800} max={6000} step={100}
+                  type="range" min={1500} max={7000} step={100}
                   value={monthlyRent}
                   onChange={(e) => setMonthlyRent(Number(e.target.value))}
                   className="w-full accent-primary"
                 />
                 <div className="flex justify-between text-xs text-muted-foreground mt-1">
-                  <span>$800</span><span>$6,000</span>
+                  <span>$1,500</span><span>$7,000</span>
                 </div>
               </div>
 

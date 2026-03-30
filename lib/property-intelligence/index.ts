@@ -48,11 +48,13 @@ export type {
   IntelligenceField,
   ConfidenceStatus,
   BuildableAnalysis,
+  FinalBuildabilityResult,
   ADURecommendation,
   FeasibilityLevel,
   SmartBannerData,
   LotDimensions,
   SourceTier,
+  SourcePolicy,
   DataSource,
   FieldVerificationStatus,
   SourceCandidate,
@@ -65,6 +67,85 @@ export { reconcileAllSources } from "./source-reconciliation-engine";
 export type { ReconciliationInput } from "./source-reconciliation-engine";
 
 export { getConfidenceStatus, formatFieldValue } from "./types";
+
+// v7 — Geometry Engine
+export {
+  analyzePropertyGeometry,
+  runGeometrySanityChecks,
+  geoPolygonAreaSqFt,
+  measureSetbacksToParcel,
+  classifyStructures,
+  createRectPolygon,
+  osmNodesToPolygon,
+} from "./geometry-engine";
+export type {
+  GeometryAnalysis,
+  GeometryInput,
+  GeometryPolygon,
+  DetectedStructure,
+  StructureClassification,
+  SetbackDistances,
+  ParcelPlacement,
+  LeftoverZone,
+  BoundingBox,
+  GeometrySanityResult,
+} from "./geometry-engine";
+
+// v6 — Source Reconciliation Engine
+export { reconcileAllSources } from "./source-reconciliation-engine";
+export type { ReconciliationInput } from "./source-reconciliation-engine";
+
+// v7.1 — Microsoft Building Footprint Service
+export {
+  getMicrosoftBuildingFootprints,
+  msFootprintsToOSMFormat,
+  latLngToQuadkey,
+} from "./microsoft-footprint-service";
+export type { MergedFootprintResult } from "./geometry-engine";
+export type { MSBuildingFootprint, MSFootprintResult } from "./microsoft-footprint-service";
+
+// v8 — Parcel GIS Service (Real Parcel Boundaries)
+export {
+  fetchParcelPolygon,
+  fetchParcelByAPN,
+  isParcelGISAvailable,
+} from "./parcel-gis-service";
+export type { ParcelGISResult } from "./parcel-gis-service";
+
+// v8 — Strict Geometry Pipeline (Single Source of Truth)
+export {
+  runStrictGeometryPipeline,
+  summarizeGeometryResult,
+} from "./strict-geometry-pipeline";
+export type {
+  StrictGeometryResult,
+  StrictPipelineInput,
+  StrictPipelineStatus,
+  StrictPropertyMetrics,
+  BuildableEnvelopeResult,
+} from "./strict-geometry-pipeline";
+
+// v7.2 — LiDAR / Enhanced Terrain Intelligence
+export { analyzeLiDARTerrain } from "./lidar-elevation-service";
+export type {
+  LiDARTerrainResult,
+  TerrainProfile,
+  SlopeAnalysis,
+  GradingEstimate,
+  FoundationRecommendation,
+} from "./lidar-elevation-service";
+
+// v7.3 — Benchmark Testing System
+export {
+  runBenchmarkSuite,
+  runSingleBenchmark,
+  getBenchmarkProperties,
+} from "./benchmark-testing-service";
+export type {
+  BenchmarkProperty,
+  BenchmarkResult,
+  BenchmarkSuiteResult,
+} from "./benchmark-testing-service";
 
 // Data model types
 export type {

@@ -4,11 +4,12 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { ArrowRight, Shield, Clock, Users, Palette, Bitcoin } from "lucide-react";
 import { useState, useRef, useEffect } from "react";
+import { COMPANY_INFO } from "@/lib/data/site-data";
 
 const stats = [
-  { value: "500+", label: "Projects Completed" },
-  { value: "15+", label: "Years Experience" },
-  { value: "$50M+", label: "Value Delivered" },
+  { value: COMPANY_INFO.stats.projectsCompleted, label: "Projects Completed" },
+  { value: `${COMPANY_INFO.yearsExperience}+`, label: "Years Experience" },
+  { value: COMPANY_INFO.stats.valueDelivered, label: "Value Delivered" },
 ];
 
 const heroVideos = [
@@ -98,7 +99,7 @@ export function Hero() {
 
             {/* Pricing info */}
             <div className="mb-8 space-y-1">
-              <p className="text-white/90 font-medium">Detached ADUs at <span className="text-primary font-bold">$427/sq ft</span></p>
+              <p className="text-white/90 font-medium">Detached ADU starting at <span className="text-primary font-bold">$175,000</span></p>
               <p className="text-white/90 font-medium">Garage conversions starting at <span className="text-primary font-bold">$120,000</span></p>
             </div>
 
@@ -234,9 +235,6 @@ export function Hero() {
               </div>
             </div>
 
-            {/* Decorative elements */}
-            <div className="absolute -top-4 -right-4 w-24 h-24 border-4 border-primary/30 rounded-2xl" />
-            <div className="absolute -bottom-4 -left-4 w-32 h-32 border-4 border-primary/20 rounded-full" />
           </div>
         </div>
       </div>

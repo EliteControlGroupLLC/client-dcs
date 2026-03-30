@@ -5,63 +5,22 @@ import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { ArrowRight, ExternalLink } from "lucide-react";
 import { useScrollAnimation } from "@/hooks/use-scroll-animation";
+import { GALLERY_PROJECTS, COMPANY_INFO } from "@/lib/data/site-data";
 
-const projects = [
-  {
-    id: 1,
-    title: "1,200 Sq Ft 4-Bed, 2-Bath Two-Story ADU",
-    location: "SDSU / College Area, CA",
-    sqft: "1,200 sq ft",
-    type: "ADU",
-    image: "/images/projects/adu-exterior-balcony.webp",
-  },
-  {
-    id: 2,
-    title: "Multifamily ADUs",
-    location: "Pacific Beach, CA",
-    sqft: "2 structures, 4-bed/2-bath each",
-    type: "ADU",
-    image: "/images/projects/adu-exterior-yard.webp",
-  },
-  {
-    id: 3,
-    title: "1,200 Sq Ft Garage Conversion ADU",
-    location: "SDSU / College Area, CA",
-    sqft: "1,200 sq ft",
-    type: "ADU",
-    image: "/images/projects/adu-exterior-side.webp",
-  },
-  {
-    id: 4,
-    title: "Modern Kitchen Remodel",
-    location: "Carlsbad, CA",
-    sqft: "Kitchen",
-    type: "Remodel",
-    image: "/images/projects/kitchen-remodel.webp",
-  },
-  {
-    id: 5,
-    title: "Custom Home Build",
-    location: "Coronado, CA",
-    sqft: "3,200 sq ft",
-    type: "Custom Homes",
-    image: "/images/projects/bedroom-interior.webp",
-  },
-  {
-    id: 6,
-    title: "Bathroom Renovation",
-    location: "Del Mar, CA",
-    sqft: "Bathroom",
-    type: "Remodel",
-    image: "/images/projects/bathroom-renovation.webp",
-  },
-];
+const projects = GALLERY_PROJECTS.map(p => ({
+  id: parseInt(p.id),
+  title: p.title,
+  location: p.location,
+  sqft: p.sqft,
+  type: p.type,
+  image: p.image,
+}));
 
 const projectStats = [
-  { value: "500+", label: "Projects Completed" },
-  { value: "250+", label: "ADUs Built" },
-  { value: "50+", label: "Custom Homes" },
-  { value: "200+", label: "Remodels" },
+  { value: COMPANY_INFO.stats.projectsCompleted, label: "Projects Completed" },
+  { value: COMPANY_INFO.stats.adusBuilt, label: "ADUs Built" },
+  { value: COMPANY_INFO.stats.customHomes, label: "Custom Homes" },
+  { value: COMPANY_INFO.stats.remodels, label: "Remodels" },
 ];
 
 export function GalleryPreview() {

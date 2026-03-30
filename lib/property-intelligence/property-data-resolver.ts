@@ -74,43 +74,52 @@ export function resolvePropertyData(
   const hasAttom = attomData?.available === true;
   const hasOSMBuildings = osmData?.parcel && osmData.parcel.buildings.length > 0;
 
-  // ── Building Footprint (prefer ATTOM > OSM > estimate) ──
+  // ── Building Footprint ──
+  // SURGICAL FIX: Enforce source hierarchy (Tier 1 backbone > Tier 2 geometry > Tier 3 reference)
+  // ATTOM = Tier 1 (Primary Backbone), OSM = Tier 2 (Geometry/Visual)
+  // ATTOM footprint is authoritative; OSM provides polygon shape but ATTOM area is preferred
   let footprintSqFt: number;
   let footprintConfidence: number;
   let footprintSources: string[];
 
   if (hasAttom && attomData.footprintSqFt) {
+    // Tier 1: ATTOM (Primary Backbone) — authoritative for area
     footprintSqFt = attomData.footprintSqFt;
     footprintConfidence = 92;
-    footprintSources = ["ATTOM Property Data"];
+    footprintSources = ["ATTOM Property Data (Tier 1 — Primary Backbone)"];
   } else if (hasOSMBuildings) {
+    // Tier 2: OSM (Geometry/Visual) — good polygon shape, less authoritative area
     footprintSqFt = osmData.parcel!.mainBuildingFootprintSqFt;
-    footprintConfidence = 82;
-    footprintSources = ["OpenStreetMap building outline"];
+    footprintConfidence = 78;
+    footprintSources = ["OpenStreetMap building outline (Tier 2 — Geometry)"];
   } else {
-    // Fallback: estimate from zone
+    // Fallback: estimate from zone (lowest confidence)
     const estLot = zone.minLot + (zone.maxLot - zone.minLot) * 0.5;
     footprintSqFt = Math.round(estLot * (0.25 + r(4) * 0.1));
     footprintConfidence = 45;
-    footprintSources = ["Estimated from zone averages"];
+    footprintSources = ["Estimated from zone averages (fallback)"];
   }
 
-  // ── Home Area / Living Space (prefer ATTOM > OSM > estimate) ──
+  // ── Home Area / Living Space ──
+  // SURGICAL FIX: Enforce source hierarchy
+  // ATTOM = Tier 1 (Primary Backbone), OSM = Tier 2 (Geometry)
   let homeAreaSqFt: number;
   let homeConfidence: number;
   let homeSources: string[];
 
   if (hasAttom && attomData.homeAreaSqFt) {
+    // Tier 1: ATTOM (Primary Backbone) — authoritative
     homeAreaSqFt = attomData.homeAreaSqFt;
     homeConfidence = 95;
-    homeSources = ["ATTOM Property Data"];
+    homeSources = ["ATTOM Property Data (Tier 1 — Primary Backbone)"];
     if (attomData.stories && attomData.stories > 1) {
       homeSources.push(`${attomData.stories} stories recorded`);
     }
   } else if (hasOSMBuildings) {
+    // Tier 2: OSM (Geometry) — polygon shape, less authoritative for area
     homeAreaSqFt = osmData.parcel!.mainBuildingAreaSqFt;
-    homeConfidence = 76;
-    homeSources = ["OpenStreetMap footprint × levels"];
+    homeConfidence = 72;
+    homeSources = ["OpenStreetMap footprint × levels (Tier 2 — Geometry)"];
     if (osmData.parcel!.mainBuildingLevels > 1) {
       homeSources.push(`${osmData.parcel!.mainBuildingLevels} levels detected`);
     }
@@ -119,18 +128,23 @@ export function resolvePropertyData(
     const estLot = zone.minLot + (zone.maxLot - zone.minLot) * r(1);
     homeAreaSqFt = Math.round((estLot * homeRatio) / 10) * 10;
     homeConfidence = 40;
-    homeSources = ["Estimated from zone averages"];
+    homeSources = ["Estimated from zone averages (fallback)"];
   }
 
-  // ── Lot Size (prefer ATTOM > Nominatim bbox > zone estimate) ──
+  // ── Lot Size ──
+  // SURGICAL FIX: Enforce source hierarchy
+  // ATTOM = Tier 1 (Primary Backbone) — lot size from ATTOM is authoritative
+  // Nominatim bbox = Tier 2 (Geometry) — rough estimate only
+  // Tier 3 (Reference Only: Zillow, Redfin, Realtor) MUST NEVER override Tier 1 for lot size
   let lotSizeSqFt: number;
   let lotConfidence: number;
   let lotSources: string[];
 
   if (hasAttom && attomData.lotSizeSqFt) {
+    // Tier 1: ATTOM (Primary Backbone) — authoritative for lot size
     lotSizeSqFt = attomData.lotSizeSqFt;
     lotConfidence = 95;
-    lotSources = ["ATTOM Property Data"];
+    lotSources = ["ATTOM Property Data (Tier 1 — Primary Backbone)"];
   } else if (osmData?.boundingBox) {
     // Use Nominatim bounding box as a rough parcel estimate
     const [minLat, maxLat, minLon, maxLon] = osmData.boundingBox;
@@ -175,15 +189,18 @@ export function resolvePropertyData(
   // ── Zoning ──
   const zoningConfidence = 88 + Math.round(r(12) * 8);
 
-  // ── APN (prefer ATTOM > estimated) ──
+  // ── APN ──
+  // SURGICAL FIX: Enforce source hierarchy — APN is Tier 1 (ATTOM only)
+  // Reference-only sources (Zillow, Redfin, Realtor) MUST NEVER override backbone for APN
   let apn: string;
   let apnConfidence: number;
   let apnSources: string[];
 
   if (hasAttom && attomData.apn) {
+    // Tier 1: ATTOM (Primary Backbone) — authoritative for APN
     apn = attomData.apn;
     apnConfidence = 97;
-    apnSources = ["ATTOM Property Data"];
+    apnSources = ["ATTOM Property Data (Tier 1 — Primary Backbone)"];
   } else {
     const apnPart1 = 400 + Math.round(r(13) * 200);
     const apnPart2 = 100 + Math.round(r(14) * 900);

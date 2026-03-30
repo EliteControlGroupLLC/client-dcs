@@ -21,12 +21,13 @@ import { ConfidenceScoreCard } from "./confidence-score-card";
 import { ZoningEnrichmentCard } from "./zoning-enrichment-card";
 import { RentEstimateCard } from "./rent-estimate-card";
 import { RentScenariosCard } from "./rent-scenarios-card";
-import { DetectedStructuresCard } from "./detected-structures-card";
+// Removed: DetectedStructuresCard - not client-facing per requirements
 import { ImageryWarningBanner } from "./imagery-warning-banner";
 import { SiteConstraintsCard } from "./site-constraints-card";
-import { DataSourcesBadge } from "./data-sources-badge";
+// Removed: DataSourcesBadge - not client-facing per requirements
 import { LeadCaptureForm } from "./lead-capture-form";
 import { PropertyReportModal } from "./property-report-modal";
+// Removed: ShowSourcesPanel - not client-facing per requirements
 import { analyzeProperty } from "@/lib/property-intelligence";
 import type { PropertyAnalysisResult } from "@/lib/property-intelligence";
 import { trackScanCompleted, trackLeadSubmitted } from "@/lib/analytics";
@@ -51,12 +52,26 @@ export function PropertyScanner() {
     setSelectedAddress(finalAddress);
     setPhase("scanning");
 
-    // Run the property intelligence engine (async)
+    // SURGICAL FIX: Try server-side route first (protects API keys),
+    // fall back to client-side if server route unavailable
     try {
+      const serverRes = await fetch('/api/analyze-property', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ address: finalAddress }),
+      });
+      if (serverRes.ok) {
+        const data = await serverRes.json();
+        if (data.success && data.result) {
+          setAnalysisData(data.result);
+          return;
+        }
+      }
+      // Server route failed — fall back to client-side
       const result = await analyzeProperty(finalAddress);
       setAnalysisData(result);
     } catch {
-      // If analysis fails, try again as fallback
+      // If server route fails, try client-side as fallback
       try {
         const result = await analyzeProperty(finalAddress);
         setAnalysisData(result);
@@ -207,7 +222,10 @@ export function PropertyScanner() {
                 ) : (
                   <MapPreview address={selectedAddress} />
                 )}
-                <SiteDiagram {...analysisData.lotDimensions} />
+                <SiteDiagram
+                  geometryResult={analysisData.strictGeometry as Parameters<typeof SiteDiagram>[0]["geometryResult"]}
+                  {...analysisData.lotDimensions}
+                />
               </div>
             </div>
 
@@ -216,10 +234,7 @@ export function PropertyScanner() {
               <ImageryWarningBanner message={analysisData.imageryWarning} />
             )}
 
-            {/* Detected Structures */}
-            {analysisData.detectedStructures && analysisData.detectedStructures.length > 1 && (
-              <DetectedStructuresCard structures={analysisData.detectedStructures} />
-            )}
+            {/* Detected Structures - Removed from client-facing view */}
 
             {/* Zoning Enrichment + Rent Estimates row */}
             {(analysisData.zoningEnrichment || analysisData.rentData) && (
@@ -285,10 +300,7 @@ export function PropertyScanner() {
               }}
             />
 
-            {/* Data Sources */}
-            {analysisData.dataSources && (
-              <DataSourcesBadge data={analysisData.dataSources} />
-            )}
+            {/* Data sources and debug info removed from client-facing view */}
 
             {/* Disclaimer */}
             <div className="bg-muted/50 rounded-2xl border border-border/50 p-5">

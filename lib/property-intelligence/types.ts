@@ -45,6 +45,39 @@ export interface BuildableAnalysis {
   twoStoryPotential: string;
 }
 
+// ─── FinalBuildabilityResult: Single Source of Truth ───
+// All downstream systems (recommendations, banner, financial, report) MUST read from this.
+// When polygon geometry is available, it drives these values.
+// Rectangle fallback is only used when geometry engine fails or confidence is too low.
+
+export interface FinalBuildabilityResult {
+  totalBuildableAreaSqFt: number;
+  bestAduZoneAreaSqFt: number;
+  bestAduZonePolygon: { type: string; coordinates: number[][][] } | null;
+  candidateZones: {
+    polygon: { type: string; coordinates: number[][][] };
+    areaSqFt: number;
+    position: string;
+    buildQuality: number;
+    minWidthFt: number;
+    minDepthFt: number;
+    suitableFor: string[];
+  }[];
+  candidateZoneCount: number;
+  buildabilityConfidence: number;
+  structurePlacementConfidence: number;
+  geometryMethodUsed: "polygon-verified" | "polygon-estimated" | "rectangle-fallback";
+  notes: string[];
+  warnings: string[];
+  // Debug comparison: shows rectangle result alongside polygon result
+  debugComparison?: {
+    rectangleBuildableAreaSqFt: number;
+    polygonBuildableAreaSqFt: number;
+    deltaPercent: number;
+    polygonIsSource: boolean;
+  };
+}
+
 export type FeasibilityLevel = "Likely" | "Possible" | "Limited" | "Not Recommended";
 
 export interface ADURecommendation {
@@ -70,6 +103,7 @@ export interface LotDimensions {
 export interface PropertyAnalysisResult {
   property: PropertyIntelligence;
   buildable: BuildableAnalysis;
+  finalBuildability: FinalBuildabilityResult;
   recommendations: ADURecommendation[];
   bestRecommendation: string;
   smartBanner: SmartBannerData;
@@ -206,6 +240,8 @@ export interface PropertyAnalysisResult {
     zoneomics: boolean;
     rentCast: boolean;
     mapbox: boolean;
+    microsoftFootprints: boolean;
+    lidar: boolean;
   };
 
   // v4 layers — Architecture enhancements
@@ -240,6 +276,175 @@ export interface PropertyAnalysisResult {
 
   // v6 layers — Source Cross-Reference & Reconciliation
   sourceAudit?: SourceAudit;
+
+  // v7 layers — Polygon Geometry & Source Backbone
+  geometryAnalysis?: {
+    /** Parcel boundary as GeoJSON polygon */
+    parcelPolygon: { type: string; coordinates: number[][][] };
+    /** All detected structure polygons */
+    structures: {
+      classification: string;
+      polygon: { type: string; coordinates: number[][][] };
+      areaSqFt: number;
+      centroid: { lng: number; lat: number };
+      confidence: number;
+      source: string;
+      levels?: number;
+    }[];
+    /** Main structure placement within parcel */
+    placement: {
+      measuredSetbacks: { frontFt: number; rearFt: number; leftFt: number; rightFt: number };
+      fitsWithinParcel: boolean;
+      confidence: number;
+      placementMethod: string;
+    } | null;
+    /** Setback-inset envelope polygon */
+    setbackEnvelope: { type: string; coordinates: number[][][] } | null;
+    /** Leftover buildable zones */
+    leftoverZones: {
+      polygon: { type: string; coordinates: number[][][] };
+      areaSqFt: number;
+      position: string;
+      buildQuality: number;
+      minWidthFt: number;
+      minDepthFt: number;
+      suitableFor: string[];
+    }[];
+    /** Best ADU candidate zone index */
+    bestAduZoneIndex: number | null;
+    /** Attached ADU candidate walls */
+    attachedCandidateWalls: string[];
+    /** Garage conversion candidate */
+    garageConversionCandidate: {
+      classification: string;
+      areaSqFt: number;
+      confidence: number;
+    } | null;
+    /** Overall geometry confidence */
+    geometryConfidence: number;
+    /** Geometry quality status */
+    geometryStatus: "polygon-verified" | "polygon-estimated" | "rectangle-fallback";
+    /** Source of parcel data */
+    parcelSource: string;
+    /** Source of footprint data */
+    footprintSource: string;
+    /** Area breakdown separating footprint from living area */
+    areaSummary: {
+      parcelSqFt: number;
+      mainFootprintSqFt: number;
+      mainLivingSqFt: number;
+      totalStructureFootprintSqFt: number;
+      totalSetbackAreaSqFt: number;
+      totalLeftoverSqFt: number;
+      bestBuildableZoneSqFt: number;
+    };
+    /** Geometry sanity check results */
+    geometrySanityChecks: {
+      passed: boolean;
+      checks: { name: string; passed: boolean; severity: string; message: string }[];
+      adjustedConfidence: number;
+    };
+  };
+
+  // Footprint merge audit trail (OSM + Microsoft intelligent merge)
+  footprintMergeNotes?: string[];
+
+  // v7.1 layers — Microsoft Building Footprints
+  microsoftFootprints?: {
+    buildingCount: number;
+    totalFootprintSqFt: number;
+    mainBuildingSqFt: number | null;
+    confidence: number;
+    quadkey: string;
+    source: string;
+  };
+
+  // v8 layers — Strict Geometry Pipeline (single-source, no fallbacks)
+  strictGeometry?: {
+    /** Pipeline status: geometry-verified | building-only | parcel-only | unavailable */
+    status: "geometry-verified" | "building-only" | "parcel-only" | "unavailable";
+    /** Whether we have enough data to render a valid diagram */
+    canRenderDiagram: boolean;
+    /** Fallback message when diagram cannot be rendered */
+    fallbackMessage: string | null;
+    /** Real parcel boundary polygon (from Parcel GIS) */
+    parcelPolygon: { type: string; coordinates: number[][][] } | null;
+    /** Real main residence footprint (from Microsoft Building Footprints) */
+    buildingPolygon: { type: string; coordinates: number[][][] } | null;
+    /** Calculated property metrics (from real geometry only) */
+    metrics: {
+      parcelWidthFt: number;
+      parcelDepthFt: number;
+      buildingWidthFt: number;
+      buildingDepthFt: number;
+      frontYardDepthFt: number;
+      rearYardDepthFt: number;
+      leftSideYardFt: number;
+      rightSideYardFt: number;
+      openYardAreaSqFt: number;
+      buildingPlacement: {
+        offsetFromCenterXFt: number;
+        offsetFromCenterYFt: number;
+        isCentered: boolean;
+      };
+    } | null;
+    /** ADU buildable envelope (computed from real geometry) */
+    buildableEnvelope: {
+      parcelSetbackPolygon: { type: string; coordinates: number[][][] };
+      residenceSeparationPolygon: { type: string; coordinates: number[][][] };
+      buildablePolygon: { type: string; coordinates: number[][][] } | null;
+      buildableAreaSqFt: number;
+      bestZone: "rear" | "left-side" | "right-side" | "none";
+      constraints: string[];
+    } | null;
+    /** Parcel data source */
+    parcelSource: string;
+    /** Building data source */
+    buildingSource: string;
+    /** Confidence score (only high if both sources verified) */
+    confidence: number;
+    /** Source audit for debugging */
+    sourceAudit: {
+      parcelGISAvailable: boolean;
+      parcelGISReason: string | null;
+      microsoftFootprintsAvailable: boolean;
+      microsoftFootprintsReason: string | null;
+      geometryValidated: boolean;
+      validationErrors: string[];
+    };
+  };
+
+  // v7.2 layers — LiDAR / Enhanced Terrain Intelligence
+  lidarTerrain?: {
+    slopeAnalysis: {
+      averageSlopePercent: number;
+      maxSlopePercent: number;
+      minSlopePercent: number;
+      aspectDegrees: number;
+      aspectDirection: string;
+      category: string;
+      uniformity: string;
+    };
+    gradingEstimate: {
+      gradingRequired: boolean;
+      estimatedCutCuYd: number;
+      estimatedFillCuYd: number;
+      estimatedGradingCost: number;
+      retainingWallLikely: boolean;
+      estimatedRetainingWallLf: number;
+      estimatedRetainingWallCost: number;
+    };
+    foundationRecommendation: {
+      type: string;
+      reason: string;
+      additionalCostEstimate: number;
+      confidence: number;
+    };
+    lidarAvailable: boolean;
+    sources: string[];
+    confidence: number;
+    summary: string;
+  };
 
   // v5 layers — Site Constraint Intelligence
   siteConstraints?: {
@@ -293,25 +498,25 @@ export interface PropertyAnalysisResult {
 // Source tier classification
 export type SourceTier = "tier1" | "tier2" | "tier3";
 
+// Source policy classification
+export type SourcePolicy = "primary-backbone" | "reference-only";
+
 export interface DataSource {
   name: string;
   tier: SourceTier;
+  policy: SourcePolicy;
   timestamp: string;
 }
 
 // ─── v6: Source Cross-Reference & Reconciliation Types ───
 
-export type FieldVerificationStatus =
-  | "verified"
-  | "estimated"
-  | "inferred"
-  | "under-review"
-  | "rejected";
+export type FieldVerificationStatus = "verified" | "estimated" | "inferred" | "under-review" | "rejected";
 
 export interface SourceCandidate<T = string | number> {
   value: T;
   sourceName: string;
   sourceTier: SourceTier;
+  sourcePolicy: SourcePolicy;
   confidence: number;
   timestamp: string | null;
   status: FieldVerificationStatus;
@@ -342,6 +547,10 @@ export interface SourceAudit {
   slope: ReconciledField<string>;
   rentEstimate: ReconciledField<number>;
   recommendedAduPath: ReconciledField<string>;
+  // v7 geometry source fields
+  parcelGeometry: ReconciledField<string>;
+  footprintGeometry: ReconciledField<string>;
+  structurePlacement: ReconciledField<string>;
   discrepancies: DiscrepancyRecord[];
   reconciliationTimestamp: string;
   totalSourcesConsulted: number;
@@ -349,6 +558,10 @@ export interface SourceAudit {
   verifiedFieldCount: number;
   estimatedFieldCount: number;
   underReviewFieldCount: number;
+  sourcePolicy: {
+    primaryBackbone: string[];
+    referenceOnly: string[];
+  };
 }
 
 export interface DiscrepancyRecord {

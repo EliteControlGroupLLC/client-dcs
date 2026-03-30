@@ -1,239 +1,263 @@
 "use client";
 
 import { useState } from "react";
-import { ChevronDown, ChevronRight, Eye, EyeOff, AlertTriangle, CheckCircle, HelpCircle, XCircle, Info } from "lucide-react";
-import type { SourceAudit, ReconciledField, DiscrepancyRecord, FieldVerificationStatus } from "@/lib/property-intelligence/types";
+import { ChevronDown, ChevronUp, Database, Eye, AlertTriangle } from "lucide-react";
+import type { PropertyAnalysisResult } from "@/lib/property-intelligence";
 
 interface ShowSourcesPanelProps {
-  sourceAudit: SourceAudit;
-  isAdmin: boolean;
+  analysisData: PropertyAnalysisResult;
 }
 
-const STATUS_CONFIG: Record<FieldVerificationStatus, { label: string; color: string; icon: typeof CheckCircle }> = {
-  verified: { label: "Verified", color: "text-emerald-600 bg-emerald-50", icon: CheckCircle },
-  estimated: { label: "Estimated", color: "text-amber-600 bg-amber-50", icon: HelpCircle },
-  inferred: { label: "Inferred", color: "text-blue-600 bg-blue-50", icon: Info },
-  "under-review": { label: "Under Review", color: "text-red-600 bg-red-50", icon: AlertTriangle },
-  rejected: { label: "Rejected", color: "text-gray-500 bg-gray-100", icon: XCircle },
-};
+function ConfidenceBadge({ confidence }: { confidence: number }) {
+  const color =
+    confidence >= 80
+      ? "bg-green-100 text-green-800"
+      : confidence >= 60
+        ? "bg-yellow-100 text-yellow-800"
+        : "bg-red-100 text-red-800";
+  return (
+    <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${color}`}>
+      {confidence}%
+    </span>
+  );
+}
 
-const TIER_LABELS: Record<string, string> = {
-  tier1: "Tier 1 (Primary)",
-  tier2: "Tier 2 (Geometry)",
-  tier3: "Tier 3 (Supplemental)",
-};
+function MethodBadge({ method }: { method: string }) {
+  const color =
+    method === "polygon-verified"
+      ? "bg-green-100 text-green-800"
+      : method === "polygon-estimated"
+        ? "bg-yellow-100 text-yellow-800"
+        : "bg-red-100 text-red-800";
+  return (
+    <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${color}`}>
+      {method}
+    </span>
+  );
+}
 
-export function ShowSourcesPanel({ sourceAudit, isAdmin }: ShowSourcesPanelProps) {
-  const [isExpanded, setIsExpanded] = useState(false);
-  const [expandedFields, setExpandedFields] = useState<Set<string>>(new Set());
+export function ShowSourcesPanel({ analysisData }: ShowSourcesPanelProps) {
+  const [isOpen, setIsOpen] = useState(false);
+  const [activeTab, setActiveTab] = useState<"fields" | "geometry" | "debug">("fields");
 
-  if (!isAdmin) return null;
-
-  const toggleField = (fieldName: string) => {
-    setExpandedFields((prev) => {
-      const next = new Set(prev);
-      if (next.has(fieldName)) {
-        next.delete(fieldName);
-      } else {
-        next.add(fieldName);
-      }
-      return next;
-    });
-  };
-
-  const fields: { name: string; label: string; field: ReconciledField<string | number> }[] = [
-    { name: "address", label: "Address", field: sourceAudit.address },
-    { name: "apn", label: "APN", field: sourceAudit.apn },
-    { name: "lotSizeSqFt", label: "Lot Size", field: sourceAudit.lotSizeSqFt },
-    { name: "zoning", label: "Zoning", field: sourceAudit.zoning },
-    { name: "landUse", label: "Land Use", field: sourceAudit.landUse },
-    { name: "homeAreaSqFt", label: "Home Area (sqft)", field: sourceAudit.homeAreaSqFt },
-    { name: "footprintSqFt", label: "Footprint (sqft)", field: sourceAudit.footprintSqFt },
-    { name: "openYardSqFt", label: "Open Yard (sqft)", field: sourceAudit.openYardSqFt },
-    { name: "parcelShape", label: "Parcel Shape", field: sourceAudit.parcelShape },
-    { name: "slope", label: "Slope", field: sourceAudit.slope },
-    { name: "rentEstimate", label: "Rent Estimate", field: sourceAudit.rentEstimate },
-    { name: "recommendedAduPath", label: "Recommended ADU Path", field: sourceAudit.recommendedAduPath },
-  ];
+  const { finalBuildability, property, geometryAnalysis, dataSources } = analysisData;
 
   return (
-    <div className="border border-indigo-200 rounded-xl overflow-hidden bg-indigo-50/30">
-      {/* Toggle Header */}
+    <div className="bg-slate-50 border border-slate-200 rounded-xl overflow-hidden">
       <button
-        onClick={() => setIsExpanded(!isExpanded)}
-        className="w-full px-4 py-3 flex items-center justify-between hover:bg-indigo-50/60 transition-colors"
+        onClick={() => setIsOpen(!isOpen)}
+        className="w-full flex items-center justify-between px-4 py-3 text-sm font-medium text-slate-700 hover:bg-slate-100 transition-colors"
       >
         <div className="flex items-center gap-2">
-          {isExpanded ? <EyeOff className="h-4 w-4 text-indigo-600" /> : <Eye className="h-4 w-4 text-indigo-600" />}
-          <span className="text-sm font-semibold text-indigo-900">Show Sources (Admin Only)</span>
-          <span className="text-[10px] px-1.5 py-0.5 rounded bg-indigo-100 text-indigo-700 font-medium">
-            {sourceAudit.totalSourcesConsulted} sources | {sourceAudit.verifiedFieldCount}/{sourceAudit.fieldCount} verified
-          </span>
-          {sourceAudit.discrepancies.length > 0 && (
-            <span className="text-[10px] px-1.5 py-0.5 rounded bg-amber-100 text-amber-700 font-medium">
-              {sourceAudit.discrepancies.length} discrepancies
-            </span>
-          )}
+          <Eye className="h-4 w-4" />
+          <span>Show Sources (Internal Debug)</span>
+          <MethodBadge method={finalBuildability.geometryMethodUsed} />
         </div>
-        {isExpanded ? <ChevronDown className="h-4 w-4 text-indigo-400" /> : <ChevronRight className="h-4 w-4 text-indigo-400" />}
+        {isOpen ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
       </button>
 
-      {isExpanded && (
-        <div className="border-t border-indigo-200 px-4 py-3 space-y-3">
-          {/* Summary Bar */}
-          <div className="grid grid-cols-4 gap-2 text-center">
-            <StatBox label="Verified" value={sourceAudit.verifiedFieldCount} color="text-emerald-700 bg-emerald-50" />
-            <StatBox label="Estimated" value={sourceAudit.estimatedFieldCount} color="text-amber-700 bg-amber-50" />
-            <StatBox label="Under Review" value={sourceAudit.underReviewFieldCount} color="text-red-700 bg-red-50" />
-            <StatBox label="Discrepancies" value={sourceAudit.discrepancies.length} color="text-purple-700 bg-purple-50" />
-          </div>
-
-          {/* Discrepancies Section */}
-          {sourceAudit.discrepancies.length > 0 && (
-            <div className="bg-amber-50 border border-amber-200 rounded-lg p-3">
-              <h4 className="text-xs font-semibold text-amber-800 mb-2 flex items-center gap-1">
-                <AlertTriangle className="h-3.5 w-3.5" />
-                Discrepancies Detected
-              </h4>
-              {sourceAudit.discrepancies.map((d, i) => (
-                <DiscrepancyRow key={`${d.field}-${i}`} discrepancy={d} />
-              ))}
-            </div>
-          )}
-
-          {/* Field-by-Field Breakdown */}
-          <div className="space-y-1">
-            {fields.map(({ name, label, field }) => (
-              <FieldRow
-                key={name}
-                fieldName={name}
-                label={label}
-                field={field}
-                isExpanded={expandedFields.has(name)}
-                onToggle={() => toggleField(name)}
-              />
+      {isOpen && (
+        <div className="border-t border-slate-200 p-4 space-y-4">
+          <div className="flex gap-2">
+            {(["fields", "geometry", "debug"] as const).map((tab) => (
+              <button
+                key={tab}
+                onClick={() => setActiveTab(tab)}
+                className={`px-3 py-1.5 text-xs font-medium rounded-md transition-colors ${
+                  activeTab === tab
+                    ? "bg-slate-800 text-white"
+                    : "bg-white text-slate-600 hover:bg-slate-100 border border-slate-200"
+                }`}
+              >
+                {tab === "fields" ? "Field Sources" : tab === "geometry" ? "Geometry Audit" : "Debug Comparison"}
+              </button>
             ))}
           </div>
 
-          {/* Footer */}
-          <div className="text-[10px] text-indigo-400 text-center pt-1 border-t border-indigo-100">
-            Reconciled at {new Date(sourceAudit.reconciliationTimestamp).toLocaleString()}
-          </div>
-        </div>
-      )}
-    </div>
-  );
-}
+          {activeTab === "fields" && (
+            <div className="space-y-3">
+              {[
+                { label: "Lot Size", field: property.lotSizeSqFt },
+                { label: "Home Area", field: property.homeAreaSqFt },
+                { label: "Footprint", field: property.footprintSqFt },
+                { label: "Zoning", field: property.zoning },
+                { label: "Slope", field: property.slope },
+                { label: "APN", field: property.apn },
+              ].map(({ label, field }) => (
+                <div key={label} className="bg-white rounded-lg p-3 border border-slate-100">
+                  <div className="flex items-center justify-between mb-1">
+                    <span className="text-xs font-semibold text-slate-700">{label}</span>
+                    <ConfidenceBadge confidence={field.confidence} />
+                  </div>
+                  <div className="text-sm text-slate-900 font-medium">
+                    {typeof field.value === "number" ? field.value.toLocaleString() : String(field.value)}
+                  </div>
+                  <div className="mt-1 space-y-0.5">
+                    {field.sources?.map((s: string, i: number) => (
+                      <div key={i} className="flex items-center gap-1 text-[10px] text-slate-500">
+                        <Database className="h-3 w-3" />
+                        {s}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              ))}
 
-function StatBox({ label, value, color }: { label: string; value: number; color: string }) {
-  return (
-    <div className={`rounded-lg px-2 py-1.5 ${color}`}>
-      <div className="text-lg font-bold">{value}</div>
-      <div className="text-[10px]">{label}</div>
-    </div>
-  );
-}
+              <div className="bg-white rounded-lg p-3 border border-slate-100">
+                <div className="flex items-center justify-between mb-1">
+                  <span className="text-xs font-semibold text-slate-700">
+                    Buildable Area (Single Source of Truth)
+                  </span>
+                  <ConfidenceBadge confidence={finalBuildability.buildabilityConfidence} />
+                </div>
+                <div className="text-sm text-slate-900 font-medium">
+                  {finalBuildability.totalBuildableAreaSqFt.toLocaleString()} sq ft
+                </div>
+                <div className="mt-1 flex items-center gap-1 text-[10px] text-slate-500">
+                  <Database className="h-3 w-3" />
+                  Method: <MethodBadge method={finalBuildability.geometryMethodUsed} />
+                </div>
+                <div className="text-[10px] text-slate-500 mt-1">
+                  Candidate zones: {finalBuildability.candidateZoneCount}
+                </div>
+                {finalBuildability.warnings.length > 0 && (
+                  <div className="mt-2 space-y-1">
+                    {finalBuildability.warnings.map((w, i) => (
+                      <div key={i} className="flex items-start gap-1 text-[10px] text-amber-600">
+                        <AlertTriangle className="h-3 w-3 mt-0.5 flex-shrink-0" />
+                        {w}
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
 
-function DiscrepancyRow({ discrepancy }: { discrepancy: DiscrepancyRecord }) {
-  const severityColor = discrepancy.severity === "high" ? "text-red-700" : discrepancy.severity === "medium" ? "text-amber-700" : "text-yellow-600";
-  return (
-    <div className="mb-2 last:mb-0 text-[11px]">
-      <div className="flex items-center gap-1.5">
-        <span className={`font-semibold ${severityColor} uppercase`}>[{discrepancy.severity}]</span>
-        <span className="text-amber-900 font-medium">{discrepancy.field}</span>
-      </div>
-      <p className="text-amber-800 mt-0.5">{discrepancy.description}</p>
-      <p className="text-amber-600 italic">Resolution: {discrepancy.resolution}</p>
-    </div>
-  );
-}
-
-function FieldRow({
-  fieldName,
-  label,
-  field,
-  isExpanded,
-  onToggle,
-}: {
-  fieldName: string;
-  label: string;
-  field: ReconciledField<string | number>;
-  isExpanded: boolean;
-  onToggle: () => void;
-}) {
-  const statusConfig = STATUS_CONFIG[field.finalStatus];
-  const StatusIcon = statusConfig.icon;
-  const displayValue = typeof field.finalValue === "number"
-    ? field.finalValue.toLocaleString()
-    : String(field.finalValue);
-
-  return (
-    <div className="border border-indigo-100 rounded-lg overflow-hidden bg-white">
-      <button
-        onClick={onToggle}
-        className="w-full px-3 py-2 flex items-center justify-between hover:bg-indigo-50/30 transition-colors"
-      >
-        <div className="flex items-center gap-2 min-w-0">
-          {isExpanded ? <ChevronDown className="h-3 w-3 text-indigo-400 shrink-0" /> : <ChevronRight className="h-3 w-3 text-indigo-400 shrink-0" />}
-          <span className="text-xs font-medium text-indigo-900">{label}</span>
-          {field.discrepancyDetected && <AlertTriangle className="h-3 w-3 text-amber-500 shrink-0" />}
-        </div>
-        <div className="flex items-center gap-2">
-          <span className="text-xs text-secondary font-medium truncate max-w-[200px]">{displayValue}</span>
-          <span className={`text-[9px] px-1.5 py-0.5 rounded-full font-medium flex items-center gap-0.5 ${statusConfig.color}`}>
-            <StatusIcon className="h-2.5 w-2.5" />
-            {statusConfig.label}
-          </span>
-          <span className="text-[10px] text-indigo-400">{field.finalConfidence}%</span>
-        </div>
-      </button>
-
-      {isExpanded && (
-        <div className="border-t border-indigo-50 px-3 py-2 bg-indigo-50/20 space-y-2">
-          {/* Selection Reason */}
-          <div className="text-[10px] text-indigo-600">
-            <span className="font-medium">Selected:</span> {field.selectedSource} — {field.selectionReason}
-          </div>
-
-          {/* Discrepancy Detail */}
-          {field.discrepancyDetail && (
-            <div className="text-[10px] text-amber-600 bg-amber-50 rounded px-2 py-1">
-              {field.discrepancyDetail}
+              <div className="bg-white rounded-lg p-3 border border-slate-100">
+                <div className="text-xs font-semibold text-slate-700 mb-1">Best Recommendation</div>
+                <div className="text-sm text-slate-900 font-medium">{analysisData.bestRecommendation}</div>
+              </div>
             </div>
           )}
 
-          {/* All Candidates */}
-          <div className="space-y-1">
-            <div className="text-[10px] font-medium text-indigo-700">
-              All Candidates ({field.candidates.length}):
-            </div>
-            {field.candidates.map((c, i) => {
-              const cStatus = STATUS_CONFIG[c.status];
-              const CIcon = cStatus.icon;
-              const isWinner = c.sourceName === field.selectedSource;
-              const cValue = typeof c.value === "number" ? c.value.toLocaleString() : String(c.value);
-              return (
-                <div
-                  key={`${fieldName}-candidate-${i}`}
-                  className={`flex items-center justify-between text-[10px] px-2 py-1 rounded ${
-                    isWinner ? "bg-indigo-100 border border-indigo-200" : "bg-white border border-indigo-50"
-                  }`}
-                >
-                  <div className="flex items-center gap-1.5 min-w-0">
-                    <CIcon className={`h-2.5 w-2.5 shrink-0 ${cStatus.color.split(" ")[0]}`} />
-                    <span className={`font-medium ${isWinner ? "text-indigo-900" : "text-gray-700"}`}>
-                      {c.sourceName}
-                    </span>
-                    <span className="text-[9px] text-indigo-400">{TIER_LABELS[c.sourceTier]}</span>
+          {activeTab === "geometry" && (
+            <div className="space-y-3">
+              {geometryAnalysis ? (
+                <>
+                  <div className="bg-white rounded-lg p-3 border border-slate-100">
+                    <div className="text-xs font-semibold text-slate-700 mb-2">Geometry Engine Status</div>
+                    <div className="grid grid-cols-2 gap-2 text-xs">
+                      <div>
+                        Status: <MethodBadge method={geometryAnalysis.geometryStatus} />
+                      </div>
+                      <div>
+                        Confidence: <ConfidenceBadge confidence={geometryAnalysis.geometryConfidence} />
+                      </div>
+                      <div>Parcel: {geometryAnalysis.parcelSource}</div>
+                      <div>Footprint: {geometryAnalysis.footprintSource}</div>
+                    </div>
                   </div>
-                  <div className="flex items-center gap-2">
-                    <span className="font-medium text-secondary truncate max-w-[150px]">{cValue}</span>
-                    <span className="text-indigo-400">{c.confidence}%</span>
+
+                  {dataSources && (
+                    <div className="bg-white rounded-lg p-3 border border-slate-100">
+                      <div className="text-xs font-semibold text-slate-700 mb-2">Data Sources</div>
+                      <div className="grid grid-cols-2 gap-1 text-xs">
+                        {Object.entries(dataSources).map(([name, available]) => (
+                          <div key={name} className="flex items-center gap-1">
+                            <span className={`w-2 h-2 rounded-full ${available ? "bg-green-500" : "bg-red-400"}`} />
+                            {name}: {available ? "Connected" : "Unavailable"}
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {analysisData.footprintMergeNotes && analysisData.footprintMergeNotes.length > 0 && (
+                    <div className="bg-white rounded-lg p-3 border border-slate-100">
+                      <div className="text-xs font-semibold text-slate-700 mb-2">Footprint Merge Audit</div>
+                      <div className="space-y-1">
+                        {analysisData.footprintMergeNotes.map((note, i) => (
+                          <div key={i} className="text-[10px] text-slate-500">
+                            {note}
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </>
+              ) : (
+                <div className="bg-amber-50 rounded-lg p-3 border border-amber-200 text-xs text-amber-700">
+                  Geometry engine did not run for this property.
+                </div>
+              )}
+
+              {finalBuildability.notes.length > 0 && (
+                <div className="bg-white rounded-lg p-3 border border-slate-100">
+                  <div className="text-xs font-semibold text-slate-700 mb-2">Geometry Engine Notes</div>
+                  <div className="space-y-1">
+                    {finalBuildability.notes.map((n, i) => (
+                      <div key={i} className="text-[10px] text-slate-500">
+                        {n}
+                      </div>
+                    ))}
                   </div>
                 </div>
-              );
-            })}
-          </div>
+              )}
+            </div>
+          )}
+
+          {activeTab === "debug" && finalBuildability.debugComparison && (
+            <div className="space-y-3">
+              <div className="bg-white rounded-lg p-3 border border-slate-100">
+                <div className="text-xs font-semibold text-slate-700 mb-3">Rectangle vs Polygon Comparison</div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div
+                    className={`p-3 rounded-lg border ${
+                      !finalBuildability.debugComparison.polygonIsSource
+                        ? "border-blue-300 bg-blue-50"
+                        : "border-slate-200 bg-slate-50"
+                    }`}
+                  >
+                    <div className="text-[10px] text-slate-500 mb-1">
+                      Rectangle Method {!finalBuildability.debugComparison.polygonIsSource && "(ACTIVE)"}
+                    </div>
+                    <div className="text-lg font-bold text-slate-900">
+                      {finalBuildability.debugComparison.rectangleBuildableAreaSqFt.toLocaleString()} sq ft
+                    </div>
+                  </div>
+                  <div
+                    className={`p-3 rounded-lg border ${
+                      finalBuildability.debugComparison.polygonIsSource
+                        ? "border-green-300 bg-green-50"
+                        : "border-slate-200 bg-slate-50"
+                    }`}
+                  >
+                    <div className="text-[10px] text-slate-500 mb-1">
+                      Polygon Engine {finalBuildability.debugComparison.polygonIsSource && "(ACTIVE — Source of Truth)"}
+                    </div>
+                    <div className="text-lg font-bold text-slate-900">
+                      {finalBuildability.debugComparison.polygonBuildableAreaSqFt.toLocaleString()} sq ft
+                    </div>
+                  </div>
+                </div>
+                <div className="mt-2 text-xs text-slate-600 text-center">
+                  Delta: {finalBuildability.debugComparison.deltaPercent > 0 ? "+" : ""}
+                  {finalBuildability.debugComparison.deltaPercent}%
+                  {finalBuildability.debugComparison.polygonIsSource
+                    ? " — Polygon engine is the production source of truth"
+                    : " — Using rectangle fallback (polygon unavailable)"}
+                </div>
+              </div>
+
+              <div className="bg-white rounded-lg p-3 border border-slate-100">
+                <div className="text-xs font-semibold text-slate-700 mb-2">Confidence Summary</div>
+                <div className="space-y-1 text-xs text-slate-600">
+                  <div>Overall scan confidence: {analysisData.confidenceScore || "N/A"}%</div>
+                  <div>Buildability confidence: {finalBuildability.buildabilityConfidence}%</div>
+                  <div>Method: {finalBuildability.geometryMethodUsed}</div>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
       )}
     </div>

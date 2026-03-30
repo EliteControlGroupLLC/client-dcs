@@ -18,19 +18,32 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: "Distinct Construction Solutions | San Diego ADU & Home Construction",
-  description: "San Diego's premier design-build construction company specializing in ADUs, custom homes, remodeling, and renovations. Get your free consultation today.",
-  keywords: ["ADU San Diego", "home construction", "remodeling", "design-build", "custom homes", "accessory dwelling units"],
+  description:
+    "San Diego's premier design-build construction company specializing in ADUs, custom homes, remodeling, and renovations. Get your free consultation today.",
+  keywords: [
+    "ADU San Diego",
+    "home construction",
+    "remodeling",
+    "design-build",
+    "custom homes",
+    "accessory dwelling units",
+  ],
   authors: [{ name: "Distinct Construction Solutions" }],
+  metadataBase: new URL("https://www.distinctcsolutions.com"),
+  alternates: {
+    canonical: "https://www.distinctcsolutions.com",
+  },
   openGraph: {
     title: "Distinct Construction Solutions | San Diego ADU & Home Construction",
-    description: "San Diego's premier design-build construction company specializing in ADUs, custom homes, remodeling, and renovations.",
-    url: "https://client-dcs.vercel.app",
+    description:
+      "San Diego's premier design-build construction company specializing in ADUs, custom homes, remodeling, and renovations.",
+    url: "https://www.distinctcsolutions.com",
     siteName: "Distinct Construction Solutions",
     locale: "en_US",
     type: "website",
     images: [
       {
-        url: "/images/og-image.jpg",
+        url: "https://www.distinctcsolutions.com/og-image.png",
         width: 1200,
         height: 630,
         alt: "Distinct Construction Solutions - San Diego ADU & Home Builder",
@@ -41,7 +54,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "Distinct Construction Solutions",
     description: "San Diego's premier design-build construction company",
-    images: ["/images/og-image.jpg"],
+    images: ["https://www.distinctcsolutions.com/og-image.png"],
   },
   robots: {
     index: true,
@@ -58,42 +71,43 @@ export const viewport: Viewport = {
 const jsonLd = {
   "@context": "https://schema.org",
   "@type": "LocalBusiness",
-  "name": "Distinct Construction Solutions",
-  "description": "San Diego's premier design-build construction company specializing in ADUs, custom homes, remodeling, and renovations.",
-  "url": "https://distinctconstructionsolutions.com",
-  "logo": "https://distinctconstructionsolutions.com/images/logo-light.png",
-  "image": "https://distinctconstructionsolutions.com/images/logo-light.png",
-  "telephone": "+1-858-833-0705",
-  "address": {
+  name: "Distinct Construction Solutions",
+  description:
+    "San Diego's premier design-build construction company specializing in ADUs, custom homes, remodeling, and renovations.",
+  url: "https://www.distinctcsolutions.com",
+  logo: "https://www.distinctcsolutions.com/images/logo-light.png",
+  image: "https://www.distinctcsolutions.com/images/logo-light.png",
+  telephone: "+1-858-833-0705",
+  address: {
     "@type": "PostalAddress",
-    "addressLocality": "San Diego",
-    "addressRegion": "CA",
-    "addressCountry": "US",
+    addressLocality: "San Diego",
+    addressRegion: "CA",
+    addressCountry: "US",
   },
-  "geo": {
+  geo: {
     "@type": "GeoCoordinates",
-    "latitude": 32.7157,
-    "longitude": -117.1611,
+    latitude: 32.7157,
+    longitude: -117.1611,
   },
-  "areaServed": {
+  areaServed: {
     "@type": "City",
-    "name": "San Diego",
+    name: "San Diego",
   },
-  "serviceType": [
+  serviceType: [
     "ADU Construction",
     "Custom Home Building",
     "Home Remodeling",
     "Garage Conversions",
     "Room Additions",
   ],
-  "priceRange": "$$",
-  "openingHoursSpecification": {
+  priceRange: "$$",
+  openingHoursSpecification: {
     "@type": "OpeningHoursSpecification",
-    "dayOfWeek": ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"],
-    "opens": "08:00",
-    "closes": "18:00",
+    dayOfWeek: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"],
+    opens: "08:00",
+    closes: "18:00",
   },
-  "sameAs": [],
+  sameAs: [],
 };
 
 export default function RootLayout({
@@ -108,7 +122,49 @@ export default function RootLayout({
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
         />
-        {/* Google Tag Manager */}
+
+        <link rel="canonical" href="https://www.distinctcsolutions.com" />
+
+        <meta
+          property="og:title"
+          content="Distinct Construction Solutions | San Diego ADU & Home Construction"
+        />
+        <meta
+          property="og:description"
+          content="San Diego's premier design-build construction company specializing in ADUs, custom homes, remodeling, and renovations."
+        />
+        <meta property="og:type" content="website" />
+        <meta
+          property="og:url"
+          content="https://www.distinctcsolutions.com"
+        />
+        <meta
+          property="og:image"
+          content="https://www.distinctcsolutions.com/og-image.png"
+        />
+        <meta property="og:image:width" content="1200" />
+        <meta property="og:image:height" content="630" />
+        <meta
+          property="og:image:alt"
+          content="Distinct Construction Solutions - San Diego ADU & Home Builder"
+        />
+        <meta property="og:site_name" content="Distinct Construction Solutions" />
+        <meta property="og:locale" content="en_US" />
+
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta
+          name="twitter:title"
+          content="Distinct Construction Solutions"
+        />
+        <meta
+          name="twitter:description"
+          content="San Diego's premier design-build construction company"
+        />
+        <meta
+          name="twitter:image"
+          content="https://www.distinctcsolutions.com/og-image.png"
+        />
+
         <script
           dangerouslySetInnerHTML={{
             __html: `(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
@@ -118,7 +174,7 @@ export default function RootLayout({
             })(window,document,'script','dataLayer','GTM-5KJT4QTZ');`,
           }}
         />
-        {/* Meta Pixel */}
+
         <script
           dangerouslySetInnerHTML={{
             __html: `!function(f,b,e,v,n,t,s)
@@ -134,10 +190,10 @@ export default function RootLayout({
           }}
         />
       </head>
+
       <body
         className={`${inter.variable} ${geistMono.variable} font-sans antialiased`}
       >
-        {/* Google Tag Manager (noscript) */}
         <noscript>
           <iframe
             src="https://www.googletagmanager.com/ns.html?id=GTM-5KJT4QTZ"
@@ -146,10 +202,9 @@ export default function RootLayout({
             style={{ display: "none", visibility: "hidden" }}
           />
         </noscript>
+
         <Header />
-        <main className="min-h-screen">
-          {children}
-        </main>
+        <main className="min-h-screen">{children}</main>
         <Footer />
         <FloatingEstimateButton />
       </body>
