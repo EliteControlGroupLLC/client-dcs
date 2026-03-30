@@ -257,7 +257,7 @@ export function PropertyReportModal({
 
           {/* Source Cross-Reference (Admin Only) */}
           {analysisData.sourceAudit && (
-            <ShowSourcesPanel sourceAudit={analysisData.sourceAudit} isAdmin={isAdmin} />
+            <ShowSourcesPanel analysisData={analysisData} />
           )}
 
           {/* Disclaimers */}
