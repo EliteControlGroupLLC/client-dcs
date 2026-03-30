@@ -1,18 +1,18 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { ArrowRight, Zap, Check, X } from "lucide-react";
-import { FLOOR_PLANS, getRentEstimate } from "@/lib/data/site-data";
+import { estimateAduPriceRange, getRentEstimate } from "@/lib/data/site-data";
 
 const aduTypes = [
-  { label: "Detached ADU (New Build)", perSqFt: 427, id: "detached", type: "detached" },
-  { label: "Attached ADU", perSqFt: 444, id: "attached", type: "attached" },
-  { label: "Garage Conversion (2-Car)", perSqFt: 0, flatCost: 120000, id: "garage-2", type: "garage-conversion" },
-  { label: "Garage Conversion (3-Car)", perSqFt: 0, flatCost: 150000, id: "garage-3", type: "garage-conversion" },
-  { label: "Two-Story ADU", perSqFt: 450, id: "two-story", type: "two-story" },
+  { label: "Detached ADU", id: "detached", type: "detached" },
+  { label: "Attached ADU", id: "attached", type: "attached" },
+  { label: "Garage Conversion (2-Car)", id: "garage-2", type: "garage-conversion", garageStalls: 2 as const },
+  { label: "Garage Conversion (3-Car)", id: "garage-3", type: "garage-conversion", garageStalls: 3 as const },
+  { label: "Two-Story ADU", id: "two-story", type: "two-story", stories: 2 as const },
 ];
 
 const sizeOptions = [400, 500, 700, 1000, 1200];
@@ -27,62 +27,74 @@ export default function InstantADUEstimatorPage() {
   const selected = aduTypes[typeIndex];
   const isGarage = selected.id.startsWith("garage");
 
-  // Calculate available bedroom options based on size
+  const availableSizes = useMemo(() => {
+    if (selected.id === "attached") return [500];
+    if (selected.id === "two-story") return [1200];
+    return sizeOptions;
+  }, [selected.id]);
+
+  useEffect(() => {
+    if (!availableSizes.includes(size)) {
+      setSize(availableSizes[0]);
+    }
+
+    if (selected.id === "attached") {
+      setBedrooms(1);
+      setBathrooms(1);
+      setStories(1);
+    } else if (selected.id === "garage-2") {
+      setBedrooms(0);
+      setBathrooms(1);
+      setStories(1);
+    } else if (selected.id === "garage-3") {
+      setBedrooms(1);
+      setBathrooms(1);
+      setStories(1);
+    } else if (selected.id === "two-story") {
+      setBedrooms(4);
+      setBathrooms(2);
+      setStories(2);
+    }
+  }, [availableSizes, selected.id, size]);
+
   const maxBedrooms = useMemo(() => {
+    if (selected.id === "garage-2") return 0;
+    if (selected.id === "garage-3") return 1;
+    if (selected.id === "attached") return 1;
+    if (selected.id === "two-story") return 4;
     if (size <= 400) return 1;
     if (size <= 500) return 1;
     if (size <= 700) return 2;
     if (size <= 1000) return 3;
-    return 4; // 1200 sq ft can support up to 4 bedrooms
-  }, [size]);
+    return 4;
+  }, [selected.id, size]);
 
-  // Adjust bedrooms if current selection exceeds max
   const effectiveBedrooms = Math.min(bedrooms, maxBedrooms);
+  const bathroomOptions = size >= 1000 || selected.id === "two-story" ? [1, 2] : [1];
+  const effectiveBathrooms = bathroomOptions.includes(bathrooms) ? bathrooms : bathroomOptions[0];
 
-  // Calculate price based on floor plan data or formula
-  const { baseCost, lowEstimate, highEstimate } = useMemo(() => {
-    if (isGarage) {
-      const flat = (selected as { flatCost: number }).flatCost;
-      return {
-        baseCost: flat,
-        lowEstimate: Math.round(flat * 0.95),
-        highEstimate: Math.round(flat * 1.1),
-      };
-    }
+  const { low: lowEstimate, high: highEstimate } = useMemo(() => {
+    return estimateAduPriceRange({
+      sqFt: isGarage ? 400 : size,
+      type: selected.type,
+      bedrooms: effectiveBedrooms,
+      bathrooms: effectiveBathrooms,
+      stories: selected.id === "two-story" ? 2 : stories,
+      garageStalls: selected.garageStalls,
+    });
+  }, [effectiveBathrooms, effectiveBedrooms, isGarage, selected, size, stories]);
 
-    // Try to find matching floor plan
-    const matchingPlan = FLOOR_PLANS.find(p => 
-      p.sqFt === size && 
-      (selected.type === "two-story" ? p.type === "Two-Story" : 
-       selected.type === "attached" ? p.type === "Attached" : p.type === "Detached")
-    );
-
-    if (matchingPlan) {
-      return {
-        baseCost: matchingPlan.priceLow,
-        lowEstimate: matchingPlan.priceLow,
-        highEstimate: matchingPlan.priceHigh,
-      };
-    }
-
-    // Fallback to per-sqft calculation
-    const base = size * selected.perSqFt;
-    return {
-      baseCost: base,
-      lowEstimate: Math.round(base * 0.95),
-      highEstimate: Math.round(base * 1.1),
-    };
-  }, [isGarage, selected, size]);
-
-  // Calculate rent based on unified rent assumptions
   const rentEstimate = useMemo(() => {
-    const rent = getRentEstimate(
+    return getRentEstimate(
       isGarage ? 400 : size,
       selected.type,
-      effectiveBedrooms
+      effectiveBedrooms,
+      {
+        stories: selected.id === "two-story" ? 2 : stories,
+        garageStalls: selected.garageStalls,
+      }
     );
-    return rent;
-  }, [isGarage, size, selected.type, effectiveBedrooms]);
+  }, [effectiveBedrooms, isGarage, selected, size, stories]);
 
   const included = [
     "Architectural plans & engineering",
@@ -146,7 +158,7 @@ export default function InstantADUEstimatorPage() {
                 <div>
                   <label className="block text-sm font-semibold text-secondary mb-3">Size</label>
                   <div className="flex flex-wrap gap-2">
-                    {sizeOptions.map((s) => (
+                    {availableSizes.map((s) => (
                       <button
                         key={s}
                         onClick={() => setSize(s)}
@@ -185,7 +197,7 @@ export default function InstantADUEstimatorPage() {
                 <div>
                   <label className="block text-sm font-semibold text-secondary mb-2">Bathrooms</label>
                   <div className="flex gap-2">
-                    {[1, 2].map((b) => (
+                    {bathroomOptions.map((b) => (
                       <button
                         key={b}
                         onClick={() => setBathrooms(b)}
@@ -207,6 +219,7 @@ export default function InstantADUEstimatorPage() {
                       <button
                         key={s}
                         onClick={() => setStories(s)}
+                        disabled={selected.id === "garage-2" || selected.id === "garage-3" || selected.id === "attached"}
                         className={`flex-1 py-2 rounded-lg border text-sm font-medium transition-all ${
                           stories === s
                             ? "border-primary bg-primary/5 text-secondary"
@@ -230,7 +243,7 @@ export default function InstantADUEstimatorPage() {
                     ${lowEstimate.toLocaleString()} &ndash; ${highEstimate.toLocaleString()}
                   </p>
                   <p className="text-white/50 text-sm">
-                    {selected.label} &bull; {isGarage ? "Standard scope" : `${size.toLocaleString()} sq ft`} &bull; {effectiveBedrooms === 0 ? "Studio" : `${effectiveBedrooms} Bed`}, {bathrooms} Bath
+                    {selected.label} &bull; {isGarage ? "Existing garage shell" : `${size.toLocaleString()} sq ft`} &bull; {effectiveBedrooms === 0 ? "Studio" : `${effectiveBedrooms} Bed`}, {effectiveBathrooms} Bath
                   </p>
                 </div>
 
@@ -240,7 +253,7 @@ export default function InstantADUEstimatorPage() {
                     ${rentEstimate.low.toLocaleString()} - ${rentEstimate.high.toLocaleString()}/mo
                   </p>
                   <p className="text-white/40 text-xs mt-1">
-                    Based on San Diego market rates for {isGarage ? "garage conversion" : `${size.toLocaleString()} sq ft`} {selected.type === "two-story" ? "two-story " : ""}ADUs
+                    Based on the current DCS plan library and San Diego market rates for the selected build path
                   </p>
                 </div>
 

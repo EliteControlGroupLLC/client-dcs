@@ -42,8 +42,8 @@ const finishLevels = [
 ];
 
 const addOns = [
-  { label: "Heated Floor", cost: 2500 },
-  { label: "Frameless Glass Shower Door", cost: 2000 },
+  { label: "Heated Floor", cost: 10000 },
+  { label: "Frameless Glass Shower Door", cost: 2500 },
   { label: "Freestanding Soaking Tub", cost: 3500 },
   { label: "Double Vanity Upgrade", cost: 2000 },
   { label: "Plumbing Relocation", cost: 3500 },
@@ -134,7 +134,7 @@ export function BathroomCalculatorInline() {
                       className="w-4 h-4 accent-primary"
                     />
                     <span className="text-sm text-secondary">{a.label}</span>
-                    <span className="text-sm text-muted-foreground ml-auto">+${a.cost.toLocaleString()}</span>
+                    <span className="text-sm text-muted-foreground ml-auto">Starting at ${a.cost.toLocaleString()}</span>
                   </label>
                 ))}
               </div>

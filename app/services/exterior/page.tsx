@@ -20,11 +20,6 @@ const exteriorServices = [
     price: "Starting at $12,000",
   },
   {
-    title: "Fencing & Gates",
-    description: "Privacy fencing, decorative gates, and property enclosures. Wood, vinyl, metal, and composite options.",
-    price: "Starting at $5,000",
-  },
-  {
     title: "Outdoor Living Spaces",
     description: "Custom patios, outdoor kitchens, fire pits, and entertainment areas designed for year-round enjoyment.",
     price: "Starting at $75,000",
@@ -39,23 +34,23 @@ const exteriorServices = [
 const features = [
   {
     icon: Sun,
-    title: "Elevate Your Property Value",
-    description: "Strategic exterior improvements can add 5-15% to your home's resale value while making it the standout property on your street.",
+    title: "Create a Stronger First Impression",
+    description: "The exterior sets expectations before anyone steps inside. A well-composed facade, premium materials, and sharper detailing make the entire property feel more expensive and better maintained.",
   },
   {
     icon: Home,
-    title: "Transform Your Lifestyle",
-    description: "Unlock your outdoor spaces for entertaining, relaxation, and everyday living. San Diego's climate is perfect for outdoor rooms you'll actually use.",
+    title: "Extend How You Live",
+    description: "In San Diego, the backyard is usable square footage. Thoughtful decks, shade structures, and outdoor rooms turn neglected exterior area into daily living space that actually gets used.",
   },
   {
     icon: Shield,
-    title: "Build a More Intentional Home",
-    description: "A well-designed exterior isn't just maintenance - it's the finishing touch that ties your entire property together into a cohesive, polished whole.",
+    title: "Protect Premium Interior Work",
+    description: "Exterior upgrades are not cosmetic alone. Better coatings, drainage, hardscape planning, and envelope improvements help preserve the quality and value of the investment behind the walls.",
   },
   {
     icon: Paintbrush,
-    title: "Invest in Better Living",
-    description: "Quality exterior work creates spaces that enhance how you live every day - from morning coffee on a custom deck to evening gatherings around a fire pit.",
+    title: "Support Long-Term Resale",
+    description: "Buyers notice coherent exterior planning. When paint, hardscape, outdoor living, and architectural detailing feel intentional, the property presents like a finished asset instead of a work in progress.",
   },
 ];
 
@@ -83,8 +78,8 @@ export default function ExteriorPage() {
               Enhance Your Home&apos;s Exterior
             </h1>
             <p className="text-xl text-white/80 mb-8">
-              From painting and siding to decks, fencing, and outdoor living spaces — complete exterior
-              improvement services designed for San Diego homes and lifestyles.
+              From exterior painting and siding to pergolas, hardscaping, and full outdoor living
+              environments, we design and build exteriors that feel cohesive, higher-value, and ready for daily use.
             </p>
             <p className="text-2xl font-bold text-primary mb-8">Starting at $12,000</p>
             <Link href="/contact">
@@ -101,7 +96,7 @@ export default function ExteriorPage() {
           <div className="text-center mb-12">
             <h2 className="text-3xl md:text-4xl font-bold text-secondary mb-4">Exterior Services</h2>
             <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-              Comprehensive exterior improvement services to protect, beautify, and add value to your property.
+              Exterior scopes designed to elevate curb presence, extend livable space, and support long-term property value.
             </p>
           </div>
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-5xl mx-auto">

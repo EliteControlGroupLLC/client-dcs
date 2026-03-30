@@ -132,7 +132,7 @@ export function KitchenCalculatorInline() {
                       className="w-4 h-4 accent-primary"
                     />
                     <span className="text-sm text-secondary">{a.label}</span>
-                    <span className="text-sm text-muted-foreground ml-auto">+${a.cost.toLocaleString()}</span>
+                    <span className="text-sm text-muted-foreground ml-auto">Starting at ${a.cost.toLocaleString()}</span>
                   </label>
                 ))}
               </div>

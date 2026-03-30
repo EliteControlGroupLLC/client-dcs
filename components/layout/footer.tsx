@@ -1,7 +1,8 @@
 import Link from "next/link";
 import Image from "next/image";
-import { Facebook, Instagram, Linkedin, Youtube, Mail, Phone, MapPin, Star, ArrowRight, Shield, CheckCircle2, Building2, CreditCard } from "lucide-react";
+import { Mail, Phone, MapPin, Star, ArrowRight, Shield, CheckCircle2, Building2, CreditCard } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { COMPANY_INFO } from "@/lib/data/site-data";
 
 const footerLinks = {
   services: [
@@ -31,11 +32,11 @@ const footerLinks = {
 };
 
 const socialLinks = [
-  { name: "Facebook", href: "#", icon: Facebook },
-  { name: "Instagram", href: "#", icon: Instagram },
-  { name: "LinkedIn", href: "#", icon: Linkedin },
-  { name: "YouTube", href: "#", icon: Youtube },
-  { name: "Google Reviews", href: "#", icon: Star },
+  {
+    name: "Google Reviews",
+    href: "https://www.google.com/search?q=Distinct+Construction+Solutions+Chula+Vista+reviews",
+    icon: Star,
+  },
 ];
 
 const trustBadges = [
@@ -114,22 +115,22 @@ export function Footer() {
               <div className="flex items-center gap-3 text-sm">
                 <Phone className="h-4 w-4 text-white/70" />
                 <div className="flex items-center gap-2">
-                  <a href="tel:+18588330705" className="text-white/70 hover:text-primary transition-colors">
-                    +1 (858) - 833 - 0705
+                  <a href={`tel:${COMPANY_INFO.phoneHref}`} className="text-white/70 hover:text-primary transition-colors">
+                    {COMPANY_INFO.phone}
                   </a>
                   <span className="text-white/30">|</span>
-                  <a href="sms:+18588330705" className="text-white/70 hover:text-primary transition-colors text-xs">
+                  <a href={`sms:${COMPANY_INFO.phoneHref}`} className="text-white/70 hover:text-primary transition-colors text-xs">
                     Text
                   </a>
                 </div>
               </div>
-              <a href="mailto:Office@distinctcsolutions.com" className="flex items-center gap-3 text-sm text-white/70 hover:text-primary transition-colors">
+              <a href={`mailto:${COMPANY_INFO.email}`} className="flex items-center gap-3 text-sm text-white/70 hover:text-primary transition-colors">
                 <Mail className="h-4 w-4" />
-                Office@distinctcsolutions.com
+                {COMPANY_INFO.email}
               </a>
               <div className="flex items-start gap-3 text-sm text-white/70">
                 <MapPin className="h-4 w-4 mt-0.5 shrink-0" />
-                <span>Chula Vista, CA</span>
+                <span>{COMPANY_INFO.office}</span>
               </div>
             </div>
 
@@ -139,6 +140,8 @@ export function Footer() {
                 <a
                   key={social.name}
                   href={social.href}
+                  target="_blank"
+                  rel="noopener noreferrer"
                   className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center hover:bg-primary transition-colors"
                   aria-label={social.name}
                 >

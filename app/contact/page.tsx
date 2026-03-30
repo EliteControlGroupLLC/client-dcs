@@ -13,6 +13,7 @@ import {
   CheckCircle
 } from "lucide-react";
 import { trackContactFormSubmitted } from "@/lib/analytics";
+import { COMPANY_INFO } from "@/lib/data/site-data";
 
 const serviceTypes = [
   "ADU / Accessory Dwelling Unit",
@@ -26,6 +27,8 @@ const serviceTypes = [
 
 export default function ContactPage() {
   const [submitted, setSubmitted] = useState(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -36,17 +39,25 @@ export default function ContactPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setSubmitError(null);
+    setIsSubmitting(true);
     try {
-      await fetch("/api/contact", {
+      const response = await fetch("/api/contact", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(formData),
       });
-    } catch {
-      // Contact form still shows success even if API fails
+      const result = await response.json().catch(() => null);
+      if (!response.ok || !result?.success) {
+        throw new Error(result?.error || "We could not submit your request. Please try again.");
+      }
+      trackContactFormSubmitted(formData.service);
+      setSubmitted(true);
+    } catch (error) {
+      setSubmitError(error instanceof Error ? error.message : "We could not submit your request. Please try again.");
+    } finally {
+      setIsSubmitting(false);
     }
-    trackContactFormSubmitted(formData.service);
-    setSubmitted(true);
   };
 
   if (submitted) {
@@ -96,8 +107,8 @@ export default function ContactPage() {
                   </div>
                   <div>
                     <h3 className="font-semibold text-secondary">Phone</h3>
-                    <p className="text-muted-foreground">(858) 833-0705</p>
-                    <p className="text-sm text-muted-foreground">Mon-Fri 8am-4:30pm</p>
+                    <p className="text-muted-foreground">{COMPANY_INFO.phone}</p>
+                    <p className="text-sm text-muted-foreground">Monday-Friday 8:00 AM-4:30 PM</p>
                   </div>
                 </div>
               </CardContent>
@@ -111,7 +122,7 @@ export default function ContactPage() {
                   </div>
                   <div>
                     <h3 className="font-semibold text-secondary">Email</h3>
-                    <p className="text-muted-foreground">jtalavera@distinctcsolutions.com</p>
+                    <p className="text-muted-foreground">{COMPANY_INFO.email}</p>
                     <p className="text-sm text-muted-foreground">We reply within 24 hours</p>
                   </div>
                 </div>
@@ -226,9 +237,15 @@ export default function ContactPage() {
                   />
                 </div>
 
-                <Button type="submit" size="lg" className="w-full bg-primary hover:bg-primary-dark text-secondary font-semibold">
+                {submitError && (
+                  <div className="rounded-lg border border-destructive/20 bg-destructive/5 px-4 py-3 text-sm text-destructive">
+                    {submitError}
+                  </div>
+                )}
+
+                <Button type="submit" size="lg" className="w-full bg-primary hover:bg-primary-dark text-secondary font-semibold" disabled={isSubmitting}>
                   <Send className="h-4 w-4 mr-2" />
-                  Send Message
+                  {isSubmitting ? "Sending..." : "Send Message"}
                 </Button>
 
                 <p className="text-xs text-center text-muted-foreground">

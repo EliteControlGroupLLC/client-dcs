@@ -2,7 +2,7 @@
 
 import { useADU } from "@/lib/contexts/adu-context";
 import { Button } from "@/components/ui/button";
-import { ArrowRight, ArrowLeft, Home, Link, Warehouse, DoorOpen, Check, Info } from "lucide-react";
+import { ArrowRight, ArrowLeft, Home, Link, Warehouse, Check, Info } from "lucide-react";
 
 const aduTypes = [
   {
@@ -27,20 +27,35 @@ const aduTypes = [
     description: "Transform your existing garage",
     features: ["Lower construction cost", "Faster build time", "Uses existing structure"],
   },
-  {
-    id: "jadu",
-    icon: DoorOpen,
-    title: "Junior ADU (JADU)",
-    description: "Within existing home, max 500 sq ft",
-    features: ["Lowest cost option", "Minimal permits", "Share utilities with main home"],
-  },
 ];
 
 export function StepADUType() {
   const { config, updateConfig, nextStep, prevStep } = useADU();
 
   const handleTypeSelect = (type: string) => {
-    updateConfig({ aduType: type as "detached" | "attached" | "garage-conversion" | "jadu" });
+    if (type === "attached") {
+      updateConfig({
+        aduType: "attached",
+        size: "1-bed",
+        sqft: 500,
+        bedrooms: 1,
+        bathrooms: 1,
+      });
+      return;
+    }
+
+    if (type === "garage-conversion") {
+      updateConfig({
+        aduType: "garage-conversion",
+        size: "studio",
+        sqft: 400,
+        bedrooms: 0,
+        bathrooms: 1,
+      });
+      return;
+    }
+
+    updateConfig({ aduType: "detached" });
   };
 
   return (

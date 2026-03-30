@@ -15,40 +15,16 @@ import { Star, ExternalLink } from "lucide-react";
  * To update: Replace the reviews array below with real review data
  * Format: { author: "First Name + Last Initial", date: "relative date", rating: 5, text: "exact review text" }
  */
-const reviews = [
-  {
-    author: "Review Pending",
-    date: "Awaiting approval",
-    rating: 5,
-    text: "Real customer review will be inserted here. Contact the marketing team to add verified Google and Yelp reviews from satisfied customers.",
-    isPending: true,
-  },
-  {
-    author: "Review Pending",
-    date: "Awaiting approval",
-    rating: 5,
-    text: "Real customer review will be inserted here. Contact the marketing team to add verified Google and Yelp reviews from satisfied customers.",
-    isPending: true,
-  },
-  {
-    author: "Review Pending",
-    date: "Awaiting approval",
-    rating: 5,
-    text: "Real customer review will be inserted here. Contact the marketing team to add verified Google and Yelp reviews from satisfied customers.",
-    isPending: true,
-  },
-  {
-    author: "Review Pending",
-    date: "Awaiting approval",
-    rating: 5,
-    text: "Real customer review will be inserted here. Contact the marketing team to add verified Google and Yelp reviews from satisfied customers.",
-    isPending: true,
-  },
-];
+const reviews: Array<{
+  author: string;
+  date: string;
+  rating: number;
+  text: string;
+}> = [];
 
 export function GoogleReviews() {
   // Check if reviews are still pending (all reviews have isPending flag)
-  const hasPendingReviews = reviews.every((r) => r.isPending);
+  const hasPendingReviews = reviews.length === 0;
 
   // If all reviews are pending, show a simplified CTA section instead
   if (hasPendingReviews) {
@@ -106,7 +82,7 @@ export function GoogleReviews() {
 
         {/* Reviews Grid */}
         <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
-          {reviews.filter(r => !r.isPending).map((review, index) => (
+          {reviews.map((review, index) => (
             <div
               key={`${review.author}-${index}`}
               className="bg-white rounded-xl p-6 shadow-sm hover:shadow-md transition-shadow"

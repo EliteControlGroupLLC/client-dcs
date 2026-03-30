@@ -1,6 +1,6 @@
 "use client";
 
-import { Building2, ExternalLink } from "lucide-react";
+import { Building2 } from "lucide-react";
 
 interface ZoningEnrichmentData {
   zoningCode: string | null;
@@ -29,7 +29,7 @@ export function ZoningEnrichmentCard({ data }: ZoningEnrichmentCardProps) {
           <h3 className="font-semibold text-secondary text-sm">Zoning Enrichment</h3>
         </div>
         <span className="text-[10px] bg-indigo-50 text-indigo-600 px-2 py-0.5 rounded-full">
-          Zoneomics
+          Planning context
         </span>
       </div>
 
@@ -98,15 +98,9 @@ export function ZoningEnrichmentCard({ data }: ZoningEnrichmentCardProps) {
         <span className="text-[10px] text-muted-foreground">
           Confidence: {data.confidence}%
         </span>
-        <a
-          href="https://zoneomics.com"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="text-[10px] text-indigo-500 hover:text-indigo-700 flex items-center gap-0.5"
-        >
-          Powered by Zoneomics
-          <ExternalLink className="h-2.5 w-2.5" />
-        </a>
+        <span className="text-[10px] text-muted-foreground">
+          Cross-checked against parcel rules and planning overlays
+        </span>
       </div>
     </div>
   );

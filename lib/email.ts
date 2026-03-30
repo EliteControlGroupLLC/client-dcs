@@ -3,7 +3,7 @@
 // Uses Resend API if configured, otherwise logs for manual follow-up.
 
 const RESEND_API_KEY = process.env.RESEND_API_KEY;
-const DCS_TEAM_EMAIL = "Office@distinctcsolutions.com";
+const DCS_TEAM_EMAIL = "jtalavera@distinctcsolutions.com";
 const DCS_FROM_EMAIL = "DCS Property Scanner <noreply@distinctcsolutions.com>";
 
 interface EmailPayload {

@@ -3,15 +3,18 @@
 import { useState } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import Image from "next/image";
 import { 
   Grid3x3, 
   Home, 
   Hammer,
   UtensilsCrossed,
   Bath,
-  X
+  Building2,
+  ArrowRight
 } from "lucide-react";
 import Link from "next/link";
+import { GALLERY_PROJECTS } from "@/lib/data/site-data";
 
 const categories = [
   { id: "all", name: "All Projects", icon: Grid3x3 },
@@ -19,32 +22,15 @@ const categories = [
   { id: "remodel", name: "Remodels", icon: Hammer },
   { id: "kitchen", name: "Kitchens", icon: UtensilsCrossed },
   { id: "bathroom", name: "Bathrooms", icon: Bath },
-];
-
-const projects = [
-  { id: 1, category: "adu", title: "Modern Detached ADU", location: "La Jolla", sqFt: 650 },
-  { id: 2, category: "adu", title: "Garage Conversion", location: "North Park", sqFt: 450 },
-  { id: 3, category: "kitchen", title: "Contemporary Kitchen", location: "Pacific Beach", sqFt: 180 },
-  { id: 4, category: "bathroom", title: "Spa Master Bath", location: "Del Mar", sqFt: 120 },
-  { id: 5, category: "adu", title: "Craftsman ADU", location: "Hillcrest", sqFt: 800 },
-  { id: 6, category: "remodel", title: "Whole Home Renovation", location: "Mission Hills", sqFt: 2400 },
-  { id: 7, category: "kitchen", title: "Farmhouse Kitchen", location: "Encinitas", sqFt: 200 },
-  { id: 8, category: "adu", title: "Junior ADU", location: "Ocean Beach", sqFt: 400 },
-  { id: 9, category: "bathroom", title: "Modern Guest Bath", location: "Point Loma", sqFt: 80 },
-  { id: 10, category: "remodel", title: "Mid-Century Update", location: "Kensington", sqFt: 1800 },
-  { id: 11, category: "adu", title: "Two-Story ADU", location: "Scripps Ranch", sqFt: 1000 },
-  { id: 12, category: "kitchen", title: "Open Concept Kitchen", location: "Carmel Valley", sqFt: 250 },
-];
+  { id: "custom-home", name: "Custom Homes", icon: Building2 },
+] as const;
 
 export default function GalleryPage() {
   const [activeCategory, setActiveCategory] = useState("all");
-  const [selectedProject, setSelectedProject] = useState<number | null>(null);
 
   const filteredProjects = activeCategory === "all" 
-    ? projects 
-    : projects.filter(p => p.category === activeCategory);
-
-  const selectedProjectData = projects.find(p => p.id === selectedProject);
+    ? GALLERY_PROJECTS
+    : GALLERY_PROJECTS.filter((project) => project.category === activeCategory);
 
   return (
     <div className="min-h-screen bg-muted pt-28 pb-12">
@@ -55,7 +41,7 @@ export default function GalleryPage() {
             Our Work
           </h1>
           <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-            Browse our portfolio of completed projects. Each one represents our commitment to quality craftsmanship.
+            A tighter look at the projects that define our design-build work across ADUs, remodels, and custom residential construction.
           </p>
         </div>
 
@@ -81,67 +67,49 @@ export default function GalleryPage() {
         </div>
 
         {/* Project Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {filteredProjects.map((project) => (
-            <Card 
-              key={project.id}
-              className="overflow-hidden cursor-pointer group"
-              onClick={() => setSelectedProject(project.id)}
-            >
-              <div className="aspect-[4/3] bg-gradient-to-br from-primary/20 to-secondary/20 relative">
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <Home className="h-12 w-12 text-primary/40" />
+            <Link key={project.id} href={`/gallery/${project.id}`} className="group">
+              <Card className="overflow-hidden border-0 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-xl">
+                <div className="relative aspect-[4/3] overflow-hidden">
+                  <Image
+                    src={project.image}
+                    alt={project.title}
+                    fill
+                    className="object-cover transition-transform duration-500 group-hover:scale-105"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-secondary/85 via-secondary/15 to-transparent" />
+                  <div className="absolute left-4 right-4 top-4 flex flex-wrap gap-2">
+                    <span className="rounded-full bg-white/12 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-white backdrop-blur-sm">
+                      {project.type}
+                    </span>
+                    {project.imageStatus === "pending-replacement" && (
+                      <span className="rounded-full bg-secondary/70 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-white backdrop-blur-sm">
+                        Replacement image pending
+                      </span>
+                    )}
+                  </div>
+                  <div className="absolute bottom-0 left-0 right-0 p-5">
+                    <h3 className="font-semibold text-white text-lg">{project.title}</h3>
+                    <p className="text-sm text-white/70">
+                      {project.location} • {project.sqft}
+                    </p>
+                  </div>
                 </div>
-                <div className="absolute inset-0 bg-secondary/80 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                  <span className="text-white font-medium">View Project</span>
+                <div className="p-5">
+                  <p className="text-sm leading-relaxed text-muted-foreground">{project.description}</p>
+                  {project.imageNote && (
+                    <p className="mt-3 text-xs font-medium text-primary">{project.imageNote}</p>
+                  )}
+                  <span className="mt-4 inline-flex items-center gap-2 text-sm font-semibold text-primary">
+                    View project details
+                    <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
+                  </span>
                 </div>
-              </div>
-              <div className="p-4">
-                <h3 className="font-semibold text-secondary">{project.title}</h3>
-                <p className="text-sm text-muted-foreground">
-                  {project.location} • {project.sqFt} sq ft
-                </p>
-              </div>
-            </Card>
+              </Card>
+            </Link>
           ))}
         </div>
-
-        {/* Lightbox */}
-        {selectedProject && selectedProjectData && (
-          <div 
-            className="fixed inset-0 bg-black/80 z-50 flex items-center justify-center p-4"
-            onClick={() => setSelectedProject(null)}
-          >
-            <div 
-              className="bg-white rounded-xl max-w-4xl w-full max-h-[90vh] overflow-auto"
-              onClick={(e) => e.stopPropagation()}
-            >
-              <div className="aspect-video bg-gradient-to-br from-primary/20 to-secondary/20 relative">
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <Home className="h-20 w-20 text-primary/40" />
-                </div>
-                <button 
-                  onClick={() => setSelectedProject(null)}
-                  className="absolute top-4 right-4 w-10 h-10 bg-white rounded-full flex items-center justify-center"
-                >
-                  <X className="h-5 w-5" />
-                </button>
-              </div>
-              <div className="p-6">
-                <h2 className="text-2xl font-bold text-secondary mb-2">
-                  {selectedProjectData.title}
-                </h2>
-                <p className="text-muted-foreground mb-4">
-                  {selectedProjectData.location} • {selectedProjectData.sqFt} sq ft
-                </p>
-                <p className="text-muted-foreground">
-                  This project showcases our commitment to quality craftsmanship and attention to detail. 
-                  Each element was carefully designed and executed to meet our client&apos;s vision.
-                </p>
-              </div>
-            </div>
-          </div>
-        )}
 
         {/* CTA */}
         <div className="mt-16 bg-secondary rounded-2xl p-8 md:p-12 text-center text-white">

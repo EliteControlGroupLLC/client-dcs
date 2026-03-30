@@ -43,7 +43,7 @@ const primaryTools: ToolItem[] = [
   {
     icon: Calculator,
     title: "ADU Cost Calculator",
-    description: "Estimate your ADU project cost based on size, type, and finish level.",
+    description: "Estimate ADU cost ranges using the same floor-plan pricing logic used across the rest of the site.",
     href: "/adu-calculator",
     cta: "Calculate Cost",
   },
@@ -74,7 +74,7 @@ const aduTools: ToolItem[] = [
   {
     icon: Palette,
     title: "ADU Design Inspiration",
-    description: "Build your style profile with aesthetics, materials, and finishes to visualize your dream ADU.",
+    description: "Generate exterior and interior concept visuals based on your preferred style, materials, and finish direction.",
     href: "/tools/adu-design-inspiration",
     cta: "Explore Styles",
   },

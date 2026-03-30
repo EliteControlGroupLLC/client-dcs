@@ -13,45 +13,37 @@ import {
   DetachedADUFloorPlan,
   AttachedADUFloorPlan,
   GarageConversionFloorPlan,
-  JADUFloorPlan,
   FloorPlanLegend,
 } from "@/components/floor-plans";
+import { SERVICE_PRICING } from "@/lib/data/site-data";
 
 const floorPlanComponents = [
   DetachedADUFloorPlan,
   AttachedADUFloorPlan,
   GarageConversionFloorPlan,
-  JADUFloorPlan,
 ];
 
 const aduTypes = [
   {
     title: "Detached ADU",
-    description: "A standalone structure separate from your main home. Offers maximum privacy and flexibility.",
+    description: "A standalone backyard home designed for privacy, better resale positioning, and the widest range of premium floor-plan options.",
     sqFt: "400-1,200 sq ft",
-    timeline: "10-12 months",
-    features: ["Complete privacy", "Flexible placement", "Highest rental potential"],
+    timeline: "10-14 months",
+    features: ["Strongest plan flexibility", "Best fit for premium rentals", "Private detached living"],
   },
   {
     title: "Attached ADU",
-    description: "Built as an addition to your existing home, sharing one or more walls.",
-    sqFt: "400-1,000 sq ft",
-    timeline: "11-13 months",
-    features: ["Perfect for family living", "Blends seamlessly with your home", "Smart solution for tighter lots"],
+    description: "Built as an addition to the main residence for lots where a detached structure is less efficient or a connected family suite makes more sense.",
+    sqFt: "500+ sq ft",
+    timeline: "9-12 months",
+    features: ["Efficient utility tie-ins", "Clean integration with the existing home", "Strong option for tighter lots"],
   },
   {
     title: "Garage Conversion",
-    description: "Transform your existing garage into a fully functional living space. Ideal for homeowners looking to convert underutilized square footage into a comfortable ADU.",
-    sqFt: "400-600 sq ft",
+    description: "Transform an existing 2-car or 3-car garage shell into a code-compliant living space with a faster delivery path and lower entry price.",
+    sqFt: "400 sq ft",
     timeline: "6-8 months",
-    features: ["Uses existing structure", "Efficient conversion process", "Great rental potential"],
-  },
-  {
-    title: "Junior ADU (JADU)",
-    description: "Built within your existing home, a Junior ADU makes efficient use of your current footprint. Streamlined permitting is available for qualifying properties, making this a smart option for homeowners ready to add a private living space without a ground-up build.",
-    sqFt: "200-500 sq ft",
-    timeline: "2-4 months",
-    features: ["Built inside existing home", "Efficient use of space", "Streamlined permitting for qualifying homes"],
+    features: ["Best lower-cost entry point", "Uses existing structure efficiently", "Strong studio or compact one-bed potential"],
   },
 ];
 
@@ -74,8 +66,11 @@ export default function ADUSolutionsPage() {
               ADU Solutions in San Diego
             </h1>
             <p className="text-xl text-white/80 mb-8">
-              Add value to your property with a professionally designed and built Accessory Dwelling Unit. 
-              From design to completion, we handle everything.
+              We design and build detached ADUs, attached ADUs, and garage conversions for homeowners
+              who want better use of their lot, stronger rental performance, or flexible family living.
+            </p>
+            <p className="text-2xl font-bold text-primary mb-8">
+              Starting at {SERVICE_PRICING.adu.startingPrice}
             </p>
             <div className="flex flex-col sm:flex-row gap-4">
               <Link href="/build-your-adu">
@@ -96,7 +91,7 @@ export default function ADUSolutionsPage() {
               Types of ADUs We Build
             </h2>
             <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-              Every property is unique. We&apos;ll help you choose the ADU type that best fits your lot, budget, and goals.
+              Every property is different. We help you choose the product that fits the lot, budget, permit path, and long-term use case.
             </p>
           </div>
 
@@ -155,7 +150,7 @@ export default function ADUSolutionsPage() {
               </div>
               <h3 className="font-semibold text-secondary mb-2">Rental Income</h3>
               <p className="text-sm text-muted-foreground">
-                Generate $2,000-$4,000+ monthly in San Diego
+                Typical DCS ADU products can support roughly $2,000-$6,000/month depending on size and layout
               </p>
             </div>
             <div className="text-center">
@@ -164,7 +159,7 @@ export default function ADUSolutionsPage() {
               </div>
               <h3 className="font-semibold text-secondary mb-2">Property Value</h3>
               <p className="text-sm text-muted-foreground">
-                Increase home value by 20-30%
+                Add usable square footage and create a more valuable long-term real estate asset
               </p>
             </div>
             <div className="text-center">
@@ -173,7 +168,7 @@ export default function ADUSolutionsPage() {
               </div>
               <h3 className="font-semibold text-secondary mb-2">Multi-Gen Living</h3>
               <p className="text-sm text-muted-foreground">
-                Housing for family with privacy
+                Create independent living space for family without leaving the property
               </p>
             </div>
             <div className="text-center">
@@ -182,7 +177,7 @@ export default function ADUSolutionsPage() {
               </div>
               <h3 className="font-semibold text-secondary mb-2">Financial Security</h3>
               <p className="text-sm text-muted-foreground">
-                Hedge against rising costs
+                Add an income-producing or family-supporting asset on land you already own
               </p>
             </div>
           </div>

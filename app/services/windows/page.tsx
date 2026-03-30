@@ -29,23 +29,23 @@ const windowTypes = [
 const features = [
   {
     icon: Thermometer,
-    title: "Lower Energy Bills",
-    description: "Dual-pane Low-E glass with argon fill cuts heat transfer by up to 50%. Your HVAC works less, and you feel the difference in comfort and monthly bills.",
+    title: "Hold Comfort More Consistently",
+    description: "Better frame systems, tighter weather seals, and higher-performance glass reduce drafts, hot spots, and solar gain so the house stays more even throughout the day.",
   },
   {
     icon: Shield,
-    title: "Quiet Your Home",
-    description: "Premium multi-pane construction creates an acoustic barrier that dramatically reduces street noise, traffic, and neighborhood sounds.",
+    title: "Cut Noise and Improve Privacy",
+    description: "Upgraded glazing packages and tighter frames can dramatically soften traffic, neighborhood, and aircraft noise, which changes how calm the home feels from room to room.",
   },
   {
     icon: Sun,
-    title: "Protect Your Interiors",
-    description: "Advanced UV-blocking coatings prevent fading of furniture, flooring, and artwork while still letting natural light flood your spaces.",
+    title: "Bring in Light Without Sacrificing Finish Quality",
+    description: "Modern glass packages let you open the home to more daylight while still protecting flooring, furniture, artwork, and cabinetry from excessive UV exposure.",
   },
   {
     icon: Eye,
-    title: "Add Resale Value",
-    description: "Quality window replacements consistently rank among the highest-ROI home improvements, often returning 70-80% of investment at resale.",
+    title: "Sharpen the Architecture",
+    description: "Slimmer sightlines, cleaner trim details, and smoother door operation make the home feel more current. Buyers notice that difference immediately, especially in higher-end neighborhoods.",
   },
 ];
 
@@ -73,10 +73,10 @@ export default function WindowsPage() {
               Window Replacement & Installation
             </h1>
             <p className="text-xl text-white/80 mb-8">
-              Transform your home with premium window systems from top manufacturers. We install 
-              high-performance vinyl, architectural aluminum, and composite fiberglass windows - each 
-              professionally measured, sealed, and trimmed to ensure years of trouble-free operation 
-              and maximum energy efficiency.
+              Upgrade your home with window and door systems that look better, perform better, and
+              feel noticeably tighter the day they are installed. We handle measurement, product
+              coordination, waterproofing, trim work, and final tuning so the finished result looks
+              architectural, not pieced together.
             </p>
             <p className="text-2xl font-bold text-primary mb-8">Starting at $750/window installed</p>
             <Link href="/contact">
@@ -93,7 +93,7 @@ export default function WindowsPage() {
           <div className="text-center mb-12">
             <h2 className="text-3xl md:text-4xl font-bold text-secondary mb-4">Window Options</h2>
             <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-              We install all major window types and brands. Every installation includes proper weatherproofing and trim.
+              Installed window and patio door packages selected for performance, durability, and a cleaner finished look.
             </p>
           </div>
           <div className="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">

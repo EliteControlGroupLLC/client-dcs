@@ -149,9 +149,8 @@ export function PropertySummaryCard({ data }: PropertySummaryCardProps) {
 
       <div className="mt-4 pt-3 border-t border-border/50">
         <p className="text-[10px] text-muted-foreground leading-relaxed">
-          Data sourced from public records, satellite analysis, and cross-referenced listings.
-          Hover over confidence badges for source details. Values marked &quot;Approx.&quot; are estimates
-          pending site verification.
+          Values marked &quot;Approx.&quot; should be treated as planning guidance until a site visit,
+          survey, and permit-level review confirm the final build conditions.
         </p>
       </div>
     </div>

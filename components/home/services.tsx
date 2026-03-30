@@ -5,91 +5,32 @@ import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { Home, Building2, Hammer, ArrowRight, Check, Layers, SquareStack, Sun, Paintbrush, Wrench } from "lucide-react";
 import { useScrollAnimation, useStaggeredAnimation } from "@/hooks/use-scroll-animation";
+import { PRIMARY_SERVICE_CARDS, SECONDARY_SERVICE_CARDS } from "@/lib/data/site-data";
 
-const services = [
-  {
-    icon: Home,
-    title: "ADU Solutions",
-    badge: "Most Popular",
-    description:
-      "Complete accessory dwelling units from permits to keys. Maximize your property value with a rental unit, guest house, or multigenerational living space.",
-    features: [
-      "Detached ADUs",
-      "Garage Conversions",
-      "Junior ADUs",
-      "Full Permits Included",
-    ],
-    price: "Starting at $120,000",
-    href: "/services/adu-solutions",
-    featured: true,
-  },
-  {
-    icon: Building2,
-    title: "Custom Homes",
-    description:
-      "Custom homes designed and built to your vision. From architectural planning to final construction, our team manages the entire process under one roof.",
-    features: [
-      "Custom Homes",
-      "Spec Homes",
-      "Multi-Family",
-      "Ground-Up Construction",
-    ],
-    price: "Custom Pricing",
-    href: "/services/new-construction",
-  },
-  {
-    icon: Hammer,
-    title: "Remodeling",
-    description:
-      "Transform your existing space with thoughtful renovation and modernization services designed to improve functionality, comfort, and value.",
-    features: [
-      "Kitchen Remodels",
-      "Bathroom Renovations",
-      "Room Additions",
-      "Whole Home Renovations",
-    ],
-    price: "Starting at $18,000",
-    href: "/services/remodeling",
-  },
-];
+const iconMap = {
+  "adu-solutions": Home,
+  "custom-homes": Building2,
+  remodeling: Hammer,
+  roofing: Layers,
+  concrete: SquareStack,
+  windows: Sun,
+  exterior: Paintbrush,
+  "general-construction": Wrench,
+};
 
-const additionalServices = [
-  {
-    icon: Layers,
-    title: "Roofing",
-    description: "Shingles, tile, and metal roofing with professional installation.",
-    href: "/services/roofing",
-    price: "Starting at $12,500",
-  },
-  {
-    icon: SquareStack,
-    title: "Concrete",
-    description: "Driveways, patios, retaining walls, and foundations.",
-    href: "/services/concrete",
-    price: "Starting at $17.50/sq ft",
-  },
-  {
-    icon: Sun,
-    title: "Windows",
-    description: "Energy-efficient window replacement and installation.",
-    href: "/services/windows",
-    price: "Starting at $750/window",
-  },
-  {
-    icon: Paintbrush,
-    title: "Exterior Improvements",
-    description: "Painting, siding, decks, fencing, and outdoor living.",
-    href: "/services/exterior",
-    price: "Starting at $12,000",
-  },
-  {
-    icon: Wrench,
-    title: "General Construction",
-    description: "Additions, structural work, electrical, plumbing, and repairs.",
-    href: "/services/general-construction",
-    price: "Starting at $800",
-  },
-];
+const featureMap: Record<string, string[]> = {
+  "adu-solutions": ["Detached ADUs", "Garage conversions", "Floor-plan options", "Plans and permits"],
+  "custom-homes": ["Ground-up homes", "Architectural planning", "Permit coordination", "Premium finish execution"],
+  remodeling: ["Kitchen remodels", "Bathroom renovations", "Room additions", "Whole-home updates"],
+};
+
+const orderedSecondaryCards = [
+  SECONDARY_SERVICE_CARDS.find((service) => service.id === "general-construction"),
+  SECONDARY_SERVICE_CARDS.find((service) => service.id === "roofing"),
+  SECONDARY_SERVICE_CARDS.find((service) => service.id === "exterior"),
+  SECONDARY_SERVICE_CARDS.find((service) => service.id === "concrete"),
+  SECONDARY_SERVICE_CARDS.find((service) => service.id === "windows"),
+].filter((service): service is NonNullable<(typeof SECONDARY_SERVICE_CARDS)[number]> => Boolean(service));
 
 export function Services() {
   const { ref: headerRef, isVisible: headerVisible } = useScrollAnimation();
@@ -133,12 +74,14 @@ export function Services() {
 
         {/* Services Grid */}
         <div ref={gridRef} className="grid md:grid-cols-3 gap-6 lg:gap-8">
-          {services.map((service, index) => (
+          {PRIMARY_SERVICE_CARDS.map((service, index) => {
+            const Icon = iconMap[service.id as keyof typeof iconMap];
+            return (
             <div
               key={service.title}
               style={{ transitionDelay: gridVisible ? getDelay(index) : "0ms" }}
               className={`group relative rounded-2xl overflow-hidden transition-all duration-500 hover:-translate-y-1 ${gridVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"} ${
-                service.featured
+                service.id === "adu-solutions"
                   ? "bg-white/15 backdrop-blur-xl border border-white/30 shadow-2xl ring-1 ring-primary/50"
                   : "bg-white/10 backdrop-blur-lg border border-white/20 hover:bg-white/15 hover:border-white/30"
               }`}
@@ -156,12 +99,12 @@ export function Services() {
                 {/* Icon */}
                 <div
                   className={`w-14 h-14 rounded-xl flex items-center justify-center mb-6 transition-colors ${
-                    service.featured
+                    service.id === "adu-solutions"
                       ? "bg-primary text-white"
                       : "bg-white/10 text-primary group-hover:bg-primary/20"
                   }`}
                 >
-                  <service.icon className="h-7 w-7" />
+                  <Icon className="h-7 w-7" />
                 </div>
 
                 {/* Title */}
@@ -176,7 +119,7 @@ export function Services() {
 
                 {/* Features */}
                 <ul className="space-y-2.5 mb-6">
-                  {service.features.map((feature) => (
+                  {(featureMap[service.id] || []).map((feature) => (
                     <li
                       key={feature}
                       className="flex items-center gap-3 text-sm text-white/80"
@@ -190,14 +133,14 @@ export function Services() {
                 {/* Price */}
                 <div className="mb-6 pb-6 border-b border-white/10">
                   <span className="text-lg font-bold text-primary">
-                    {service.price}
+                    {service.priceLabel}
                   </span>
                 </div>
 
                 {/* CTA */}
                 <Link href={service.href}>
                   <Button
-                    variant={service.featured ? "default" : "outlineWhite"}
+                    variant={service.id === "adu-solutions" ? "default" : "outlineWhite"}
                     className="w-full group/btn"
                     rounded="full"
                   >
@@ -207,7 +150,7 @@ export function Services() {
                 </Link>
               </div>
             </div>
-          ))}
+          )})}
         </div>
 
         {/* Additional Services */}
@@ -216,17 +159,19 @@ export function Services() {
             More Services
           </h3>
           <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
-            {additionalServices.map((service) => (
+            {orderedSecondaryCards.map((service) => {
+              const Icon = iconMap[service.id as keyof typeof iconMap];
+              return (
               <Link key={service.title} href={service.href} className="group">
                 <div className="bg-white/5 backdrop-blur-lg border border-white/10 rounded-xl p-4 hover:bg-white/10 hover:border-white/20 transition-all duration-300 text-center h-full">
                   <div className="w-10 h-10 rounded-lg bg-white/10 flex items-center justify-center mx-auto mb-3 group-hover:bg-primary/20 transition-colors">
-                    <service.icon className="h-5 w-5 text-primary" />
+                    <Icon className="h-5 w-5 text-primary" />
                   </div>
                   <h4 className="text-sm font-bold text-white group-hover:text-primary transition-colors mb-1">{service.title}</h4>
-                  <p className="text-xs text-white/40">{service.price}</p>
+                  <p className="text-xs text-white/40">{service.priceLabel}</p>
                 </div>
               </Link>
-            ))}
+            )})}
           </div>
         </div>
 

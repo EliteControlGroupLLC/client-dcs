@@ -4,6 +4,7 @@ import "./globals.css";
 import { Header } from "@/components/layout/header";
 import { Footer } from "@/components/layout/footer";
 import { FloatingEstimateButton } from "@/components/instant-estimate/floating-estimate-button";
+import { SITE_URL } from "@/lib/site-url";
 
 const inter = Inter({
   variable: "--font-inter",
@@ -17,6 +18,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL(SITE_URL),
   title: "Distinct Construction Solutions | San Diego ADU & Home Construction",
   description: "San Diego's premier design-build construction company specializing in ADUs, custom homes, remodeling, and renovations. Get your free consultation today.",
   keywords: ["ADU San Diego", "home construction", "remodeling", "design-build", "custom homes", "accessory dwelling units"],
@@ -24,7 +26,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: "Distinct Construction Solutions | San Diego ADU & Home Construction",
     description: "San Diego's premier design-build construction company specializing in ADUs, custom homes, remodeling, and renovations.",
-    url: "https://client-dcs.vercel.app",
+    url: SITE_URL,
     siteName: "Distinct Construction Solutions",
     locale: "en_US",
     type: "website",
@@ -60,9 +62,9 @@ const jsonLd = {
   "@type": "LocalBusiness",
   "name": "Distinct Construction Solutions",
   "description": "San Diego's premier design-build construction company specializing in ADUs, custom homes, remodeling, and renovations.",
-  "url": "https://distinctconstructionsolutions.com",
-  "logo": "https://distinctconstructionsolutions.com/images/logo-light.png",
-  "image": "https://distinctconstructionsolutions.com/images/logo-light.png",
+  "url": SITE_URL,
+  "logo": `${SITE_URL}/images/logo-light.png`,
+  "image": `${SITE_URL}/images/logo-light.png`,
   "telephone": "+1-858-833-0705",
   "address": {
     "@type": "PostalAddress",

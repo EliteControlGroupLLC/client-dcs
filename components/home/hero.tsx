@@ -4,11 +4,11 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { ArrowRight, Shield, Clock, Users, Palette, Bitcoin } from "lucide-react";
 import { useState, useRef, useEffect } from "react";
-import { COMPANY_INFO } from "@/lib/data/site-data";
+import { COMPANY_INFO, SERVICE_PRICING, getYearsExperience } from "@/lib/data/site-data";
 
 const stats = [
   { value: COMPANY_INFO.stats.projectsCompleted, label: "Projects Completed" },
-  { value: `${COMPANY_INFO.yearsExperience}+`, label: "Years Experience" },
+  { value: `${getYearsExperience()}+`, label: "Years Experience" },
   { value: COMPANY_INFO.stats.valueDelivered, label: "Value Delivered" },
 ];
 
@@ -92,15 +92,19 @@ export function Hero() {
             </h1>
 
             <p className="text-lg text-white/80 max-w-xl mb-4 leading-relaxed">
-              From concept to completion, we manage the entire process — design, permitting, 
-              and construction. Transparent pricing, thoughtful design, and a dedicated team 
-              focused on delivering exceptional results.
+              From concept to completion, we manage design, permitting, and construction with
+              one disciplined team. You get clearer pricing, tighter coordination, and a
+              finished project that feels premium from day one.
             </p>
 
             {/* Pricing info */}
             <div className="mb-8 space-y-1">
-              <p className="text-white/90 font-medium">Detached ADU starting at <span className="text-primary font-bold">$175,000</span></p>
-              <p className="text-white/90 font-medium">Garage conversions starting at <span className="text-primary font-bold">$120,000</span></p>
+              <p className="text-white/90 font-medium">
+                Detached ADU starting at <span className="text-primary font-bold">{SERVICE_PRICING.adu.detachedStartingPrice}</span>
+              </p>
+              <p className="text-white/90 font-medium">
+                Garage conversions starting at <span className="text-primary font-bold">{SERVICE_PRICING.adu.startingPrice}</span>
+              </p>
             </div>
 
             {/* Key benefits */}
@@ -177,7 +181,7 @@ export function Hero() {
                   </div>
                   <div>
                     <p className="font-semibold text-white">Integrated Design-Build Team</p>
-                    <p className="text-sm text-white/60">Architects, designers, and builders working together under one team for a seamless process from concept to completion.</p>
+                    <p className="text-sm text-white/60">Design, estimating, permitting, and construction stay coordinated under one team so decisions move faster and scope stays aligned.</p>
                   </div>
                 </div>
                 <div className="flex items-start gap-3">
@@ -186,7 +190,7 @@ export function Hero() {
                   </div>
                   <div>
                     <p className="font-semibold text-white">Interactive Online Showroom</p>
-                    <p className="text-sm text-white/60">Explore materials, finishes, fixtures, and design options through our online showroom platform.</p>
+                    <p className="text-sm text-white/60">Review finishes, fixtures, and material directions before selections become expensive field changes.</p>
                   </div>
                 </div>
                 <div className="flex items-start gap-3">
@@ -195,7 +199,7 @@ export function Hero() {
                   </div>
                   <div>
                     <p className="font-semibold text-white">Cryptocurrency Payments Accepted</p>
-                    <p className="text-sm text-white/60">We accept Bitcoin, Ethereum, and USDC for construction projects.</p>
+                    <p className="text-sm text-white/60">Flexible payment options are available for qualified projects, including Bitcoin, Ethereum, and USDC.</p>
                   </div>
                 </div>
               </div>

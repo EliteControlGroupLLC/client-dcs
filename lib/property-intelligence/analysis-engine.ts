@@ -36,8 +36,6 @@ import {
   type ZoneomicsZoningData,
 } from "./zoneomics-service";
 import {
-  getRentEstimate,
-  inferUnitConfig,
   isRentCastAvailable,
   type RentEstimate,
 } from "./rentcast-service";
@@ -69,6 +67,12 @@ import {
   buildUnifiedFinancialScenarios,
   type UnifiedRecommendation,
 } from "./unified-recommendation-engine";
+import {
+  estimateAduPriceRange,
+  formatPriceRange,
+  getRecommendedFloorPlan,
+  normalizeAduType,
+} from "../data/site-data";
 
 export async function analyzeProperty(address: string): Promise<PropertyAnalysisResult> {
   // Step 1: Geocode the address (Google Places API)
@@ -342,13 +346,16 @@ export async function analyzeProperty(address: string): Promise<PropertyAnalysis
   }
 
   // The buildable object used downstream — driven by polygon when available
+  const allowanceCapSqFt = parseAduAllowanceCap(intelligence.aduAllowances.value) ?? profile.sizeRules.detachedAduMaxSqft;
+  const effectiveAduCapSqFt = Math.min(finalBuildability.totalBuildableAreaSqFt, allowanceCapSqFt);
+
   const buildable: BuildableAnalysis = {
     requiredMainHomeSeparationFt: rectangleFallback.requiredMainHomeSeparationFt,
     requiredPropertyLineSetbackFt: rectangleFallback.requiredPropertyLineSetbackFt,
-    estimatedBuildableEnvelopeSqFt: finalBuildability.totalBuildableAreaSqFt,
-    oneStoryPotential: `Up to ${finalBuildability.totalBuildableAreaSqFt.toLocaleString()} sq ft (${finalBuildability.geometryMethodUsed})`,
-    twoStoryPotential: finalBuildability.totalBuildableAreaSqFt > 400
-      ? `Up to ${Math.min(1200, finalBuildability.totalBuildableAreaSqFt * 1.5).toLocaleString()} sq ft estimated depending on design/review`
+    estimatedBuildableEnvelopeSqFt: effectiveAduCapSqFt,
+    oneStoryPotential: `Recommended up to ${effectiveAduCapSqFt.toLocaleString()} sq ft`,
+    twoStoryPotential: profile.height.twoStoryAllowed && effectiveAduCapSqFt > 400
+      ? `Recommended up to ${Math.min(1200, effectiveAduCapSqFt).toLocaleString()} sq ft with city review`
       : 'Limited — lot constraints may restrict two-story options',
   };
 
@@ -437,12 +444,12 @@ export async function analyzeProperty(address: string): Promise<PropertyAnalysis
 
   // Step 9: Generate recommendations FIRST to determine primary recommendation
   // This ensures all downstream outputs derive from the same recommendation
-  const recommendations = generateRecommendations(rawLotSizeSqFt, openYard, finalBuildability.totalBuildableAreaSqFt);
-  const bestRec = determineBestRecommendation(recommendations);
+  let recommendations = generateRecommendations(rawLotSizeSqFt, openYard, effectiveAduCapSqFt);
+  let bestRec = determineBestRecommendation(recommendations);
   
   // Step 9b: Generate UNIFIED recommendation that drives rent and financial scenarios
   // This is the single source of truth for the entire page
-  const zipCode = geocoded?.zip || "92115"; // Default to standard San Diego zip if not found
+  const zipCode = geocoded?.components.zip || "92115";
   let unifiedRecommendation: UnifiedRecommendation | undefined;
   
   try {
@@ -455,11 +462,16 @@ export async function analyzeProperty(address: string): Promise<PropertyAnalysis
       hasGarage: rawFootprintSqFt > 800,
       feasibilityResults: enhancedFeasibility,
       bestRecommendationType: bestRec,
-      maxAllowedSqFt: profile.sizeRules.detachedAduMaxSqft,
+      maxAllowedSqFt: effectiveAduCapSqFt,
       jaduMaxSqFt: profile.sizeRules.jaduMaxSqft,
     });
   } catch (err) {
     console.error("[UNIFIED-RECOMMENDATION] Failed to generate unified recommendation:", err);
+  }
+
+  if (unifiedRecommendation) {
+    bestRec = unifiedRecommendation.primaryType;
+    recommendations = synchronizeRecommendations(recommendations, unifiedRecommendation, effectiveAduCapSqFt);
   }
   
   // Step 9c: Build rent estimates map from unified recommendation (for backward compatibility)
@@ -467,7 +479,6 @@ export async function analyzeProperty(address: string): Promise<PropertyAnalysis
   let rentEstimates: Map<string, RentEstimate> | undefined;
   if (unifiedRecommendation) {
     rentEstimates = new Map();
-    const primaryConfig = inferUnitConfig(unifiedRecommendation.primarySizeSqFt);
     rentEstimates.set(unifiedRecommendation.primaryType, {
       estimatedMonthlyRent: unifiedRecommendation.primaryRentEstimate.monthlyRent,
       estimatedAnnualRent: unifiedRecommendation.primaryRentEstimate.annualRent,
@@ -475,8 +486,8 @@ export async function analyzeProperty(address: string): Promise<PropertyAnalysis
       rentRangeHigh: unifiedRecommendation.primaryRentEstimate.rentRangeHigh,
       pricePerSqft: unifiedRecommendation.primaryRentEstimate.pricePerSqft,
       comparableCount: 0,
-      bedrooms: primaryConfig.bedrooms,
-      bathrooms: primaryConfig.bathrooms,
+      bedrooms: unifiedRecommendation.primaryBedrooms,
+      bathrooms: unifiedRecommendation.primaryBathrooms,
       sqft: unifiedRecommendation.primarySizeSqFt,
       propertyType: "apartment",
       confidence: 75,
@@ -582,13 +593,13 @@ export async function analyzeProperty(address: string): Promise<PropertyAnalysis
 
   if (zoneomicsData?.available) {
     adjustedScore = Math.min(100, adjustedScore + 3);
-    additionalPositiveSignals.push("Zoneomics zoning data available");
+    additionalPositiveSignals.push("Additional planning data available");
   }
   if (rentEstimates && rentEstimates.size > 0) {
     const hasRentCast = Array.from(rentEstimates.values()).some((r) => r.source === "rentcast");
     if (hasRentCast) {
       adjustedScore = Math.min(100, adjustedScore + 2);
-      additionalPositiveSignals.push("RentCast market rent data available");
+      additionalPositiveSignals.push("Additional market rent data available");
     }
   }
   if (isMapboxAvailable()) {
@@ -1148,6 +1159,75 @@ function determineBestRecommendation(recommendations: ADURecommendation[]): stri
   });
 
   return sorted[0].type;
+}
+
+function parseAduAllowanceCap(value: string): number | null {
+  const match = value.match(/ADU up to ([\d,]+)\s*sq ft/i);
+  if (!match) return null;
+  const parsed = Number(match[1].replace(/,/g, ""));
+  return Number.isFinite(parsed) ? parsed : null;
+}
+
+function synchronizeRecommendations(
+  recommendations: ADURecommendation[],
+  unifiedRecommendation: UnifiedRecommendation,
+  maxAllowedSqFt: number
+): ADURecommendation[] {
+  return recommendations
+    .map((recommendation) => {
+      const normalizedType = normalizeAduType(
+        recommendation.type,
+        recommendation.type === "Second-Story ADU" ? 2 : 1
+      );
+      const candidatePlan = getRecommendedFloorPlan({
+        sqFt: maxAllowedSqFt,
+        type: recommendation.type,
+        stories: normalizedType === "two-story" ? 2 : 1,
+        garageStalls: 2,
+      });
+      const recommendedSqFt =
+        recommendation.type === unifiedRecommendation.primaryType
+          ? unifiedRecommendation.primarySizeSqFt
+          : Math.min(candidatePlan?.sqFt ?? maxAllowedSqFt, maxAllowedSqFt);
+      const price = estimateAduPriceRange({
+        sqFt: recommendedSqFt,
+        type: recommendation.type,
+        bedrooms: candidatePlan?.bedrooms,
+        bathrooms: candidatePlan?.bathrooms,
+        stories: candidatePlan?.stories,
+        garageStalls: recommendation.type === "Garage Conversion" ? 2 : undefined,
+      });
+
+      if (recommendation.type === unifiedRecommendation.primaryType) {
+        return {
+          ...recommendation,
+          feasibility: "Likely" as FeasibilityLevel,
+          estimatedSizeRange: `${unifiedRecommendation.primarySizeSqFt.toLocaleString()} sq ft`,
+          priceRange: unifiedRecommendation.priceRange,
+          description: `Primary DCS recommendation for this parcel: ${unifiedRecommendation.primaryUnitLabel} with estimated market rent of $${unifiedRecommendation.primaryRentEstimate.rentRangeLow.toLocaleString()}-$${unifiedRecommendation.primaryRentEstimate.rentRangeHigh.toLocaleString()}/month.`,
+        };
+      }
+
+      if (recommendation.type === "Garage Conversion" && unifiedRecommendation.primaryType !== "Garage Conversion" && unifiedRecommendation.primarySizeSqFt >= 850) {
+        return {
+          ...recommendation,
+          feasibility: "Limited" as FeasibilityLevel,
+          estimatedSizeRange: "400 sq ft",
+          priceRange: formatPriceRange(price.low, price.high),
+          description: "A garage conversion remains a secondary fallback path, but the stronger DCS recommendation for this property is the larger detached product shown above.",
+        };
+      }
+
+      return {
+        ...recommendation,
+        estimatedSizeRange:
+          recommendation.type === "Garage Conversion"
+            ? "400 sq ft"
+            : `Up to ${recommendedSqFt.toLocaleString()} sq ft`,
+        priceRange: formatPriceRange(price.low, price.high),
+      };
+    })
+    .sort((a, b) => Number(b.type === unifiedRecommendation.primaryType) - Number(a.type === unifiedRecommendation.primaryType));
 }
 
 function generateSmartBanner(

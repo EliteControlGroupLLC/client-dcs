@@ -2,89 +2,20 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { ArrowRight, Home, Hammer, Paintbrush, Layers, SquareStack, Sun, Wrench, ChefHat, Bath } from "lucide-react";
+import { SERVICE_CARDS } from "@/lib/data/site-data";
 
-const services = [
-  {
-    icon: Home,
-    title: "ADU Solutions",
-    description: "Detached ADUs, attached ADUs, garage conversions, and JADUs. Full design-build service from permits to completion.",
-    starting: "Starting from $120,000",
-    href: "/services/adu-solutions",
-    badge: "Most Popular",
-  },
-  {
-    icon: Hammer,
-    title: "Custom Homes",
-    description: "Custom homes built from the ground up. Complete design-build with transparent pricing and professional project management.",
-    starting: "Custom Pricing",
-    href: "/services/new-construction",
-    badge: null,
-  },
-  {
-    icon: Paintbrush,
-    title: "Remodeling",
-    description: "Kitchen remodels, bathroom renovations, and whole-home transformations with quality materials and expert execution.",
-    starting: "$18,000",
-    href: "/services/remodeling",
-    badge: null,
-  },
-  {
-    icon: Layers,
-    title: "Roofing",
-    description: "Complete roof replacement, repairs, and new installations. Shingles, tile, and metal roofing with professional installation.",
-    starting: "$12,500",
-    href: "/services/roofing",
-    badge: null,
-  },
-  {
-    icon: SquareStack,
-    title: "Concrete",
-    description: "Driveways, patios, retaining walls, and foundations. Quality concrete work with decorative finish options.",
-    starting: "$17.50/sq ft",
-    href: "/services/concrete",
-    badge: null,
-  },
-  {
-    icon: Sun,
-    title: "Windows",
-    description: "Energy-efficient window replacement and installation. Vinyl, aluminum, and fiberglass options with proper weatherproofing.",
-    starting: "$750/window",
-    href: "/services/windows",
-    badge: null,
-  },
-  {
-    icon: Paintbrush,
-    title: "Exterior Improvements",
-    description: "Painting, siding, decks, fencing, and outdoor living spaces designed for San Diego homes.",
-    starting: "$12,000",
-    href: "/services/exterior",
-    badge: null,
-  },
-  {
-    icon: Wrench,
-    title: "General Construction",
-    description: "Room additions, structural repairs, electrical, plumbing, and general residential construction services.",
-    starting: "$800",
-    href: "/services/general-construction",
-    badge: null,
-  },
-  {
-    icon: ChefHat,
-    title: "Kitchen Remodeling",
-    description: "Custom cabinetry, premium countertops, modern appliances, and complete kitchen transformations.",
-    starting: "$18,000",
-    href: "/services/kitchen",
-    badge: null,
-  },
-  {
-    icon: Bath,
-    title: "Bathroom Renovation",
-    description: "Modern bathroom upgrades with custom tile, fixtures, vanities, and spa-like features.",
-    starting: "$12,000",
-    href: "/services/bathroom",
-    badge: null,
-  },
-];
+const iconMap = {
+  "adu-solutions": Home,
+  "custom-homes": Hammer,
+  remodeling: Paintbrush,
+  roofing: Layers,
+  concrete: SquareStack,
+  windows: Sun,
+  exterior: Paintbrush,
+  "general-construction": Wrench,
+  kitchen: ChefHat,
+  bathroom: Bath,
+};
 
 export default function ServicesPage() {
   return (
@@ -109,8 +40,8 @@ export default function ServicesPage() {
       <section className="py-20">
         <div className="container mx-auto px-4">
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-6xl mx-auto">
-            {services.map((service) => {
-              const Icon = service.icon;
+            {SERVICE_CARDS.map((service) => {
+              const Icon = iconMap[service.id as keyof typeof iconMap];
               return (
                 <Card key={service.title} className="overflow-hidden hover:shadow-lg transition-shadow relative">
                   {service.badge && (
@@ -124,7 +55,7 @@ export default function ServicesPage() {
                     </div>
                     <h3 className="text-xl font-bold text-secondary mb-3">{service.title}</h3>
                     <p className="text-muted-foreground mb-4">{service.description}</p>
-                    <p className="text-lg font-bold text-primary mb-6">Starting at {service.starting}</p>
+                    <p className="text-lg font-bold text-primary mb-6">{service.priceLabel}</p>
                     <Link href={service.href}>
                       <Button variant="outline" className="w-full group">
                         Learn More <ArrowRight className="h-4 w-4 ml-2 group-hover:translate-x-1 transition-transform" />

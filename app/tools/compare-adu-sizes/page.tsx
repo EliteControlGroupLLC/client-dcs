@@ -5,9 +5,8 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { ArrowRight, ArrowLeftRight, Check } from "lucide-react";
-import { FLOOR_PLANS_SORTED, getRentEstimate } from "@/lib/data/site-data";
+import { estimateAduPriceRange, formatPriceRange, getRentEstimate } from "@/lib/data/site-data";
 
-// Build comparison options from floor plans
 const aduOptions = [
   {
     sqFt: 400,
@@ -24,8 +23,11 @@ const aduOptions = [
     label: "500 sq ft",
     bedBath: "1 Bed, 1 Bath",
     useCase: "Rental unit, young professional, in-law suite",
-    estimatedCost: "$220K - $225K",
-    estimatedRent: "$2,800 - $3,200/mo",
+    estimatedCost: formatPriceRange(
+      estimateAduPriceRange({ sqFt: 500, type: "attached", bedrooms: 1, bathrooms: 1 }).low,
+      estimateAduPriceRange({ sqFt: 500, type: "attached", bedrooms: 1, bathrooms: 1 }).high
+    ),
+    estimatedRent: "$2,500 - $2,800/mo",
     yardDemand: "Low (~600 sq ft footprint)",
     bestFor: "First-time ADU builders, strong rental ROI",
   },
@@ -34,7 +36,10 @@ const aduOptions = [
     label: "700 sq ft",
     bedBath: "1-2 Bed, 1 Bath",
     useCase: "Family ADU, long-term rental, multigenerational",
-    estimatedCost: "$299K - $311K",
+    estimatedCost: formatPriceRange(
+      estimateAduPriceRange({ sqFt: 700, type: "detached", bedrooms: 2, bathrooms: 1 }).low,
+      estimateAduPriceRange({ sqFt: 700, type: "detached", bedrooms: 2, bathrooms: 1 }).high
+    ),
     estimatedRent: "$3,000 - $3,700/mo",
     yardDemand: "Moderate (~800 sq ft footprint)",
     bestFor: "Balanced size and ROI, flexible use",
@@ -44,7 +49,10 @@ const aduOptions = [
     label: "1,000 sq ft",
     bedBath: "2-3 Bed, 2 Bath",
     useCase: "Full family unit, premium rental, aging parents",
-    estimatedCost: "$425K - $430K",
+    estimatedCost: formatPriceRange(
+      estimateAduPriceRange({ sqFt: 1000, type: "detached", bedrooms: 3, bathrooms: 2 }).low,
+      estimateAduPriceRange({ sqFt: 1000, type: "detached", bedrooms: 3, bathrooms: 2 }).high
+    ),
     estimatedRent: "$4,000 - $4,500/mo",
     yardDemand: "Significant (~1,100 sq ft footprint)",
     bestFor: "Larger lots, family housing, higher rental income",
@@ -54,8 +62,8 @@ const aduOptions = [
     label: "1,200 sq ft",
     bedBath: "3-4 Bed, 2-2.5 Bath",
     useCase: "Full-size home, two-story option, maximum rental",
-    estimatedCost: "$495K - $520K",
-    estimatedRent: "$5,000 - $6,500/mo",
+    estimatedCost: "$495,000-$520,000",
+    estimatedRent: "$5,000 - $6,000/mo",
     yardDemand: "High (~1,300 sq ft or two-story)",
     bestFor: "Large lots, maximum livable space, two-story builds, up to 4 bedrooms",
   },

@@ -15,7 +15,6 @@ import { MapPreview } from "./map-preview";
 import { MapboxMap } from "./mapbox-map";
 import { JurisdictionSnapshotCard } from "./jurisdiction-snapshot-card";
 import { AduRulesSnapshotCard } from "./adu-rules-snapshot-card";
-import { OpportunityDetectedCard } from "./opportunity-detected-card";
 import { FinancialPreviewCard } from "./financial-preview-card";
 import { ConfidenceScoreCard } from "./confidence-score-card";
 import { ZoningEnrichmentCard } from "./zoning-enrichment-card";
@@ -256,11 +255,6 @@ export function PropertyScanner() {
             {/* Rent Scenarios (Conservative / Market / Premium) */}
             {analysisData.rentScenarios && analysisData.rentScenarios.length > 0 && (
               <RentScenariosCard scenarios={analysisData.rentScenarios} />
-            )}
-
-            {/* Opportunity Detected */}
-            {analysisData.upsideDetected && analysisData.upsideOpportunities && (
-              <OpportunityDetectedCard opportunities={analysisData.upsideOpportunities} />
             )}
 
             {/* Recommended ADU Paths */}

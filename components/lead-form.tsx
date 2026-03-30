@@ -19,14 +19,19 @@ export function LeadForm({
   compact = false,
 }: LeadFormProps) {
   const [submitted, setSubmitted] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [formData, setFormData] = useState({
     name: "",
+    email: "",
     phone: "",
     project: "ADU",
   });
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setError(null);
+    setIsSubmitting(true);
     // Track conversion event
     if (typeof window !== "undefined") {
       // GTM event
@@ -47,8 +52,28 @@ export function LeadForm({
         });
       }
     }
-    console.log("Lead form submitted:", { ...formData, source });
-    setSubmitted(true);
+    try {
+      const response = await fetch("/api/leads", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: formData.name,
+          email: formData.email,
+          phone: formData.phone,
+          service_type: formData.project,
+          source,
+        }),
+      });
+      const result = await response.json().catch(() => null);
+      if (!response.ok || !result?.success) {
+        throw new Error(result?.error || "We could not submit your request right now.");
+      }
+      setSubmitted(true);
+    } catch (submitError) {
+      setError(submitError instanceof Error ? submitError.message : "We could not submit your request right now.");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   if (submitted) {
@@ -80,6 +105,14 @@ export function LeadForm({
         className="bg-white"
       />
       <Input
+        type="email"
+        required
+        value={formData.email}
+        onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+        placeholder="Email Address"
+        className="bg-white"
+      />
+      <Input
         type="tel"
         required
         value={formData.phone}
@@ -99,9 +132,10 @@ export function LeadForm({
         <option value="Other">Other</option>
       </select>
       <Button type="submit" size="lg" className="w-full group">
-        {buttonText}
+        {isSubmitting ? "Submitting..." : buttonText}
         <ArrowRight className="h-5 w-5 group-hover:translate-x-1 transition-transform" />
       </Button>
+      {error && <p className="text-xs text-center text-destructive">{error}</p>}
       <p className="text-xs text-center text-muted-foreground">
         No obligation. We&apos;ll never share your info.
       </p>

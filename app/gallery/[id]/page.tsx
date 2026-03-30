@@ -2,27 +2,17 @@ import Link from "next/link";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, ArrowRight, MapPin, Ruler } from "lucide-react";
-import { GALLERY_PROJECTS } from "@/lib/data/site-data";
-
-const projects = GALLERY_PROJECTS.map(p => ({
-  id: p.id,
-  title: p.title,
-  location: p.location,
-  sqft: p.sqft,
-  type: p.type,
-  image: p.image,
-  description: p.description,
-}));
+import { GALLERY_PROJECTS, getProjectById } from "@/lib/data/site-data";
 
 export function generateStaticParams() {
-  return projects.map((project) => ({
+  return GALLERY_PROJECTS.map((project) => ({
     id: project.id,
   }));
 }
 
 export default async function ProjectPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  const project = projects.find((p) => p.id === id);
+  const project = getProjectById(id);
 
   if (!project) {
     return (
@@ -37,9 +27,9 @@ export default async function ProjectPage({ params }: { params: Promise<{ id: st
     );
   }
 
-  const currentIndex = projects.findIndex((p) => p.id === id);
-  const prevProject = currentIndex > 0 ? projects[currentIndex - 1] : null;
-  const nextProject = currentIndex < projects.length - 1 ? projects[currentIndex + 1] : null;
+  const currentIndex = GALLERY_PROJECTS.findIndex((item) => item.id === id);
+  const prevProject = currentIndex > 0 ? GALLERY_PROJECTS[currentIndex - 1] : null;
+  const nextProject = currentIndex < GALLERY_PROJECTS.length - 1 ? GALLERY_PROJECTS[currentIndex + 1] : null;
 
   return (
     <div className="min-h-screen">
@@ -80,6 +70,12 @@ export default async function ProjectPage({ params }: { params: Promise<{ id: st
       {/* Project Details */}
       <section className="py-16">
         <div className="container mx-auto px-4 max-w-3xl">
+          {project.imageStatus === "pending-replacement" && project.imageNote && (
+            <div className="mb-8 rounded-2xl border border-primary/20 bg-primary/5 p-5">
+              <p className="text-sm font-semibold text-secondary">Visual asset pending</p>
+              <p className="mt-1 text-sm text-muted-foreground">{project.imageNote}</p>
+            </div>
+          )}
           <h2 className="text-2xl font-bold text-secondary mb-4">About This Project</h2>
           <p className="text-lg text-muted-foreground leading-relaxed mb-8">
             {project.description}

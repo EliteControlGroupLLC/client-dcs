@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 1200" fill="none">
+  <rect width="1600" height="1200" fill="#0F2A4A"/>
+  <rect x="90" y="90" width="1420" height="1020" rx="40" fill="url(#bg)" opacity="0.9"/>
+  <rect x="180" y="180" width="1240" height="840" rx="28" stroke="rgba(255,255,255,0.18)" stroke-width="3"/>
+  <path d="M320 800L560 560L760 720L1000 470L1280 800" stroke="#3ECDA2" stroke-width="20" stroke-linecap="round" stroke-linejoin="round" opacity="0.85"/>
+  <circle cx="520" cy="430" r="68" stroke="#3ECDA2" stroke-width="16" opacity="0.6"/>
+  <text x="800" y="340" fill="#FFFFFF" font-family="Arial, sans-serif" font-size="56" font-weight="700" text-anchor="middle">Gallery Image Pending Approval</text>
+  <text x="800" y="420" fill="#D7E2EC" font-family="Arial, sans-serif" font-size="30" text-anchor="middle">This project stays visible, but a client-approved replacement photo is still required.</text>
+  <text x="800" y="930" fill="#3ECDA2" font-family="Arial, sans-serif" font-size="24" font-weight="700" letter-spacing="4" text-anchor="middle">DISTINCT CONSTRUCTION SOLUTIONS</text>
+  <defs>
+    <linearGradient id="bg" x1="140" y1="90" x2="1460" y2="1110" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#16385E"/>
+      <stop offset="1" stop-color="#0D2038"/>
+    </linearGradient>
+  </defs>
+</svg>

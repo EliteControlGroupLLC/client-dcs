@@ -5,11 +5,58 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { ArrowRight, BarChart3 } from "lucide-react";
+import { estimateAduPriceRange, getAverageMonthlyRent } from "@/lib/data/site-data";
+
+const scenarioPresets = [
+  {
+    label: "500 sq ft Attached ADU",
+    sqFt: 500,
+    type: "attached",
+    bedrooms: 1,
+    bathrooms: 1,
+    stories: 1,
+  },
+  {
+    label: "750 sq ft Detached ADU",
+    sqFt: 750,
+    type: "detached",
+    bedrooms: 2,
+    bathrooms: 1,
+    stories: 1,
+  },
+  {
+    label: "1,000 sq ft Detached ADU",
+    sqFt: 1000,
+    type: "detached",
+    bedrooms: 3,
+    bathrooms: 2,
+    stories: 1,
+  },
+  {
+    label: "1,200 sq ft Two-Story ADU",
+    sqFt: 1200,
+    type: "two-story",
+    bedrooms: 4,
+    bathrooms: 2,
+    stories: 2,
+  },
+] as const;
 
 export default function ADUROISimulatorPage() {
-  const [projectCost, setProjectCost] = useState(350000);
-  const [monthlyRent, setMonthlyRent] = useState(4000);
-  const [loanAmount, setLoanAmount] = useState(280000);
+  const defaultScenario = scenarioPresets[0];
+  const defaultRange = estimateAduPriceRange(defaultScenario);
+  const defaultCost = Math.round((defaultRange.low + defaultRange.high) / 2);
+  const [presetIndex, setPresetIndex] = useState(0);
+  const [projectCost, setProjectCost] = useState(defaultCost);
+  const [monthlyRent, setMonthlyRent] = useState(
+    getAverageMonthlyRent(
+      defaultScenario.sqFt,
+      defaultScenario.type,
+      defaultScenario.bedrooms,
+      { stories: defaultScenario.stories }
+    )
+  );
+  const [loanAmount, setLoanAmount] = useState(defaultCost);
   const [interestRate, setInterestRate] = useState(7.0);
   const [loanTermYears, setLoanTermYears] = useState(30);
 
@@ -58,6 +105,36 @@ export default function ADUROISimulatorPage() {
         <div className="container mx-auto px-4 max-w-5xl">
           <div className="grid md:grid-cols-2 gap-8">
             <div className="space-y-6">
+              <div>
+                <label className="block text-sm font-semibold text-secondary mb-2">
+                  Recommended Scenario
+                </label>
+                <select
+                  value={presetIndex}
+                  onChange={(e) => {
+                    const nextIndex = Number(e.target.value);
+                    const preset = scenarioPresets[nextIndex];
+                    const nextRange = estimateAduPriceRange(preset);
+                    const nextCost = Math.round((nextRange.low + nextRange.high) / 2);
+                    setPresetIndex(nextIndex);
+                    setProjectCost(nextCost);
+                    setMonthlyRent(
+                      getAverageMonthlyRent(preset.sqFt, preset.type, preset.bedrooms, {
+                        stories: preset.stories,
+                      })
+                    );
+                    setLoanAmount(nextCost);
+                  }}
+                  className="w-full px-4 py-3 rounded-lg border border-gray-200 text-secondary font-medium bg-white"
+                >
+                  {scenarioPresets.map((preset, index) => (
+                    <option key={preset.label} value={index}>
+                      {preset.label}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
               <div>
                 <label className="block text-sm font-semibold text-secondary mb-2">
                   Project Cost: ${projectCost.toLocaleString()}
@@ -118,7 +195,7 @@ export default function ADUROISimulatorPage() {
                       Loan Term: {loanTermYears} years
                     </label>
                     <input
-                      type="range" min={5} max={30} step={5}
+                      type="range" min={5} max={40} step={5}
                       value={loanTermYears}
                       onChange={(e) => setLoanTermYears(Number(e.target.value))}
                       className="w-full accent-primary"
