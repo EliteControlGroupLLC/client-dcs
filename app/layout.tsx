@@ -22,27 +22,27 @@ export const metadata: Metadata = {
   keywords: ["ADU San Diego", "home construction", "remodeling", "design-build", "custom homes", "accessory dwelling units"],
   authors: [{ name: "Distinct Construction Solutions" }],
   openGraph: {
-    title: "Distinct Construction Solutions | San Diego ADU & Home Construction",
-    description: "San Diego's premier design-build construction company specializing in ADUs, custom homes, remodeling, and renovations.",
-    url: "https://client-dcs.vercel.app",
-    siteName: "Distinct Construction Solutions",
-    locale: "en_US",
-    type: "website",
-    images: [
-      {
-        url: "/images/og-image.png",
-        width: 1200,
-        height: 630,
-        alt: "Distinct Construction Solutions - San Diego ADU & Home Builder",
-      },
-    ],
-  },
-  twitter: {
-    card: "summary_large_image",
-    title: "Distinct Construction Solutions",
-    description: "San Diego's premier design-build construction company",
-    images: ["/images/og-image.png"],
-  },
+  title: "Distinct Construction Solutions | San Diego ADU & Home Construction",
+  description: "San Diego's premier design-build construction company specializing in ADUs, custom homes, remodeling, and renovations.",
+  url: "https://www.distinctcsolutions.com",
+  siteName: "Distinct Construction Solutions",
+  locale: "en_US",
+  type: "website",
+  images: [
+    {
+      url: "https://www.distinctcsolutions.com/images/og-image.png",
+      width: 1200,
+      height: 630,
+      alt: "Distinct Construction Solutions - San Diego ADU & Home Builder",
+    },
+  ],
+},
+twitter: {
+  card: "summary_large_image",
+  title: "Distinct Construction Solutions",
+  description: "San Diego's premier design-build construction company",
+  images: ["https://www.distinctcsolutions.com/images/og-image.png"],
+},
   robots: {
     index: true,
     follow: true,
