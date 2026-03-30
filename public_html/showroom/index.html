@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Distinct Construction Solutions | Showroom</title>
+    <meta
+      name="description"
+      content="Explore materials, finishes, fixtures, and design options in the Distinct Construction Solutions digital showroom."
+    />
+    <style>
+      :root {
+        --bg: #f6f8fb;
+        --card: #ffffff;
+        --ink: #10233d;
+        --muted: #5e6f86;
+        --line: #dfe7f0;
+        --accent: #3ecda2;
+        --accent-deep: #1f8b6e;
+        --hero: #112744;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        font-family: Arial, Helvetica, sans-serif;
+        background: var(--bg);
+        color: var(--ink);
+      }
+
+      a {
+        color: inherit;
+        text-decoration: none;
+      }
+
+      .container {
+        width: min(1120px, calc(100% - 32px));
+        margin: 0 auto;
+      }
+
+      .hero {
+        background: linear-gradient(135deg, #10233d 0%, #17365d 100%);
+        color: #ffffff;
+        padding: 88px 0 80px;
+      }
+
+      .eyebrow {
+        display: inline-block;
+        margin-bottom: 18px;
+        color: var(--accent);
+        font-size: 12px;
+        font-weight: 700;
+        letter-spacing: 0.18em;
+        text-transform: uppercase;
+      }
+
+      h1 {
+        margin: 0 0 20px;
+        font-size: clamp(36px, 6vw, 58px);
+        line-height: 1.05;
+      }
+
+      .hero p {
+        max-width: 720px;
+        margin: 0;
+        color: rgba(255, 255, 255, 0.82);
+        font-size: 20px;
+        line-height: 1.65;
+      }
+
+      .section {
+        padding: 80px 0;
+      }
+
+      .section-intro {
+        max-width: 760px;
+        margin: 0 auto 40px;
+        text-align: center;
+      }
+
+      h2 {
+        margin: 0 0 14px;
+        font-size: clamp(28px, 4vw, 44px);
+      }
+
+      .section-intro p,
+      .card p,
+      .cta-copy {
+        color: var(--muted);
+        line-height: 1.7;
+      }
+
+      .grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 24px;
+      }
+
+      .card {
+        background: var(--card);
+        border: 1px solid var(--line);
+        border-radius: 24px;
+        padding: 28px;
+        box-shadow: 0 10px 30px rgba(16, 35, 61, 0.06);
+      }
+
+      .icon {
+        width: 56px;
+        height: 56px;
+        border-radius: 16px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        margin-bottom: 20px;
+        background: rgba(62, 205, 162, 0.14);
+        color: var(--accent-deep);
+        font-size: 24px;
+        font-weight: 700;
+      }
+
+      .card h3 {
+        margin: 0 0 10px;
+        font-size: 24px;
+      }
+
+      .count {
+        display: inline-block;
+        margin-top: 12px;
+        color: var(--accent-deep);
+        font-size: 14px;
+        font-weight: 700;
+      }
+
+      .cta {
+        background: var(--hero);
+        color: #ffffff;
+        text-align: center;
+      }
+
+      .cta-copy {
+        max-width: 760px;
+        margin: 0 auto 28px;
+        color: rgba(255, 255, 255, 0.8);
+      }
+
+      .actions {
+        display: flex;
+        justify-content: center;
+        gap: 14px;
+        flex-wrap: wrap;
+      }
+
+      .button {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 220px;
+        padding: 15px 22px;
+        border-radius: 999px;
+        font-weight: 700;
+        transition: 180ms ease;
+      }
+
+      .button-primary {
+        background: var(--accent);
+        color: #10233d;
+      }
+
+      .button-primary:hover {
+        background: #4adab0;
+      }
+
+      .button-secondary {
+        border: 1px solid rgba(255, 255, 255, 0.28);
+        color: #ffffff;
+      }
+
+      .button-secondary:hover {
+        background: rgba(255, 255, 255, 0.08);
+      }
+
+      @media (max-width: 800px) {
+        .grid {
+          grid-template-columns: 1fr;
+        }
+
+        .hero {
+          padding: 72px 0 64px;
+        }
+
+        .section {
+          padding: 64px 0;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <section class="hero">
+      <div class="container">
+        <span class="eyebrow">Digital Showroom</span>
+        <h1>Explore Materials, Finishes &amp; Design Options</h1>
+        <p>
+          Browse our curated selection of materials, finishes, fixtures, and design options.
+          Visualize your project before construction begins.
+        </p>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="container">
+        <div class="section-intro">
+          <h2>Browse by Category</h2>
+          <p>Select a category to explore available options for your project.</p>
+        </div>
+
+        <div class="grid">
+          <article class="card">
+            <div class="icon">F</div>
+            <h3>Flooring</h3>
+            <p>Hardwood, tile, luxury vinyl, and more. Browse options that fit your style and budget.</p>
+            <span class="count">50+ Options</span>
+          </article>
+
+          <article class="card">
+            <div class="icon">P</div>
+            <h3>Finishes &amp; Paint</h3>
+            <p>Interior and exterior finishes curated for modern San Diego homes.</p>
+            <span class="count">100+ Colors</span>
+          </article>
+
+          <article class="card">
+            <div class="icon">C</div>
+            <h3>Cabinetry &amp; Fixtures</h3>
+            <p>Kitchen and bathroom cabinetry, hardware, and plumbing fixtures.</p>
+            <span class="count">75+ Styles</span>
+          </article>
+
+          <article class="card">
+            <div class="icon">T</div>
+            <h3>Countertops &amp; Tile</h3>
+            <p>Quartz, granite, marble, and ceramic tile selections for every room.</p>
+            <span class="count">40+ Materials</span>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section class="section cta">
+      <div class="container">
+        <h2>Ready to Start Selecting?</h2>
+        <p class="cta-copy">
+          Our design team can walk you through material options and help you make selections that match your vision and budget.
+        </p>
+        <div class="actions">
+          <a class="button button-primary" href="https://www.distinctcsolutions.com/build-your-adu">Build Your ADU</a>
+          <a class="button button-secondary" href="https://www.distinctcsolutions.com/contact">Schedule a Consultation</a>
+        </div>
+      </div>
+    </section>
+  </body>
+</html>
