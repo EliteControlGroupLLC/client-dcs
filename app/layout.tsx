@@ -30,7 +30,9 @@ export const metadata: Metadata = {
   ],
   authors: [{ name: "Distinct Construction Solutions" }],
   metadataBase: new URL("https://www.distinctcsolutions.com"),
-
+  alternates: {
+    canonical: "https://www.distinctcsolutions.com",
+  },
   openGraph: {
     title: "Distinct Construction Solutions | San Diego ADU & Home Construction",
     description:
@@ -48,14 +50,12 @@ export const metadata: Metadata = {
       },
     ],
   },
-
   twitter: {
     card: "summary_large_image",
     title: "Distinct Construction Solutions",
     description: "San Diego's premier design-build construction company",
     images: ["https://www.distinctcsolutions.com/og-image.png"],
   },
-
   robots: {
     index: true,
     follow: true,
@@ -121,6 +121,48 @@ export default function RootLayout({
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        />
+
+        <link rel="canonical" href="https://www.distinctcsolutions.com" />
+
+        <meta
+          property="og:title"
+          content="Distinct Construction Solutions | San Diego ADU & Home Construction"
+        />
+        <meta
+          property="og:description"
+          content="San Diego's premier design-build construction company specializing in ADUs, custom homes, remodeling, and renovations."
+        />
+        <meta property="og:type" content="website" />
+        <meta
+          property="og:url"
+          content="https://www.distinctcsolutions.com"
+        />
+        <meta
+          property="og:image"
+          content="https://www.distinctcsolutions.com/og-image.png"
+        />
+        <meta property="og:image:width" content="1200" />
+        <meta property="og:image:height" content="630" />
+        <meta
+          property="og:image:alt"
+          content="Distinct Construction Solutions - San Diego ADU & Home Builder"
+        />
+        <meta property="og:site_name" content="Distinct Construction Solutions" />
+        <meta property="og:locale" content="en_US" />
+
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta
+          name="twitter:title"
+          content="Distinct Construction Solutions"
+        />
+        <meta
+          name="twitter:description"
+          content="San Diego's premier design-build construction company"
+        />
+        <meta
+          name="twitter:image"
+          content="https://www.distinctcsolutions.com/og-image.png"
         />
 
         <script
