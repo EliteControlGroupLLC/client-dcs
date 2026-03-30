@@ -91,10 +91,6 @@ export type {
   GeometrySanityResult,
 } from "./geometry-engine";
 
-// v6 — Source Reconciliation Engine
-export { reconcileAllSources } from "./source-reconciliation-engine";
-export type { ReconciliationInput } from "./source-reconciliation-engine";
-
 // v7.1 — Microsoft Building Footprint Service
 export {
   getMicrosoftBuildingFootprints,
