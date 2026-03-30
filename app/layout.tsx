@@ -20,12 +20,24 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
   title: "Distinct Construction Solutions | San Diego ADU & Home Construction",
-  description: "San Diego's premier design-build construction company specializing in ADUs, custom homes, remodeling, and renovations. Get your free consultation today.",
-  keywords: ["ADU San Diego", "home construction", "remodeling", "design-build", "custom homes", "accessory dwelling units"],
+  description:
+    "San Diego's premier design-build construction company specializing in ADUs, custom homes, remodeling, and renovations. Get your free consultation today.",
+  keywords: [
+    "ADU San Diego",
+    "home construction",
+    "remodeling",
+    "design-build",
+    "custom homes",
+    "accessory dwelling units",
+  ],
   authors: [{ name: "Distinct Construction Solutions" }],
+  alternates: {
+    canonical: SITE_URL,
+  },
   openGraph: {
     title: "Distinct Construction Solutions | San Diego ADU & Home Construction",
-    description: "San Diego's premier design-build construction company specializing in ADUs, custom homes, remodeling, and renovations.",
+    description:
+      "San Diego's premier design-build construction company specializing in ADUs, custom homes, remodeling, and renovations.",
     url: SITE_URL,
     siteName: "Distinct Construction Solutions",
     locale: "en_US",
@@ -61,7 +73,8 @@ const jsonLd = {
   "@context": "https://schema.org",
   "@type": "LocalBusiness",
   "name": "Distinct Construction Solutions",
-  "description": "San Diego's premier design-build construction company specializing in ADUs, custom homes, remodeling, and renovations.",
+  "description":
+    "San Diego's premier design-build construction company specializing in ADUs, custom homes, remodeling, and renovations.",
   "url": SITE_URL,
   "logo": `${SITE_URL}/images/logo-light.png`,
   "image": `${SITE_URL}/images/logo-light.png`,

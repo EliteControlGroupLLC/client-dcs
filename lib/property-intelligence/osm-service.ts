@@ -145,7 +145,7 @@ async function queryNominatim(
       `https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${lat}&lon=${lng}&zoom=18&addressdetails=1&extratags=1`,
       {
         headers: {
-          "User-Agent": "DCS-ADU-Scanner/1.0 (https://distinctconstructionsolutions.com)",
+          "User-Agent": "DCS-ADU-Scanner/1.0 (https://www.distinctcsolutions.com)",
         },
       }
     );
