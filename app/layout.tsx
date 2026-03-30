@@ -21,28 +21,31 @@ export const metadata: Metadata = {
   description: "San Diego's premier design-build construction company specializing in ADUs, custom homes, remodeling, and renovations. Get your free consultation today.",
   keywords: ["ADU San Diego", "home construction", "remodeling", "design-build", "custom homes", "accessory dwelling units"],
   authors: [{ name: "Distinct Construction Solutions" }],
+  
   openGraph: {
-  title: "Distinct Construction Solutions | San Diego ADU & Home Construction",
-  description: "San Diego's premier design-build construction company specializing in ADUs, custom homes, remodeling, and renovations.",
-  url: "https://www.distinctcsolutions.com",
-  siteName: "Distinct Construction Solutions",
-  locale: "en_US",
-  type: "website",
-  images: [
-    {
-      url: "https://www.distinctcsolutions.com/images/og-image.png",
-      width: 1200,
-      height: 630,
-      alt: "Distinct Construction Solutions - San Diego ADU & Home Builder",
-    },
-  ],
-},
-twitter: {
-  card: "summary_large_image",
-  title: "Distinct Construction Solutions",
-  description: "San Diego's premier design-build construction company",
-  images: ["https://www.distinctcsolutions.com/images/og-image.png"],
-},
+    title: "Distinct Construction Solutions | San Diego ADU & Home Construction",
+    description: "San Diego's premier design-build construction company specializing in ADUs, custom homes, remodeling, and renovations.",
+    url: "https://www.distinctcsolutions.com",
+    siteName: "Distinct Construction Solutions",
+    locale: "en_US",
+    type: "website",
+    images: [
+      {
+        url: "https://www.distinctcsolutions.com/images/og-image.png",
+        width: 1200,
+        height: 630,
+        alt: "Distinct Construction Solutions - San Diego ADU & Home Builder",
+      },
+    ],
+  },
+
+  twitter: {
+    card: "summary_large_image",
+    title: "Distinct Construction Solutions",
+    description: "San Diego's premier design-build construction company",
+    images: ["https://www.distinctcsolutions.com/images/og-image.png"],
+  },
+
   robots: {
     index: true,
     follow: true,
@@ -60,9 +63,9 @@ const jsonLd = {
   "@type": "LocalBusiness",
   "name": "Distinct Construction Solutions",
   "description": "San Diego's premier design-build construction company specializing in ADUs, custom homes, remodeling, and renovations.",
-  "url": "https://distinctconstructionsolutions.com",
-  "logo": "https://distinctconstructionsolutions.com/images/logo-light.png",
-  "image": "https://distinctconstructionsolutions.com/images/logo-light.png",
+  "url": "https://www.distinctcsolutions.com",
+  "logo": "https://www.distinctcsolutions.com/images/logo-light.png",
+  "image": "https://www.distinctcsolutions.com/images/logo-light.png",
   "telephone": "+1-858-833-0705",
   "address": {
     "@type": "PostalAddress",
@@ -104,10 +107,12 @@ export default function RootLayout({
   return (
     <html lang="en" className="scroll-smooth">
       <head>
+        {/* JSON-LD */}
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
         />
+
         {/* Google Tag Manager */}
         <script
           dangerouslySetInnerHTML={{
@@ -118,6 +123,7 @@ export default function RootLayout({
             })(window,document,'script','dataLayer','GTM-5KJT4QTZ');`,
           }}
         />
+
         {/* Meta Pixel */}
         <script
           dangerouslySetInnerHTML={{
@@ -134,10 +140,9 @@ export default function RootLayout({
           }}
         />
       </head>
-      <body
-        className={`${inter.variable} ${geistMono.variable} font-sans antialiased`}
-      >
-        {/* Google Tag Manager (noscript) */}
+
+      <body className={`${inter.variable} ${geistMono.variable} font-sans antialiased`}>
+        {/* GTM (noscript) */}
         <noscript>
           <iframe
             src="https://www.googletagmanager.com/ns.html?id=GTM-5KJT4QTZ"
@@ -146,10 +151,13 @@ export default function RootLayout({
             style={{ display: "none", visibility: "hidden" }}
           />
         </noscript>
+
         <Header />
+
         <main className="min-h-screen">
           {children}
         </main>
+
         <Footer />
         <FloatingEstimateButton />
       </body>
