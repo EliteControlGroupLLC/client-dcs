@@ -8,11 +8,11 @@ import { ArrowRight, DollarSign, TrendingUp } from "lucide-react";
 import { getRentEstimate } from "@/lib/data/site-data";
 
 const aduSizes = [
-  { label: "400 sq ft (Studio)", sqFt: 400, bedrooms: 0, type: "detached" },
-  { label: "500 sq ft (1 Bed)", sqFt: 500, bedrooms: 1, type: "detached" },
-  { label: "700 sq ft (1-2 Bed)", sqFt: 700, bedrooms: 1, type: "detached" },
-  { label: "1,000 sq ft (2-3 Bed)", sqFt: 1000, bedrooms: 2, type: "detached" },
-  { label: "1,200 sq ft (3-4 Bed)", sqFt: 1200, bedrooms: 3, type: "detached" },
+  { label: "400 sq ft (Studio)", sqFt: 400, bedrooms: 0, type: "detached", baselineRent: 2400 },
+  { label: "500 sq ft (1 Bed)", sqFt: 500, bedrooms: 1, type: "detached", baselineRent: 2700 },
+  { label: "700 sq ft (1-2 Bed)", sqFt: 700, bedrooms: 1, type: "detached", baselineRent: 3350 },
+  { label: "1,000 sq ft (2-3 Bed)", sqFt: 1000, bedrooms: 2, type: "detached", baselineRent: 4250 },
+  { label: "1,200 sq ft (3-4 Bed)", sqFt: 1200, bedrooms: 4, type: "two-story", baselineRent: 5500 },
 ];
 
 export default function ADUIncomeCalculatorPage() {
@@ -21,8 +21,10 @@ export default function ADUIncomeCalculatorPage() {
   const [customRent, setCustomRent] = useState<number | null>(null);
 
   const size = aduSizes[sizeIndex];
-  const rentData = getRentEstimate(size.sqFt, size.type, size.bedrooms);
-  const baseRent = Math.round((rentData.low + rentData.high) / 2);
+  const rentData = getRentEstimate(size.sqFt, size.type, size.bedrooms, {
+    stories: size.type === "two-story" ? 2 : 1,
+  });
+  const baseRent = size.baselineRent;
   const monthlyRent = customRent ?? baseRent;
   const annualIncome = monthlyRent * 12;
   const monthsToBreakeven = Math.ceil(projectCost / monthlyRent);
@@ -71,7 +73,7 @@ export default function ADUIncomeCalculatorPage() {
                       >
                         <span>{s.label}</span>
                         <span className="text-primary ml-2 text-sm font-semibold">
-                          ~${avgRent.toLocaleString()}/mo
+                          ~${s.baselineRent.toLocaleString()}/mo
                         </span>
                       </button>
                     );
@@ -150,14 +152,14 @@ export default function ADUIncomeCalculatorPage() {
                   <div className="bg-primary/10 border border-primary/20 rounded-xl p-4 mb-6">
                     <TrendingUp className="h-5 w-5 text-primary mb-2" />
                     <p className="text-sm text-white/80">
-                      Based on San Diego market rates, your {size.sqFt} sq ft ADU could generate
+                      Based on the approved DCS rent assumptions, your {size.sqFt} sq ft ADU could generate
                       <strong className="text-primary"> ${tenYearIncome.toLocaleString()}</strong> over 10 years,
                       potentially paying for itself in <strong className="text-primary">~{yearsToBreakeven} years</strong>.
                     </p>
                   </div>
 
                   <p className="text-xs text-white/40 mb-4">
-                    * Based on current San Diego rental market estimates. Actual rental income depends on location, finishes, and market conditions.
+                    * Baseline rent targets follow the current DCS plan library and San Diego market assumptions. Actual rental income depends on location, finish quality, and lease strategy.
                   </p>
 
                   <Link href="/contact">

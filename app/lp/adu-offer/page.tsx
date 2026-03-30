@@ -1,29 +1,10 @@
 "use client";
 
+import Link from "next/link";
 import { LeadForm } from "@/components/lead-form";
-import { CheckCircle, Phone, Star, ArrowRight } from "lucide-react";
+import { CheckCircle, Phone, Star, ArrowRight, ExternalLink } from "lucide-react";
 import Image from "next/image";
-
-const testimonials = [
-  {
-    name: "Sarah M.",
-    location: "La Jolla, CA",
-    text: "They built our 600 sq ft ADU in just 4 months. The whole process was seamless — from design to move-in.",
-    rating: 5,
-  },
-  {
-    name: "James R.",
-    location: "Pacific Beach, CA",
-    text: "We converted our garage into a beautiful studio ADU. It now generates $2,500/month in rental income!",
-    rating: 5,
-  },
-  {
-    name: "Maria L.",
-    location: "Chula Vista, CA",
-    text: "Best decision we made. Our mother-in-law now has her own space right in our backyard. The team made it easy.",
-    rating: 5,
-  },
-];
+import { COMPANY_INFO } from "@/lib/data/site-data";
 
 export default function ADUOfferLP() {
   return (
@@ -71,16 +52,16 @@ export default function ADUOfferLP() {
               </div>
 
               <a
-                href="tel:+18588330705"
+                href={`tel:${COMPANY_INFO.phoneHref}`}
                 className="inline-flex items-center gap-2 text-white/80 hover:text-primary transition-colors"
               >
                 <Phone className="h-5 w-5" />
-                <span>Or call us: (858) 833-0705</span>
+                <span>Or call us: {COMPANY_INFO.phone}</span>
               </a>
             </div>
 
             {/* Lead Form */}
-            <div className="bg-white rounded-2xl p-8 shadow-2xl">
+            <div id="lead-form" className="bg-white rounded-2xl p-8 shadow-2xl">
               <LeadForm
                 source="meta-ads-adu-offer"
                 heading="Claim Your Free Design Consultation"
@@ -103,29 +84,32 @@ export default function ADUOfferLP() {
         </div>
       </section>
 
-      {/* Testimonials — Key for Meta Ads */}
+      {/* Reviews */}
       <section className="py-16 bg-muted">
         <div className="container mx-auto px-4 max-w-5xl">
           <h2 className="text-3xl font-bold text-center text-secondary mb-12">
-            What Our Clients Say
+            Review Approval In Progress
           </h2>
-          <div className="grid md:grid-cols-3 gap-6">
-            {testimonials.map((t) => (
-              <div key={t.name} className="bg-white rounded-xl p-6 shadow-sm">
-                <div className="flex gap-1 mb-3">
-                  {Array.from({ length: t.rating }).map((_, i) => (
-                    <Star key={i} className="h-4 w-4 text-yellow-400 fill-yellow-400" />
-                  ))}
-                </div>
-                <p className="text-muted-foreground mb-4 text-sm leading-relaxed">
-                  &ldquo;{t.text}&rdquo;
-                </p>
-                <div>
-                  <p className="font-semibold text-secondary text-sm">{t.name}</p>
-                  <p className="text-xs text-muted-foreground">{t.location}</p>
-                </div>
-              </div>
-            ))}
+          <div className="bg-white rounded-2xl border border-border p-8 text-center shadow-sm">
+            <div className="flex justify-center gap-1 mb-4">
+              {[1, 2, 3, 4, 5].map((i) => (
+                <Star key={i} className="h-5 w-5 text-yellow-400 fill-yellow-400" />
+              ))}
+            </div>
+            <p className="text-secondary font-semibold mb-2">No fabricated reviews are shown on this landing page.</p>
+            <p className="text-muted-foreground max-w-2xl mx-auto mb-6">
+              Verified Google and Yelp excerpts for Distinct Construction Solutions are being curated for approval.
+              Until approved text is supplied, this page links directly to the public review profiles instead of showing placeholders.
+            </p>
+            <a
+              href="https://www.google.com/search?q=Distinct+Construction+Solutions+Chula+Vista+reviews"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-2 text-primary font-semibold hover:text-primary-dark transition-colors"
+            >
+              View Public Review Profiles
+              <ExternalLink className="h-4 w-4" />
+            </a>
           </div>
         </div>
       </section>
@@ -175,16 +159,16 @@ export default function ADUOfferLP() {
             </div>
             <div className="relative aspect-square rounded-xl overflow-hidden">
               <Image
-                src="/images/projects/bathroom-renovation.webp"
-                alt="Luxury bathroom renovation"
+                src="/images/projects/adu-exterior-side.webp"
+                alt="Detached ADU exterior side view"
                 fill
                 className="object-cover hover:scale-105 transition-transform duration-500"
               />
             </div>
             <div className="relative aspect-square rounded-xl overflow-hidden">
               <Image
-                src="/images/projects/bedroom-interior.webp"
-                alt="Custom bedroom interior"
+                src="/images/projects/kitchen-remodel.webp"
+                alt="Premium kitchen remodel"
                 fill
                 className="object-cover hover:scale-105 transition-transform duration-500"
               />
@@ -204,23 +188,19 @@ export default function ADUOfferLP() {
           </p>
           <div className="flex flex-wrap justify-center gap-4">
             <a
-              href="tel:+18588330705"
+              href={`tel:${COMPANY_INFO.phoneHref}`}
               className="inline-flex items-center gap-2 bg-secondary text-white font-bold px-8 py-4 rounded-full text-lg hover:bg-secondary-light transition-colors"
             >
               <Phone className="h-5 w-5" />
-              Call (858) 833-0705
+              Call {COMPANY_INFO.phone}
             </a>
-            <a
-              href="#"
-              onClick={(e) => {
-                e.preventDefault();
-                window.scrollTo({ top: 0, behavior: "smooth" });
-              }}
+            <Link
+              href="#lead-form"
               className="inline-flex items-center gap-2 bg-white text-secondary font-bold px-8 py-4 rounded-full text-lg hover:bg-gray-100 transition-colors"
             >
               Get Free Quote
               <ArrowRight className="h-5 w-5" />
-            </a>
+            </Link>
           </div>
         </div>
       </section>

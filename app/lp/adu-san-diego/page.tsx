@@ -2,15 +2,16 @@ import type { Metadata } from "next";
 import { LeadForm } from "@/components/lead-form";
 import { CheckCircle, Shield, Clock, Star } from "lucide-react";
 import Image from "next/image";
+import { COMPANY_INFO, SERVICE_PRICING, getYearsExperience } from "@/lib/data/site-data";
 
 export const metadata: Metadata = {
   title: "San Diego ADU Builder | Free Quote | Distinct Construction Solutions",
   description:
-    "Build your dream ADU in San Diego. Detached ADUs at $427/sq ft. Licensed, bonded, and insured. Fixed-price contracts. Average 4-month build time. Get your free quote today.",
+    "Build your dream ADU in San Diego. Detached ADUs starting at $175,000 and garage conversions starting at $120,000. Licensed, bonded, and insured. Get your free quote today.",
   openGraph: {
-    title: "San Diego ADU Builder | Detached ADUs at $427/sq ft",
+    title: "San Diego ADU Builder | Detached ADUs Starting at $175,000",
     description:
-      "Build your dream ADU in San Diego. Licensed & bonded. Fixed-price contracts. Free consultation.",
+      "Build your dream ADU in San Diego. Detached ADUs starting at $175,000. Licensed, bonded, and insured. Free consultation.",
     images: ["/images/og-image.jpg"],
   },
 };
@@ -53,7 +54,7 @@ export default function ADUSanDiegoLP() {
               </h1>
 
               <p className="text-lg text-white/80 mb-6">
-                Detached ADUs at <span className="text-primary font-bold text-2xl">$427/sq ft</span>. Garage conversions from <span className="text-primary font-bold text-2xl">$120,000</span>.
+                Detached ADUs starting at <span className="text-primary font-bold text-2xl">{SERVICE_PRICING.adu.detachedStartingPrice}</span>. Garage conversions from <span className="text-primary font-bold text-2xl">{SERVICE_PRICING.adu.startingPrice}</span>.
                 We handle everything — design, permits, and construction. One team, one price, zero stress.
               </p>
 
@@ -96,7 +97,7 @@ export default function ADUSanDiegoLP() {
           <div className="flex flex-wrap justify-center gap-8 text-secondary font-semibold text-sm md:text-base">
             <span>500+ Projects</span>
             <span>•</span>
-            <span>15+ Years Experience</span>
+            <span>{getYearsExperience()}+ Years Experience</span>
             <span>•</span>
             <span>Licensed & Bonded</span>
             <span>•</span>
@@ -170,10 +171,10 @@ export default function ADUSanDiegoLP() {
             Get a free, no-obligation quote in 24 hours. Call us or fill out the form above.
           </p>
           <a
-            href="tel:+18588330705"
+            href={`tel:${COMPANY_INFO.phoneHref}`}
             className="inline-flex items-center gap-2 bg-primary text-white font-bold px-8 py-4 rounded-full text-lg hover:bg-primary-dark transition-colors"
           >
-            Call (858) 833-0705
+            Call {COMPANY_INFO.phone}
           </a>
         </div>
       </section>

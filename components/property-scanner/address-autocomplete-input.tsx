@@ -272,11 +272,6 @@ export function AddressAutocompleteInput({
               <span className="text-sm font-medium">{suggestion}</span>
             </button>
           ))}
-          {useGoogleApi && (
-            <div className="px-5 py-2 bg-muted/30 border-t border-border/50">
-              <span className="text-[10px] text-muted-foreground">Powered by Google</span>
-            </div>
-          )}
         </div>
       )}
     </div>

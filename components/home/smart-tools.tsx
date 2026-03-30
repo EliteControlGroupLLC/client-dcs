@@ -190,7 +190,7 @@ export function SmartTools() {
             { icon: Layers, title: "Concrete Calculator", desc: "Slab and retaining wall estimates", href: "/tools/concrete-calculator" },
             { icon: ChefHat, title: "Kitchen Calculator", desc: "Remodel cost estimates", href: "/tools/kitchen-calculator" },
             { icon: Bath, title: "Bathroom Calculator", desc: "Renovation estimates", href: "/tools/bathroom-calculator" },
-            { icon: Wand2, title: "Design Inspiration", desc: "Build your style profile", href: "/tools/adu-design-inspiration" },
+            { icon: Wand2, title: "Design Inspiration", desc: "Generate concept visuals", href: "/tools/adu-design-inspiration" },
           ].map((tool) => (
             <Link key={tool.title} href={tool.href} className="group">
               <div className="bg-white/10 backdrop-blur-lg border border-white/20 rounded-xl p-5 hover:bg-white/15 hover:border-white/30 transition-all duration-300 h-full">

@@ -4,6 +4,7 @@ import "./globals.css";
 import { Header } from "@/components/layout/header";
 import { Footer } from "@/components/layout/footer";
 import { FloatingEstimateButton } from "@/components/instant-estimate/floating-estimate-button";
+import { SITE_URL } from "@/lib/site-url";
 
 const inter = Inter({
   variable: "--font-inter",
@@ -17,6 +18,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL(SITE_URL),
   title: "Distinct Construction Solutions | San Diego ADU & Home Construction",
   description:
     "San Diego's premier design-build construction company specializing in ADUs, custom homes, remodeling, and renovations. Get your free consultation today.",
@@ -29,21 +31,20 @@ export const metadata: Metadata = {
     "accessory dwelling units",
   ],
   authors: [{ name: "Distinct Construction Solutions" }],
-  metadataBase: new URL("https://www.distinctcsolutions.com"),
   alternates: {
-    canonical: "https://www.distinctcsolutions.com",
+    canonical: SITE_URL,
   },
   openGraph: {
     title: "Distinct Construction Solutions | San Diego ADU & Home Construction",
     description:
       "San Diego's premier design-build construction company specializing in ADUs, custom homes, remodeling, and renovations.",
-    url: "https://www.distinctcsolutions.com",
+    url: SITE_URL,
     siteName: "Distinct Construction Solutions",
     locale: "en_US",
     type: "website",
     images: [
       {
-        url: "https://www.distinctcsolutions.com/og-image.png",
+        url: `${SITE_URL}/og-image.png`,
         width: 1200,
         height: 630,
         alt: "Distinct Construction Solutions - San Diego ADU & Home Builder",
@@ -54,7 +55,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "Distinct Construction Solutions",
     description: "San Diego's premier design-build construction company",
-    images: ["https://www.distinctcsolutions.com/og-image.png"],
+    images: [`${SITE_URL}/og-image.png`],
   },
   robots: {
     index: true,
@@ -74,9 +75,9 @@ const jsonLd = {
   name: "Distinct Construction Solutions",
   description:
     "San Diego's premier design-build construction company specializing in ADUs, custom homes, remodeling, and renovations.",
-  url: "https://www.distinctcsolutions.com",
-  logo: "https://www.distinctcsolutions.com/images/logo-light.png",
-  image: "https://www.distinctcsolutions.com/images/logo-light.png",
+  url: SITE_URL,
+  logo: `${SITE_URL}/images/logo-light.png`,
+  image: `${SITE_URL}/images/logo-light.png`,
   telephone: "+1-858-833-0705",
   address: {
     "@type": "PostalAddress",
@@ -123,7 +124,7 @@ export default function RootLayout({
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
         />
 
-        <link rel="canonical" href="https://www.distinctcsolutions.com" />
+        <link rel="canonical" href={SITE_URL} />
 
         <meta
           property="og:title"
@@ -134,14 +135,8 @@ export default function RootLayout({
           content="San Diego's premier design-build construction company specializing in ADUs, custom homes, remodeling, and renovations."
         />
         <meta property="og:type" content="website" />
-        <meta
-          property="og:url"
-          content="https://www.distinctcsolutions.com"
-        />
-        <meta
-          property="og:image"
-          content="https://www.distinctcsolutions.com/og-image.png"
-        />
+        <meta property="og:url" content={SITE_URL} />
+        <meta property="og:image" content={`${SITE_URL}/og-image.png`} />
         <meta property="og:image:width" content="1200" />
         <meta property="og:image:height" content="630" />
         <meta
@@ -162,7 +157,7 @@ export default function RootLayout({
         />
         <meta
           name="twitter:image"
-          content="https://www.distinctcsolutions.com/og-image.png"
+          content={`${SITE_URL}/og-image.png`}
         />
 
         <script

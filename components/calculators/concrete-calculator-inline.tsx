@@ -34,7 +34,8 @@ export function ConcreteCalculatorInline() {
   const selectedFinish = finishTypes[finish];
   const thicknessMultiplier = thicknessOptions[thickness].inches / 4;
   const slabCost = Math.round(sqFt * selectedFinish.pricePerSqFt * thicknessMultiplier);
-  const wallCost = hasRetainingWall ? Math.round(wallLength * wallHeight * 85) : 0;
+  const wallHeightMultiplier = wallHeight <= 4 ? 1 : 1 + (wallHeight - 4) * 0.08;
+  const wallCost = hasRetainingWall ? Math.round(wallLength * 200 * wallHeightMultiplier) : 0;
   const totalLow = Math.round((slabCost + wallCost) * 0.9);
   const totalHigh = Math.round((slabCost + wallCost) * 1.15);
   const cubicYards = Math.round((sqFt * thicknessOptions[thickness].inches / 12 / 27) * 10) / 10;
@@ -118,7 +119,7 @@ export function ConcreteCalculatorInline() {
                     }`}
                   >
                     <span>{f.label}</span>
-                    <span className="text-muted-foreground ml-2 text-sm">(~${f.pricePerSqFt}/sq ft)</span>
+                    <span className="text-muted-foreground ml-2 text-sm">(Starting at ${f.pricePerSqFt}/sq ft)</span>
                   </button>
                 ))}
               </div>
@@ -165,6 +166,11 @@ export function ConcreteCalculatorInline() {
                     />
                   </div>
                 </div>
+              )}
+              {hasRetainingWall && (
+                <p className="mt-3 text-xs text-muted-foreground">
+                  Retaining walls are modeled from a minimum of $200 per linear foot, with additional allowance for walls above 4 feet.
+                </p>
               )}
             </div>
           </div>

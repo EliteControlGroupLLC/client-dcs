@@ -1,44 +1,9 @@
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { ArrowRight, Pencil, DollarSign, FileText, Hammer, CheckCircle } from "lucide-react";
+import { PROCESS_STEPS } from "@/lib/data/site-data";
 
-const steps = [
-  {
-    step: 1,
-    icon: Pencil,
-    title: "Design Your Project & Get Pricing",
-    description: "Use our online planning tools to explore what you can build on your property. Choose your project type, layout, size, and style to see realistic pricing and project possibilities.",
-    timeline: "1 Day",
-  },
-  {
-    step: 2,
-    icon: DollarSign,
-    title: "Funding & Pre-Approval",
-    description: "Once you understand the project scope and estimated cost, we help review funding options and confirm your project budget. This step ensures the project is financially ready to move forward.",
-    timeline: "2-3 Days",
-  },
-  {
-    step: 3,
-    icon: FileText,
-    title: "Design, Engineering & Permits",
-    description: "Our team prepares architectural plans, coordinates engineering, and manages the permitting process with the city. We guide the project through approvals so construction can begin.",
-    timeline: "6-9 Months",
-  },
-  {
-    step: 4,
-    icon: Hammer,
-    title: "Construction",
-    description: "Our construction team builds your project using professional project management, organized scheduling, and clear progress updates.",
-    timeline: "3-4 Months",
-  },
-  {
-    step: 5,
-    icon: CheckCircle,
-    title: "Final Walkthrough",
-    description: "We walk through the completed project with you, address final details, and ensure everything meets expectations before delivering the finished space.",
-    timeline: "About 1 Week",
-  },
-];
+const stepIcons = [Pencil, DollarSign, FileText, Hammer, CheckCircle];
 
 export default function ProcessPage() {
   return (
@@ -63,15 +28,15 @@ export default function ProcessPage() {
       <section className="py-20">
         <div className="container mx-auto px-4 max-w-4xl">
           <div className="space-y-12">
-            {steps.map((item) => {
-              const Icon = item.icon;
+            {PROCESS_STEPS.map((item, index) => {
+              const Icon = stepIcons[index];
               return (
                 <div key={item.step} className="flex gap-6">
                   <div className="flex flex-col items-center">
                     <div className="w-14 h-14 bg-primary text-white rounded-full flex items-center justify-center font-bold text-lg shrink-0">
                       {item.step}
                     </div>
-                    {item.step < steps.length && (
+                    {item.step < PROCESS_STEPS.length && (
                       <div className="w-0.5 h-full bg-primary/20 mt-2" />
                     )}
                   </div>

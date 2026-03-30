@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { COMPANY_INFO } from "@/lib/data/site-data";
 
 export default function PrivacyPage() {
   return (
@@ -42,21 +43,21 @@ export default function PrivacyPage() {
           <p className="text-muted-foreground mb-6">
             You have the right to access, correct, or delete your personal information. To exercise these rights,
             please contact us at{" "}
-            <a href="mailto:Office@distinctcsolutions.com" className="text-primary hover:underline">
-              Office@distinctcsolutions.com
+            <a href={`mailto:${COMPANY_INFO.email}`} className="text-primary hover:underline">
+              {COMPANY_INFO.email}
             </a>.
           </p>
 
           <h2 className="text-2xl font-bold text-secondary mb-4">Contact Us</h2>
           <p className="text-muted-foreground mb-6">
             If you have questions about this Privacy Policy, please contact us at:<br />
-            Distinct Construction Solutions<br />
-            Chula Vista, CA<br />
-            <a href="mailto:Office@distinctcsolutions.com" className="text-primary hover:underline">
-              Office@distinctcsolutions.com
+            {COMPANY_INFO.name}<br />
+            {COMPANY_INFO.office}<br />
+            <a href={`mailto:${COMPANY_INFO.email}`} className="text-primary hover:underline">
+              {COMPANY_INFO.email}
             </a><br />
-            <a href="tel:+18588330705" className="text-primary hover:underline">
-              +1 (858) 833-0705
+            <a href={`tel:${COMPANY_INFO.phoneHref}`} className="text-primary hover:underline">
+              {COMPANY_INFO.phone}
             </a>
           </p>
         </div>

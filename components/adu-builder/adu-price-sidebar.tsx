@@ -5,7 +5,7 @@ import { formatCurrency } from "@/lib/utils";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Home, Bed, Bath, Ruler, DollarSign, Phone, Info } from "lucide-react";
-import { ADU_SIZES, ADU_TYPES } from "@/lib/types/adu";
+import { ADU_SIZES, ADU_TYPES, calculateADURent } from "@/lib/types/adu";
 
 export function ADUPriceSidebar() {
   const { config, pricing, currentStep } = useADU();
@@ -18,12 +18,7 @@ export function ADUPriceSidebar() {
     ? Math.round((pricing.total * 0.07 / 12) / (1 - Math.pow(1 + 0.07 / 12, -360))) 
     : 0;
 
-  // Estimated rental income based on size
-  const estimatedRent = sizeInfo 
-    ? Math.round(sizeInfo.sqft * 3.5) // ~$3.50/sqft in San Diego
-    : config.sqft 
-    ? Math.round(config.sqft * 3.5)
-    : 0;
+  const estimatedRent = calculateADURent(config);
 
   return (
     <div className="space-y-6 sticky top-40">

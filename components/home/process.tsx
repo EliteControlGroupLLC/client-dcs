@@ -10,49 +10,9 @@ import {
   ArrowRight,
 } from "lucide-react";
 import { useScrollAnimation, useStaggeredAnimation } from "@/hooks/use-scroll-animation";
+import { PROCESS_STEPS } from "@/lib/data/site-data";
 
-const steps = [
-  {
-    number: "01",
-    icon: Laptop,
-    title: "Design Your Project & Get Pricing",
-    description:
-      "Use our online planning tools to explore what you can build on your property. Choose your project type, layout, size, and style to see realistic pricing and project possibilities.",
-    timeline: "1 Day",
-  },
-  {
-    number: "02",
-    icon: Wallet,
-    title: "Funding & Pre-Approval",
-    description:
-      "Once you understand the project scope and estimated cost, we help review funding options and confirm your project budget. This step ensures the project is financially ready to move forward.",
-    timeline: "2–3 Days",
-  },
-  {
-    number: "03",
-    icon: FileCheck,
-    title: "Design, Engineering & Permits",
-    description:
-      "Our team prepares architectural plans, coordinates engineering, and manages the permitting process with the city. We guide the project through approvals so construction can begin.",
-    timeline: "6–9 Months",
-  },
-  {
-    number: "04",
-    icon: HardHat,
-    title: "Construction",
-    description:
-      "Our construction team builds your project using professional project management, organized scheduling, and clear progress updates.",
-    timeline: "3–4 Months",
-  },
-  {
-    number: "05",
-    icon: Key,
-    title: "Final Walkthrough",
-    description:
-      "We walk through the completed project with you, address final details, and ensure everything meets expectations before delivering the finished space.",
-    timeline: "About 1 Week",
-  },
-];
+const stepIcons = [Laptop, Wallet, FileCheck, HardHat, Key];
 
 export function Process() {
   const { ref: headerRef, isVisible: headerVisible } = useScrollAnimation();
@@ -100,7 +60,9 @@ export function Process() {
           <div className="hidden lg:block absolute top-[60px] left-[10%] right-[10%] h-0.5 bg-gradient-to-r from-primary/30 via-primary/60 to-primary/30" />
 
           <div ref={stepsRef} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6">
-            {steps.map((step, index) => (
+            {PROCESS_STEPS.map((step, index) => {
+              const Icon = stepIcons[index];
+              return (
               <div
                 key={step.number}
                 className="relative"
@@ -110,7 +72,7 @@ export function Process() {
                 <div className={`bg-white/10 backdrop-blur-lg border border-white/20 rounded-2xl p-6 h-full hover:bg-white/15 hover:border-white/30 transition-all duration-500 ${stepsVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"}`}>
                   {/* Icon circle */}
                   <div className="relative z-10 w-14 h-14 rounded-full bg-primary/20 border-2 border-primary flex items-center justify-center mb-5 mx-auto">
-                    <step.icon className="h-6 w-6 text-primary" />
+                    <Icon className="h-6 w-6 text-primary" />
                   </div>
 
                   <div className="text-center">
@@ -137,13 +99,13 @@ export function Process() {
                 </div>
 
                 {/* Arrow connector - mobile/tablet */}
-                {index < steps.length - 1 && (
+                {index < PROCESS_STEPS.length - 1 && (
                   <div className="flex justify-center py-4 lg:hidden">
                     <ArrowRight className="h-5 w-5 text-primary/50 rotate-90 md:rotate-0" />
                   </div>
                 )}
               </div>
-            ))}
+            )})}
           </div>
         </div>
       </div>

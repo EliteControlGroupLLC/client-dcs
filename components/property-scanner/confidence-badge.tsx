@@ -84,7 +84,7 @@ export function ConfidenceBadge({ status, confidence, sources, size = "sm" }: Co
             />
           </div>
           <p className="text-[10px] text-muted-foreground">
-            <span className="font-medium">Source:</span> {sources.join(" + ")}
+            Confidence reflects how strongly this field was cross-checked across available records and property signals.
           </p>
           <div className="absolute top-full left-4 -mt-px">
             <div className="w-2 h-2 bg-white border-r border-b border-border transform rotate-45 -translate-y-1" />

@@ -20,7 +20,7 @@ const defaultConfig: Partial<ADUConfiguration> = {
   existingStructure: true,
   aduType: "detached",
   size: "1-bed",
-  sqft: 600,
+  sqft: 500,
   bedrooms: 1,
   bathrooms: 1,
   layout: "open",

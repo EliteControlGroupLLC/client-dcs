@@ -7,26 +7,20 @@ import { ArrowRight, ArrowLeft, Ruler, Check } from "lucide-react";
 import { ADU_SIZES } from "@/lib/types/adu";
 import { formatCurrency } from "@/lib/utils";
 
-const sizeOptions = [
-  {
-    id: "studio",
-    ...ADU_SIZES.studio,
-    popular: false,
-  },
-  {
-    id: "1-bed",
-    ...ADU_SIZES["1-bed"],
-    popular: true,
-  },
-  {
-    id: "2-bed",
-    ...ADU_SIZES["2-bed"],
-    popular: false,
-  },
-];
-
 export function StepSize() {
-  const { config, updateConfig, nextStep, prevStep } = useADU();
+  const { config, updateConfig, nextStep, prevStep, pricing } = useADU();
+
+  const sizeOptions = (
+    config.aduType === "garage-conversion"
+      ? [{ id: "studio", ...ADU_SIZES.studio, popular: true }]
+      : config.aduType === "attached"
+        ? [{ id: "1-bed", ...ADU_SIZES["1-bed"], popular: true }]
+        : [
+            { id: "studio", ...ADU_SIZES.studio, popular: false },
+            { id: "1-bed", ...ADU_SIZES["1-bed"], popular: true },
+            { id: "2-bed", ...ADU_SIZES["2-bed"], popular: false },
+          ]
+  );
 
   const handleSizeSelect = (sizeId: string) => {
     const sizeInfo = sizeOptions.find((s) => s.id === sizeId);
@@ -44,8 +38,8 @@ export function StepSize() {
     updateConfig({
       size: "custom",
       sqft: sqft,
-      bedrooms: sqft <= 400 ? 0 : sqft <= 600 ? 1 : 2,
-      bathrooms: sqft <= 600 ? 1 : 2,
+      bedrooms: sqft <= 400 ? 0 : sqft <= 650 ? 1 : sqft <= 1000 ? 2 : 3,
+      bathrooms: sqft <= 750 ? 1 : 2,
     });
   };
 
@@ -130,7 +124,7 @@ export function StepSize() {
         {config.size === "custom" && config.sqft && config.sqft > 0 && (
           <div className="mt-4 pt-4 border-t border-border">
             <p className="text-sm text-muted-foreground">
-              Estimated price: <span className="font-bold text-primary">{formatCurrency(config.sqft * 427)}</span>
+              Estimated price: <span className="font-bold text-primary">{formatCurrency(pricing.base)}</span>
             </p>
           </div>
         )}
@@ -146,11 +140,11 @@ export function StepSize() {
           </li>
           <li className="flex items-center gap-2">
             <Check className="h-4 w-4 text-primary" />
-            1 Bedroom (600 sq ft): Ideal for long-term tenants or guests
+            1 Bedroom (500 sq ft): Ideal for long-term tenants or guests
           </li>
           <li className="flex items-center gap-2">
             <Check className="h-4 w-4 text-primary" />
-            2 Bedroom (800 sq ft): Great for families or maximum rental income
+            2 Bedroom (750 sq ft): Great for families or stronger long-term rental use
           </li>
         </ul>
       </div>

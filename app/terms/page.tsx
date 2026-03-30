@@ -1,3 +1,5 @@
+import { COMPANY_INFO } from "@/lib/data/site-data";
+
 export default function TermsPage() {
   return (
     <div className="min-h-screen">
@@ -53,11 +55,11 @@ export default function TermsPage() {
           <h2 className="text-2xl font-bold text-secondary mb-4">Contact</h2>
           <p className="text-muted-foreground mb-6">
             For questions about these terms, contact us at:<br />
-            <a href="mailto:Office@distinctcsolutions.com" className="text-primary hover:underline">
-              Office@distinctcsolutions.com
+            <a href={`mailto:${COMPANY_INFO.email}`} className="text-primary hover:underline">
+              {COMPANY_INFO.email}
             </a><br />
-            <a href="tel:+18588330705" className="text-primary hover:underline">
-              +1 (858) 833-0705
+            <a href={`tel:${COMPANY_INFO.phoneHref}`} className="text-primary hover:underline">
+              {COMPANY_INFO.phone}
             </a>
           </p>
         </div>

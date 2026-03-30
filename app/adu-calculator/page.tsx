@@ -1,22 +1,23 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { ArrowRight, Calculator } from "lucide-react";
+import { estimateAduPriceRange, getRentEstimate } from "@/lib/data/site-data";
 
 const aduTypes = [
-  { label: "Detached ADU (New Build)", baseCost: 175000, perSqFt: 350 },
-  { label: "Attached ADU", baseCost: 150000, perSqFt: 300 },
-  { label: "Garage Conversion", baseCost: 120000, perSqFt: 250 },
-  { label: "Junior ADU (JADU)", baseCost: 80000, perSqFt: 200 },
+  { label: "Detached ADU", type: "detached", bedrooms: 1, bathrooms: 1 },
+  { label: "Attached ADU", type: "attached", bedrooms: 1, bathrooms: 1 },
+  { label: "Garage Conversion", type: "garage-conversion", bedrooms: 0, bathrooms: 1, garageStalls: 2 as const },
+  { label: "Two-Story ADU", type: "two-story", bedrooms: 4, bathrooms: 2, stories: 2 as const },
 ];
 
 const finishLevels = [
   { label: "Standard", multiplier: 1.0 },
-  { label: "Premium", multiplier: 1.25 },
-  { label: "Luxury", multiplier: 1.5 },
+  { label: "Premium", multiplier: 1.08 },
+  { label: "Luxury", multiplier: 1.15 },
 ];
 
 export default function ADUCalculatorPage() {
@@ -26,8 +27,31 @@ export default function ADUCalculatorPage() {
 
   const selected = aduTypes[type];
   const finishLevel = finishLevels[finish];
-  const estimate = Math.round((selected.baseCost + (size - 400) * selected.perSqFt) * finishLevel.multiplier);
-  const monthlyRent = Math.round(size * 4.5);
+  const adjustedSize = selected.type === "garage-conversion" ? 400 : selected.type === "attached" ? 500 : selected.type === "two-story" ? 1200 : size;
+  const derivedBedrooms = useMemo(() => {
+    if (selected.type === "garage-conversion") return 0;
+    if (selected.type === "attached") return 1;
+    if (selected.type === "two-story") return 4;
+    if (adjustedSize <= 400) return 0;
+    if (adjustedSize <= 650) return 1;
+    if (adjustedSize <= 1000) return 2;
+    return 3;
+  }, [adjustedSize, selected.type]);
+  const derivedBathrooms = selected.type === "two-story" || adjustedSize >= 850 ? 2 : 1;
+  const estimateRange = estimateAduPriceRange({
+    sqFt: adjustedSize,
+    type: selected.type,
+    bedrooms: derivedBedrooms,
+    bathrooms: derivedBathrooms,
+    stories: selected.stories ?? 1,
+    garageStalls: selected.garageStalls,
+  });
+  const estimateLow = Math.round(estimateRange.low * finishLevel.multiplier);
+  const estimateHigh = Math.round(estimateRange.high * finishLevel.multiplier);
+  const rentEstimate = getRentEstimate(adjustedSize, selected.type, derivedBedrooms, {
+    stories: selected.stories ?? 1,
+    garageStalls: selected.garageStalls,
+  });
 
   return (
     <div className="min-h-screen">
@@ -74,19 +98,20 @@ export default function ADUCalculatorPage() {
 
               <div>
                 <label className="block text-sm font-semibold text-secondary mb-3">
-                  Size: {size} sq ft
+                  Size: {adjustedSize} sq ft
                 </label>
                 <input
                   type="range"
-                  min={200}
+                  min={400}
                   max={1200}
                   step={50}
-                  value={size}
+                  value={adjustedSize}
                   onChange={(e) => setSize(Number(e.target.value))}
+                  disabled={selected.type === "garage-conversion" || selected.type === "attached" || selected.type === "two-story"}
                   className="w-full accent-primary"
                 />
                 <div className="flex justify-between text-xs text-muted-foreground mt-1">
-                  <span>200 sq ft</span>
+                  <span>400 sq ft</span>
                   <span>1,200 sq ft</span>
                 </div>
               </div>
@@ -118,15 +143,17 @@ export default function ADUCalculatorPage() {
                   <Calculator className="h-12 w-12 text-primary mx-auto mb-4" />
                   <p className="text-white/70 text-sm mb-2">Estimated Project Cost</p>
                   <p className="text-4xl md:text-5xl font-bold text-primary mb-2">
-                    ${estimate.toLocaleString()}
+                    ${estimateLow.toLocaleString()}-${estimateHigh.toLocaleString()}
                   </p>
                   <p className="text-white/50 text-sm mb-6">
-                    {selected.label} &bull; {size} sq ft &bull; {finishLevel.label}
+                    {selected.label} &bull; {adjustedSize} sq ft &bull; {finishLevel.label}
                   </p>
 
                   <div className="border-t border-white/10 pt-6 mb-6">
                     <p className="text-white/70 text-sm mb-1">Estimated Monthly Rental Income</p>
-                    <p className="text-2xl font-bold text-white">${monthlyRent.toLocaleString()}/mo</p>
+                    <p className="text-2xl font-bold text-white">
+                      ${rentEstimate.low.toLocaleString()}-${rentEstimate.high.toLocaleString()}/mo
+                    </p>
                   </div>
 
                   <p className="text-xs text-white/40 mb-6">

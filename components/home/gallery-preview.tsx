@@ -7,14 +7,7 @@ import { ArrowRight, ExternalLink } from "lucide-react";
 import { useScrollAnimation } from "@/hooks/use-scroll-animation";
 import { GALLERY_PROJECTS, COMPANY_INFO } from "@/lib/data/site-data";
 
-const projects = GALLERY_PROJECTS.map(p => ({
-  id: parseInt(p.id),
-  title: p.title,
-  location: p.location,
-  sqft: p.sqft,
-  type: p.type,
-  image: p.image,
-}));
+const projects = GALLERY_PROJECTS.slice(0, 6);
 
 const projectStats = [
   { value: COMPANY_INFO.stats.projectsCompleted, label: "Projects Completed" },
@@ -93,15 +86,20 @@ export function GalleryPreview() {
               {/* Project info with glass effect */}
               <div className="absolute inset-0 p-6 flex flex-col justify-end">
                 {/* Type badge */}
-                <span className="text-xs font-semibold text-primary bg-white/10 backdrop-blur-sm w-fit px-3 py-1.5 rounded-full mb-3 border border-white/10">
-                  {project.type}
-                </span>
+                  <span className="text-xs font-semibold text-primary bg-white/10 backdrop-blur-sm w-fit px-3 py-1.5 rounded-full mb-3 border border-white/10">
+                    {project.type}
+                  </span>
+                  {project.imageStatus === "pending-replacement" && (
+                    <span className="text-[10px] font-semibold uppercase tracking-[0.2em] text-white/80 bg-secondary/60 backdrop-blur-sm w-fit px-3 py-1.5 rounded-full mb-3 border border-white/10">
+                      Replacement image pending
+                    </span>
+                  )}
                 
                 <h3 className="text-lg font-bold text-white mb-1 group-hover:text-primary transition-colors">
                   {project.title}
                 </h3>
                 
-                <div className="flex items-center justify-between">
+                <div className="flex items-center justify-between gap-4">
                   <p className="text-sm text-white/70">
                     {project.location} • {project.sqft}
                   </p>
@@ -109,6 +107,11 @@ export function GalleryPreview() {
                     <ExternalLink className="h-4 w-4 text-white group-hover:text-primary transition-colors" />
                   </div>
                 </div>
+                {project.imageNote && (
+                  <p className="text-xs text-white/55 mt-2 max-w-sm">
+                    {project.imageNote}
+                  </p>
+                )}
               </div>
             </Link>
           ))}

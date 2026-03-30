@@ -8,10 +8,9 @@ import {
   Award, 
   Headphones,
   CheckCircle,
-  Star
 } from "lucide-react";
 import { useScrollAnimation, useStaggeredAnimation } from "@/hooks/use-scroll-animation";
-import { COMPANY_INFO } from "@/lib/data/site-data";
+import { COMPANY_INFO, getYearsExperience } from "@/lib/data/site-data";
 
 const features = [
   {
@@ -46,31 +45,15 @@ const features = [
   },
 ];
 
-const testimonial = {
-  quote: "Our ADU project was seamless from start to finish. The transparent pricing and professional team exceeded our expectations. We're now earning $2,800/month in rental income.",
-  author: "Sarah & Michael Thompson",
-  location: "La Mesa, CA",
-  project: "650 sq ft ADU",
-  rating: 5,
-};
-
-const satisfactionStats = [
-  { label: "Communication", value: 100 },
-  { label: "Quality of Work", value: 99 },
-  { label: "On-Time Delivery", value: 95 },
-  { label: "Would Recommend", value: 100 },
-];
-
 const bottomMetrics = [
   `${COMPANY_INFO.stats.projectsCompleted} Projects`,
-  `${COMPANY_INFO.yearsExperience}+ Years Experience`,
+  `${getYearsExperience()}+ Years Experience`,
   `${COMPANY_INFO.stats.valueDelivered} Project Value Delivered`,
 ];
 
 export function WhyChooseUs() {
   const { ref: headerRef, isVisible: headerVisible } = useScrollAnimation();
   const { ref: gridRef, isVisible: gridVisible, getDelay } = useStaggeredAnimation(100);
-  const { ref: testimonialRef, isVisible: testimonialVisible } = useScrollAnimation();
 
   return (
     <section className="py-24 bg-secondary text-white relative overflow-hidden">
@@ -93,8 +76,8 @@ export function WhyChooseUs() {
             The Distinct Construction Solutions Difference
           </h2>
           <p className="text-lg text-white/70 leading-relaxed">
-            We're not just contractors — we're your partners in bringing your vision to life. 
-            Here's what sets Distinct Construction Solutions apart.
+            Premium residential work depends on tighter systems, better planning, and cleaner execution.
+            That is the standard we build around from the first pricing conversation through final delivery.
           </p>
         </div>
 
@@ -115,48 +98,35 @@ export function WhyChooseUs() {
           ))}
         </div>
 
-        {/* Testimonial */}
-        <div ref={testimonialRef} className={`bg-white/10 backdrop-blur-sm rounded-3xl p-8 lg:p-12 border border-white/10 transition-all duration-700 delay-200 ${testimonialVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"}`}>
-          <div className="grid lg:grid-cols-5 gap-8 items-center">
-            <div className="lg:col-span-3">
-              <div className="flex gap-1 mb-4">
-                {Array.from({ length: testimonial.rating }).map((_, i) => (
-                  <Star key={i} className="h-5 w-5 text-primary fill-primary" />
-                ))}
-              </div>
-              <blockquote className="text-xl lg:text-2xl font-medium leading-relaxed mb-6">
-                "{testimonial.quote}"
-              </blockquote>
-              <div className="flex items-center gap-4">
-                <div className="w-12 h-12 rounded-full bg-primary/20 flex items-center justify-center">
-                  <span className="text-primary font-bold">ST</span>
-                </div>
-                <div>
-                  <p className="font-semibold">{testimonial.author}</p>
-                  <p className="text-sm text-white/60">{testimonial.location} — {testimonial.project}</p>
-                </div>
-              </div>
+        <div className="bg-white/10 backdrop-blur-sm rounded-3xl p-8 lg:p-12 border border-white/10">
+          <div className="grid gap-8 lg:grid-cols-[1.4fr_1fr]">
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-[0.24em] text-primary mb-3">
+                Client Experience Standard
+              </p>
+              <h3 className="text-2xl lg:text-3xl font-bold mb-4">
+                Built to feel organized before construction even starts
+              </h3>
+              <p className="text-white/70 leading-relaxed max-w-2xl">
+                Homeowners choose DCS when they want more than a bid and a promise. We build the
+                project around scope clarity, permit readiness, premium detailing, and consistent
+                communication so the experience feels controlled from the start.
+              </p>
             </div>
-            <div className="lg:col-span-2">
-              <div className="bg-white/10 rounded-2xl p-6 border border-white/10">
-                <h4 className="font-semibold mb-4 text-center">Client Satisfaction</h4>
-                <div className="space-y-4">
-                  {satisfactionStats.map((stat) => (
-                    <div key={stat.label}>
-                      <div className="flex justify-between text-sm mb-1">
-                        <span className="text-white/70">{stat.label}</span>
-                        <span className="font-medium">{stat.value}%</span>
-                      </div>
-                      <div className="h-2 bg-white/10 rounded-full overflow-hidden">
-                        <div 
-                          className="h-full bg-primary rounded-full transition-all duration-1000"
-                          style={{ width: `${stat.value}%` }}
-                        />
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
+            <div className="rounded-2xl border border-white/10 bg-white/8 p-6">
+              <p className="text-sm font-semibold text-white mb-3">Real review integration</p>
+              <p className="text-sm leading-relaxed text-white/65">
+                Verified Google and Yelp review excerpts are being curated for client approval. No
+                placeholder quotes are shown here until approved copy is supplied.
+              </p>
+              <a
+                href="https://www.google.com/search?q=Distinct+Construction+Solutions+Chula+Vista+reviews"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="mt-5 inline-flex items-center gap-2 text-sm font-semibold text-primary hover:text-primary-light transition-colors"
+              >
+                View public review profiles
+              </a>
             </div>
           </div>
         </div>

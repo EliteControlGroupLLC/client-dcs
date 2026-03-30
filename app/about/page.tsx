@@ -6,15 +6,14 @@ import {
   Clock, 
   Shield,
   CheckCircle,
-  Star
 } from "lucide-react";
 import Link from "next/link";
-import { COMPANY_INFO } from "@/lib/data/site-data";
+import { COMPANY_INFO, getYearsExperience } from "@/lib/data/site-data";
 
 const stats = [
   { value: COMPANY_INFO.stats.projectsCompleted, label: "Projects Completed" },
-  { value: `${COMPANY_INFO.yearsExperience}+`, label: "Years in Construction" },
-  { value: "98%", label: "Client Satisfaction" },
+  { value: `${getYearsExperience()}+`, label: "Years in Construction" },
+  { value: COMPANY_INFO.stats.clientSatisfaction, label: "Client Satisfaction" },
   { value: COMPANY_INFO.stats.adusBuilt, label: "ADUs Built" },
 ];
 
@@ -41,30 +40,6 @@ const values = [
   },
 ];
 
-const testimonials = [
-  {
-    name: "Sarah M.",
-    location: "La Jolla",
-    project: "ADU Construction",
-    quote: "The team built an incredible ADU in our backyard. They were professional, communicative, and the quality exceeded our expectations. Now we have rental income that covers our mortgage!",
-    rating: 5,
-  },
-  {
-    name: "Michael R.",
-    location: "North Park",
-    project: "Kitchen Remodel",
-    quote: "From design to completion, the process was seamless. They helped us navigate permits and kept the project on budget. Our new kitchen is absolutely stunning.",
-    rating: 5,
-  },
-  {
-    name: "Jennifer L.",
-    location: "Pacific Beach",
-    project: "Custom Homes",
-    quote: "Building our dream home was a big decision. The team made it easy with their transparent pricing and expert guidance. We couldn&apos;t be happier with the result.",
-    rating: 5,
-  },
-];
-
 export default function AboutPage() {
   return (
     <div className="min-h-screen">
@@ -73,11 +48,10 @@ export default function AboutPage() {
         <div className="container mx-auto px-4">
           <div className="max-w-3xl">
             <h1 className="text-4xl md:text-5xl font-bold mb-6">
-              {COMPANY_INFO.yearsExperience} Years in the Field. Built Different Since Day One.
+              {getYearsExperience()}+ years of field experience, design-build discipline, and premium residential execution.
             </h1>
             <p className="text-xl text-white/80 mb-8">
-              Distinct Construction Solutions is a San Diego design-build firm founded by Jordan Talavera in 2022 &mdash; 
-              backed by over a decade of hands-on construction experience and a commitment to doing things the right way.
+              Distinct Construction Solutions is a Chula Vista-based design-build firm shaped by hands-on construction experience that began in 2014 and matured into a more disciplined way to deliver residential projects across San Diego County.
             </p>
           </div>
         </div>
@@ -120,10 +94,9 @@ export default function AboutPage() {
                 company that did things differently.
               </p>
               <p>
-                In 2022, Jordan founded Distinct Construction Solutions. Not as another general contractor, 
-                but as a design-build firm with real systems in place: fixed-price contracts, dedicated 
-                project management, weekly client updates, and a process designed around transparency from 
-                the first call to the final walkthrough.
+                Distinct Construction Solutions was built around a different operating standard: fixed-price
+                contracts where the scope is ready, dedicated project management, weekly client updates,
+                and a process designed around transparency from the first call to the final walkthrough.
               </p>
               <p>
                 Every project we&apos;ve taken on has made us sharper. Early on, we learned that clear 
@@ -203,28 +176,22 @@ export default function AboutPage() {
       <section className="py-20 bg-muted">
         <div className="container mx-auto px-4">
           <h2 className="text-3xl md:text-4xl font-bold text-secondary text-center mb-12">
-            What Our Clients Say
+            Verified Reviews
           </h2>
-          <div className="grid md:grid-cols-3 gap-8">
-            {testimonials.map((testimonial) => (
-              <Card key={testimonial.name}>
-                <CardContent className="p-6">
-                  <div className="flex gap-1 mb-4">
-                    {Array.from({ length: testimonial.rating }).map((_, i) => (
-                      <Star key={i} className="h-5 w-5 fill-yellow-400 text-yellow-400" />
-                    ))}
-                  </div>
-                  <p className="text-muted-foreground mb-4">&quot;{testimonial.quote}&quot;</p>
-                  <div>
-                    <p className="font-semibold text-secondary">{testimonial.name}</p>
-                    <p className="text-sm text-muted-foreground">
-                      {testimonial.location} • {testimonial.project}
-                    </p>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
+          <Card className="max-w-4xl mx-auto">
+            <CardContent className="p-8 md:p-10 text-center">
+              <p className="text-sm font-semibold uppercase tracking-[0.24em] text-primary mb-3">
+                Manual approval required
+              </p>
+              <p className="text-lg text-secondary font-semibold mb-3">
+                Curated Google and Yelp review excerpts are still awaiting final approved copy.
+              </p>
+              <p className="text-muted-foreground max-w-2xl mx-auto">
+                This site does not publish fabricated testimonials. Once approved review text is supplied,
+                it can be inserted here and across the rest of the site in a consistent format.
+              </p>
+            </CardContent>
+          </Card>
         </div>
       </section>
 
