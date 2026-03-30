@@ -124,42 +124,6 @@ export default function RootLayout({
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
         />
 
-        <link rel="canonical" href={SITE_URL} />
-
-        <meta
-          property="og:title"
-          content="Distinct Construction Solutions | San Diego ADU & Home Construction"
-        />
-        <meta
-          property="og:description"
-          content="San Diego's premier design-build construction company specializing in ADUs, custom homes, remodeling, and renovations."
-        />
-        <meta property="og:type" content="website" />
-        <meta property="og:url" content={SITE_URL} />
-        <meta property="og:image" content={`${SITE_URL}/og-image.png`} />
-        <meta property="og:image:width" content="1200" />
-        <meta property="og:image:height" content="630" />
-        <meta
-          property="og:image:alt"
-          content="Distinct Construction Solutions - San Diego ADU & Home Builder"
-        />
-        <meta property="og:site_name" content="Distinct Construction Solutions" />
-        <meta property="og:locale" content="en_US" />
-
-        <meta name="twitter:card" content="summary_large_image" />
-        <meta
-          name="twitter:title"
-          content="Distinct Construction Solutions"
-        />
-        <meta
-          name="twitter:description"
-          content="San Diego's premier design-build construction company"
-        />
-        <meta
-          name="twitter:image"
-          content={`${SITE_URL}/og-image.png`}
-        />
-
         <script
           dangerouslySetInnerHTML={{
             __html: `(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
