@@ -847,20 +847,20 @@ export const GALLERY_PROJECTS: GalleryProject[] = [
     imageStatus: "pending-replacement",
     imageNote: "Approved replacement custom home image still required before this project can be considered visually complete.",
     description:
-      "A 3,200 sq ft custom home in Coronado planned around clean California architecture, strong indoor-outdoor living, and a premium finish package. Approved replacement imagery is still needed for this gallery item.",
+      "A 3,200 sq ft custom home in Coronado featuring modern California architecture, open living spaces, and a premium finish package. Approved replacement imagery is still needed before this gallery item is visually complete.",
   },
   {
     id: "6",
     category: "bathroom",
     title: "Bathroom Renovation",
-    location: "Del Mar, CA",
+    location: "Encinitas, CA",
     sqft: "Bathroom renovation",
     type: "Remodel",
     image: "/images/projects/pending-gallery-image.svg",
     imageStatus: "pending-replacement",
     imageNote: "Approved replacement bathroom image still required before this project can be considered visually complete.",
     description:
-      "A bathroom renovation centered on cleaner detailing, upgraded surfaces, and a stronger spa feel. Approved replacement imagery is still needed for this gallery slot.",
+      "A complete bathroom renovation with custom tile work, a walk-in shower, modern vanity, and updated fixtures. Approved replacement imagery is still needed before this gallery item is visually complete.",
   },
 ];
 
