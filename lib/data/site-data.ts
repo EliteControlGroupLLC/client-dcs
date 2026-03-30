@@ -415,7 +415,7 @@ export const GALLERY_PROJECTS: GalleryProject[] = [
     location: "Coronado, CA",
     sqft: "3,200 sq ft",
     type: "Custom Homes",
-    image: "/images/projects/bedroom-interior.webp",
+    image: "/images/projects/custom-home-coronado.jpg",
     description: "A custom-built 3,200 sq ft home featuring modern California architecture, open living spaces, and premium finishes throughout. Designed for comfortable family living with attention to every detail.",
   },
   {
