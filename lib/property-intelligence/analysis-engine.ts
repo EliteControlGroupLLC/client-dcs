@@ -107,18 +107,14 @@ export async function analyzeProperty(address: string): Promise<PropertyAnalysis
       console.error(`[PROVIDER-ERROR] Zoneomics: no zoning data returned for (${geocoded.lat}, ${geocoded.lng})`);
     }
     if (msFootprints?.available) {
-      console.log(`[MS-FOOTPRINTS] Found ${msFootprints.buildings.length} buildings, total ${msFootprints.totalFootprintSqFt} sq ft`);
+      console.log(
+        `[MS-FOOTPRINTS] Found ${msFootprints.buildings.length} buildings, total ${msFootprints.totalFootprintSqFt} sq ft`
+      );
     }
   }
 
   // Step 3: Resolve property data from all sources (ATTOM + OSM + estimates)
-  const resolved = resolvePropertyData(
-    address,
-    geocoded?.formattedAddress,
-    slopeData,
-    osmData,
-    attomData
-  );
+  const resolved = resolvePropertyData(address, geocoded?.formattedAddress, slopeData, osmData, attomData);
 
   const { intelligence } = resolved;
   let { rawLotSizeSqFt, rawFootprintSqFt } = resolved;
@@ -143,7 +139,9 @@ export async function analyzeProperty(address: string): Promise<PropertyAnalysis
   for (const adj of sanityResult.adjustments) {
     if (adj.field === "footprintSqFt") {
       rawFootprintSqFt = adj.adjustedValue;
-      console.warn(`[SANITY-CHECK] Adjusted footprint: ${adj.originalValue} -> ${adj.adjustedValue} (${adj.reason})`);
+      console.warn(
+        `[SANITY-CHECK] Adjusted footprint: ${adj.originalValue} -> ${adj.adjustedValue} (${adj.reason})`
+      );
     }
   }
 
@@ -189,26 +187,24 @@ export async function analyzeProperty(address: string): Promise<PropertyAnalysis
   // SURGICAL FIX: Intelligent merge of OSM + Microsoft footprints (not OSM-only blocker)
   let footprintMergeNotes: string[] = [];
   try {
-    const rawOsmBuildings = (osmData?.parcel?.buildings || []).map(b => ({
+    const rawOsmBuildings = (osmData?.parcel?.buildings || []).map((b) => ({
       areaSqFt: b.areaSqFt,
       buildingType: b.buildingType,
       nodes: b.nodes,
       levels: b.levels,
     }));
 
-    const rawMsBuildings = msFootprints?.available
-      ? msFootprintsToOSMFormat(msFootprints.buildings)
-      : [];
+    const rawMsBuildings = msFootprints?.available ? msFootprintsToOSMFormat(msFootprints.buildings) : [];
 
     // Intelligent merge: both sources contribute, best polygons selected
-    const mergedFootprints = mergeFootprintSources(
-      rawOsmBuildings,
-      rawMsBuildings,
-      rawLotSizeSqFt
-    );
+    const mergedFootprints = mergeFootprintSources(rawOsmBuildings, rawMsBuildings, rawLotSizeSqFt);
     const osmBuildings = mergedFootprints.buildings;
     footprintMergeNotes = mergedFootprints.mergeNotes;
-    console.log(`[FOOTPRINT-MERGE] Source: ${mergedFootprints.source}, buildings: ${osmBuildings.length}, notes: ${mergedFootprints.mergeNotes.join('; ')}`);
+    console.log(
+      `[FOOTPRINT-MERGE] Source: ${mergedFootprints.source}, buildings: ${osmBuildings.length}, notes: ${mergedFootprints.mergeNotes.join(
+        "; "
+      )}`
+    );
 
     geometryAnalysis = analyzePropertyGeometry({
       lat: geocoded?.lat || 0,
@@ -227,10 +223,7 @@ export async function analyzeProperty(address: string): Promise<PropertyAnalysis
       separationFt: profile.separation.minDistanceFromPrimaryHomeFt,
     });
 
-    const geoSanity = runGeometrySanityChecks(
-      geometryAnalysis,
-      attomData?.homeAreaSqFt || intelligence.homeAreaSqFt.value
-    );
+    const geoSanity = runGeometrySanityChecks(geometryAnalysis, attomData?.homeAreaSqFt || intelligence.homeAreaSqFt.value);
 
     (geometryAnalysis as GeometryAnalysis & { sanityChecks?: typeof geoSanity }).sanityChecks = geoSanity;
 
@@ -241,7 +234,9 @@ export async function analyzeProperty(address: string): Promise<PropertyAnalysis
       rawLotSizeSqFt = geometryAnalysis.areaSummary.parcelSqFt;
     }
 
-    console.log(`[GEOMETRY-ENGINE] Status: ${geometryAnalysis.geometryStatus}, confidence: ${geometryAnalysis.geometryConfidence}%, structures: ${geometryAnalysis.structures.length}`);
+    console.log(
+      `[GEOMETRY-ENGINE] Status: ${geometryAnalysis.geometryStatus}, confidence: ${geometryAnalysis.geometryConfidence}%, structures: ${geometryAnalysis.structures.length}`
+    );
   } catch (err) {
     console.error("[GEOMETRY-ENGINE] Failed to run geometry analysis:", err);
   }
@@ -253,11 +248,11 @@ export async function analyzeProperty(address: string): Promise<PropertyAnalysis
       const estLotWidth = attomData?.lotWidth || Math.round(Math.sqrt(rawLotSizeSqFt * 0.5));
       const estLotDepth = attomData?.lotDepth || Math.round(rawLotSizeSqFt / estLotWidth);
       const estAduFootprint = geometryAnalysis?.bestAduZone?.areaSqFt || 800;
-      lidarTerrain = await analyzeLiDARTerrain(
-        geocoded.lat, geocoded.lng, estLotWidth, estLotDepth, estAduFootprint
-      );
+      lidarTerrain = await analyzeLiDARTerrain(geocoded.lat, geocoded.lng, estLotWidth, estLotDepth, estAduFootprint);
       if (lidarTerrain.lidarAvailable) {
-        console.log(`[LIDAR-TERRAIN] LiDAR data available, ${lidarTerrain.terrainProfile.sampleCount} samples, slope: ${lidarTerrain.slopeAnalysis.averageSlopePercent}%`);
+        console.log(
+          `[LIDAR-TERRAIN] LiDAR data available, ${lidarTerrain.terrainProfile.sampleCount} samples, slope: ${lidarTerrain.slopeAnalysis.averageSlopePercent}%`
+        );
       }
     } catch (err) {
       console.error("[LIDAR-TERRAIN] Failed to run LiDAR terrain analysis:", err);
@@ -337,8 +332,10 @@ export async function analyzeProperty(address: string): Promise<PropertyAnalysis
 
   // GEOMETRY ASSERTION: If polygon geometry exists with valid zones,
   // user-facing buildable area MUST come from polygon, not rectangle.
-  if (geometryAnalysis && geometryAnalysis.leftoverZones.length > 0 && finalBuildability.geometryMethodUsed === 'rectangle-fallback') {
-    console.error('[GEOMETRY-ASSERTION] BUG: Polygon geometry available with valid zones but rectangle fallback was used. This should not happen.');
+  if (geometryAnalysis && geometryAnalysis.leftoverZones.length > 0 && finalBuildability.geometryMethodUsed === "rectangle-fallback") {
+    console.error(
+      "[GEOMETRY-ASSERTION] BUG: Polygon geometry available with valid zones but rectangle fallback was used. This should not happen."
+    );
   }
 
   // The buildable object used downstream — driven by polygon when available
@@ -347,9 +344,10 @@ export async function analyzeProperty(address: string): Promise<PropertyAnalysis
     requiredPropertyLineSetbackFt: rectangleFallback.requiredPropertyLineSetbackFt,
     estimatedBuildableEnvelopeSqFt: finalBuildability.totalBuildableAreaSqFt,
     oneStoryPotential: `Up to ${finalBuildability.totalBuildableAreaSqFt.toLocaleString()} sq ft (${finalBuildability.geometryMethodUsed})`,
-    twoStoryPotential: finalBuildability.totalBuildableAreaSqFt > 400
-      ? `Up to ${Math.min(1200, finalBuildability.totalBuildableAreaSqFt * 1.5).toLocaleString()} sq ft estimated depending on design/review`
-      : 'Limited — lot constraints may restrict two-story options',
+    twoStoryPotential:
+      finalBuildability.totalBuildableAreaSqFt > 400
+        ? `Up to ${Math.min(1200, finalBuildability.totalBuildableAreaSqFt * 1.5).toLocaleString()} sq ft estimated depending on design/review`
+        : "Limited — lot constraints may restrict two-story options",
   };
 
   // Step 6: Detect overlays (base detection + Zoneomics enrichment)
@@ -439,12 +437,12 @@ export async function analyzeProperty(address: string): Promise<PropertyAnalysis
   // This ensures all downstream outputs derive from the same recommendation
   const recommendations = generateRecommendations(rawLotSizeSqFt, openYard, finalBuildability.totalBuildableAreaSqFt);
   const bestRec = determineBestRecommendation(recommendations);
-  
+
   // Step 9b: Generate UNIFIED recommendation that drives rent and financial scenarios
   // This is the single source of truth for the entire page
   const zipCode = geocoded?.components?.zip || "92115"; // Default to standard San Diego zip if not found
   let unifiedRecommendation: UnifiedRecommendation | undefined;
-  
+
   try {
     unifiedRecommendation = await generateUnifiedRecommendation({
       address: formattedAddress,
@@ -461,7 +459,7 @@ export async function analyzeProperty(address: string): Promise<PropertyAnalysis
   } catch (err) {
     console.error("[UNIFIED-RECOMMENDATION] Failed to generate unified recommendation:", err);
   }
-  
+
   // Step 9c: Build rent estimates map from unified recommendation (for backward compatibility)
   // This ensures rentData aligns with the primary recommendation
   let rentEstimates: Map<string, RentEstimate> | undefined;
@@ -491,7 +489,7 @@ export async function analyzeProperty(address: string): Promise<PropertyAnalysis
 
   // Step 10: Generate financial scenarios from UNIFIED recommendation
   // This ensures financial preview matches the primary recommendation exactly
-  let financialScenarios = unifiedRecommendation 
+  let financialScenarios = unifiedRecommendation
     ? buildUnifiedFinancialScenarios(unifiedRecommendation)
     : generateFinancialScenarios(enhancedFeasibility, rentEstimates);
 
@@ -502,7 +500,7 @@ export async function analyzeProperty(address: string): Promise<PropertyAnalysis
       scenario.estimatedBuildCost = Math.round(scenario.estimatedBuildCost * multiplier);
       scenario.estimatedSoftCost = Math.round(scenario.estimatedSoftCost * multiplier);
       scenario.estimatedTotalCost = scenario.estimatedBuildCost + scenario.estimatedSoftCost;
-      scenario.estimatedDownPayment = Math.round(scenario.estimatedTotalCost * 0.20);
+      scenario.estimatedDownPayment = Math.round(scenario.estimatedTotalCost * 0.2);
       scenario.estimatedLoanAmount = scenario.estimatedTotalCost - scenario.estimatedDownPayment;
     }
   }
@@ -521,15 +519,13 @@ export async function analyzeProperty(address: string): Promise<PropertyAnalysis
         setbackLines: [],
         buildableEnvelope: geometryAnalysis.setbackEnvelope,
         detachedCandidateZones: geometryAnalysis.leftoverZones
-          .filter(z => z.suitableFor.some(s => s.includes("ADU")))
-          .map(z => z.polygon),
+          .filter((z) => z.suitableFor.some((s) => s.includes("ADU")))
+          .map((z) => z.polygon),
         attachedCandidateZones: [],
         conversionCandidateZones: geometryAnalysis.garageConversionCandidate
           ? [geometryAnalysis.garageConversionCandidate.polygon]
           : [],
-        uncertaintyShading: geometryAnalysis.geometryStatus === "rectangle-fallback"
-          ? geometryAnalysis.parcelPolygon
-          : null,
+        uncertaintyShading: geometryAnalysis.geometryStatus === "rectangle-fallback" ? geometryAnalysis.parcelPolygon : null,
         geometryConfidence: geometryAnalysis.geometryConfidence,
       };
     } else {
@@ -609,7 +605,9 @@ export async function analyzeProperty(address: string): Promise<PropertyAnalysis
   if (sanityResult.overallConfidenceAdjustment !== 0) {
     adjustedScore = Math.max(0, Math.min(100, adjustedScore + sanityResult.overallConfidenceAdjustment));
     if (sanityResult.overallConfidenceAdjustment < 0) {
-      additionalNegativeSignals.push(`Data quality issues detected (${sanityResult.checks.filter((c) => !c.passed).length} checks flagged)`);
+      additionalNegativeSignals.push(
+        `Data quality issues detected (${sanityResult.checks.filter((c) => !c.passed).length} checks flagged)`
+      );
     } else {
       additionalPositiveSignals.push("Multi-source data cross-validation passed");
     }
@@ -628,7 +626,8 @@ export async function analyzeProperty(address: string): Promise<PropertyAnalysis
     }
   }
 
-  const adjustedBand: "high" | "moderate" | "low" = adjustedScore >= 85 ? "high" : adjustedScore >= 65 ? "moderate" : "low";
+  const adjustedBand: "high" | "moderate" | "low" =
+    adjustedScore >= 85 ? "high" : adjustedScore >= 65 ? "moderate" : "low";
 
   // Step 13: Generate smart banner from UNIFIED recommendation
   // This ensures the banner text matches the rent and financial scenarios
@@ -644,7 +643,7 @@ export async function analyzeProperty(address: string): Promise<PropertyAnalysis
 
   // FAIL-CLOSED RULE: If polygon geometry missing or low-confidence,
   // mark scan as low confidence and warn user
-  if (finalBuildability.geometryMethodUsed === 'rectangle-fallback') {
+  if (finalBuildability.geometryMethodUsed === "rectangle-fallback") {
     smartBanner.recommendation = `[Estimated] ${smartBanner.recommendation}`;
     smartBanner.details = `Note: This analysis used simplified geometry (rectangle fallback). Polygon-based analysis was not available. Results should be verified with a professional site review. ${smartBanner.details}`;
   }
@@ -677,9 +676,9 @@ export async function analyzeProperty(address: string): Promise<PropertyAnalysis
           confidence: est.confidence,
         })),
         available: true as const,
-        source: (Array.from(rentEstimates.values()).some((r) => r.source === "rentcast")
-          ? "rentcast"
-          : "estimated") as "rentcast" | "estimated",
+        source: (Array.from(rentEstimates.values()).some((r) => r.source === "rentcast") ? "rentcast" : "estimated") as
+          | "rentcast"
+          | "estimated",
       }
     : undefined;
 
@@ -776,8 +775,8 @@ export async function analyzeProperty(address: string): Promise<PropertyAnalysis
       adjustments: sanityResult.adjustments,
     },
     detectedStructures: undefined, // Removed from client-facing UI per requirements
-    rentScenarios: unifiedRecommendation 
-      ? buildUnifiedRentScenarios(unifiedRecommendation).map(s => ({
+    rentScenarios: unifiedRecommendation
+      ? buildUnifiedRentScenarios(unifiedRecommendation).map((s) => ({
           aduType: s.aduType,
           source: "estimated" as const,
           conservative: s.conservative,
@@ -785,34 +784,39 @@ export async function analyzeProperty(address: string): Promise<PropertyAnalysis
           premium: s.premium,
         }))
       : buildRentScenarios(rentEstimates),
-    imageryWarning: "Aerial imagery may not reflect recent construction or site changes. A professional site visit is recommended to verify current conditions.",
+    imageryWarning:
+      "Aerial imagery may not reflect recent construction or site changes. A professional site visit is recommended to verify current conditions.",
 
     // v5 layers — Site Constraint Intelligence
     siteConstraints,
 
     // v7.1 layers — Microsoft Building Footprints
-    microsoftFootprints: msFootprints?.available ? {
-      buildingCount: msFootprints.buildings.length,
-      totalFootprintSqFt: msFootprints.totalFootprintSqFt,
-      mainBuildingSqFt: msFootprints.mainBuilding?.areaSqFt || null,
-      confidence: msFootprints.confidence,
-      quadkey: msFootprints.quadkey,
-      source: msFootprints.source,
-    } : undefined,
+    microsoftFootprints: msFootprints?.available
+      ? {
+          buildingCount: msFootprints.buildings.length,
+          totalFootprintSqFt: msFootprints.totalFootprintSqFt,
+          mainBuildingSqFt: msFootprints.mainBuilding?.areaSqFt || null,
+          confidence: msFootprints.confidence,
+          quadkey: msFootprints.quadkey,
+          source: msFootprints.source,
+        }
+      : undefined,
 
     // Footprint merge audit trail
     footprintMergeNotes,
 
     // v7.2 layers — LiDAR / Enhanced Terrain Intelligence
-    lidarTerrain: lidarTerrain ? {
-      slopeAnalysis: lidarTerrain.slopeAnalysis,
-      gradingEstimate: lidarTerrain.gradingEstimate,
-      foundationRecommendation: lidarTerrain.foundationRecommendation,
-      lidarAvailable: lidarTerrain.lidarAvailable,
-      sources: lidarTerrain.sources,
-      confidence: lidarTerrain.confidence,
-      summary: lidarTerrain.summary,
-    } : undefined,
+    lidarTerrain: lidarTerrain
+      ? {
+          slopeAnalysis: lidarTerrain.slopeAnalysis,
+          gradingEstimate: lidarTerrain.gradingEstimate,
+          foundationRecommendation: lidarTerrain.foundationRecommendation,
+          lidarAvailable: lidarTerrain.lidarAvailable,
+          sources: lidarTerrain.sources,
+          confidence: lidarTerrain.confidence,
+          summary: lidarTerrain.summary,
+        }
+      : undefined,
 
     // v6 layers — Source Cross-Reference & Reconciliation
     sourceAudit: reconcileAllSources({
@@ -839,82 +843,98 @@ export async function analyzeProperty(address: string): Promise<PropertyAnalysis
     }),
 
     // v8 layers — Strict Geometry Pipeline (single-source, for site diagram)
-    strictGeometry: strictGeometry ? {
-      status: strictGeometry.status,
-      canRenderDiagram: strictGeometry.canRenderDiagram,
-      fallbackMessage: strictGeometry.fallbackMessage,
-      parcelPolygon: strictGeometry.parcelPolygon,
-      buildingPolygon: strictGeometry.buildingPolygon,
-      metrics: strictGeometry.metrics,
-      buildableEnvelope: strictGeometry.buildableEnvelope ? {
-        parcelSetbackPolygon: strictGeometry.buildableEnvelope.parcelSetbackPolygon,
-        residenceSeparationPolygon: strictGeometry.buildableEnvelope.residenceSeparationPolygon,
-        buildablePolygon: strictGeometry.buildableEnvelope.buildablePolygon,
-        buildableAreaSqFt: strictGeometry.buildableEnvelope.buildableAreaSqFt,
-        bestZone: strictGeometry.buildableEnvelope.bestZone,
-        constraints: strictGeometry.buildableEnvelope.constraints,
-      } : null,
-      parcelSource: strictGeometry.parcelSource,
-      buildingSource: strictGeometry.buildingSource,
-      confidence: strictGeometry.confidence,
-      sourceAudit: strictGeometry.sourceAudit,
-    } : undefined,
+    strictGeometry: strictGeometry
+      ? {
+          status: strictGeometry.status,
+          canRenderDiagram: strictGeometry.canRenderDiagram,
+          fallbackMessage: strictGeometry.fallbackMessage,
+          parcelPolygon: strictGeometry.parcelPolygon,
+          buildingPolygon: strictGeometry.buildingPolygon,
+          metrics: strictGeometry.metrics,
+          buildableEnvelope: strictGeometry.buildableEnvelope
+            ? {
+                parcelSetbackPolygon: strictGeometry.buildableEnvelope.parcelSetbackPolygon,
+                residenceSeparationPolygon: strictGeometry.buildableEnvelope.residenceSeparationPolygon,
+                buildablePolygon: strictGeometry.buildableEnvelope.buildablePolygon,
+                buildableAreaSqFt: strictGeometry.buildableEnvelope.buildableAreaSqFt,
+                bestZone: strictGeometry.buildableEnvelope.bestZone,
+                constraints: strictGeometry.buildableEnvelope.constraints,
+              }
+            : null,
+          parcelSource: strictGeometry.parcelSource,
+          buildingSource: strictGeometry.buildingSource,
+          confidence: strictGeometry.confidence,
+          sourceAudit: strictGeometry.sourceAudit,
+        }
+      : undefined,
 
     // v7 layers — Polygon Geometry & Source Backbone
-    geometryAnalysis: geometryAnalysis ? {
-      parcelPolygon: geometryAnalysis.parcelPolygon,
-      structures: geometryAnalysis.structures.map(s => ({
-        classification: s.classification,
-        polygon: s.polygon,
-        areaSqFt: s.areaSqFt,
-        centroid: s.centroid,
-        confidence: s.confidence,
-        source: s.source,
-        levels: s.levels,
-      })),
-      placement: geometryAnalysis.placement ? {
-        measuredSetbacks: geometryAnalysis.placement.measuredSetbacks,
-        fitsWithinParcel: geometryAnalysis.placement.fitsWithinParcel,
-        confidence: geometryAnalysis.placement.confidence,
-        placementMethod: geometryAnalysis.placement.placementMethod,
-      } : null,
-      setbackEnvelope: geometryAnalysis.setbackEnvelope,
-      leftoverZones: geometryAnalysis.leftoverZones.map(z => ({
-        polygon: z.polygon,
-        areaSqFt: z.areaSqFt,
-        position: z.position,
-        buildQuality: z.buildQuality,
-        minWidthFt: z.minWidthFt,
-        minDepthFt: z.minDepthFt,
-        suitableFor: z.suitableFor,
-      })),
-      bestAduZoneIndex: geometryAnalysis.bestAduZone
-        ? geometryAnalysis.leftoverZones.indexOf(geometryAnalysis.bestAduZone)
-        : null,
-      attachedCandidateWalls: geometryAnalysis.attachedCandidateWalls,
-      garageConversionCandidate: geometryAnalysis.garageConversionCandidate ? {
-        classification: geometryAnalysis.garageConversionCandidate.classification,
-        areaSqFt: geometryAnalysis.garageConversionCandidate.areaSqFt,
-        confidence: geometryAnalysis.garageConversionCandidate.confidence,
-      } : null,
-      geometryConfidence: geometryAnalysis.geometryConfidence,
-      geometryStatus: geometryAnalysis.geometryStatus,
-      parcelSource: geometryAnalysis.parcelSource,
-      footprintSource: geometryAnalysis.footprintSource,
-      areaSummary: geometryAnalysis.areaSummary,
-      geometrySanityChecks: {
-        passed: true,
-        checks: [],
-        adjustedConfidence: geometryAnalysis.geometryConfidence,
-      },
-    } : undefined,
+    geometryAnalysis: geometryAnalysis
+      ? {
+          parcelPolygon: geometryAnalysis.parcelPolygon,
+          structures: geometryAnalysis.structures.map((s) => ({
+            classification: s.classification,
+            polygon: s.polygon,
+            areaSqFt: s.areaSqFt,
+            centroid: s.centroid,
+            confidence: s.confidence,
+            source: s.source,
+            levels: s.levels,
+          })),
+          placement: geometryAnalysis.placement
+            ? {
+                measuredSetbacks: geometryAnalysis.placement.measuredSetbacks,
+                fitsWithinParcel: geometryAnalysis.placement.fitsWithinParcel,
+                confidence: geometryAnalysis.placement.confidence,
+                placementMethod: geometryAnalysis.placement.placementMethod,
+              }
+            : null,
+          setbackEnvelope: geometryAnalysis.setbackEnvelope,
+          leftoverZones: geometryAnalysis.leftoverZones.map((z) => ({
+            polygon: z.polygon,
+            areaSqFt: z.areaSqFt,
+            position: z.position,
+            buildQuality: z.buildQuality,
+            minWidthFt: z.minWidthFt,
+            minDepthFt: z.minDepthFt,
+            suitableFor: z.suitableFor,
+          })),
+          bestAduZoneIndex: geometryAnalysis.bestAduZone ? geometryAnalysis.leftoverZones.indexOf(geometryAnalysis.bestAduZone) : null,
+          attachedCandidateWalls: geometryAnalysis.attachedCandidateWalls,
+          garageConversionCandidate: geometryAnalysis.garageConversionCandidate
+            ? {
+                classification: geometryAnalysis.garageConversionCandidate.classification,
+                areaSqFt: geometryAnalysis.garageConversionCandidate.areaSqFt,
+                confidence: geometryAnalysis.garageConversionCandidate.confidence,
+              }
+            : null,
+          geometryConfidence: geometryAnalysis.geometryConfidence,
+          geometryStatus: geometryAnalysis.geometryStatus,
+          parcelSource: geometryAnalysis.parcelSource,
+          footprintSource: geometryAnalysis.footprintSource,
+          areaSummary: geometryAnalysis.areaSummary,
+          geometrySanityChecks: {
+            passed: true,
+            checks: [],
+            adjustedConfidence: geometryAnalysis.geometryConfidence,
+          },
+        }
+      : undefined,
   };
 }
 
 /** Build conservative / market / premium rent scenarios from RentCast data */
 function buildRentScenarios(
   rentEstimates?: Map<string, RentEstimate>
-): { conservative: { monthlyRent: number; annualRent: number }; market: { monthlyRent: number; annualRent: number }; premium: { monthlyRent: number; annualRent: number }; source: "rentcast" | "estimated"; aduType: string }[] | undefined {
+):
+  | {
+      conservative: { monthlyRent: number; annualRent: number };
+      market: { monthlyRent: number; annualRent: number };
+      premium: { monthlyRent: number; annualRent: number };
+      source: "rentcast" | "estimated";
+      aduType: string;
+    }[]
+  | undefined {
   if (!rentEstimates || rentEstimates.size === 0) return undefined;
 
   return Array.from(rentEstimates.entries()).map(([type, est]) => {
@@ -951,15 +971,15 @@ function buildFinalBuildabilityResult(
     const bestZone = geometryAnalysis.bestAduZone || geometryAnalysis.leftoverZones[0];
     const bestZoneArea = Math.min(bestZone.areaSqFt, 1200); // CA ADU max cap
 
-    const methodUsed: FinalBuildabilityResult['geometryMethodUsed'] =
-      geometryAnalysis.geometryStatus === 'polygon-verified' ? 'polygon-verified' : 'polygon-estimated';
+    const methodUsed: FinalBuildabilityResult["geometryMethodUsed"] =
+      geometryAnalysis.geometryStatus === "polygon-verified" ? "polygon-verified" : "polygon-estimated";
 
     notes.push(`Polygon engine: ${geometryAnalysis.leftoverZones.length} candidate zones found`);
     notes.push(`Geometry status: ${geometryAnalysis.geometryStatus}, confidence: ${geometryAnalysis.geometryConfidence}%`);
     notes.push(`Parcel source: ${geometryAnalysis.parcelSource}, footprint source: ${geometryAnalysis.footprintSource}`);
 
     if (geometryAnalysis.geometryConfidence < 60) {
-      warnings.push('Geometry confidence below 60% — results should be verified with professional site review');
+      warnings.push("Geometry confidence below 60% — results should be verified with professional site review");
     }
 
     // Debug comparison with rectangle method
@@ -971,7 +991,7 @@ function buildFinalBuildabilityResult(
       totalBuildableAreaSqFt: bestZoneArea,
       bestAduZoneAreaSqFt: bestZoneArea,
       bestAduZonePolygon: bestZone.polygon,
-      candidateZones: geometryAnalysis.leftoverZones.map(z => ({
+      candidateZones: geometryAnalysis.leftoverZones.map((z) => ({
         polygon: z.polygon,
         areaSqFt: z.areaSqFt,
         position: z.position,
@@ -997,15 +1017,15 @@ function buildFinalBuildabilityResult(
 
   // Case 2: Geometry engine ran but no valid zones (e.g., lot too small, all zones below threshold)
   if (geometryAnalysis && geometryAnalysis.leftoverZones.length === 0) {
-    warnings.push('Polygon geometry engine found no suitable ADU zones');
-    warnings.push('Falling back to rectangle estimation — manual review recommended');
+    warnings.push("Polygon geometry engine found no suitable ADU zones");
+    warnings.push("Falling back to rectangle estimation — manual review recommended");
     notes.push(`Geometry ran but no zones: status=${geometryAnalysis.geometryStatus}, confidence=${geometryAnalysis.geometryConfidence}%`);
   }
 
   // Case 3: Geometry engine not available — rectangle fallback
   if (!geometryAnalysis) {
-    warnings.push('Polygon geometry engine not available — using rectangle fallback estimate');
-    warnings.push('This is a low-confidence estimate. Manual review recommended.');
+    warnings.push("Polygon geometry engine not available — using rectangle fallback estimate");
+    warnings.push("This is a low-confidence estimate. Manual review recommended.");
   }
 
   const fallbackArea = rectangleFallback.estimatedBuildableEnvelopeSqFt;
@@ -1018,7 +1038,7 @@ function buildFinalBuildabilityResult(
     candidateZoneCount: 0,
     buildabilityConfidence: Math.min(40, geometryAnalysis?.geometryConfidence || 25),
     structurePlacementConfidence: 0,
-    geometryMethodUsed: 'rectangle-fallback',
+    geometryMethodUsed: "rectangle-fallback",
     notes,
     warnings,
     debugComparison: {
@@ -1059,40 +1079,25 @@ function calculateBuildableArea(
   };
 }
 
-function generateRecommendations(
-  lotSizeSqFt: number,
-  openYardSqFt: number,
-  buildableEnvelope: number
-): ADURecommendation[] {
+function generateRecommendations(lotSizeSqFt: number, openYardSqFt: number, buildableEnvelope: number): ADURecommendation[] {
   const isLargeLot = lotSizeSqFt > 6500;
   const hasGoodYard = openYardSqFt > 2000;
   const hasModerateYard = openYardSqFt > 1200;
 
   const detachedFeasibility: FeasibilityLevel =
-    hasGoodYard && buildableEnvelope > 500
-      ? "Likely"
-      : hasModerateYard
-      ? "Possible"
-      : "Limited";
+    hasGoodYard && buildableEnvelope > 500 ? "Likely" : hasModerateYard ? "Possible" : "Limited";
 
-  const attachedFeasibility: FeasibilityLevel =
-    buildableEnvelope > 300 ? "Possible" : "Limited";
+  const attachedFeasibility: FeasibilityLevel = buildableEnvelope > 300 ? "Possible" : "Limited";
 
-  const garageFeasibility: FeasibilityLevel =
-    isLargeLot || lotSizeSqFt > 5500 ? "Likely" : "Possible";
+  const garageFeasibility: FeasibilityLevel = isLargeLot || lotSizeSqFt > 5500 ? "Likely" : "Possible";
 
-  const secondStoryFeasibility: FeasibilityLevel =
-    lotSizeSqFt > 5000 ? "Possible" : "Limited";
+  const secondStoryFeasibility: FeasibilityLevel = lotSizeSqFt > 5000 ? "Possible" : "Limited";
 
   return [
     {
       type: "Detached ADU",
       feasibility: detachedFeasibility,
-      estimatedSizeRange: hasGoodYard
-        ? "600 - 1,200 sq ft"
-        : hasModerateYard
-        ? "400 - 600 sq ft"
-        : "Up to 400 sq ft",
+      estimatedSizeRange: hasGoodYard ? "600 - 1,200 sq ft" : hasModerateYard ? "400 - 600 sq ft" : "Up to 400 sq ft",
       priceRange: hasGoodYard ? "$175K - $350K" : "$120K - $200K",
       description: hasGoodYard
         ? "Based on this preliminary scan, a detached ADU appears feasible. Your lot has sufficient open area to accommodate a standalone unit with required setbacks."
@@ -1150,12 +1155,7 @@ function determineBestRecommendation(recommendations: ADURecommendation[]): stri
   return sorted[0].type;
 }
 
-function generateSmartBanner(
-  bestType: string,
-  buildable: BuildableAnalysis,
-  lotSizeSqFt: number,
-  hasUpside: boolean = false
-): SmartBannerData {
+function generateSmartBanner(bestType: string, buildable: BuildableAnalysis, lotSizeSqFt: number, hasUpside: boolean = false): SmartBannerData {
   const isLargeLot = lotSizeSqFt > 6500;
 
   if (hasUpside) {
@@ -1178,8 +1178,7 @@ function generateSmartBanner(
 
   if (bestType === "Garage Conversion") {
     return {
-      recommendation:
-        "Your lot appears limited for a detached ADU. A garage conversion may be the better path.",
+      recommendation: "Your lot appears limited for a detached ADU. A garage conversion may be the better path.",
       details:
         "Your lot looks tight for a detached ADU, but you may still have strong conversion options. A garage conversion is typically the most affordable path and can deliver a beautiful, functional living space.",
     };

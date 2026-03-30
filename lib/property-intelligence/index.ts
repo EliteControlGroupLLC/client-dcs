@@ -63,6 +63,9 @@ export type {
   DiscrepancyRecord,
 } from "./types";
 
+export { reconcileAllSources } from "./source-reconciliation-engine";
+export type { ReconciliationInput } from "./source-reconciliation-engine";
+
 export { getConfidenceStatus, formatFieldValue } from "./types";
 
 // v7 — Geometry Engine

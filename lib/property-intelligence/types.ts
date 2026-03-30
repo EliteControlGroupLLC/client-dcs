@@ -510,12 +510,7 @@ export interface DataSource {
 
 // ─── v6: Source Cross-Reference & Reconciliation Types ───
 
-export type FieldVerificationStatus =
-  | "verified"
-  | "estimated"
-  | "inferred"
-  | "under-review"
-  | "rejected";
+export type FieldVerificationStatus = "verified" | "estimated" | "inferred" | "under-review" | "rejected";
 
 export interface SourceCandidate<T = string | number> {
   value: T;

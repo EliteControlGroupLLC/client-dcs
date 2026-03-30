@@ -9,9 +9,12 @@ interface ShowSourcesPanelProps {
 }
 
 function ConfidenceBadge({ confidence }: { confidence: number }) {
-  const color = confidence >= 80 ? "bg-green-100 text-green-800" :
-    confidence >= 60 ? "bg-yellow-100 text-yellow-800" :
-    "bg-red-100 text-red-800";
+  const color =
+    confidence >= 80
+      ? "bg-green-100 text-green-800"
+      : confidence >= 60
+        ? "bg-yellow-100 text-yellow-800"
+        : "bg-red-100 text-red-800";
   return (
     <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${color}`}>
       {confidence}%
@@ -20,9 +23,12 @@ function ConfidenceBadge({ confidence }: { confidence: number }) {
 }
 
 function MethodBadge({ method }: { method: string }) {
-  const color = method === "polygon-verified" ? "bg-green-100 text-green-800" :
-    method === "polygon-estimated" ? "bg-yellow-100 text-yellow-800" :
-    "bg-red-100 text-red-800";
+  const color =
+    method === "polygon-verified"
+      ? "bg-green-100 text-green-800"
+      : method === "polygon-estimated"
+        ? "bg-yellow-100 text-yellow-800"
+        : "bg-red-100 text-red-800";
   return (
     <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${color}`}>
       {method}
@@ -52,9 +58,8 @@ export function ShowSourcesPanel({ analysisData }: ShowSourcesPanelProps) {
 
       {isOpen && (
         <div className="border-t border-slate-200 p-4 space-y-4">
-          {/* Tab navigation */}
           <div className="flex gap-2">
-            {(["fields", "geometry", "debug"] as const).map(tab => (
+            {(["fields", "geometry", "debug"] as const).map((tab) => (
               <button
                 key={tab}
                 onClick={() => setActiveTab(tab)}
@@ -69,7 +74,6 @@ export function ShowSourcesPanel({ analysisData }: ShowSourcesPanelProps) {
             ))}
           </div>
 
-          {/* Fields tab */}
           {activeTab === "fields" && (
             <div className="space-y-3">
               {[
@@ -99,10 +103,11 @@ export function ShowSourcesPanel({ analysisData }: ShowSourcesPanelProps) {
                 </div>
               ))}
 
-              {/* Buildable area — special treatment */}
               <div className="bg-white rounded-lg p-3 border border-slate-100">
                 <div className="flex items-center justify-between mb-1">
-                  <span className="text-xs font-semibold text-slate-700">Buildable Area (Single Source of Truth)</span>
+                  <span className="text-xs font-semibold text-slate-700">
+                    Buildable Area (Single Source of Truth)
+                  </span>
                   <ConfidenceBadge confidence={finalBuildability.buildabilityConfidence} />
                 </div>
                 <div className="text-sm text-slate-900 font-medium">
@@ -127,7 +132,6 @@ export function ShowSourcesPanel({ analysisData }: ShowSourcesPanelProps) {
                 )}
               </div>
 
-              {/* Best Recommendation */}
               <div className="bg-white rounded-lg p-3 border border-slate-100">
                 <div className="text-xs font-semibold text-slate-700 mb-1">Best Recommendation</div>
                 <div className="text-sm text-slate-900 font-medium">{analysisData.bestRecommendation}</div>
@@ -135,7 +139,6 @@ export function ShowSourcesPanel({ analysisData }: ShowSourcesPanelProps) {
             </div>
           )}
 
-          {/* Geometry audit tab */}
           {activeTab === "geometry" && (
             <div className="space-y-3">
               {geometryAnalysis ? (
@@ -143,14 +146,17 @@ export function ShowSourcesPanel({ analysisData }: ShowSourcesPanelProps) {
                   <div className="bg-white rounded-lg p-3 border border-slate-100">
                     <div className="text-xs font-semibold text-slate-700 mb-2">Geometry Engine Status</div>
                     <div className="grid grid-cols-2 gap-2 text-xs">
-                      <div>Status: <MethodBadge method={geometryAnalysis.geometryStatus} /></div>
-                      <div>Confidence: <ConfidenceBadge confidence={geometryAnalysis.geometryConfidence} /></div>
+                      <div>
+                        Status: <MethodBadge method={geometryAnalysis.geometryStatus} />
+                      </div>
+                      <div>
+                        Confidence: <ConfidenceBadge confidence={geometryAnalysis.geometryConfidence} />
+                      </div>
                       <div>Parcel: {geometryAnalysis.parcelSource}</div>
                       <div>Footprint: {geometryAnalysis.footprintSource}</div>
                     </div>
                   </div>
 
-                  {/* Data sources */}
                   {dataSources && (
                     <div className="bg-white rounded-lg p-3 border border-slate-100">
                       <div className="text-xs font-semibold text-slate-700 mb-2">Data Sources</div>
@@ -165,13 +171,14 @@ export function ShowSourcesPanel({ analysisData }: ShowSourcesPanelProps) {
                     </div>
                   )}
 
-                  {/* Footprint merge notes */}
                   {analysisData.footprintMergeNotes && analysisData.footprintMergeNotes.length > 0 && (
                     <div className="bg-white rounded-lg p-3 border border-slate-100">
                       <div className="text-xs font-semibold text-slate-700 mb-2">Footprint Merge Audit</div>
                       <div className="space-y-1">
                         {analysisData.footprintMergeNotes.map((note, i) => (
-                          <div key={i} className="text-[10px] text-slate-500">{note}</div>
+                          <div key={i} className="text-[10px] text-slate-500">
+                            {note}
+                          </div>
                         ))}
                       </div>
                     </div>
@@ -183,13 +190,14 @@ export function ShowSourcesPanel({ analysisData }: ShowSourcesPanelProps) {
                 </div>
               )}
 
-              {/* FinalBuildability notes */}
               {finalBuildability.notes.length > 0 && (
                 <div className="bg-white rounded-lg p-3 border border-slate-100">
                   <div className="text-xs font-semibold text-slate-700 mb-2">Geometry Engine Notes</div>
                   <div className="space-y-1">
                     {finalBuildability.notes.map((n, i) => (
-                      <div key={i} className="text-[10px] text-slate-500">{n}</div>
+                      <div key={i} className="text-[10px] text-slate-500">
+                        {n}
+                      </div>
                     ))}
                   </div>
                 </div>
@@ -197,34 +205,49 @@ export function ShowSourcesPanel({ analysisData }: ShowSourcesPanelProps) {
             </div>
           )}
 
-          {/* Debug comparison tab */}
           {activeTab === "debug" && finalBuildability.debugComparison && (
             <div className="space-y-3">
               <div className="bg-white rounded-lg p-3 border border-slate-100">
                 <div className="text-xs font-semibold text-slate-700 mb-3">Rectangle vs Polygon Comparison</div>
                 <div className="grid grid-cols-2 gap-4">
-                  <div className={`p-3 rounded-lg border ${!finalBuildability.debugComparison.polygonIsSource ? "border-blue-300 bg-blue-50" : "border-slate-200 bg-slate-50"}`}>
-                    <div className="text-[10px] text-slate-500 mb-1">Rectangle Method {!finalBuildability.debugComparison.polygonIsSource && "(ACTIVE)"}</div>
+                  <div
+                    className={`p-3 rounded-lg border ${
+                      !finalBuildability.debugComparison.polygonIsSource
+                        ? "border-blue-300 bg-blue-50"
+                        : "border-slate-200 bg-slate-50"
+                    }`}
+                  >
+                    <div className="text-[10px] text-slate-500 mb-1">
+                      Rectangle Method {!finalBuildability.debugComparison.polygonIsSource && "(ACTIVE)"}
+                    </div>
                     <div className="text-lg font-bold text-slate-900">
                       {finalBuildability.debugComparison.rectangleBuildableAreaSqFt.toLocaleString()} sq ft
                     </div>
                   </div>
-                  <div className={`p-3 rounded-lg border ${finalBuildability.debugComparison.polygonIsSource ? "border-green-300 bg-green-50" : "border-slate-200 bg-slate-50"}`}>
-                    <div className="text-[10px] text-slate-500 mb-1">Polygon Engine {finalBuildability.debugComparison.polygonIsSource && "(ACTIVE — Source of Truth)"}</div>
+                  <div
+                    className={`p-3 rounded-lg border ${
+                      finalBuildability.debugComparison.polygonIsSource
+                        ? "border-green-300 bg-green-50"
+                        : "border-slate-200 bg-slate-50"
+                    }`}
+                  >
+                    <div className="text-[10px] text-slate-500 mb-1">
+                      Polygon Engine {finalBuildability.debugComparison.polygonIsSource && "(ACTIVE — Source of Truth)"}
+                    </div>
                     <div className="text-lg font-bold text-slate-900">
                       {finalBuildability.debugComparison.polygonBuildableAreaSqFt.toLocaleString()} sq ft
                     </div>
                   </div>
                 </div>
                 <div className="mt-2 text-xs text-slate-600 text-center">
-                  Delta: {finalBuildability.debugComparison.deltaPercent > 0 ? "+" : ""}{finalBuildability.debugComparison.deltaPercent}%
+                  Delta: {finalBuildability.debugComparison.deltaPercent > 0 ? "+" : ""}
+                  {finalBuildability.debugComparison.deltaPercent}%
                   {finalBuildability.debugComparison.polygonIsSource
                     ? " — Polygon engine is the production source of truth"
                     : " — Using rectangle fallback (polygon unavailable)"}
                 </div>
               </div>
 
-              {/* Confidence info */}
               <div className="bg-white rounded-lg p-3 border border-slate-100">
                 <div className="text-xs font-semibold text-slate-700 mb-2">Confidence Summary</div>
                 <div className="space-y-1 text-xs text-slate-600">

@@ -74,21 +74,25 @@ function classifySource(sourceName: string): { tier: SourceTier; policy: SourceP
   if (lower.includes("google") || lower.includes("geocod")) return { tier: "tier1", policy: "primary-backbone" };
   if (lower.includes("zoneomics")) return { tier: "tier1", policy: "primary-backbone" };
   if (lower.includes("rentcast")) return { tier: "tier1", policy: "primary-backbone" };
-  if (lower.includes("city") || lower.includes("municipal") || lower.includes("county") || lower.includes("state"))
+  if (lower.includes("city") || lower.includes("municipal") || lower.includes("county") || lower.includes("state")) {
     return { tier: "tier1", policy: "primary-backbone" };
+  }
   if (lower.includes("assessor") || lower.includes("official")) return { tier: "tier1", policy: "primary-backbone" };
 
   // TIER 2 — Geometry / Visual Validation
-  if (lower.includes("osm") || lower.includes("openstreetmap") || lower.includes("overpass"))
+  if (lower.includes("osm") || lower.includes("openstreetmap") || lower.includes("overpass")) {
     return { tier: "tier2", policy: "primary-backbone" };
-  if (lower.includes("polygon") || lower.includes("footprint") || lower.includes("vector"))
+  }
+  if (lower.includes("polygon") || lower.includes("footprint") || lower.includes("vector")) {
     return { tier: "tier2", policy: "primary-backbone" };
+  }
   if (lower.includes("nominatim")) return { tier: "tier2", policy: "primary-backbone" };
   if (lower.includes("mapbox") || lower.includes("elevation")) return { tier: "tier2", policy: "primary-backbone" };
 
   // REFERENCE ONLY sources
-  if (lower.includes("zillow") || lower.includes("redfin") || lower.includes("realtor"))
+  if (lower.includes("zillow") || lower.includes("redfin") || lower.includes("realtor")) {
     return { tier: "tier3", policy: "reference-only" };
+  }
 
   // Default to tier2 backbone for unknown sources
   return { tier: "tier2", policy: "primary-backbone" };
@@ -124,7 +128,7 @@ function reconcileNumeric(
     // Primary backbone always beats reference-only for legal/property fields
     if (a.sourcePolicy === "primary-backbone" && b.sourcePolicy === "reference-only") return -1;
     if (a.sourcePolicy === "reference-only" && b.sourcePolicy === "primary-backbone") return 1;
-    return (TIER_WEIGHT[b.sourceTier] * b.confidence) - (TIER_WEIGHT[a.sourceTier] * a.confidence);
+    return TIER_WEIGHT[b.sourceTier] * b.confidence - TIER_WEIGHT[a.sourceTier] * a.confidence;
   });
 
   const best = sorted[0];
@@ -136,8 +140,7 @@ function reconcileNumeric(
 
     const diff = Math.abs(best.value - other.value) / Math.max(best.value, 1);
     if (diff > tolerancePercent / 100) {
-      const severity: DiscrepancyRecord["severity"] =
-        diff > 0.3 ? "high" : diff > 0.15 ? "medium" : "low";
+      const severity: DiscrepancyRecord["severity"] = diff > 0.3 ? "high" : diff > 0.15 ? "medium" : "low";
 
       discrepancies.push({
         field: fieldName,
@@ -160,7 +163,7 @@ function reconcileNumeric(
 
   if (candidates.length >= 2 && discrepancies.length === 0) {
     status = "verified";
-  } else if (discrepancies.some(d => d.severity === "high")) {
+  } else if (discrepancies.some((d) => d.severity === "high")) {
     status = isCritical ? "under-review" : "estimated";
   } else if (best.sourcePolicy === "primary-backbone" && best.confidence >= 80) {
     status = "verified";
@@ -177,9 +180,7 @@ function reconcileNumeric(
       selectionReason: `Highest-priority ${best.sourcePolicy} source (${best.sourceTier})`,
       candidates: sorted,
       discrepancyDetected: discrepancies.length > 0,
-      discrepancyDetail: discrepancies.length > 0
-        ? discrepancies.map(d => d.description).join("; ")
-        : undefined,
+      discrepancyDetail: discrepancies.length > 0 ? discrepancies.map((d) => d.description).join("; ") : undefined,
     },
     discrepancies,
   };
@@ -211,7 +212,7 @@ function reconcileString(
   const sorted = [...candidates].sort((a, b) => {
     if (a.sourcePolicy === "primary-backbone" && b.sourcePolicy === "reference-only") return -1;
     if (a.sourcePolicy === "reference-only" && b.sourcePolicy === "primary-backbone") return 1;
-    return (TIER_WEIGHT[b.sourceTier] * b.confidence) - (TIER_WEIGHT[a.sourceTier] * a.confidence);
+    return TIER_WEIGHT[b.sourceTier] * b.confidence - TIER_WEIGHT[a.sourceTier] * a.confidence;
   });
 
   const best = sorted[0];
@@ -243,7 +244,7 @@ function reconcileString(
 
   if (candidates.length >= 2 && discrepancies.length === 0) {
     status = "verified";
-  } else if (discrepancies.some(d => d.severity === "high")) {
+  } else if (discrepancies.some((d) => d.severity === "high")) {
     status = isCritical ? "under-review" : "estimated";
   } else if (best.sourcePolicy === "primary-backbone" && best.confidence >= 80) {
     status = "verified";
@@ -260,19 +261,13 @@ function reconcileString(
       selectionReason: `Highest-priority ${best.sourcePolicy} source (${best.sourceTier})`,
       candidates: sorted,
       discrepancyDetected: discrepancies.length > 0,
-      discrepancyDetail: discrepancies.length > 0
-        ? discrepancies.map(d => d.description).join("; ")
-        : undefined,
+      discrepancyDetail: discrepancies.length > 0 ? discrepancies.map((d) => d.description).join("; ") : undefined,
     },
     discrepancies,
   };
 }
 
-function makeCandidate<T>(
-  value: T,
-  sourceName: string,
-  confidence: number
-): SourceCandidate<T> {
+function makeCandidate<T>(value: T, sourceName: string, confidence: number): SourceCandidate<T> {
   const { tier, policy } = classifySource(sourceName);
   return {
     value,
@@ -321,7 +316,7 @@ export function reconcileAllSources(input: ReconciliationInput): SourceAudit {
   if (input.osmData?.boundingBox) {
     const [minLat, maxLat, minLon, maxLon] = input.osmData.boundingBox;
     const latM = (maxLat - minLat) * 111320;
-    const lonM = (maxLon - minLon) * 111320 * Math.cos(((minLat + maxLat) / 2 * Math.PI) / 180);
+    const lonM = (maxLon - minLon) * 111320 * Math.cos((((minLat + maxLat) / 2) * Math.PI) / 180);
     const bbSqFt = Math.round(latM * lonM * 10.7639 * 0.7);
     if (bbSqFt > 1000 && bbSqFt < 100000) {
       lotCandidates.push(makeCandidate(bbSqFt, "OpenStreetMap Nominatim (bbox)", 60));
@@ -405,11 +400,13 @@ export function reconcileAllSources(input: ReconciliationInput): SourceAudit {
   const rentCandidates: SourceCandidate<number>[] = [];
   if (input.rentEstimates && input.rentEstimates.size > 0) {
     const firstEst = Array.from(input.rentEstimates.values())[0];
-    rentCandidates.push(makeCandidate(
-      firstEst.estimatedMonthlyRent,
-      firstEst.source === "rentcast" ? "RentCast" : "Estimated rent model",
-      firstEst.confidence
-    ));
+    rentCandidates.push(
+      makeCandidate(
+        firstEst.estimatedMonthlyRent,
+        firstEst.source === "rentcast" ? "RentCast" : "Estimated rent model",
+        firstEst.confidence
+      )
+    );
   }
   const rentResult = reconcileNumeric("rentEstimate", rentCandidates);
   allDiscrepancies.push(...rentResult.discrepancies);
@@ -423,49 +420,50 @@ export function reconcileAllSources(input: ReconciliationInput): SourceAudit {
   // ── v7 Geometry Source Fields ──
   const parcelGeoCandidates: SourceCandidate<string>[] = [];
   if (input.parcelSource) {
-    parcelGeoCandidates.push(makeCandidate(
-      input.parcelSource,
-      input.parcelSource,
-      input.geometryConfidence || 50
-    ));
+    parcelGeoCandidates.push(makeCandidate(input.parcelSource, input.parcelSource, input.geometryConfidence || 50));
   }
   const parcelGeoResult = reconcileString("parcelGeometry", parcelGeoCandidates, true);
   allDiscrepancies.push(...parcelGeoResult.discrepancies);
 
   const footprintGeoCandidates: SourceCandidate<string>[] = [];
   if (input.footprintSource) {
-    footprintGeoCandidates.push(makeCandidate(
-      input.footprintSource,
-      input.footprintSource,
-      input.geometryConfidence || 50
-    ));
+    footprintGeoCandidates.push(makeCandidate(input.footprintSource, input.footprintSource, input.geometryConfidence || 50));
   }
   const footprintGeoResult = reconcileString("footprintGeometry", footprintGeoCandidates, true);
   allDiscrepancies.push(...footprintGeoResult.discrepancies);
 
   const placementCandidates: SourceCandidate<string>[] = [];
   if (input.placementMethod) {
-    placementCandidates.push(makeCandidate(
-      input.placementMethod,
-      input.footprintSource || "Geometry Engine",
-      input.geometryConfidence || 50
-    ));
+    placementCandidates.push(
+      makeCandidate(input.placementMethod, input.footprintSource || "Geometry Engine", input.geometryConfidence || 50)
+    );
   }
   const placementResult = reconcileString("structurePlacement", placementCandidates, true);
   allDiscrepancies.push(...placementResult.discrepancies);
 
   // ── Aggregate stats ──
   const allFields = [
-    addressResult.field, apnResult.field, lotResult.field, zoningResult.field,
-    landUseResult.field, homeAreaResult.field, footprintResult.field, yardResult.field,
-    shapeResult.field, slopeResult.field, rentResult.field, recResult.field,
-    parcelGeoResult.field, footprintGeoResult.field, placementResult.field,
+    addressResult.field,
+    apnResult.field,
+    lotResult.field,
+    zoningResult.field,
+    landUseResult.field,
+    homeAreaResult.field,
+    footprintResult.field,
+    yardResult.field,
+    shapeResult.field,
+    slopeResult.field,
+    rentResult.field,
+    recResult.field,
+    parcelGeoResult.field,
+    footprintGeoResult.field,
+    placementResult.field,
   ];
 
   const fieldCount = allFields.length;
-  const verifiedCount = allFields.filter(f => f.finalStatus === "verified").length;
-  const estimatedCount = allFields.filter(f => f.finalStatus === "estimated").length;
-  const underReviewCount = allFields.filter(f => f.finalStatus === "under-review").length;
+  const verifiedCount = allFields.filter((f) => f.finalStatus === "verified").length;
+  const estimatedCount = allFields.filter((f) => f.finalStatus === "estimated").length;
+  const underReviewCount = allFields.filter((f) => f.finalStatus === "under-review").length;
 
   // Determine total unique sources consulted
   const allSources = new Set<string>();
@@ -507,11 +505,7 @@ export function reconcileAllSources(input: ReconciliationInput): SourceAudit {
         "RentCast",
         "OpenStreetMap building outlines",
       ],
-      referenceOnly: [
-        "Zillow",
-        "Realtor.com",
-        "Redfin",
-      ],
+      referenceOnly: ["Zillow", "Realtor.com", "Redfin"],
     },
   };
 }
