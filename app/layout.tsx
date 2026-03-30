@@ -18,20 +18,30 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: "Distinct Construction Solutions | San Diego ADU & Home Construction",
-  description: "San Diego's premier design-build construction company specializing in ADUs, custom homes, remodeling, and renovations. Get your free consultation today.",
-  keywords: ["ADU San Diego", "home construction", "remodeling", "design-build", "custom homes", "accessory dwelling units"],
+  description:
+    "San Diego's premier design-build construction company specializing in ADUs, custom homes, remodeling, and renovations. Get your free consultation today.",
+  keywords: [
+    "ADU San Diego",
+    "home construction",
+    "remodeling",
+    "design-build",
+    "custom homes",
+    "accessory dwelling units",
+  ],
   authors: [{ name: "Distinct Construction Solutions" }],
-  
+  metadataBase: new URL("https://www.distinctcsolutions.com"),
+
   openGraph: {
     title: "Distinct Construction Solutions | San Diego ADU & Home Construction",
-    description: "San Diego's premier design-build construction company specializing in ADUs, custom homes, remodeling, and renovations.",
+    description:
+      "San Diego's premier design-build construction company specializing in ADUs, custom homes, remodeling, and renovations.",
     url: "https://www.distinctcsolutions.com",
     siteName: "Distinct Construction Solutions",
     locale: "en_US",
     type: "website",
     images: [
       {
-        url: "https://www.distinctcsolutions.com/images/og-image.png",
+        url: "https://www.distinctcsolutions.com/og-image.png",
         width: 1200,
         height: 630,
         alt: "Distinct Construction Solutions - San Diego ADU & Home Builder",
@@ -43,7 +53,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "Distinct Construction Solutions",
     description: "San Diego's premier design-build construction company",
-    images: ["https://www.distinctcsolutions.com/images/og-image.png"],
+    images: ["https://www.distinctcsolutions.com/og-image.png"],
   },
 
   robots: {
@@ -61,42 +71,43 @@ export const viewport: Viewport = {
 const jsonLd = {
   "@context": "https://schema.org",
   "@type": "LocalBusiness",
-  "name": "Distinct Construction Solutions",
-  "description": "San Diego's premier design-build construction company specializing in ADUs, custom homes, remodeling, and renovations.",
-  "url": "https://www.distinctcsolutions.com",
-  "logo": "https://www.distinctcsolutions.com/images/logo-light.png",
-  "image": "https://www.distinctcsolutions.com/images/logo-light.png",
-  "telephone": "+1-858-833-0705",
-  "address": {
+  name: "Distinct Construction Solutions",
+  description:
+    "San Diego's premier design-build construction company specializing in ADUs, custom homes, remodeling, and renovations.",
+  url: "https://www.distinctcsolutions.com",
+  logo: "https://www.distinctcsolutions.com/images/logo-light.png",
+  image: "https://www.distinctcsolutions.com/images/logo-light.png",
+  telephone: "+1-858-833-0705",
+  address: {
     "@type": "PostalAddress",
-    "addressLocality": "San Diego",
-    "addressRegion": "CA",
-    "addressCountry": "US",
+    addressLocality: "San Diego",
+    addressRegion: "CA",
+    addressCountry: "US",
   },
-  "geo": {
+  geo: {
     "@type": "GeoCoordinates",
-    "latitude": 32.7157,
-    "longitude": -117.1611,
+    latitude: 32.7157,
+    longitude: -117.1611,
   },
-  "areaServed": {
+  areaServed: {
     "@type": "City",
-    "name": "San Diego",
+    name: "San Diego",
   },
-  "serviceType": [
+  serviceType: [
     "ADU Construction",
     "Custom Home Building",
     "Home Remodeling",
     "Garage Conversions",
     "Room Additions",
   ],
-  "priceRange": "$$",
-  "openingHoursSpecification": {
+  priceRange: "$$",
+  openingHoursSpecification: {
     "@type": "OpeningHoursSpecification",
-    "dayOfWeek": ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"],
-    "opens": "08:00",
-    "closes": "18:00",
+    dayOfWeek: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"],
+    opens: "08:00",
+    closes: "18:00",
   },
-  "sameAs": [],
+  sameAs: [],
 };
 
 export default function RootLayout({
@@ -107,13 +118,11 @@ export default function RootLayout({
   return (
     <html lang="en" className="scroll-smooth">
       <head>
-        {/* JSON-LD */}
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
         />
 
-        {/* Google Tag Manager */}
         <script
           dangerouslySetInnerHTML={{
             __html: `(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
@@ -124,7 +133,6 @@ export default function RootLayout({
           }}
         />
 
-        {/* Meta Pixel */}
         <script
           dangerouslySetInnerHTML={{
             __html: `!function(f,b,e,v,n,t,s)
@@ -141,8 +149,9 @@ export default function RootLayout({
         />
       </head>
 
-      <body className={`${inter.variable} ${geistMono.variable} font-sans antialiased`}>
-        {/* GTM (noscript) */}
+      <body
+        className={`${inter.variable} ${geistMono.variable} font-sans antialiased`}
+      >
         <noscript>
           <iframe
             src="https://www.googletagmanager.com/ns.html?id=GTM-5KJT4QTZ"
@@ -153,11 +162,7 @@ export default function RootLayout({
         </noscript>
 
         <Header />
-
-        <main className="min-h-screen">
-          {children}
-        </main>
-
+        <main className="min-h-screen">{children}</main>
         <Footer />
         <FloatingEstimateButton />
       </body>
