@@ -421,10 +421,10 @@ export const GALLERY_PROJECTS: GalleryProject[] = [
   {
     id: "6",
     title: "Bathroom Renovation",
-    location: "Del Mar, CA",
+    location: "Encinitas, CA",
     sqft: "Bathroom",
     type: "Remodel",
-    image: "/images/projects/bathroom-renovation.webp",
+    image: "/images/projects/bathroom-renovation-encinitas.webp",
     description: "A complete bathroom renovation with custom tile work, a walk-in shower, modern vanity, and updated fixtures. Clean, contemporary design with premium materials.",
   },
 ];
