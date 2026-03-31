@@ -209,28 +209,32 @@ export function Hero() {
                 <p className="text-xs text-white/50 uppercase tracking-wider mb-2">We Accept Cryptocurrency</p>
                 <div className="flex items-center gap-4">
                   <div className="flex items-center gap-2">
-                    <div className="w-8 h-8 rounded-full bg-[#F7931A]/20 flex items-center justify-center">
-                      <svg className="w-4 h-4 text-[#F7931A]" viewBox="0 0 24 24" fill="currentColor">
-                        <path d="M23.638 14.904c-1.602 6.43-8.113 10.34-14.542 8.736C2.67 22.05-1.244 15.525.362 9.105 1.962 2.67 8.475-1.243 14.9.358c6.43 1.605 10.342 8.115 8.738 14.546z"/>
-                        <path fill="#fff" d="M14.625 10.19c.206-1.376-.842-2.115-2.275-2.61l.465-1.866-1.135-.283-.453 1.815c-.298-.074-.603-.144-.91-.214l.456-1.827-1.134-.283-.465 1.865c-.247-.056-.49-.112-.724-.171l.001-.007-1.565-.391-.302 1.212s.842.193.825.205c.459.115.542.418.528.659l-.529 2.122c.032.008.073.02.118.038l-.12-.03-.742 2.975c-.056.14-.199.35-.52.27.012.017-.825-.206-.825-.206l-.564 1.3 1.478.368c.275.069.544.141.81.209l-.47 1.887 1.133.283.465-1.865c.31.084.61.161.903.234l-.464 1.858 1.134.283.47-1.883c1.934.366 3.388.218 4.002-1.532.495-1.407-.025-2.219-1.041-2.749.74-.17 1.297-.656 1.446-1.661zm-2.588 3.628c-.352 1.413-2.73.649-3.503.457l.625-2.505c.772.193 3.246.574 2.878 2.048zm.352-3.65c-.32 1.285-2.3.632-2.943.472l.567-2.273c.642.16 2.712.46 2.376 1.8z"/>
-                      </svg>
+                    <div className="w-8 h-8 rounded-full overflow-hidden bg-[#F7931A]/20 flex items-center justify-center">
+                      <img 
+                        src="/images/crypto/bitcoin.jpg" 
+                        alt="Bitcoin logo" 
+                        className="w-full h-full object-cover"
+                      />
                     </div>
                     <span className="text-white/70 text-sm">Bitcoin</span>
                   </div>
                   <div className="flex items-center gap-2">
-                    <div className="w-8 h-8 rounded-full bg-[#627EEA]/20 flex items-center justify-center">
-                      <svg className="w-4 h-4 text-[#627EEA]" viewBox="0 0 24 24" fill="currentColor">
-                        <path d="M11.944 17.97L4.58 13.62 11.943 24l7.37-10.38-7.372 4.35h.003zM12.056 0L4.69 12.223l7.365 4.354 7.365-4.35L12.056 0z"/>
-                      </svg>
+                    <div className="w-8 h-8 rounded-full overflow-hidden bg-[#627EEA]/20 flex items-center justify-center">
+                      <img 
+                        src="/images/crypto/ethereum.jpg" 
+                        alt="Ethereum logo" 
+                        className="w-full h-full object-cover"
+                      />
                     </div>
                     <span className="text-white/70 text-sm">Ethereum</span>
                   </div>
                   <div className="flex items-center gap-2">
-                    <div className="w-8 h-8 rounded-full bg-[#2775CA]/20 flex items-center justify-center">
-                      <svg className="w-4 h-4 text-[#2775CA]" viewBox="0 0 24 24" fill="currentColor">
-                        <circle cx="12" cy="12" r="10"/>
-                        <path fill="#fff" d="M15.5 10.5c0-1.9-1.1-2.6-3.3-2.9V5h-1.4v2.5h-1.1V5H8.3v2.6H5.5v1.6h1.2c.5 0 .7.2.7.5v5.8c0 .2-.1.4-.5.4H5.5V18h2.8v2.6h1.4V18h1.1v2.6h1.4V18c2.5-.2 3.8-1.1 3.8-3.2 0-1.6-.9-2.5-2.3-2.8 1-.4 1.8-1.1 1.8-2.5zm-4.7-.4c1.5.2 2.2.6 2.2 1.6 0 .9-.6 1.4-2.2 1.5v-3.1zm0 7.1v-3.3c1.8.2 2.7.6 2.7 1.7 0 1.1-.9 1.5-2.7 1.6z"/>
-                      </svg>
+                    <div className="w-8 h-8 rounded-full overflow-hidden bg-[#2775CA]/20 flex items-center justify-center">
+                      <img 
+                        src="/images/crypto/usdc.jpg" 
+                        alt="USDC logo" 
+                        className="w-full h-full object-cover"
+                      />
                     </div>
                     <span className="text-white/70 text-sm">USDC</span>
                   </div>
