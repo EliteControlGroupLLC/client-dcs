@@ -131,8 +131,8 @@ export function Header() {
               Visit Our Showroom
             </Link>
             <Link
-              href="/design"
-              className="inline-flex items-center justify-center rounded-full bg-green-600 px-6 py-2.5 text-sm font-semibold text-white shadow-lg shadow-green-600/25 hover:bg-green-700 transition-all hover:scale-105"
+              href="https://www.distinctcsolutions.com/showroom/design-ai"
+              className="inline-flex items-center justify-center rounded-full bg-primary px-6 py-2.5 text-sm font-semibold text-white shadow-lg shadow-primary/25 hover:bg-primary-dark transition-all hover:scale-105"
             >
               Ai 3D Design
             </Link>
