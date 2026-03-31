@@ -126,13 +126,13 @@ export function Header() {
           <div className="hidden lg:flex lg:items-center gap-3">
             <Link
               href="/showroom"
-              className="inline-flex items-center justify-center rounded-full bg-primary px-6 py-2.5 text-sm font-semibold text-white shadow-lg shadow-primary/25 hover:bg-primary-dark transition-all hover:scale-105"
+              className="inline-flex items-center justify-center text-center rounded-full bg-primary px-6 py-2.5 text-sm font-semibold text-white shadow-lg shadow-primary/25 hover:bg-primary-dark transition-all hover:scale-105"
             >
               Visit Our Showroom
             </Link>
             <Link
               href="https://www.distinctcsolutions.com/showroom/design-ai"
-              className="inline-flex items-center justify-center rounded-full bg-primary px-6 py-2.5 text-sm font-semibold text-white shadow-lg shadow-primary/25 hover:bg-primary-dark transition-all hover:scale-105"
+              className="inline-flex items-center justify-center text-center rounded-full bg-primary px-6 py-2.5 text-sm font-semibold text-white shadow-lg shadow-primary/25 hover:bg-primary-dark transition-all hover:scale-105"
             >
               Ai 3D Design
             </Link>
