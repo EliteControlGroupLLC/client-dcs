@@ -211,7 +211,7 @@ export function Hero() {
                   <div className="flex items-center gap-2">
                     <div className="w-8 h-8 rounded-full overflow-hidden bg-[#F7931A]/20 flex items-center justify-center">
                       <img 
-                        src="/images/crypto/bitcoin.jpg" 
+                        src="/images/crypto/bitcoin.png" 
                         alt="Bitcoin logo" 
                         className="w-full h-full object-cover"
                       />
