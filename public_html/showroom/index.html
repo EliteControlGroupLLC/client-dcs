@@ -1,264 +1,300 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Distinct Construction Solutions | Showroom</title>
-    <meta
-      name="description"
-      content="Explore materials, finishes, fixtures, and design options in the Distinct Construction Solutions digital showroom."
-    />
-    <style>
-      :root {
-        --bg: #f6f8fb;
-        --card: #ffffff;
-        --ink: #10233d;
-        --muted: #5e6f86;
-        --line: #dfe7f0;
-        --accent: #3ecda2;
-        --accent-deep: #1f8b6e;
-        --hero: #112744;
-      }
+   <head>
+      <meta charset="utf-8">
+      <meta http-equiv="X-UA-Compatible" content="IE=edge">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+      <meta name='robots' content='index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1' />
+     
+      <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+      <meta http-equiv="Pragma" content="no-cache">
+      <meta http-equiv="Expires" content="0">
+      
+      <!--  -->
+      <!-- SEO --> 
+      <title>Distinct Construction Solutions | San Diego ADU &amp; Home Construction</title>
+      
+      <!-- END SEO -->
 
-      * {
-        box-sizing: border-box;
-      }
+      
+      <base href="/showroom/">
 
-      body {
-        margin: 0;
-        font-family: Arial, Helvetica, sans-serif;
-        background: var(--bg);
-        color: var(--ink);
-      }
 
-      a {
-        color: inherit;
-        text-decoration: none;
-      }
+      <link rel="icon" href="https://distinctcsolutions.com/favicon.ico?favicon.0b3bf435.ico" sizes="256x256" type="image/x-icon"/>
+      
+      <!-- <link rel="icon" type="image/x-icon" href="https://assets.squarespace.com/universal/default-favicon.ico"/> -->
+      <!-- <link rel="icon" href="" /> -->
+      <!-- <link rel="icon" href="<%= BASE_URL %>favicon.ico"> -->
+      
+      <!-- GOOGLE FONT -->
+      <link rel="preconnect" href="https://fonts.googleapis.com">
+      <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+      <link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap" rel="stylesheet">
 
-      .container {
-        width: min(1120px, calc(100% - 32px));
-        margin: 0 auto;
-      }
+      <link rel="stylesheet" href="./assets/css/custom.css?v=2.1">
+      
+      
 
-      .hero {
-        background: linear-gradient(135deg, #10233d 0%, #17365d 100%);
-        color: #ffffff;
-        padding: 88px 0 80px;
-      }
+      <!-- Global site tag (gtag.js) - Google Analytics -->
+      <script async src="https://www.googletagmanager.com/gtag/js?id=UA-218934039-1"></script>
+      <script>
+         window.dataLayer = window.dataLayer || [];
+         function gtag(){dataLayer.push(arguments);}
+         gtag('js', new Date());
+      
+         gtag('config', 'UA-218934039-1');
+      </script>
 
-      .eyebrow {
-        display: inline-block;
-        margin-bottom: 18px;
-        color: var(--accent);
-        font-size: 12px;
-        font-weight: 700;
-        letter-spacing: 0.18em;
-        text-transform: uppercase;
-      }
+      <!--  Hotjar Tracking Code for https://wevisu.com -->
+      <script>
+      (function(h,o,t,j,a,r){
+            h.hj=h.hj||function(){(h.hj.q=h.hj.q||[]).push(arguments)};
+            h._hjSettings={hjid:3884312,hjsv:6};
+            a=o.getElementsByTagName('head')[0];
+            r=o.createElement('script');r.async=1;
+            r.src=t+h._hjSettings.hjid+j+h._hjSettings.hjsv;
+            a.appendChild(r);
+      })(window,document,'https://static.hotjar.com/c/hotjar-','.js?sv=');
+      </script>
 
-      h1 {
-        margin: 0 0 20px;
-        font-size: clamp(36px, 6vw, 58px);
-        line-height: 1.05;
-      }
 
-      .hero p {
-        max-width: 720px;
-        margin: 0;
-        color: rgba(255, 255, 255, 0.82);
-        font-size: 20px;
-        line-height: 1.65;
-      }
+   </head>
+   <body class="default_color_set">
+      <noscript>
+         <strong>We're sorry but website doesn't work properly without JavaScript enabled. Please enable it to continue.</strong>
+      </noscript>
 
-      .section {
-        padding: 80px 0;
-      }
-
-      .section-intro {
-        max-width: 760px;
-        margin: 0 auto 40px;
-        text-align: center;
-      }
-
-      h2 {
-        margin: 0 0 14px;
-        font-size: clamp(28px, 4vw, 44px);
-      }
-
-      .section-intro p,
-      .card p,
-      .cta-copy {
-        color: var(--muted);
-        line-height: 1.7;
-      }
-
-      .grid {
-        display: grid;
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-        gap: 24px;
-      }
-
-      .card {
-        background: var(--card);
-        border: 1px solid var(--line);
-        border-radius: 24px;
-        padding: 28px;
-        box-shadow: 0 10px 30px rgba(16, 35, 61, 0.06);
-      }
-
-      .icon {
-        width: 56px;
-        height: 56px;
-        border-radius: 16px;
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        margin-bottom: 20px;
-        background: rgba(62, 205, 162, 0.14);
-        color: var(--accent-deep);
-        font-size: 24px;
-        font-weight: 700;
-      }
-
-      .card h3 {
-        margin: 0 0 10px;
-        font-size: 24px;
-      }
-
-      .count {
-        display: inline-block;
-        margin-top: 12px;
-        color: var(--accent-deep);
-        font-size: 14px;
-        font-weight: 700;
-      }
-
-      .cta {
-        background: var(--hero);
-        color: #ffffff;
-        text-align: center;
-      }
-
-      .cta-copy {
-        max-width: 760px;
-        margin: 0 auto 28px;
-        color: rgba(255, 255, 255, 0.8);
-      }
-
-      .actions {
-        display: flex;
-        justify-content: center;
-        gap: 14px;
-        flex-wrap: wrap;
-      }
-
-      .button {
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        min-width: 220px;
-        padding: 15px 22px;
-        border-radius: 999px;
-        font-weight: 700;
-        transition: 180ms ease;
-      }
-
-      .button-primary {
-        background: var(--accent);
-        color: #10233d;
-      }
-
-      .button-primary:hover {
-        background: #4adab0;
-      }
-
-      .button-secondary {
-        border: 1px solid rgba(255, 255, 255, 0.28);
-        color: #ffffff;
-      }
-
-      .button-secondary:hover {
-        background: rgba(255, 255, 255, 0.08);
-      }
-
-      @media (max-width: 800px) {
-        .grid {
-          grid-template-columns: 1fr;
-        }
-
-        .hero {
-          padding: 72px 0 64px;
-        }
-
-        .section {
-          padding: 64px 0;
-        }
-      }
-    </style>
-  </head>
-  <body>
-    <section class="hero">
-      <div class="container">
-        <span class="eyebrow">Digital Showroom</span>
-        <h1>Explore Materials, Finishes &amp; Design Options</h1>
-        <p>
-          Browse our curated selection of materials, finishes, fixtures, and design options.
-          Visualize your project before construction begins.
-        </p>
-      </div>
-    </section>
-
-    <section class="section">
-      <div class="container">
-        <div class="section-intro">
-          <h2>Browse by Category</h2>
-          <p>Select a category to explore available options for your project.</p>
+      <header class="header-part">
+        <div class="container d-flex align-items-center justify-content-between">
+          <a href="https://distinctcsolutions.com/" class="logo"><img src="assets/images/logo-light.png" alt=""></a>
+          <nav class="mainNav">
+                <div id="menu">
+                  <ul>
+                    <li><a href="https://distinctcsolutions.com/">Home</a></li>
+                    <li><a href="https://distinctcsolutions.com/services">Services<i class="fa-solid fa-angle-down"></i></a>
+                      <ul class="s_menu">
+                        <li><a href="https://distinctcsolutions.com/services/adu-solutions">ADU Solutions</a></li>
+                        <li><a href="https://distinctcsolutions.com/services/new-construction">Custom Homes</a></li>
+                        <li><a href="https://distinctcsolutions.com/services/remodeling">Remodeling</a></li>
+                        <li><a href="https://distinctcsolutions.com/services">All Services</a></li>
+                      </ul>
+                    </li>
+                    <li><a href="https://distinctcsolutions.com/floor-plans">Floor Plans</a></li>
+                    <li><a href="https://distinctcsolutions.com/build-your-adu">Build Your ADU</a></li>
+                    <li><a href="https://distinctcsolutions.com/gallery">Gallery</a></li>
+                    <li><a href="https://distinctcsolutions.com/process">Process</a></li>
+                    <li><a href="https://distinctcsolutions.com/about">About</a></li>
+                    <li><a href="https://distinctcsolutions.com/planning-tools">Tools</a></li>
+                    <li><a href="https://distinctcsolutions.com/contact">Contact</a></li>
+                    <li><a href="/showroom">Showroom</a></li>
+                    <li><a href="/showroom/design-ai">AI 3D Design</a></li>
+                  </ul>
+                </div>
+          </nav>
+          <div class="headerRight">
+            <a href="/showroom" class="headerBtn">Visit Our Showroom</a>
+            <div id="header-cart-user" data-central-header-cart-user></div>
+          </div>
         </div>
+      </header>
 
-        <div class="grid">
-          <article class="card">
-            <div class="icon">F</div>
-            <h3>Flooring</h3>
-            <p>Hardwood, tile, luxury vinyl, and more. Browse options that fit your style and budget.</p>
-            <span class="count">50+ Options</span>
-          </article>
+      
 
-          <article class="card">
-            <div class="icon">P</div>
-            <h3>Finishes &amp; Paint</h3>
-            <p>Interior and exterior finishes curated for modern San Diego homes.</p>
-            <span class="count">100+ Colors</span>
-          </article>
+      
 
-          <article class="card">
-            <div class="icon">C</div>
-            <h3>Cabinetry &amp; Fixtures</h3>
-            <p>Kitchen and bathroom cabinetry, hardware, and plumbing fixtures.</p>
-            <span class="count">75+ Styles</span>
-          </article>
 
-          <article class="card">
-            <div class="icon">T</div>
-            <h3>Countertops &amp; Tile</h3>
-            <p>Quartz, granite, marble, and ceramic tile selections for every room.</p>
-            <span class="count">40+ Materials</span>
-          </article>
+      <div id="cdn-app" data-central-app></div>
+
+      <footer class="w-100 py-0 clearfix">
+        <div class="footerPart">
+          <div class="footerPart_1">
+            <div class="container">
+              <div class="row align-items-center">
+                <div class="col-md-8">
+                  <h3>Still Exploring Your Options?</h3>
+                  <p>Explore what you can build on your property in minutes using <br> our interactive ADU builder.</p>
+                </div>
+                <div class="col-md-4">
+                  <a class="footerBtn" href="https://distinctcsolutions.com/build-your-adu">Start Building Your ADU <i class="fa-solid fa-arrow-right"></i></a>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="footerPart_2">
+            <div class="container d-flex align-items-center justify-content-between flex-wrap">
+                <article><span><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-shield h-4 w-4 text-primary" aria-hidden="true"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"></path></svg></span>CSLB Licensed #1098531</article>
+                <article><span><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-circle-check h-4 w-4 text-primary" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="m9 12 2 2 4-4"></path></svg></span>Bonded & Insured</article>
+                <article><span><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-building2 lucide-building-2 h-4 w-4 text-primary" aria-hidden="true"><path d="M6 22V4a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v18Z"></path><path d="M6 12H4a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h2"></path><path d="M18 9h2a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2h-2"></path><path d="M10 6h4"></path><path d="M10 10h4"></path><path d="M10 14h4"></path><path d="M10 18h4"></path></svg></span>Serving San Diego County</article>
+                <article><span><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-credit-card h-4 w-4 text-primary" aria-hidden="true"><rect width="20" height="14" x="2" y="5" rx="2"></rect><line x1="2" x2="22" y1="10" y2="10"></line></svg></span>Financing Available</article>
+            </div>
+          </div>
+          <div class="footerPart_3">
+            <div class="container">
+              <div class="row">
+                <div class="col-md-4">
+                  <a href="https://distinctcsolutions.com/" class="footer_logo"><img src="assets/images/logo-light.png" alt=""></a>
+                  <p>A boutique design-build firm rooted in San Diego, specializing in ADUs, custom homes, and full-scale renovations. We combine organized systems, transparent pricing, and premium craftsmanship to deliver an experience as refined as the finished product.</p>
+                  <ul class="footerContact">
+                    <li><i class="fa-solid fa-phone"></i><a href="te:+18588330705">+1 (858) - 833 - 0705</a>|<a href="sms:+18588330705">Text</a></li>
+                    <li><i class="fa-regular fa-envelope"></i><a href="mailto:Office@distinctcsolutions.com">Office@distinctcsolutions.com</a></li>
+                    <li><i class="fa-solid fa-location-dot"></i>Chula Vista, CA</li>
+                  </ul>
+                  <ul class="socialLinks">
+                    <li><a href="#"><i class="fa-brands fa-facebook-f"></i></a></li>
+                    <li><a href="#"><i class="fa-brands fa-instagram"></i></a></li>
+                    <li><a href="#"><i class="fa-brands fa-linkedin-in"></i></a></li>
+                    <li><a href="#"><i class="fa-brands fa-youtube"></i></a></li>
+                    <li><a href="#"><i class="fa-regular fa-star"></i></a></li>
+                  </ul>
+                </div>
+                <div class="col-md-2">
+                  <h4>Services</h4>
+                  <ul>
+                    <li><a href="https://distinctcsolutions.com/services/adu-solutions">ADU Solutions</a></li>
+                    <li><a href="https://distinctcsolutions.com/services/new-construction">Custom Homes</a></li>
+                    <li><a href="https://distinctcsolutions.com/services/remodeling">Remodeling</a></li>
+                    <li><a href="https://distinctcsolutions.com/services/kitchen">Kitchen Remodeling</a></li>
+                    <li><a href="https://distinctcsolutions.com/services/bathroom">Bathroom Remodeling</a></li>
+                  </ul>
+                </div>
+                <div class="col-md-2">
+                  <h4>Tools</h4>
+                  <ul>
+                    <li><a href="https://distinctcsolutions.com/build-your-adu">Build Your ADU</a></li>
+                    <li><a href="https://distinctcsolutions.com/floor-plans">Floor Plans Library</a></li>
+                  </ul>
+                </div>
+                <div class="col-md-2">
+                  <h4>Company</h4>
+                  <ul>
+                    <li><a href="https://distinctcsolutions.com/about">About Us</a></li>
+                    <li><a href="https://distinctcsolutions.com/process">Our Process</a></li>
+                    <li><a href="https://distinctcsolutions.com/gallery">Gallery</a></li>
+                    <li><a href="https://distinctcsolutions.com/financing">Financing</a></li>
+                    <li><a href="https://distinctcsolutions.com/contact">Contact</a></li>
+                  </ul>
+                </div>
+                <div class="col-md-2">
+                  <h4>Resources</h4>
+                  <ul>
+                    <li><a href="https://distinctcsolutions.com/guides/adu">ADU Guide</a></li>
+                    <li><a href="https://distinctcsolutions.com/adu-calculator">ADU Cost Calculator</a></li>
+                    <li><a href="https://distinctcsolutions.com/faq">FAQ</a></li>
+                    <li><a href="https://distinctcsolutions.com/blog">Blog</a></li>
+                  </ul>
+                  <ul class="footer_menu_2">
+                    <li><a href="https://distinctcsolutions.com/privacy">Privacy Policy</a></li>
+                    <li><a href="https://distinctcsolutions.com/terms">Terms of Service</a></li>
+                  </ul>
+                </div>
+              </div>
+              <div class="row">
+                <div class="col-12 py-5">
+                  <div class="footerUsefullLinks" id="footer-links-slot" heading-class="bg-transparent text-center"></div>
+                  <div id="powered-by-slot" data-central-powered-by heading-class="bg-transparent" image-name="we_visu_2.png"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="footerPart_4">
+            <div class="container">
+              <div class="row">
+                <div class="col-md-12">
+                  <p>© <span class="copyright-year"></span> Distinct Construction Solutions <b>California CSLB License #1098531 • Bonded & Insured</b></p>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
-      </div>
-    </section>
+        
+      </footer> 
+      
+      
+   
+<script>
+      window.__MENU_CONFIG__ = [
+  {
+    "label": "Home",
+    "url": "https://distinctcsolutions.com/"
+  },
+  {
+    "label": "Services",
+    "url": "https://distinctcsolutions.com/services",
+    "children": [
+      {
+        "label": "ADU Solutions",
+        "url": "https://distinctcsolutions.com/services/adu-solutions"
+      },
+      {
+        "label": "Custom Homes",
+        "url": "https://distinctcsolutions.com/services/new-construction"
+      },
+      {
+        "label": "Remodeling",
+        "url": "https://distinctcsolutions.com/services/remodeling"
+      },
+      {
+        "label": "All Services",
+        "url": "https://distinctcsolutions.com/services"
+      }
+    ]
+  },
+  {
+    "label": "Floor Plans",
+    "url": "https://distinctcsolutions.com/floor-plans"
+  },
+  {
+    "label": "Build Your ADU",
+    "url": "https://distinctcsolutions.com/build-your-adu"
+  },
+  {
+    "label": "Gallery",
+    "url": "https://distinctcsolutions.com/gallery"
+  },
+  {
+    "label": "Process",
+    "url": "https://distinctcsolutions.com/process"
+  },
+  {
+    "label": "About",
+    "url": "https://distinctcsolutions.com/about"
+  },
+  {
+    "label": "Tools",
+    "url": "https://distinctcsolutions.com/planning-tools"
+  },
+  {
+    "label": "Contact",
+    "url": "https://distinctcsolutions.com/contact"
+  },
+  {
+    "label": "Showroom",
+    "url": "https://distinctcsolutions.com/showroom"
+  },
+  {
+    "label": "AI 3D Design",
+    "url": "https://distinctcsolutions.com/showroom/design-ai"
+  }
+];
 
-    <section class="section cta">
-      <div class="container">
-        <h2>Ready to Start Selecting?</h2>
-        <p class="cta-copy">
-          Our design team can walk you through material options and help you make selections that match your vision and budget.
-        </p>
-        <div class="actions">
-          <a class="button button-primary" href="https://www.distinctcsolutions.com/build-your-adu">Build Your ADU</a>
-          <a class="button button-secondary" href="https://www.distinctcsolutions.com/contact">Schedule a Consultation</a>
-        </div>
-      </div>
-    </section>
-  </body>
+  window.__APP_CONFIG__ = {
+    shopId: '1640-39A', 
+    apiBaseUrl: 'https://wevisu.com/',
+    imgBaseUrl: 'https://wevisu.com/',
+    appname: 'Distinct Construction Solutions | San Diego ADU &amp; Home Construction',
+    baseHref: '/showroom/'
+  };
+</script>
+<script src="https://cdnapi.wevisu.com/central-app.js"></script> 
+<script>
+  // Make copyright year dynamic
+  (function() {
+    var yearElements = document.querySelectorAll('.copyright-year');
+    var currentYear = new Date().getFullYear();
+    yearElements.forEach(function(el) {
+      el.textContent = currentYear;
+    });
+  })();
+</script>
+   </body>
 </html>
