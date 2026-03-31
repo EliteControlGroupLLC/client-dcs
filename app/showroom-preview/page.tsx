@@ -29,10 +29,9 @@ const categories = [
   },
 ];
 
-export default function ShowroomPage() {
+export default function ShowroomPreviewPage() {
   return (
     <div className="min-h-screen">
-      {/* Hero */}
       <section className="bg-secondary text-white py-20">
         <div className="container mx-auto px-4">
           <div className="max-w-3xl">
@@ -50,7 +49,6 @@ export default function ShowroomPage() {
         </div>
       </section>
 
-      {/* Categories */}
       <section className="py-20">
         <div className="container mx-auto px-4">
           <div className="text-center mb-12">
@@ -83,7 +81,6 @@ export default function ShowroomPage() {
         </div>
       </section>
 
-      {/* CTA */}
       <section className="py-20 bg-secondary text-white">
         <div className="container mx-auto px-4 text-center">
           <h2 className="text-3xl md:text-4xl font-bold mb-4">
