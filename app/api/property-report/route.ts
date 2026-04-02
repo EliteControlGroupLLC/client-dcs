@@ -155,23 +155,36 @@ export async function POST(request: NextRequest) {
     }
 
     // Send email to jtalavera@distinctcsolutions.com with the lead info
-    const emailPromises = [
-      notifyTeamADULead({
-        firstName,
-        lastName,
-        email,
-        phone,
-        propertyAddress,
-        timestamp: new Date().toISOString(),
-        source: "Build Your ADU",
-      }),
-      sendUserConfirmation({ name: fullName, email, propertyAddress }),
-    ];
-    Promise.allSettled(emailPromises).catch(() => {});
+    console.log(`[API] Sending lead notification email...`);
+    console.log(`[API] Lead data:`, JSON.stringify({ firstName, lastName, email, phone, propertyAddress }));
+    
+    const timestamp = new Date().toISOString();
+    
+    // Send team notification (critical - must succeed)
+    const teamEmailResult = await notifyTeamADULead({
+      firstName,
+      lastName,
+      email,
+      phone,
+      propertyAddress,
+      timestamp,
+      source: "Build Your ADU",
+    });
+    
+    console.log(`[API] Team email result:`, JSON.stringify(teamEmailResult));
+    
+    // Send user confirmation (non-critical - fire and forget)
+    sendUserConfirmation({ name: fullName, email, propertyAddress })
+      .then(result => console.log(`[API] User confirmation email result:`, JSON.stringify(result)))
+      .catch(err => console.error(`[API] User confirmation email error:`, err));
 
+    // Return success even if email failed (lead is still captured)
+    // But include email status for debugging
     return NextResponse.json({
       success: true,
       leadSaved,
+      emailSent: teamEmailResult.success,
+      emailError: teamEmailResult.error || null,
       report: reportData,
     });
   } catch (error) {
