@@ -88,7 +88,10 @@ export function ReportExportButtons({ analysisData }: ReportExportButtonsProps) 
 }
 
 /**
- * Generate PDF/Print content with Structura Aetrnum branding
+ * Generate PDF/Print content with Structura Æternum branding
+ * Brand Colors: Dark Green (#1B3D2F), Gold (#C9A227), Cream (#F8F6F1)
+ * Typography: Barlow (architectural, clean)
+ * Layout: Premium, minimal, professional architectural report
  */
 function generateStructuraPDFContent(data: PropertyAnalysisResult): string {
   const generatedDate = new Date().toLocaleDateString("en-US", {
@@ -96,6 +99,30 @@ function generateStructuraPDFContent(data: PropertyAnalysisResult): string {
     month: "long",
     day: "numeric",
   });
+
+  // Structura Æternum SVG Logo - Architectural monogram with brand colors
+  const logoSVG = `
+    <svg width="180" height="60" viewBox="0 0 180 60" xmlns="http://www.w3.org/2000/svg">
+      <!-- Architectural Column Icon -->
+      <g transform="translate(0, 5)">
+        <!-- Column base -->
+        <rect x="8" y="42" width="34" height="6" fill="#1B3D2F"/>
+        <!-- Column shaft -->
+        <rect x="12" y="12" width="26" height="30" fill="#1B3D2F"/>
+        <!-- Column capital -->
+        <rect x="8" y="6" width="34" height="6" fill="#1B3D2F"/>
+        <!-- Column top detail -->
+        <rect x="10" y="2" width="30" height="4" fill="#C9A227"/>
+        <!-- Fluting lines -->
+        <line x1="18" y1="12" x2="18" y2="42" stroke="#F8F6F1" stroke-width="1"/>
+        <line x1="25" y1="12" x2="25" y2="42" stroke="#F8F6F1" stroke-width="1"/>
+        <line x1="32" y1="12" x2="32" y2="42" stroke="#F8F6F1" stroke-width="1"/>
+      </g>
+      <!-- Brand Name -->
+      <text x="55" y="28" font-family="Barlow, Bahnschrift, sans-serif" font-size="22" font-weight="600" fill="#1B3D2F" letter-spacing="2">STRUCTURA</text>
+      <text x="55" y="46" font-family="Barlow, Bahnschrift, sans-serif" font-size="12" font-weight="300" fill="#C9A227" letter-spacing="4">ÆTERNUM</text>
+    </svg>
+  `;
 
   return `
 <!DOCTYPE html>
@@ -106,136 +133,188 @@ function generateStructuraPDFContent(data: PropertyAnalysisResult): string {
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Barlow:wght@300;400;500;600;700&display=swap');
     
+    :root {
+      --brand-green: #1B3D2F;
+      --brand-gold: #C9A227;
+      --brand-cream: #F8F6F1;
+      --brand-dark: #1a1a1a;
+      --brand-muted: #666666;
+      --brand-light: #f5f5f5;
+    }
+    
     * {
       margin: 0;
       padding: 0;
       box-sizing: border-box;
     }
     
+    @page {
+      size: letter;
+      margin: 0.6in;
+    }
+    
     body {
       font-family: 'Barlow', 'Bahnschrift', 'Segoe UI', sans-serif;
-      color: #1a1a1a;
+      color: var(--brand-dark);
       background: #fff;
-      line-height: 1.6;
-      font-size: 11pt;
+      line-height: 1.5;
+      font-size: 10pt;
+      -webkit-print-color-adjust: exact;
+      print-color-adjust: exact;
     }
     
     .page {
       max-width: 8.5in;
       margin: 0 auto;
-      padding: 0.75in;
+      padding: 0.6in;
       position: relative;
       min-height: 11in;
+      background: #fff;
     }
     
+    /* Diagonal Watermark */
     .watermark {
       position: fixed;
       top: 50%;
       left: 50%;
-      transform: translate(-50%, -50%) rotate(-45deg);
-      font-size: 48pt;
-      color: rgba(26, 77, 46, 0.04);
-      font-weight: 700;
-      letter-spacing: 4px;
+      transform: translate(-50%, -50%) rotate(-35deg);
+      font-family: 'Barlow', sans-serif;
+      font-size: 42pt;
+      font-weight: 300;
+      color: rgba(27, 61, 47, 0.035);
+      letter-spacing: 8px;
       white-space: nowrap;
-      z-index: -1;
+      text-transform: uppercase;
+      z-index: 0;
       pointer-events: none;
+      user-select: none;
     }
     
+    /* Header with Logo */
     .header {
       display: flex;
       justify-content: space-between;
-      align-items: flex-start;
-      border-bottom: 2px solid #1a4d2e;
+      align-items: center;
       padding-bottom: 20px;
-      margin-bottom: 30px;
+      margin-bottom: 25px;
+      border-bottom: 2px solid var(--brand-green);
+      position: relative;
+      z-index: 1;
     }
     
-    .logo {
+    .header::after {
+      content: '';
+      position: absolute;
+      bottom: -4px;
+      left: 0;
+      width: 80px;
+      height: 2px;
+      background: var(--brand-gold);
+    }
+    
+    .logo-container {
       display: flex;
-      flex-direction: column;
+      align-items: center;
     }
     
-    .logo-main {
-      font-size: 24pt;
-      font-weight: 700;
-      color: #1a4d2e;
-      letter-spacing: 3px;
-      text-transform: uppercase;
-    }
-    
-    .logo-sub {
-      font-size: 10pt;
-      font-weight: 300;
-      color: #c9a227;
-      letter-spacing: 6px;
-      text-transform: uppercase;
-      margin-top: 2px;
-    }
-    
-    .report-info {
+    .report-meta {
       text-align: right;
       font-size: 9pt;
-      color: #666;
+      color: var(--brand-muted);
     }
     
-    .report-info strong {
-      color: #1a4d2e;
-    }
-    
-    .report-title {
-      text-align: center;
-      margin-bottom: 30px;
-    }
-    
-    .report-title h1 {
-      font-size: 18pt;
+    .report-meta strong {
+      color: var(--brand-green);
       font-weight: 600;
-      color: #1a4d2e;
-      margin-bottom: 8px;
-      letter-spacing: 1px;
     }
     
-    .report-title .address {
-      font-size: 12pt;
-      color: #333;
-      font-weight: 400;
+    .report-meta div {
+      margin-bottom: 3px;
     }
     
-    .report-title .confidential {
-      font-size: 8pt;
-      color: #c9a227;
-      text-transform: uppercase;
-      letter-spacing: 2px;
-      margin-top: 8px;
-    }
-    
-    .section {
+    /* Report Title Block */
+    .report-title-block {
+      text-align: center;
+      padding: 25px 0;
       margin-bottom: 25px;
+      background: linear-gradient(135deg, var(--brand-cream) 0%, #fff 100%);
+      border: 1px solid rgba(27, 61, 47, 0.1);
+      border-radius: 4px;
+      position: relative;
+      z-index: 1;
+    }
+    
+    .report-title-block h1 {
+      font-size: 20pt;
+      font-weight: 600;
+      color: var(--brand-green);
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      margin-bottom: 10px;
+    }
+    
+    .report-title-block .property-address {
+      font-size: 13pt;
+      color: var(--brand-dark);
+      font-weight: 400;
+      margin-bottom: 8px;
+    }
+    
+    .report-title-block .confidential-tag {
+      display: inline-block;
+      font-size: 8pt;
+      color: var(--brand-gold);
+      text-transform: uppercase;
+      letter-spacing: 3px;
+      font-weight: 500;
+      padding: 4px 12px;
+      border: 1px solid var(--brand-gold);
+      border-radius: 2px;
+    }
+    
+    /* Section Styling */
+    .section {
+      margin-bottom: 20px;
+      position: relative;
+      z-index: 1;
+    }
+    
+    .section-header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 12px;
     }
     
     .section-title {
-      font-size: 11pt;
+      font-size: 10pt;
       font-weight: 600;
-      color: #1a4d2e;
+      color: var(--brand-green);
       text-transform: uppercase;
       letter-spacing: 2px;
-      border-bottom: 1px solid #c9a227;
-      padding-bottom: 6px;
-      margin-bottom: 15px;
+      margin: 0;
+    }
+    
+    .section-line {
+      flex: 1;
+      height: 1px;
+      background: linear-gradient(90deg, var(--brand-gold) 0%, transparent 100%);
     }
     
     .section-content {
-      background: #fafafa;
-      border-left: 3px solid #1a4d2e;
-      padding: 15px 20px;
+      background: var(--brand-cream);
+      border-left: 3px solid var(--brand-green);
+      padding: 14px 18px;
+      border-radius: 0 4px 4px 0;
     }
     
+    /* Data Rows */
     .data-row {
       display: flex;
       justify-content: space-between;
-      padding: 6px 0;
-      border-bottom: 1px solid #eee;
+      align-items: center;
+      padding: 7px 0;
+      border-bottom: 1px solid rgba(27, 61, 47, 0.08);
     }
     
     .data-row:last-child {
@@ -243,90 +322,165 @@ function generateStructuraPDFContent(data: PropertyAnalysisResult): string {
     }
     
     .data-label {
-      color: #666;
+      color: var(--brand-muted);
       font-weight: 400;
+      font-size: 9.5pt;
     }
     
     .data-value {
-      color: #1a1a1a;
+      color: var(--brand-dark);
       font-weight: 500;
       text-align: right;
+      font-size: 9.5pt;
     }
     
     .data-value.highlight {
-      color: #1a4d2e;
+      color: var(--brand-green);
       font-weight: 600;
     }
     
+    .data-value.gold {
+      color: var(--brand-gold);
+      font-weight: 600;
+    }
+    
+    /* Two Column Layout */
     .two-col {
       display: grid;
       grid-template-columns: 1fr 1fr;
-      gap: 20px;
+      gap: 18px;
     }
     
+    /* Financial Scenario Cards */
+    .scenario-card {
+      background: #fff;
+      border: 1px solid rgba(27, 61, 47, 0.12);
+      border-radius: 4px;
+      padding: 12px 14px;
+      margin-bottom: 10px;
+    }
+    
+    .scenario-card:last-child {
+      margin-bottom: 0;
+    }
+    
+    .scenario-title {
+      font-size: 10pt;
+      font-weight: 600;
+      color: var(--brand-green);
+      margin-bottom: 8px;
+      padding-bottom: 6px;
+      border-bottom: 1px solid var(--brand-gold);
+    }
+    
+    /* Disclaimer */
+    .disclaimer {
+      margin-top: 25px;
+      padding: 14px 16px;
+      background: var(--brand-light);
+      border: 1px solid #e0e0e0;
+      border-radius: 4px;
+      font-size: 7.5pt;
+      color: #777;
+      line-height: 1.6;
+      position: relative;
+      z-index: 1;
+    }
+    
+    .disclaimer strong {
+      color: var(--brand-muted);
+    }
+    
+    /* Footer */
     .footer {
       position: absolute;
       bottom: 0.5in;
-      left: 0.75in;
-      right: 0.75in;
+      left: 0.6in;
+      right: 0.6in;
+      padding-top: 12px;
       border-top: 1px solid #ddd;
-      padding-top: 15px;
-      font-size: 8pt;
-      color: #999;
       display: flex;
       justify-content: space-between;
+      align-items: center;
+      font-size: 8pt;
+      color: #999;
+      z-index: 1;
     }
     
     .footer-brand {
-      color: #1a4d2e;
-      font-weight: 500;
+      display: flex;
+      align-items: center;
+      gap: 8px;
     }
     
-    .disclaimer {
-      margin-top: 30px;
-      padding: 15px;
-      background: #f9f9f9;
-      border: 1px solid #eee;
-      font-size: 8pt;
-      color: #888;
-      line-height: 1.5;
+    .footer-brand-text {
+      color: var(--brand-green);
+      font-weight: 500;
+      letter-spacing: 1px;
+    }
+    
+    .footer-divider {
+      width: 1px;
+      height: 12px;
+      background: var(--brand-gold);
+    }
+    
+    .footer-contact {
+      color: var(--brand-muted);
     }
     
     @media print {
+      body {
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+      }
+      
       .page {
-        padding: 0.5in;
+        padding: 0;
+        margin: 0;
       }
       
       .watermark {
-        display: block;
+        position: fixed;
+        -webkit-print-color-adjust: exact;
+      }
+      
+      .section-content {
+        background: var(--brand-cream) !important;
       }
     }
   </style>
 </head>
 <body>
-  <div class="watermark">CONFIDENTIAL FEASIBILITY REPORT</div>
+  <div class="watermark">Confidential Report</div>
   
   <div class="page">
+    <!-- Header with Logo -->
     <header class="header">
-      <div class="logo">
-        <div class="logo-main">Structura</div>
-        <div class="logo-sub">Aetrnum</div>
+      <div class="logo-container">
+        ${logoSVG}
       </div>
-      <div class="report-info">
-        <div><strong>Report Generated:</strong> ${generatedDate}</div>
-        <div><strong>Confidence Score:</strong> ${data.confidenceScore || "N/A"}%</div>
+      <div class="report-meta">
+        <div><strong>Report Date:</strong> ${generatedDate}</div>
+        <div><strong>Confidence:</strong> ${data.confidenceScore || "N/A"}%</div>
+        <div><strong>Report ID:</strong> SA-${Date.now().toString(36).toUpperCase()}</div>
       </div>
     </header>
     
-    <div class="report-title">
+    <!-- Title Block -->
+    <div class="report-title-block">
       <h1>ADU Feasibility Report</h1>
-      <div class="address">${data.property.address.value}</div>
-      <div class="confidential">Confidential - Prepared for Property Owner</div>
+      <div class="property-address">${data.property.address.value}</div>
+      <div class="confidential-tag">Confidential — Prepared for Property Owner</div>
     </div>
     
+    <!-- Property & Jurisdiction (Two Columns) -->
     <div class="two-col">
       <div class="section">
-        <h2 class="section-title">Property Summary</h2>
+        <div class="section-header">
+          <h2 class="section-title">Property Summary</h2>
+          <div class="section-line"></div>
+        </div>
         <div class="section-content">
           <div class="data-row">
             <span class="data-label">Lot Size</span>
@@ -348,7 +502,10 @@ function generateStructuraPDFContent(data: PropertyAnalysisResult): string {
       </div>
       
       <div class="section">
-        <h2 class="section-title">Jurisdiction</h2>
+        <div class="section-header">
+          <h2 class="section-title">Jurisdiction</h2>
+          <div class="section-line"></div>
+        </div>
         <div class="section-content">
           <div class="data-row">
             <span class="data-label">Jurisdiction</span>
@@ -366,12 +523,16 @@ function generateStructuraPDFContent(data: PropertyAnalysisResult): string {
       </div>
     </div>
     
+    <!-- ADU Feasibility -->
     <div class="section">
-      <h2 class="section-title">ADU Feasibility Analysis</h2>
+      <div class="section-header">
+        <h2 class="section-title">ADU Feasibility Analysis</h2>
+        <div class="section-line"></div>
+      </div>
       <div class="section-content">
         <div class="data-row">
           <span class="data-label">Recommended Path</span>
-          <span class="data-value highlight">${data.bestRecommendation}</span>
+          <span class="data-value gold">${data.bestRecommendation}</span>
         </div>
         ${data.recommendations.map(rec => `
         <div class="data-row">
@@ -382,13 +543,17 @@ function generateStructuraPDFContent(data: PropertyAnalysisResult): string {
       </div>
     </div>
     
+    <!-- Financial Snapshot -->
     ${data.financialScenarios && data.financialScenarios.length > 0 ? `
     <div class="section">
-      <h2 class="section-title">Financial Snapshot</h2>
-      <div class="section-content">
+      <div class="section-header">
+        <h2 class="section-title">Financial Snapshot</h2>
+        <div class="section-line"></div>
+      </div>
+      <div class="section-content" style="padding: 10px;">
         ${data.financialScenarios.slice(0, 3).map(scenario => `
-        <div style="margin-bottom: 12px;">
-          <div style="font-weight: 600; color: #1a4d2e; margin-bottom: 5px;">${scenario.scenarioName}</div>
+        <div class="scenario-card">
+          <div class="scenario-title">${scenario.scenarioName}</div>
           <div class="data-row">
             <span class="data-label">Estimated Cost</span>
             <span class="data-value">$${scenario.estimatedTotalCost.toLocaleString()}</span>
@@ -411,9 +576,13 @@ function generateStructuraPDFContent(data: PropertyAnalysisResult): string {
     </div>
     ` : ""}
     
+    <!-- Site Conditions -->
     ${data.siteConstraints ? `
     <div class="section">
-      <h2 class="section-title">Site Conditions</h2>
+      <div class="section-header">
+        <h2 class="section-title">Site Conditions</h2>
+        <div class="section-line"></div>
+      </div>
       <div class="section-content">
         <div class="data-row">
           <span class="data-label">Overall Risk Level</span>
@@ -429,14 +598,22 @@ function generateStructuraPDFContent(data: PropertyAnalysisResult): string {
     </div>
     ` : ""}
     
+    <!-- Disclaimer -->
     <div class="disclaimer">
       <strong>Disclaimer:</strong> ${data.disclaimer}
       ${data.financialDisclaimer ? `<br><br>${data.financialDisclaimer}` : ""}
     </div>
     
+    <!-- Footer -->
     <footer class="footer">
-      <div class="footer-brand">Prepared by Structura Aetrnum</div>
-      <div>info@structuraaetrnum.com | (858) 833-0705</div>
+      <div class="footer-brand">
+        <span class="footer-brand-text">Prepared by Structura Æternum</span>
+        <span class="footer-divider"></span>
+        <span>Architecture & Development</span>
+      </div>
+      <div class="footer-contact">
+        info@structuraaetrnum.com | (858) 833-0705
+      </div>
     </footer>
   </div>
 </body>
