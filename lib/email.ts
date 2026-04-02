@@ -1,11 +1,14 @@
 // Email notification service — sends lead notifications to DCS team
-// and confirmation emails to users via Resend API.
-// Uses onboarding@resend.dev as sender until custom domain is verified.
+// and confirmation emails to users via Resend SDK.
+
+import { Resend } from "resend";
 
 const RESEND_API_KEY = process.env.RESEND_API_KEY;
-const DCS_TEAM_EMAIL = "jtalavera@distinctcsolutions.com";
-// Use Resend's default sender until custom domain is verified
-const DCS_FROM_EMAIL = "Build Your ADU <onboarding@resend.dev>";
+const DCS_TEAM_EMAIL = process.env.DCS_TEAM_EMAIL || "jtalavera@distinctcsolutions.com";
+const DCS_FROM_EMAIL = process.env.RESEND_FROM_EMAIL || "onboarding@resend.dev";
+
+// Initialize Resend client
+const resend = RESEND_API_KEY ? new Resend(RESEND_API_KEY) : null;
 
 interface EmailPayload {
   to: string;
@@ -20,18 +23,17 @@ interface EmailResult {
 }
 
 /**
- * Send an email via Resend API. 
+ * Send an email via Resend SDK. 
  * Returns detailed result object for debugging.
  */
 async function sendEmail(payload: EmailPayload): Promise<EmailResult> {
   console.log(`[EMAIL] Attempting to send email to: ${payload.to}`);
   console.log(`[EMAIL] Subject: ${payload.subject}`);
-  console.log(`[EMAIL] RESEND_API_KEY configured: ${!!RESEND_API_KEY}`);
+  console.log(`[EMAIL] From: ${DCS_FROM_EMAIL}`);
+  console.log(`[EMAIL] Resend client initialized: ${!!resend}`);
 
-  if (!RESEND_API_KEY) {
+  if (!resend) {
     console.warn(`[EMAIL] WARNING: RESEND_API_KEY not configured - email NOT sent`);
-    console.log(`[EMAIL-FALLBACK] Would have sent to: ${payload.to}`);
-    console.log(`[EMAIL-FALLBACK] Subject: ${payload.subject}`);
     return { 
       success: false, 
       error: "RESEND_API_KEY not configured" 
@@ -39,49 +41,27 @@ async function sendEmail(payload: EmailPayload): Promise<EmailResult> {
   }
 
   try {
-    console.log(`[EMAIL] Sending via Resend API...`);
-    const requestBody = {
+    console.log(`[EMAIL] Sending via Resend SDK...`);
+
+    const { data, error } = await resend.emails.send({
       from: DCS_FROM_EMAIL,
       to: payload.to,
       subject: payload.subject,
       html: payload.html,
-    };
-    console.log(`[EMAIL] Request body: ${JSON.stringify({ ...requestBody, html: "[HTML CONTENT]" })}`);
-
-    const response = await fetch("https://api.resend.com/emails", {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${RESEND_API_KEY}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(requestBody),
     });
 
-    const responseText = await response.text();
-    console.log(`[EMAIL] Resend API response status: ${response.status}`);
-    console.log(`[EMAIL] Resend API response body: ${responseText}`);
-
-    if (!response.ok) {
-      console.error(`[EMAIL] FAILED to send to ${payload.to}: ${responseText}`);
+    if (error) {
+      console.error(`[EMAIL] FAILED to send to ${payload.to}:`, error);
       return { 
         success: false, 
-        error: `Resend API error (${response.status}): ${responseText}` 
+        error: `Resend error: ${error.message}` 
       };
     }
 
-    // Parse response to get message ID
-    let messageId: string | undefined;
-    try {
-      const data = JSON.parse(responseText);
-      messageId = data.id;
-    } catch {
-      // Response wasn't JSON, that's okay
-    }
-
-    console.log(`[EMAIL] SUCCESS - Email sent to ${payload.to}, messageId: ${messageId || "unknown"}`);
+    console.log(`[EMAIL] SUCCESS - Email sent to ${payload.to}, messageId: ${data?.id || "unknown"}`);
     return { 
       success: true, 
-      messageId 
+      messageId: data?.id 
     };
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : String(error);
