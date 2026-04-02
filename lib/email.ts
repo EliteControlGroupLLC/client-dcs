@@ -1,10 +1,11 @@
 // Email notification service — sends lead notifications to DCS team
-// and confirmation emails to users via a simple fetch-based approach.
-// Uses Resend API if configured, otherwise logs for manual follow-up.
+// and confirmation emails to users via Resend API.
+// Uses onboarding@resend.dev as sender until custom domain is verified.
 
 const RESEND_API_KEY = process.env.RESEND_API_KEY;
 const DCS_TEAM_EMAIL = "jtalavera@distinctcsolutions.com";
-const DCS_FROM_EMAIL = "DCS Property Scanner <noreply@distinctcsolutions.com>";
+// Use Resend's default sender until custom domain is verified
+const DCS_FROM_EMAIL = "Build Your ADU <onboarding@resend.dev>";
 
 interface EmailPayload {
   to: string;
@@ -12,42 +13,83 @@ interface EmailPayload {
   html: string;
 }
 
+interface EmailResult {
+  success: boolean;
+  messageId?: string;
+  error?: string;
+}
+
 /**
- * Send an email via Resend API. Falls back to console logging if Resend is not configured.
- * Returns true if the email was sent (or logged) successfully.
+ * Send an email via Resend API. 
+ * Returns detailed result object for debugging.
  */
-async function sendEmail(payload: EmailPayload): Promise<boolean> {
+async function sendEmail(payload: EmailPayload): Promise<EmailResult> {
+  console.log(`[EMAIL] Attempting to send email to: ${payload.to}`);
+  console.log(`[EMAIL] Subject: ${payload.subject}`);
+  console.log(`[EMAIL] RESEND_API_KEY configured: ${!!RESEND_API_KEY}`);
+
   if (!RESEND_API_KEY) {
-    console.log(`[EMAIL-LOG] To: ${payload.to} | Subject: ${payload.subject}`);
-    console.log(`[EMAIL-LOG] Body preview: ${payload.html.substring(0, 200)}...`);
-    return true;
+    console.warn(`[EMAIL] WARNING: RESEND_API_KEY not configured - email NOT sent`);
+    console.log(`[EMAIL-FALLBACK] Would have sent to: ${payload.to}`);
+    console.log(`[EMAIL-FALLBACK] Subject: ${payload.subject}`);
+    return { 
+      success: false, 
+      error: "RESEND_API_KEY not configured" 
+    };
   }
 
   try {
+    console.log(`[EMAIL] Sending via Resend API...`);
+    const requestBody = {
+      from: DCS_FROM_EMAIL,
+      to: payload.to,
+      subject: payload.subject,
+      html: payload.html,
+    };
+    console.log(`[EMAIL] Request body: ${JSON.stringify({ ...requestBody, html: "[HTML CONTENT]" })}`);
+
     const response = await fetch("https://api.resend.com/emails", {
       method: "POST",
       headers: {
         Authorization: `Bearer ${RESEND_API_KEY}`,
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({
-        from: DCS_FROM_EMAIL,
-        to: payload.to,
-        subject: payload.subject,
-        html: payload.html,
-      }),
+      body: JSON.stringify(requestBody),
     });
 
+    const responseText = await response.text();
+    console.log(`[EMAIL] Resend API response status: ${response.status}`);
+    console.log(`[EMAIL] Resend API response body: ${responseText}`);
+
     if (!response.ok) {
-      const err = await response.text();
-      console.error(`[EMAIL-ERROR] Failed to send to ${payload.to}: ${err}`);
-      return false;
+      console.error(`[EMAIL] FAILED to send to ${payload.to}: ${responseText}`);
+      return { 
+        success: false, 
+        error: `Resend API error (${response.status}): ${responseText}` 
+      };
     }
 
-    return true;
+    // Parse response to get message ID
+    let messageId: string | undefined;
+    try {
+      const data = JSON.parse(responseText);
+      messageId = data.id;
+    } catch {
+      // Response wasn't JSON, that's okay
+    }
+
+    console.log(`[EMAIL] SUCCESS - Email sent to ${payload.to}, messageId: ${messageId || "unknown"}`);
+    return { 
+      success: true, 
+      messageId 
+    };
   } catch (error) {
-    console.error("[EMAIL-ERROR]", error);
-    return false;
+    const errorMessage = error instanceof Error ? error.message : String(error);
+    console.error(`[EMAIL] EXCEPTION while sending email:`, error);
+    return { 
+      success: false, 
+      error: `Exception: ${errorMessage}` 
+    };
   }
 }
 
@@ -66,7 +108,15 @@ export async function notifyTeamADULead(lead: {
   propertyAddress: string;
   timestamp: string;
   source: string;
-}): Promise<boolean> {
+  verification?: {
+    emailValidated: boolean;
+    emailScore: number;
+    emailIsDisposable: boolean;
+    phoneVerified: boolean;
+    verificationCompletedAt: string | null;
+  };
+}): Promise<EmailResult> {
+  console.log(`[EMAIL] notifyTeamADULead called with:`, JSON.stringify(lead, null, 2));
   const formattedDate = new Date(lead.timestamp).toLocaleString("en-US", {
     weekday: "long",
     year: "numeric",
@@ -76,6 +126,18 @@ export async function notifyTeamADULead(lead: {
     minute: "2-digit",
     timeZoneName: "short",
   });
+
+  // Verification status badges
+  const v = lead.verification;
+  const emailBadge = v?.emailValidated 
+    ? `<span style="background: #22c55e; color: white; padding: 2px 8px; border-radius: 4px; font-size: 11px;">Verified (Score: ${v.emailScore})</span>`
+    : `<span style="background: #f59e0b; color: white; padding: 2px 8px; border-radius: 4px; font-size: 11px;">Not Verified</span>`;
+  const phoneBadge = v?.phoneVerified
+    ? `<span style="background: #22c55e; color: white; padding: 2px 8px; border-radius: 4px; font-size: 11px;">SMS Verified</span>`
+    : `<span style="background: #f59e0b; color: white; padding: 2px 8px; border-radius: 4px; font-size: 11px;">Not Verified</span>`;
+  const disposableBadge = v?.emailIsDisposable
+    ? `<span style="background: #ef4444; color: white; padding: 2px 8px; border-radius: 4px; font-size: 11px;">Disposable</span>`
+    : "";
 
   const html = `
     <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
@@ -94,11 +156,11 @@ export async function notifyTeamADULead(lead: {
           </tr>
           <tr>
             <td style="padding: 8px 0; font-weight: bold; color: #333;">Email:</td>
-            <td style="padding: 8px 0; color: #555;"><a href="mailto:${lead.email}">${lead.email}</a></td>
+            <td style="padding: 8px 0; color: #555;"><a href="mailto:${lead.email}">${lead.email}</a> ${emailBadge} ${disposableBadge}</td>
           </tr>
           <tr>
             <td style="padding: 8px 0; font-weight: bold; color: #333;">Phone:</td>
-            <td style="padding: 8px 0; color: #555;"><a href="tel:${lead.phone}">${lead.phone}</a></td>
+            <td style="padding: 8px 0; color: #555;"><a href="tel:${lead.phone}">${lead.phone}</a> ${phoneBadge}</td>
           </tr>
           <tr>
             <td style="padding: 8px 0; font-weight: bold; color: #333;">Property Address:</td>
@@ -113,6 +175,35 @@ export async function notifyTeamADULead(lead: {
             <td style="padding: 8px 0; color: #555;">${lead.source}</td>
           </tr>
         </table>
+        
+        ${v ? `
+        <div style="margin-top: 16px; padding: 12px; background: #f0f9ff; border: 1px solid #bae6fd; border-radius: 8px;">
+          <p style="margin: 0 0 8px 0; font-weight: bold; color: #0369a1; font-size: 13px;">Verification Status</p>
+          <table style="width: 100%; border-collapse: collapse; font-size: 12px;">
+            <tr>
+              <td style="padding: 4px 0; color: #555;">Email Validated:</td>
+              <td style="padding: 4px 0; color: #333;">${v.emailValidated ? "Yes" : "No"}</td>
+            </tr>
+            <tr>
+              <td style="padding: 4px 0; color: #555;">Email Quality Score:</td>
+              <td style="padding: 4px 0; color: #333;">${v.emailScore}/100</td>
+            </tr>
+            <tr>
+              <td style="padding: 4px 0; color: #555;">Disposable Email:</td>
+              <td style="padding: 4px 0; color: ${v.emailIsDisposable ? "#ef4444" : "#333"};">${v.emailIsDisposable ? "Yes" : "No"}</td>
+            </tr>
+            <tr>
+              <td style="padding: 4px 0; color: #555;">Phone Verified (SMS):</td>
+              <td style="padding: 4px 0; color: #333;">${v.phoneVerified ? "Yes" : "No"}</td>
+            </tr>
+            <tr>
+              <td style="padding: 4px 0; color: #555;">Verified At:</td>
+              <td style="padding: 4px 0; color: #333;">${v.verificationCompletedAt ? new Date(v.verificationCompletedAt).toLocaleString() : "N/A"}</td>
+            </tr>
+          </table>
+        </div>
+        ` : ""}
+        
         <div style="margin-top: 20px; padding: 12px; background: #fff3cd; border-radius: 8px; font-size: 13px; color: #856404;">
           Follow up within 24 hours for best conversion.
         </div>
@@ -120,11 +211,14 @@ export async function notifyTeamADULead(lead: {
     </div>
   `;
 
-  return sendEmail({
+  const result = await sendEmail({
     to: DCS_TEAM_EMAIL,
     subject: "New Build Your ADU Lead",
     html,
   });
+  
+  console.log(`[EMAIL] notifyTeamADULead result:`, JSON.stringify(result));
+  return result;
 }
 
 /**
@@ -138,7 +232,7 @@ export async function notifyTeamNewLead(lead: {
   source: string;
   confidenceScore?: number;
   recommendedPath?: string;
-}): Promise<boolean> {
+}): Promise<EmailResult> {
   const html = `
     <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
       <div style="background: #1B2D4F; padding: 20px; border-radius: 12px 12px 0 0;">
@@ -187,7 +281,8 @@ export async function sendUserConfirmation(user: {
   name: string;
   email: string;
   propertyAddress: string;
-}): Promise<boolean> {
+}): Promise<EmailResult> {
+  console.log(`[EMAIL] sendUserConfirmation called for: ${user.email}`);
   const html = `
     <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
       <div style="background: #1B2D4F; padding: 20px; border-radius: 12px 12px 0 0; text-align: center;">
@@ -237,7 +332,7 @@ export async function notifyTeamContactForm(contact: {
   phone?: string;
   service?: string;
   message: string;
-}): Promise<boolean> {
+}): Promise<EmailResult> {
   const html = `
     <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
       <div style="background: #1B2D4F; padding: 20px; border-radius: 12px 12px 0 0;">
