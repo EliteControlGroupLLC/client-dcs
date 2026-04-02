@@ -108,6 +108,13 @@ export async function notifyTeamADULead(lead: {
   propertyAddress: string;
   timestamp: string;
   source: string;
+  verification?: {
+    emailValidated: boolean;
+    emailScore: number;
+    emailIsDisposable: boolean;
+    phoneVerified: boolean;
+    verificationCompletedAt: string | null;
+  };
 }): Promise<EmailResult> {
   console.log(`[EMAIL] notifyTeamADULead called with:`, JSON.stringify(lead, null, 2));
   const formattedDate = new Date(lead.timestamp).toLocaleString("en-US", {
@@ -119,6 +126,18 @@ export async function notifyTeamADULead(lead: {
     minute: "2-digit",
     timeZoneName: "short",
   });
+
+  // Verification status badges
+  const v = lead.verification;
+  const emailBadge = v?.emailValidated 
+    ? `<span style="background: #22c55e; color: white; padding: 2px 8px; border-radius: 4px; font-size: 11px;">Verified (Score: ${v.emailScore})</span>`
+    : `<span style="background: #f59e0b; color: white; padding: 2px 8px; border-radius: 4px; font-size: 11px;">Not Verified</span>`;
+  const phoneBadge = v?.phoneVerified
+    ? `<span style="background: #22c55e; color: white; padding: 2px 8px; border-radius: 4px; font-size: 11px;">SMS Verified</span>`
+    : `<span style="background: #f59e0b; color: white; padding: 2px 8px; border-radius: 4px; font-size: 11px;">Not Verified</span>`;
+  const disposableBadge = v?.emailIsDisposable
+    ? `<span style="background: #ef4444; color: white; padding: 2px 8px; border-radius: 4px; font-size: 11px;">Disposable</span>`
+    : "";
 
   const html = `
     <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
@@ -137,11 +156,11 @@ export async function notifyTeamADULead(lead: {
           </tr>
           <tr>
             <td style="padding: 8px 0; font-weight: bold; color: #333;">Email:</td>
-            <td style="padding: 8px 0; color: #555;"><a href="mailto:${lead.email}">${lead.email}</a></td>
+            <td style="padding: 8px 0; color: #555;"><a href="mailto:${lead.email}">${lead.email}</a> ${emailBadge} ${disposableBadge}</td>
           </tr>
           <tr>
             <td style="padding: 8px 0; font-weight: bold; color: #333;">Phone:</td>
-            <td style="padding: 8px 0; color: #555;"><a href="tel:${lead.phone}">${lead.phone}</a></td>
+            <td style="padding: 8px 0; color: #555;"><a href="tel:${lead.phone}">${lead.phone}</a> ${phoneBadge}</td>
           </tr>
           <tr>
             <td style="padding: 8px 0; font-weight: bold; color: #333;">Property Address:</td>
@@ -156,6 +175,35 @@ export async function notifyTeamADULead(lead: {
             <td style="padding: 8px 0; color: #555;">${lead.source}</td>
           </tr>
         </table>
+        
+        ${v ? `
+        <div style="margin-top: 16px; padding: 12px; background: #f0f9ff; border: 1px solid #bae6fd; border-radius: 8px;">
+          <p style="margin: 0 0 8px 0; font-weight: bold; color: #0369a1; font-size: 13px;">Verification Status</p>
+          <table style="width: 100%; border-collapse: collapse; font-size: 12px;">
+            <tr>
+              <td style="padding: 4px 0; color: #555;">Email Validated:</td>
+              <td style="padding: 4px 0; color: #333;">${v.emailValidated ? "Yes" : "No"}</td>
+            </tr>
+            <tr>
+              <td style="padding: 4px 0; color: #555;">Email Quality Score:</td>
+              <td style="padding: 4px 0; color: #333;">${v.emailScore}/100</td>
+            </tr>
+            <tr>
+              <td style="padding: 4px 0; color: #555;">Disposable Email:</td>
+              <td style="padding: 4px 0; color: ${v.emailIsDisposable ? "#ef4444" : "#333"};">${v.emailIsDisposable ? "Yes" : "No"}</td>
+            </tr>
+            <tr>
+              <td style="padding: 4px 0; color: #555;">Phone Verified (SMS):</td>
+              <td style="padding: 4px 0; color: #333;">${v.phoneVerified ? "Yes" : "No"}</td>
+            </tr>
+            <tr>
+              <td style="padding: 4px 0; color: #555;">Verified At:</td>
+              <td style="padding: 4px 0; color: #333;">${v.verificationCompletedAt ? new Date(v.verificationCompletedAt).toLocaleString() : "N/A"}</td>
+            </tr>
+          </table>
+        </div>
+        ` : ""}
+        
         <div style="margin-top: 20px; padding: 12px; background: #fff3cd; border-radius: 8px; font-size: 13px; color: #856404;">
           Follow up within 24 hours for best conversion.
         </div>

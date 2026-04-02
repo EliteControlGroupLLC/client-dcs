@@ -32,7 +32,17 @@ export async function POST(request: NextRequest) {
       phone,
       propertyAddress,
       scanResults,
+      verification,
     } = body;
+
+    // Extract verification data
+    const verificationData = verification || {
+      emailValidated: false,
+      emailScore: 0,
+      emailIsDisposable: false,
+      phoneVerified: false,
+      verificationCompletedAt: null,
+    };
 
     // Validate required fields
     if (!firstName || !lastName) {
@@ -169,6 +179,14 @@ export async function POST(request: NextRequest) {
       propertyAddress,
       timestamp,
       source: "Build Your ADU",
+      // Verification status
+      verification: {
+        emailValidated: verificationData.emailValidated,
+        emailScore: verificationData.emailScore,
+        emailIsDisposable: verificationData.emailIsDisposable,
+        phoneVerified: verificationData.phoneVerified,
+        verificationCompletedAt: verificationData.verificationCompletedAt,
+      },
     });
     
     console.log(`[API] Team email result:`, JSON.stringify(teamEmailResult));
