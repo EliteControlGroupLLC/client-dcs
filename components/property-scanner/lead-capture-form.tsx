@@ -1,43 +1,93 @@
 "use client";
 
-import { useState } from "react";
-import { FileText, User, Mail, Phone, Loader2, CheckCircle } from "lucide-react";
+import { useState, useEffect } from "react";
+import { Lock, User, Mail, Phone, MapPin, Loader2, Shield, CheckCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 interface LeadCaptureFormProps {
   propertyAddress: string;
   scanResults: Record<string, unknown>;
-  onReportGenerated?: (reportData: Record<string, unknown>) => void;
+  onReportUnlocked?: () => void;
 }
 
 export function LeadCaptureForm({
   propertyAddress,
   scanResults,
-  onReportGenerated,
+  onReportUnlocked,
 }: LeadCaptureFormProps) {
-  const [name, setName] = useState("");
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
+  const [address, setAddress] = useState(propertyAddress);
   const [submitting, setSubmitting] = useState(false);
-  const [submitted, setSubmitted] = useState(false);
-  const [error, setError] = useState("");
+  const [errors, setErrors] = useState<Record<string, string>>({});
+
+  // Auto-fill address when propertyAddress changes
+  useEffect(() => {
+    setAddress(propertyAddress);
+  }, [propertyAddress]);
+
+  const validateEmail = (email: string): boolean => {
+    const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return re.test(email);
+  };
+
+  const validatePhone = (phone: string): boolean => {
+    // Allow various formats: (619) 555-0123, 619-555-0123, 6195550123, etc.
+    const digits = phone.replace(/\D/g, "");
+    return digits.length >= 10 && digits.length <= 11;
+  };
+
+  const validateForm = (): boolean => {
+    const newErrors: Record<string, string> = {};
+
+    if (!firstName.trim()) {
+      newErrors.firstName = "First name is required";
+    }
+
+    if (!lastName.trim()) {
+      newErrors.lastName = "Last name is required";
+    }
+
+    if (!email.trim()) {
+      newErrors.email = "Email is required";
+    } else if (!validateEmail(email.trim())) {
+      newErrors.email = "Please enter a valid email address";
+    }
+
+    if (!phone.trim()) {
+      newErrors.phone = "Phone number is required";
+    } else if (!validatePhone(phone.trim())) {
+      newErrors.phone = "Please enter a valid 10-digit phone number";
+    }
+
+    if (!address.trim()) {
+      newErrors.address = "Property address is required";
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!name.trim() || !email.trim()) return;
+    
+    if (!validateForm()) return;
 
     setSubmitting(true);
-    setError("");
+    setErrors({});
 
     try {
       const response = await fetch("/api/property-report", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          name: name.trim(),
+          firstName: firstName.trim(),
+          lastName: lastName.trim(),
           email: email.trim(),
-          phone: phone.trim() || null,
-          propertyAddress,
+          phone: phone.trim(),
+          propertyAddress: address.trim(),
           scanResults,
         }),
       });
@@ -45,51 +95,32 @@ export function LeadCaptureForm({
       const data = await response.json();
 
       if (!response.ok) {
-        setError(data.error || "Something went wrong. Please try again.");
+        setErrors({ form: data.error || "Something went wrong. Please try again." });
         return;
       }
 
-      setSubmitted(true);
-      if (onReportGenerated && data.report) {
-        onReportGenerated(data.report);
+      // Unlock the report
+      if (onReportUnlocked) {
+        onReportUnlocked();
       }
     } catch {
-      setError("Network error. Please check your connection and try again.");
+      setErrors({ form: "Network error. Please check your connection and try again." });
     } finally {
       setSubmitting(false);
     }
   };
 
-  if (submitted) {
-    return (
-      <div className="bg-gradient-to-br from-primary/5 via-white to-emerald-50 rounded-2xl border border-primary/20 p-8 text-center">
-        <div className="inline-flex items-center justify-center w-14 h-14 bg-emerald-100 rounded-full mb-4">
-          <CheckCircle className="h-7 w-7 text-emerald-600" />
-        </div>
-        <h3 className="text-xl font-bold text-secondary mb-2">Your Report is Ready!</h3>
-        <p className="text-sm text-muted-foreground mb-1">
-          We&apos;ve sent your Property Development Report to <strong>{email}</strong>.
-        </p>
-        <p className="text-xs text-muted-foreground">
-          A DCS specialist will follow up to discuss your property&apos;s potential.
-        </p>
-      </div>
-    );
-  }
-
   return (
-    <div className="bg-gradient-to-br from-primary/5 via-white to-blue-50 rounded-2xl border border-primary/20 overflow-hidden">
+    <div className="bg-white rounded-2xl border-2 border-primary/30 shadow-2xl overflow-hidden">
       {/* Header */}
-      <div className="bg-gradient-to-r from-secondary to-secondary-light text-white p-6">
-        <div className="flex items-center gap-3 mb-2">
-          <div className="w-10 h-10 bg-white/10 rounded-xl flex items-center justify-center">
-            <FileText className="h-5 w-5" />
-          </div>
-          <div>
-            <h3 className="text-lg font-bold">Your Property Development Report is Ready</h3>
-            <p className="text-sm text-white/70">Get your personalized report with full analysis</p>
-          </div>
+      <div className="bg-gradient-to-r from-secondary to-secondary-light text-white p-6 text-center">
+        <div className="inline-flex items-center justify-center w-14 h-14 bg-white/10 rounded-full mb-4">
+          <Lock className="h-7 w-7" />
         </div>
+        <h3 className="text-xl font-bold mb-2">Unlock Your Free ADU Feasibility Report</h3>
+        <p className="text-sm text-white/80 max-w-md mx-auto">
+          Enter your information to access your property analysis. This report provides valuable feasibility insight that property owners often pay hundreds or even thousands of dollars for.
+        </p>
       </div>
 
       {/* Form */}
@@ -98,48 +129,102 @@ export function LeadCaptureForm({
           <div>
             <label className="block text-xs font-medium text-muted-foreground mb-1.5">
               <User className="h-3 w-3 inline mr-1" />
-              Full Name *
+              First Name *
             </label>
             <input
               type="text"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              placeholder="John Smith"
-              required
-              className="w-full px-3 py-2.5 rounded-lg border border-border text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all"
+              value={firstName}
+              onChange={(e) => setFirstName(e.target.value)}
+              placeholder="John"
+              className={`w-full px-3 py-2.5 rounded-lg border text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all ${
+                errors.firstName ? "border-red-400 bg-red-50" : "border-border"
+              }`}
             />
+            {errors.firstName && (
+              <p className="text-xs text-red-500 mt-1">{errors.firstName}</p>
+            )}
           </div>
           <div>
             <label className="block text-xs font-medium text-muted-foreground mb-1.5">
-              <Mail className="h-3 w-3 inline mr-1" />
-              Email Address *
+              <User className="h-3 w-3 inline mr-1" />
+              Last Name *
             </label>
             <input
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              placeholder="john@example.com"
-              required
-              className="w-full px-3 py-2.5 rounded-lg border border-border text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all"
+              type="text"
+              value={lastName}
+              onChange={(e) => setLastName(e.target.value)}
+              placeholder="Smith"
+              className={`w-full px-3 py-2.5 rounded-lg border text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all ${
+                errors.lastName ? "border-red-400 bg-red-50" : "border-border"
+              }`}
             />
+            {errors.lastName && (
+              <p className="text-xs text-red-500 mt-1">{errors.lastName}</p>
+            )}
           </div>
         </div>
+
+        <div>
+          <label className="block text-xs font-medium text-muted-foreground mb-1.5">
+            <Mail className="h-3 w-3 inline mr-1" />
+            Email Address *
+          </label>
+          <input
+            type="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            placeholder="john@example.com"
+            className={`w-full px-3 py-2.5 rounded-lg border text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all ${
+              errors.email ? "border-red-400 bg-red-50" : "border-border"
+            }`}
+          />
+          {errors.email && (
+            <p className="text-xs text-red-500 mt-1">{errors.email}</p>
+          )}
+        </div>
+
         <div>
           <label className="block text-xs font-medium text-muted-foreground mb-1.5">
             <Phone className="h-3 w-3 inline mr-1" />
-            Phone Number (optional)
+            Phone Number *
           </label>
           <input
             type="tel"
             value={phone}
             onChange={(e) => setPhone(e.target.value)}
             placeholder="(619) 555-0123"
-            className="w-full px-3 py-2.5 rounded-lg border border-border text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all"
+            className={`w-full px-3 py-2.5 rounded-lg border text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all ${
+              errors.phone ? "border-red-400 bg-red-50" : "border-border"
+            }`}
           />
+          {errors.phone && (
+            <p className="text-xs text-red-500 mt-1">{errors.phone}</p>
+          )}
         </div>
 
-        {error && (
-          <p className="text-xs text-red-500">{error}</p>
+        <div>
+          <label className="block text-xs font-medium text-muted-foreground mb-1.5">
+            <MapPin className="h-3 w-3 inline mr-1" />
+            Property Address *
+          </label>
+          <input
+            type="text"
+            value={address}
+            onChange={(e) => setAddress(e.target.value)}
+            placeholder="123 Main St, San Diego, CA"
+            className={`w-full px-3 py-2.5 rounded-lg border text-sm bg-slate-50 focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all ${
+              errors.address ? "border-red-400 bg-red-50" : "border-border"
+            }`}
+          />
+          {errors.address && (
+            <p className="text-xs text-red-500 mt-1">{errors.address}</p>
+          )}
+        </div>
+
+        {errors.form && (
+          <div className="bg-red-50 border border-red-200 rounded-lg p-3">
+            <p className="text-sm text-red-600">{errors.form}</p>
+          </div>
         )}
 
         <Button
@@ -147,52 +232,37 @@ export function LeadCaptureForm({
           size="lg"
           rounded="full"
           className="w-full"
-          disabled={submitting || !name.trim() || !email.trim()}
+          disabled={submitting}
         >
           {submitting ? (
             <>
               <Loader2 className="h-4 w-4 animate-spin" />
-              Generating Report...
+              Unlocking Report...
             </>
           ) : (
             <>
-              <FileText className="h-4 w-4" />
-              Get My Free Property Report
+              <Lock className="h-4 w-4" />
+              Unlock My Report
             </>
           )}
         </Button>
 
-        <p className="text-[10px] text-muted-foreground text-center">
-          By submitting, you agree to receive your report and a follow-up from our team.
-          No spam, ever. Your data is secure.
-        </p>
-      </form>
-
-      {/* Report includes */}
-      <div className="px-6 pb-6">
-        <div className="bg-slate-50 rounded-xl p-4">
-          <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider mb-2">
-            Your report includes:
-          </p>
-          <div className="grid grid-cols-2 gap-1.5">
-            {[
-              "Property Summary",
-              "Jurisdiction Rules",
-              "ADU Feasibility",
-              "Parcel Analysis",
-              "Financial Projections",
-              "ROI Snapshot",
-              "Opportunity Analysis",
-              "Next Steps & CTA",
-            ].map((item) => (
-              <p key={item} className="text-[11px] text-muted-foreground flex items-center gap-1">
-                <span className="w-1 h-1 bg-primary rounded-full" />
-                {item}
-              </p>
-            ))}
+        {/* Trust indicators */}
+        <div className="flex flex-wrap items-center justify-center gap-4 pt-2">
+          <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+            <CheckCircle className="h-3.5 w-3.5 text-primary" />
+            <span>No obligation</span>
+          </div>
+          <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+            <Shield className="h-3.5 w-3.5 text-primary" />
+            <span>Built for San Diego</span>
+          </div>
+          <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+            <CheckCircle className="h-3.5 w-3.5 text-primary" />
+            <span>Instant access</span>
           </div>
         </div>
-      </div>
+      </form>
     </div>
   );
 }

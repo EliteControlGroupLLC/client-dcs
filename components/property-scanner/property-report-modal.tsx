@@ -1,7 +1,7 @@
 "use client";
 
-import { useState } from "react";
-import { X, Download, FileText, Building, DollarSign, MapPin, Shield, TrendingUp, AlertTriangle, Droplets, Flame, Mountain } from "lucide-react";
+import { useState, useRef } from "react";
+import { X, Download, Printer, FileText, Building, DollarSign, MapPin, Shield, TrendingUp, AlertTriangle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import type { PropertyAnalysisResult } from "@/lib/property-intelligence";
 import { ShowSourcesPanel } from "./show-sources-panel";
@@ -22,25 +22,52 @@ export function PropertyReportModal({
   isAdmin = false,
 }: PropertyReportModalProps) {
   const [downloading, setDownloading] = useState(false);
+  const printRef = useRef<HTMLDivElement>(null);
 
   if (!isOpen) return null;
 
-  const handleDownload = async () => {
+  const handleDownloadPDF = async () => {
     setDownloading(true);
 
-    // Generate a text-based report for download
-    const reportContent = generateReportText(analysisData, reportData);
-    const blob = new Blob([reportContent], { type: "text/plain" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `DCS-Property-Report-${Date.now()}.txt`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
+    try {
+      // Generate PDF-styled HTML content with Structura Aetrnum branding
+      const pdfContent = generateStructuraPDFContent(analysisData);
+      
+      // Create a new window for the PDF content
+      const printWindow = window.open("", "_blank");
+      if (printWindow) {
+        printWindow.document.write(pdfContent);
+        printWindow.document.close();
+        
+        // Wait for content to load then trigger print (save as PDF)
+        printWindow.onload = () => {
+          setTimeout(() => {
+            printWindow.print();
+          }, 500);
+        };
+      }
+    } catch (error) {
+      console.error("PDF generation error:", error);
+    }
 
     setDownloading(false);
+  };
+
+  const handlePrint = () => {
+    // Generate print-friendly content with Structura Aetrnum branding
+    const printContent = generateStructuraPDFContent(analysisData);
+    
+    const printWindow = window.open("", "_blank");
+    if (printWindow) {
+      printWindow.document.write(printContent);
+      printWindow.document.close();
+      
+      printWindow.onload = () => {
+        setTimeout(() => {
+          printWindow.print();
+        }, 500);
+      };
+    }
   };
 
   return (
@@ -236,10 +263,16 @@ export function PropertyReportModal({
           <p className="text-[10px] text-muted-foreground">
             Prepared for planning review by Distinct Construction Solutions
           </p>
-          <Button size="sm" rounded="full" onClick={handleDownload} disabled={downloading}>
-            <Download className="h-3.5 w-3.5" />
-            {downloading ? "Downloading..." : "Download Report"}
-          </Button>
+          <div className="flex items-center gap-2">
+            <Button size="sm" variant="outline" rounded="full" onClick={handlePrint}>
+              <Printer className="h-3.5 w-3.5" />
+              Print
+            </Button>
+            <Button size="sm" rounded="full" onClick={handleDownloadPDF} disabled={downloading}>
+              <Download className="h-3.5 w-3.5" />
+              {downloading ? "Generating..." : "Download PDF"}
+            </Button>
+          </div>
         </div>
       </div>
     </div>
@@ -275,118 +308,389 @@ function ReportRow({ label, value }: { label: string; value: string }) {
   );
 }
 
-function generateReportText(
-  data: PropertyAnalysisResult,
-  _reportData?: Record<string, unknown>
-): string {
-  const lines: string[] = [
-    "═══════════════════════════════════════════",
-    "  DCS PROPERTY DEVELOPMENT REPORT",
-    "═══════════════════════════════════════════",
-    "",
-    `Address: ${data.property.address.value}`,
-    `Generated: ${new Date().toLocaleDateString()}`,
-    "",
-    "─── PROPERTY SUMMARY ───",
-    `Lot Size: ${data.property.lotSizeSqFt.value.toLocaleString()} sq ft`,
-    `Living Area: ${data.property.homeAreaSqFt.value.toLocaleString()} sq ft`,
-    ...(data.geometryAnalysis?.areaSummary ? [
-      `Main Footprint: ${data.geometryAnalysis.areaSummary.mainFootprintSqFt.toLocaleString()} sq ft`,
-      `Main Living Area: ${data.geometryAnalysis.areaSummary.mainLivingSqFt.toLocaleString()} sq ft`,
-      `Total Structure Footprint: ${data.geometryAnalysis.areaSummary.totalStructureFootprintSqFt.toLocaleString()} sq ft`,
-    ] : []),
-    `Zoning: ${data.property.zoning.value}`,
-    `Slope: ${data.property.slope.value}`,
-    ...(data.geometryAnalysis ? [
-      `Geometry: ${data.geometryAnalysis.geometryStatus} (${data.geometryAnalysis.geometryConfidence}% confidence)`,
-    ] : []),
-    "",
-  ];
+/**
+ * Generate PDF/Print content with Structura Aetrnum branding
+ * Colors: Dark green (primary), Gold (accent), neutral light tones
+ * Typography: Clean architectural font (Bahnschrift style)
+ * Layout: Minimal, high-end, structured, no clutter
+ */
+function generateStructuraPDFContent(data: PropertyAnalysisResult): string {
+  const generatedDate = new Date().toLocaleDateString("en-US", {
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+  });
 
-  if (data.jurisdiction) {
-    lines.push("─── JURISDICTION ───");
-    lines.push(`Jurisdiction: ${data.jurisdiction.name}`);
-    lines.push(`Rules Version: ${data.jurisdiction.rulesVersion}`);
-    lines.push("");
-  }
-
-  lines.push("─── ADU FEASIBILITY ───");
-  lines.push(`Recommended Path: ${data.bestRecommendation}`);
-  lines.push(`Buildable Envelope: ${data.buildable.estimatedBuildableEnvelopeSqFt.toLocaleString()} sq ft`);
-  lines.push("");
-
-  for (const rec of data.recommendations) {
-    lines.push(`  ${rec.type}: ${rec.feasibility} — ${rec.estimatedSizeRange} — ${rec.priceRange}`);
-  }
-  lines.push("");
-
-  if (data.financialScenarios && data.financialScenarios.length > 0) {
-    lines.push("─── FINANCIAL SNAPSHOT ───");
-    for (const s of data.financialScenarios) {
-      lines.push(`  ${s.scenarioName}:`);
-      lines.push(`    Est. Cost: $${s.estimatedTotalCost.toLocaleString()}`);
-      lines.push(`    Est. Rent: $${s.estimatedMonthlyIncome.toLocaleString()}/mo`);
-      lines.push(`    ROI: ${s.estimatedRoi}%`);
-      lines.push(`    Payback: ${s.estimatedPaybackYears} years`);
+  return `
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>ADU Feasibility Report - ${data.property.address.value}</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Barlow:wght@300;400;500;600;700&display=swap');
+    
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
     }
-    lines.push("");
-  }
-
-  // Rent Scenarios
-  if (data.rentScenarios && data.rentScenarios.length > 0) {
-    lines.push("─── RENT SCENARIOS ───");
-    for (const rs of data.rentScenarios) {
-      lines.push(`  ${rs.aduType.replace(/-/g, " ")}:`);
-      lines.push(`    Conservative: $${rs.conservative.monthlyRent.toLocaleString()}/mo ($${rs.conservative.annualRent.toLocaleString()}/yr)`);
-      lines.push(`    Market:       $${rs.market.monthlyRent.toLocaleString()}/mo ($${rs.market.annualRent.toLocaleString()}/yr)`);
-      lines.push(`    Premium:      $${rs.premium.monthlyRent.toLocaleString()}/mo ($${rs.premium.annualRent.toLocaleString()}/yr)`);
+    
+    body {
+      font-family: 'Barlow', 'Bahnschrift', 'Segoe UI', sans-serif;
+      color: #1a1a1a;
+      background: #fff;
+      line-height: 1.6;
+      font-size: 11pt;
     }
-    lines.push("");
-  }
-
-  // Site Constraints
-  if (data.siteConstraints) {
-    lines.push("─── SITE CONDITIONS ───");
-    lines.push(`  Overall Constraint Risk: ${data.siteConstraints.overallRiskLevel}`);
-    for (const c of data.siteConstraints.constraints) {
-      const label = c.category.charAt(0).toUpperCase() + c.category.slice(1);
-      const sev = c.severity === "none" ? "None" : c.severity.charAt(0).toUpperCase() + c.severity.slice(1);
-      lines.push(`  ${label}: ${sev} — ${c.classification}`);
+    
+    .page {
+      max-width: 8.5in;
+      margin: 0 auto;
+      padding: 0.75in;
+      position: relative;
+      min-height: 11in;
     }
-    if (data.siteConstraints.costAdjustmentPercent > 0) {
-      lines.push(`  Est. Cost Impact: +${data.siteConstraints.costAdjustmentPercent}%`);
+    
+    /* Watermark */
+    .watermark {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%) rotate(-45deg);
+      font-size: 48pt;
+      color: rgba(26, 77, 46, 0.04);
+      font-weight: 700;
+      letter-spacing: 4px;
+      white-space: nowrap;
+      z-index: -1;
+      pointer-events: none;
     }
-    if (data.siteConstraints.timelineAdjustmentMonths > 0) {
-      lines.push(`  Est. Timeline Impact: +${data.siteConstraints.timelineAdjustmentMonths} months`);
+    
+    /* Header */
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      border-bottom: 2px solid #1a4d2e;
+      padding-bottom: 20px;
+      margin-bottom: 30px;
     }
-    lines.push(`  Summary: ${data.siteConstraints.summary}`);
-    lines.push("");
-  }
-
-  if (data.confidenceScore !== undefined) {
-    lines.push(`Confidence Score: ${data.confidenceScore}% (${data.confidenceBand})`);
-    lines.push("");
-  }
-
-  // Data Quality
-  if (data.sanityChecks && !data.sanityChecks.passed) {
-    lines.push("─── DATA QUALITY NOTES ───");
-    for (const c of data.sanityChecks.checks.filter((ch) => !ch.passed)) {
-      lines.push(`  [${c.severity.toUpperCase()}] ${c.message}`);
+    
+    .logo {
+      display: flex;
+      flex-direction: column;
     }
-    lines.push("");
-  }
-
-  lines.push("─── DISCLAIMER ───");
-  lines.push(data.disclaimer);
-  if (data.financialDisclaimer) {
-    lines.push(data.financialDisclaimer);
-  }
-  lines.push("");
-  lines.push("═══════════════════════════════════════════");
-  lines.push("  Prepared by Distinct Construction Solutions");
-  lines.push("  www.distinctcsolutions.com");
-  lines.push("═══════════════════════════════════════════");
-
-  return lines.join("\n");
+    
+    .logo-main {
+      font-size: 24pt;
+      font-weight: 700;
+      color: #1a4d2e;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+    }
+    
+    .logo-sub {
+      font-size: 10pt;
+      font-weight: 300;
+      color: #c9a227;
+      letter-spacing: 6px;
+      text-transform: uppercase;
+      margin-top: 2px;
+    }
+    
+    .report-info {
+      text-align: right;
+      font-size: 9pt;
+      color: #666;
+    }
+    
+    .report-info strong {
+      color: #1a4d2e;
+    }
+    
+    /* Title */
+    .report-title {
+      text-align: center;
+      margin-bottom: 30px;
+    }
+    
+    .report-title h1 {
+      font-size: 18pt;
+      font-weight: 600;
+      color: #1a4d2e;
+      margin-bottom: 8px;
+      letter-spacing: 1px;
+    }
+    
+    .report-title .address {
+      font-size: 12pt;
+      color: #333;
+      font-weight: 400;
+    }
+    
+    .report-title .confidential {
+      font-size: 8pt;
+      color: #c9a227;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      margin-top: 8px;
+    }
+    
+    /* Sections */
+    .section {
+      margin-bottom: 25px;
+    }
+    
+    .section-title {
+      font-size: 11pt;
+      font-weight: 600;
+      color: #1a4d2e;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      border-bottom: 1px solid #c9a227;
+      padding-bottom: 6px;
+      margin-bottom: 15px;
+    }
+    
+    .section-content {
+      background: #fafafa;
+      border-left: 3px solid #1a4d2e;
+      padding: 15px 20px;
+    }
+    
+    .data-row {
+      display: flex;
+      justify-content: space-between;
+      padding: 6px 0;
+      border-bottom: 1px solid #eee;
+    }
+    
+    .data-row:last-child {
+      border-bottom: none;
+    }
+    
+    .data-label {
+      color: #666;
+      font-weight: 400;
+    }
+    
+    .data-value {
+      color: #1a1a1a;
+      font-weight: 500;
+      text-align: right;
+    }
+    
+    .data-value.highlight {
+      color: #1a4d2e;
+      font-weight: 600;
+    }
+    
+    /* Two column layout */
+    .two-col {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+    }
+    
+    /* Recommendations */
+    .recommendation-card {
+      background: #f5f5f5;
+      border: 1px solid #ddd;
+      padding: 12px 15px;
+      margin-bottom: 10px;
+    }
+    
+    .recommendation-card h4 {
+      font-size: 10pt;
+      font-weight: 600;
+      color: #1a4d2e;
+      margin-bottom: 5px;
+    }
+    
+    .recommendation-card p {
+      font-size: 9pt;
+      color: #666;
+    }
+    
+    /* Footer */
+    .footer {
+      position: absolute;
+      bottom: 0.5in;
+      left: 0.75in;
+      right: 0.75in;
+      border-top: 1px solid #ddd;
+      padding-top: 15px;
+      font-size: 8pt;
+      color: #999;
+      display: flex;
+      justify-content: space-between;
+    }
+    
+    .footer-brand {
+      color: #1a4d2e;
+      font-weight: 500;
+    }
+    
+    /* Disclaimer */
+    .disclaimer {
+      margin-top: 30px;
+      padding: 15px;
+      background: #f9f9f9;
+      border: 1px solid #eee;
+      font-size: 8pt;
+      color: #888;
+      line-height: 1.5;
+    }
+    
+    @media print {
+      .page {
+        padding: 0.5in;
+      }
+      
+      .watermark {
+        display: block;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="watermark">CONFIDENTIAL FEASIBILITY REPORT</div>
+  
+  <div class="page">
+    <header class="header">
+      <div class="logo">
+        <div class="logo-main">Structura</div>
+        <div class="logo-sub">Aetrnum</div>
+      </div>
+      <div class="report-info">
+        <div><strong>Report Generated:</strong> ${generatedDate}</div>
+        <div><strong>Confidence Score:</strong> ${data.confidenceScore || "N/A"}%</div>
+      </div>
+    </header>
+    
+    <div class="report-title">
+      <h1>ADU Feasibility Report</h1>
+      <div class="address">${data.property.address.value}</div>
+      <div class="confidential">Confidential - Prepared for Property Owner</div>
+    </div>
+    
+    <div class="two-col">
+      <div class="section">
+        <h2 class="section-title">Property Summary</h2>
+        <div class="section-content">
+          <div class="data-row">
+            <span class="data-label">Lot Size</span>
+            <span class="data-value">${data.property.lotSizeSqFt.value.toLocaleString()} sq ft</span>
+          </div>
+          <div class="data-row">
+            <span class="data-label">Living Area</span>
+            <span class="data-value">${data.property.homeAreaSqFt.value.toLocaleString()} sq ft</span>
+          </div>
+          <div class="data-row">
+            <span class="data-label">Zoning</span>
+            <span class="data-value">${data.property.zoning.value}</span>
+          </div>
+          <div class="data-row">
+            <span class="data-label">Slope</span>
+            <span class="data-value">${data.property.slope.value}</span>
+          </div>
+        </div>
+      </div>
+      
+      <div class="section">
+        <h2 class="section-title">Jurisdiction</h2>
+        <div class="section-content">
+          <div class="data-row">
+            <span class="data-label">Jurisdiction</span>
+            <span class="data-value">${data.jurisdiction?.name || "San Diego County"}</span>
+          </div>
+          <div class="data-row">
+            <span class="data-label">Rules Version</span>
+            <span class="data-value">${data.jurisdiction?.rulesVersion || "2024"}</span>
+          </div>
+          <div class="data-row">
+            <span class="data-label">Buildable Envelope</span>
+            <span class="data-value highlight">${data.buildable.estimatedBuildableEnvelopeSqFt.toLocaleString()} sq ft</span>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <div class="section">
+      <h2 class="section-title">ADU Feasibility Analysis</h2>
+      <div class="section-content">
+        <div class="data-row">
+          <span class="data-label">Recommended Path</span>
+          <span class="data-value highlight">${data.bestRecommendation}</span>
+        </div>
+        ${data.recommendations.map(rec => `
+        <div class="data-row">
+          <span class="data-label">${rec.type}</span>
+          <span class="data-value">${rec.feasibility} — ${rec.estimatedSizeRange}</span>
+        </div>
+        `).join("")}
+      </div>
+    </div>
+    
+    ${data.financialScenarios && data.financialScenarios.length > 0 ? `
+    <div class="section">
+      <h2 class="section-title">Financial Snapshot</h2>
+      <div class="section-content">
+        ${data.financialScenarios.slice(0, 3).map(scenario => `
+        <div style="margin-bottom: 12px;">
+          <div style="font-weight: 600; color: #1a4d2e; margin-bottom: 5px;">${scenario.scenarioName}</div>
+          <div class="data-row">
+            <span class="data-label">Estimated Cost</span>
+            <span class="data-value">$${scenario.estimatedTotalCost.toLocaleString()}</span>
+          </div>
+          <div class="data-row">
+            <span class="data-label">Monthly Rent Potential</span>
+            <span class="data-value">$${scenario.estimatedMonthlyIncome.toLocaleString()}/mo</span>
+          </div>
+          <div class="data-row">
+            <span class="data-label">Estimated ROI</span>
+            <span class="data-value highlight">${scenario.estimatedRoi}%</span>
+          </div>
+          <div class="data-row">
+            <span class="data-label">Payback Period</span>
+            <span class="data-value">${scenario.estimatedPaybackYears} years</span>
+          </div>
+        </div>
+        `).join("")}
+      </div>
+    </div>
+    ` : ""}
+    
+    ${data.siteConstraints ? `
+    <div class="section">
+      <h2 class="section-title">Site Conditions</h2>
+      <div class="section-content">
+        <div class="data-row">
+          <span class="data-label">Overall Risk Level</span>
+          <span class="data-value">${data.siteConstraints.overallRiskLevel}</span>
+        </div>
+        ${data.siteConstraints.constraints.map(c => `
+        <div class="data-row">
+          <span class="data-label">${c.category.charAt(0).toUpperCase() + c.category.slice(1)}</span>
+          <span class="data-value">${c.severity === "none" ? "None" : c.severity.charAt(0).toUpperCase() + c.severity.slice(1)}</span>
+        </div>
+        `).join("")}
+      </div>
+    </div>
+    ` : ""}
+    
+    <div class="disclaimer">
+      <strong>Disclaimer:</strong> ${data.disclaimer}
+      ${data.financialDisclaimer ? `<br><br>${data.financialDisclaimer}` : ""}
+    </div>
+    
+    <footer class="footer">
+      <div class="footer-brand">Prepared by Structura Aetrnum</div>
+      <div>info@structuraaetrnum.com | (858) 833-0705</div>
+    </footer>
+  </div>
+</body>
+</html>
+  `.trim();
 }

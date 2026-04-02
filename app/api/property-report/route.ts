@@ -1,8 +1,8 @@
 // Property Report API — Lead capture + report generation endpoint
-// Saves lead info and generates a property development report.
+// Saves lead info and sends notification to jtalavera@distinctcsolutions.com
 
 import { NextRequest, NextResponse } from "next/server";
-import { notifyTeamNewLead, sendUserConfirmation } from "@/lib/email";
+import { notifyTeamADULead, sendUserConfirmation } from "@/lib/email";
 import { checkRateLimit, getClientIp, RATE_LIMITS } from "@/lib/rate-limit";
 
 export async function POST(request: NextRequest) {
@@ -26,7 +26,8 @@ export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
     const {
-      name,
+      firstName,
+      lastName,
       email,
       phone,
       propertyAddress,
@@ -34,9 +35,41 @@ export async function POST(request: NextRequest) {
     } = body;
 
     // Validate required fields
-    if (!name || !email) {
+    if (!firstName || !lastName) {
       return NextResponse.json(
-        { error: "Name and email are required" },
+        { error: "First name and last name are required" },
+        { status: 400 }
+      );
+    }
+
+    if (!email) {
+      return NextResponse.json(
+        { error: "Email is required" },
+        { status: 400 }
+      );
+    }
+
+    // Validate email format
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      return NextResponse.json(
+        { error: "Please enter a valid email address" },
+        { status: 400 }
+      );
+    }
+
+    if (!phone) {
+      return NextResponse.json(
+        { error: "Phone number is required" },
+        { status: 400 }
+      );
+    }
+
+    // Validate phone (at least 10 digits)
+    const phoneDigits = phone.replace(/\D/g, "");
+    if (phoneDigits.length < 10) {
+      return NextResponse.json(
+        { error: "Please enter a valid phone number" },
         { status: 400 }
       );
     }
@@ -47,6 +80,8 @@ export async function POST(request: NextRequest) {
         { status: 400 }
       );
     }
+
+    const fullName = `${firstName} ${lastName}`;
 
     // Generate report data from scan results
     const reportData = {
@@ -104,13 +139,13 @@ export async function POST(request: NextRequest) {
       const supabase = await createClient();
 
       await supabase.from("leads").insert({
-        name,
+        name: fullName,
         email,
         phone: phone || null,
         service_type: "property-report",
         property_address: propertyAddress,
         message: `Property Development Report requested. Confidence: ${reportData.confidenceScore}%. Recommended: ${reportData.feasibilitySummary.recommendedPath}.`,
-        source: "property-scanner-report",
+        source: "Build Your ADU",
         status: "new",
       });
       leadSaved = true;
@@ -119,18 +154,18 @@ export async function POST(request: NextRequest) {
       leadSaved = false;
     }
 
-    // Send email notifications (fire-and-forget, don't block the response)
+    // Send email to jtalavera@distinctcsolutions.com with the lead info
     const emailPromises = [
-      notifyTeamNewLead({
-        name,
+      notifyTeamADULead({
+        firstName,
+        lastName,
         email,
         phone,
         propertyAddress,
-        source: "property-scanner-report",
-        confidenceScore: reportData.confidenceScore,
-        recommendedPath: reportData.feasibilitySummary.recommendedPath,
+        timestamp: new Date().toISOString(),
+        source: "Build Your ADU",
       }),
-      sendUserConfirmation({ name, email, propertyAddress }),
+      sendUserConfirmation({ name: fullName, email, propertyAddress }),
     ];
     Promise.allSettled(emailPromises).catch(() => {});
 
