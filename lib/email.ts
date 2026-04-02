@@ -54,7 +54,81 @@ async function sendEmail(payload: EmailPayload): Promise<boolean> {
 // ─── Public Notification Functions ───
 
 /**
- * Notify the DCS team about a new property report lead
+ * Notify the DCS team about a new Build Your ADU lead
+ * Subject: "New Build Your ADU Lead"
+ * Sent to: jtalavera@distinctcsolutions.com
+ */
+export async function notifyTeamADULead(lead: {
+  firstName: string;
+  lastName: string;
+  email: string;
+  phone: string;
+  propertyAddress: string;
+  timestamp: string;
+  source: string;
+}): Promise<boolean> {
+  const formattedDate = new Date(lead.timestamp).toLocaleString("en-US", {
+    weekday: "long",
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+    hour: "numeric",
+    minute: "2-digit",
+    timeZoneName: "short",
+  });
+
+  const html = `
+    <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+      <div style="background: #1B2D4F; padding: 20px; border-radius: 12px 12px 0 0;">
+        <h1 style="color: #C8A951; margin: 0; font-size: 20px;">New Build Your ADU Lead</h1>
+      </div>
+      <div style="background: #f9f9f9; padding: 24px; border: 1px solid #e5e5e5; border-radius: 0 0 12px 12px;">
+        <table style="width: 100%; border-collapse: collapse;">
+          <tr>
+            <td style="padding: 8px 0; font-weight: bold; color: #333;">First Name:</td>
+            <td style="padding: 8px 0; color: #555;">${lead.firstName}</td>
+          </tr>
+          <tr>
+            <td style="padding: 8px 0; font-weight: bold; color: #333;">Last Name:</td>
+            <td style="padding: 8px 0; color: #555;">${lead.lastName}</td>
+          </tr>
+          <tr>
+            <td style="padding: 8px 0; font-weight: bold; color: #333;">Email:</td>
+            <td style="padding: 8px 0; color: #555;"><a href="mailto:${lead.email}">${lead.email}</a></td>
+          </tr>
+          <tr>
+            <td style="padding: 8px 0; font-weight: bold; color: #333;">Phone:</td>
+            <td style="padding: 8px 0; color: #555;"><a href="tel:${lead.phone}">${lead.phone}</a></td>
+          </tr>
+          <tr>
+            <td style="padding: 8px 0; font-weight: bold; color: #333;">Property Address:</td>
+            <td style="padding: 8px 0; color: #555;">${lead.propertyAddress}</td>
+          </tr>
+          <tr>
+            <td style="padding: 8px 0; font-weight: bold; color: #333;">Timestamp:</td>
+            <td style="padding: 8px 0; color: #555;">${formattedDate}</td>
+          </tr>
+          <tr>
+            <td style="padding: 8px 0; font-weight: bold; color: #333;">Source:</td>
+            <td style="padding: 8px 0; color: #555;">${lead.source}</td>
+          </tr>
+        </table>
+        <div style="margin-top: 20px; padding: 12px; background: #fff3cd; border-radius: 8px; font-size: 13px; color: #856404;">
+          Follow up within 24 hours for best conversion.
+        </div>
+      </div>
+    </div>
+  `;
+
+  return sendEmail({
+    to: DCS_TEAM_EMAIL,
+    subject: "New Build Your ADU Lead",
+    html,
+  });
+}
+
+/**
+ * Notify the DCS team about a new property report lead (legacy function)
  */
 export async function notifyTeamNewLead(lead: {
   name: string;

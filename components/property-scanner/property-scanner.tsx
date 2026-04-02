@@ -26,6 +26,8 @@ import { SiteConstraintsCard } from "./site-constraints-card";
 // Removed: DataSourcesBadge - not client-facing per requirements
 import { LeadCaptureForm } from "./lead-capture-form";
 import { PropertyReportModal } from "./property-report-modal";
+import { LockedReportPreview } from "./locked-report-preview";
+import { ReportExportButtons } from "./report-export-buttons";
 // Removed: ShowSourcesPanel - not client-facing per requirements
 import { analyzeProperty } from "@/lib/property-intelligence";
 import type { PropertyAnalysisResult } from "@/lib/property-intelligence";
@@ -38,6 +40,7 @@ export function PropertyScanner() {
   const [address, setAddress] = useState("");
   const [selectedAddress, setSelectedAddress] = useState("");
   const [analysisData, setAnalysisData] = useState<PropertyAnalysisResult | null>(null);
+  const [reportUnlocked, setReportUnlocked] = useState(false);
   const [showReportModal, setShowReportModal] = useState(false);
   const [reportData, setReportData] = useState<Record<string, unknown> | undefined>(undefined);
 
@@ -93,6 +96,12 @@ export function PropertyScanner() {
     setAddress("");
     setSelectedAddress("");
     setAnalysisData(null);
+    setReportUnlocked(false);
+  };
+
+  const handleReportUnlocked = () => {
+    setReportUnlocked(true);
+    trackLeadSubmitted("property-scanner-report", selectedAddress);
   };
 
   return (
@@ -173,8 +182,17 @@ export function PropertyScanner() {
           </div>
         )}
 
-        {/* Results phase */}
-        {phase === "results" && analysisData && (
+        {/* Results phase - LOCKED until user submits info */}
+        {phase === "results" && analysisData && !reportUnlocked && (
+          <LockedReportPreview
+            analysisData={analysisData}
+            propertyAddress={selectedAddress}
+            onReportUnlocked={handleReportUnlocked}
+          />
+        )}
+
+        {/* Results phase - UNLOCKED after user submits info */}
+        {phase === "results" && analysisData && reportUnlocked && (
           <div className="space-y-8 animate-fade-in">
             {/* Smart Recommendation Banner */}
             <SmartRecommendationBanner
@@ -283,16 +301,8 @@ export function PropertyScanner() {
               />
             )}
 
-            {/* Lead Capture Form / Property Report CTA */}
-            <LeadCaptureForm
-              propertyAddress={selectedAddress}
-              scanResults={analysisData as unknown as Record<string, unknown>}
-              onReportGenerated={(data) => {
-                setReportData(data);
-                setShowReportModal(true);
-                trackLeadSubmitted("property-scanner-report", selectedAddress);
-              }}
-            />
+            {/* Report Download/Print Buttons - Only shown after unlock */}
+            <ReportExportButtons analysisData={analysisData} />
 
             {/* Data sources and debug info removed from client-facing view */}
 
@@ -306,7 +316,7 @@ export function PropertyScanner() {
             {/* CTA Section */}
             <NextStepCTA />
 
-            {/* Property Report Modal */}
+            {/* Property Report Modal with PDF/Print */}
             {analysisData && (
               <PropertyReportModal
                 isOpen={showReportModal}
