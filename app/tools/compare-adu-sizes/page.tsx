@@ -13,7 +13,7 @@ const aduOptions = [
     label: "400 sq ft",
     bedBath: "Studio / 1 Bed, 1 Bath",
     useCase: "Compact rental, home office, guest suite",
-    estimatedCost: "$120K - $175K",
+    estimatedCost: "$155K - $215K",
     estimatedRent: "$2,000 - $2,800/mo",
     yardDemand: "Minimal (~500 sq ft footprint)",
     bestFor: "Garage conversions, tight lots, budget-conscious builds",

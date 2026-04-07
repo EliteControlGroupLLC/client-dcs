@@ -139,9 +139,9 @@ export const FLOOR_PLANS: FloorPlan[] = [
     stories: 1,
     style: "Modern",
     type: "Garage Conversion",
-    priceRange: "$120,000-$150,000",
-    priceLow: 120000,
-    priceHigh: 150000,
+    priceRange: "$155,000-$215,000",
+    priceLow: 155000,
+    priceHigh: 215000,
     popular: true,
     dimensions: { widthFt: 20, depthFt: 20, label: "20' x 20'" },
     features: ["Existing shell reuse", "Full kitchen", "Dedicated bath", "Laundry niche"],
@@ -156,8 +156,8 @@ export const FLOOR_PLANS: FloorPlan[] = [
         bedrooms: 0,
         bathrooms: 1,
         stories: 1,
-        priceLow: 120000,
-        priceHigh: 140000,
+        priceLow: 155000,
+        priceHigh: 185000,
         description: "Best for tight lots and efficient rental income using a standard 2-car shell.",
       },
       {
@@ -165,8 +165,8 @@ export const FLOOR_PLANS: FloorPlan[] = [
         bedrooms: 1,
         bathrooms: 1,
         stories: 1,
-        priceLow: 140000,
-        priceHigh: 150000,
+        priceLow: 185000,
+        priceHigh: 215000,
         description: "Uses the extra bay depth to create a more private sleeping zone and stronger rent profile.",
       },
     ],
@@ -615,7 +615,7 @@ export const RENT_ASSUMPTIONS: RentAssumption[] = [
 
 export const SERVICE_PRICING = {
   adu: {
-    startingPrice: "$120,000",
+  startingPrice: "$155,000",
     detachedStartingPrice: "$175,000",
     description: "ADU Solutions",
     badge: "Most Popular",
@@ -1028,7 +1028,7 @@ export function estimateAduPriceRange(input: AduEstimateInput): { low: number; h
     const garageStalls = input.garageStalls ?? 2;
 
     if (!garagePlan) {
-      return { low: 120000, high: 150000 };
+      return { low: 155000, high: 215000 };
     }
 
     if (garageStalls === 3) {
