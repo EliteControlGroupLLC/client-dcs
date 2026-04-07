@@ -7,7 +7,7 @@ import { COMPANY_INFO, SERVICE_PRICING, getYearsExperience } from "@/lib/data/si
 export const metadata: Metadata = {
   title: "San Diego ADU Builder | Free Quote | Distinct Construction Solutions",
   description:
-    "Build your dream ADU in San Diego. Detached ADUs starting at $175,000 and garage conversions starting at $120,000. Licensed, bonded, and insured. Get your free quote today.",
+    "Build your dream ADU in San Diego. Detached ADUs starting at $175,000 and garage conversions starting at $155,000. Licensed, bonded, and insured. Get your free quote today.",
   openGraph: {
     title: "San Diego ADU Builder | Detached ADUs Starting at $175,000",
     description:
