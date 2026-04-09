@@ -1,4 +1,4 @@
-const PRODUCTION_SITE_URL = "https://www.dcs.build";
+const PRODUCTION_SITE_URL = "https://www.distinctcsolutions.com";
 
 function normalizeSiteUrl(value: string | undefined): string | null {
   if (!value) return null;
