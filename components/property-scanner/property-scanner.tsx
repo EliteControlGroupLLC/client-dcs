@@ -16,6 +16,7 @@ import { MapboxMap } from "./mapbox-map";
 import { JurisdictionSnapshotCard } from "./jurisdiction-snapshot-card";
 import { AduRulesSnapshotCard } from "./adu-rules-snapshot-card";
 import { FinancialPreviewCard } from "./financial-preview-card";
+import { EquityAppraisalCard } from "./equity-appraisal-card";
 import { ConfidenceScoreCard } from "./confidence-score-card";
 import { ZoningEnrichmentCard } from "./zoning-enrichment-card";
 import { RentEstimateCard } from "./rent-estimate-card";
@@ -34,6 +35,16 @@ import type { PropertyAnalysisResult } from "@/lib/property-intelligence";
 import { trackScanCompleted, trackLeadSubmitted } from "@/lib/analytics";
 
 type ScanPhase = "address" | "scanning" | "results";
+
+// Parse a numeric ADU size from a size-range label like "1,000 - 1,200 sq ft"
+// (returns the upper bound — the best-case recommended size).
+function parseRecommendedSqFt(sizeRange?: string | null): number | null {
+  if (!sizeRange) return null;
+  const nums = (sizeRange.match(/\d[\d,]*/g) || [])
+    .map((n) => parseInt(n.replace(/,/g, ""), 10))
+    .filter((n) => Number.isFinite(n) && n >= 100 && n <= 5000);
+  return nums.length ? Math.max(...nums) : null;
+}
 
 export function PropertyScanner() {
   const [phase, setPhase] = useState<ScanPhase>("address");
@@ -103,6 +114,26 @@ export function PropertyScanner() {
     setReportUnlocked(true);
     trackLeadSubmitted("property-scanner-report", selectedAddress);
   };
+
+  // Derive the recommended ADU + financials for the Equity & Appraisal module.
+  const bestRec = analysisData?.recommendations?.find(
+    (r) => r.type === analysisData?.bestRecommendation
+  );
+  const recommendedAduSqFt = parseRecommendedSqFt(bestRec?.estimatedSizeRange) ?? 0;
+  const recommendedAduType = analysisData?.bestRecommendation || bestRec?.type || "ADU";
+  const recommendedAduLabel =
+    recommendedAduSqFt > 0
+      ? `${recommendedAduSqFt.toLocaleString()} sq ft ${recommendedAduType}`
+      : recommendedAduType;
+  const primaryScenario =
+    analysisData?.financialScenarios?.find((s) => s.scenarioType !== "maximize") ??
+    analysisData?.financialScenarios?.[0];
+  // Income figure for the value-add model = NOI (cashflow before debt service).
+  const aduAnnualNetIncome = primaryScenario
+    ? primaryScenario.estimatedAnnualNetCashflow + primaryScenario.estimatedMonthlyPayment * 12
+    : null;
+  const aduTotalCost = primaryScenario?.estimatedTotalCost ?? null;
+  const homeAreaSqFt = analysisData?.property?.homeAreaSqFt?.value ?? null;
 
   return (
     <div className="min-h-screen bg-muted pt-20">
@@ -298,6 +329,19 @@ export function PropertyScanner() {
               <FinancialPreviewCard
                 scenarios={analysisData.financialScenarios}
                 disclaimer={analysisData.financialDisclaimer}
+              />
+            )}
+
+            {/* Home Value, Equity & Projected Value after the recommended ADU */}
+            {analysisData.recommendations && analysisData.recommendations.length > 0 && (
+              <EquityAppraisalCard
+                address={selectedAddress}
+                recommendedAduLabel={recommendedAduLabel}
+                recommendedAduSqFt={recommendedAduSqFt}
+                recommendedAduType={recommendedAduType}
+                homeAreaSqFt={homeAreaSqFt}
+                aduAnnualNetIncome={aduAnnualNetIncome}
+                aduTotalCost={aduTotalCost}
               />
             )}
 
