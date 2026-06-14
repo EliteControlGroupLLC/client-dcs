@@ -10,6 +10,8 @@ import {
   ChevronDown,
   ChevronUp,
   Info,
+  ShieldCheck,
+  Building2,
 } from "lucide-react";
 
 function formatCurrencyFull(v: number): string {
@@ -56,9 +58,19 @@ interface ProjectedValue {
   high: number;
 }
 
+interface Owner {
+  names: string[];
+  ownerType: string | null;
+  heldInTrust: boolean;
+  ownerOccupied: boolean | null;
+  available: boolean;
+  source: "rentcast" | "estimated";
+}
+
 interface ValuationResponse {
   success: true;
   valuation: Valuation;
+  owner: Owner;
   aduValueAdd: ValueAdd;
   projectedValue: ProjectedValue | null;
 }
@@ -149,6 +161,7 @@ export function EquityAppraisalCard({
   ]);
 
   const valuation = data?.valuation;
+  const owner = data?.owner;
   const estimatedValue = valuation?.estimatedValue ?? 0;
   const effectiveBalance = ownOutright ? 0 : mortgageBalance;
 
@@ -297,6 +310,63 @@ export function EquityAppraisalCard({
                   ))}
                 </div>
               )}
+            </div>
+          )}
+
+          {/* 5b. Owner of record */}
+          {owner?.available && owner.names.length > 0 && (
+            <div className="rounded-xl border border-border p-4">
+              <div className="flex items-center gap-2 mb-3">
+                {owner.heldInTrust ? (
+                  <Building2 className="h-4 w-4 text-secondary" />
+                ) : (
+                  <ShieldCheck className="h-4 w-4 text-secondary" />
+                )}
+                <h4 className="text-sm font-semibold text-secondary">
+                  Owner of record
+                </h4>
+              </div>
+
+              <div className="space-y-2">
+                <div className="flex items-start justify-between gap-3 py-2 px-3 rounded-lg bg-muted/30">
+                  <p className="text-xs text-muted-foreground">
+                    {owner.names.length > 1 ? "Owners" : "Owner"}
+                  </p>
+                  <p className="text-sm font-semibold text-secondary text-right leading-snug">
+                    {owner.names.join(" & ")}
+                  </p>
+                </div>
+
+                {owner.ownerType && (
+                  <div className="flex items-start justify-between gap-3 py-2 px-3 rounded-lg bg-muted/30">
+                    <p className="text-xs text-muted-foreground">Title held as</p>
+                    <p className="text-sm font-semibold text-secondary text-right capitalize">
+                      {owner.ownerType}
+                    </p>
+                  </div>
+                )}
+
+                {owner.ownerOccupied != null && (
+                  <div className="flex items-start justify-between gap-3 py-2 px-3 rounded-lg bg-muted/30">
+                    <p className="text-xs text-muted-foreground">Occupancy</p>
+                    <p className="text-sm font-semibold text-secondary text-right">
+                      {owner.ownerOccupied ? "Owner-occupied" : "Non-owner-occupied"}
+                    </p>
+                  </div>
+                )}
+              </div>
+
+              {owner.heldInTrust && (
+                <p className="mt-3 text-[11px] leading-relaxed text-muted-foreground">
+                  This property is held in a trust or entity. A trustee or
+                  authorized signer will typically need to sign the ADU
+                  agreement and any financing.
+                </p>
+              )}
+
+              <p className="mt-3 text-[10px] text-muted-foreground">
+                Ownership from public property records. Verify against title before closing.
+              </p>
             </div>
           )}
 

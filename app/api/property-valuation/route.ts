@@ -5,6 +5,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import {
   getPropertyValuation,
+  getPropertyOwner,
   computeAduValueAdd,
 } from "@/lib/property-intelligence/valuation-service";
 
@@ -29,7 +30,10 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Valid address is required" }, { status: 400 });
     }
 
-    const valuation = await getPropertyValuation(address, homeAreaSqFt ?? null);
+    const [valuation, owner] = await Promise.all([
+      getPropertyValuation(address, homeAreaSqFt ?? null),
+      getPropertyOwner(address),
+    ]);
 
     const aduValueAdd = computeAduValueAdd({
       recommendedAduSqFt: recommendedAduSqFt && recommendedAduSqFt > 0 ? recommendedAduSqFt : 0,
@@ -50,6 +54,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({
       success: true,
       valuation,
+      owner,
       aduValueAdd,
       projectedValue,
       timestamp: new Date().toISOString(),
