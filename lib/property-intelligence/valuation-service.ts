@@ -4,7 +4,11 @@
 // and falls back to a clearly-labeled San Diego market estimate when it isn't.
 // All outputs are labeled estimate-based and assumption-driven.
 
-const RENTCAST_API_KEY = process.env.NEXT_PUBLIC_RENTCAST_API_KEY;
+// This service runs server-side only (via /api/property-valuation), so prefer the
+// server-only secret. Fall back to the NEXT_PUBLIC_ name for existing deployments
+// that still set it there, so production keeps working during the migration.
+const RENTCAST_API_KEY =
+  process.env.RENTCAST_API_KEY || process.env.NEXT_PUBLIC_RENTCAST_API_KEY;
 const RENTCAST_BASE_URL = "https://api.rentcast.io/v1";
 
 // San Diego County market assumptions (2025) — used for fallback + value-add model.
@@ -41,6 +45,15 @@ export interface AduValueAdd {
   method: string;
 }
 
+export interface PropertyOwner {
+  names: string[]; // owner name(s) of public record
+  ownerType: string | null; // e.g. "Individual", "Trust", "Company"
+  heldInTrust: boolean; // true when the title is vested in a trust/LLC/corp
+  ownerOccupied: boolean | null; // owner lives at the property vs. investor-held
+  available: boolean;
+  source: "rentcast" | "estimated";
+}
+
 interface RentCastValueResponse {
   price?: number;
   priceRangeLow?: number;
@@ -53,6 +66,14 @@ interface RentCastValueResponse {
     bathrooms?: number;
     distance?: number;
   }>;
+}
+
+interface RentCastPropertyRecord {
+  owner?: {
+    names?: string[];
+    type?: string;
+  };
+  ownerOccupied?: boolean;
 }
 
 export function isValuationLiveDataAvailable(): boolean {
@@ -123,6 +144,64 @@ export async function getPropertyValuation(
       pricePerSqft,
       comps,
       confidence: 82,
+      available: true,
+      source: "rentcast",
+    };
+  } catch {
+    return fallback;
+  }
+}
+
+const OWNER_TRUST_PATTERN = /\b(trust|living trust|family trust|revocable|llc|l\.l\.c|inc|incorporated|corp|company|properties|partners|holdings|estate)\b/i;
+
+function inferHeldInTrust(names: string[], ownerType: string | null): boolean {
+  if (ownerType && OWNER_TRUST_PATTERN.test(ownerType)) return true;
+  return names.some((n) => OWNER_TRUST_PATTERN.test(n));
+}
+
+/**
+ * Look up the property owner of public record (name(s), owner type, and whether
+ * title is held in a trust/entity) via RentCast's /properties records endpoint.
+ * Returns a clearly-labeled "unavailable" record when no key is configured or the
+ * lookup fails — callers should treat `available: false` as "not on record."
+ */
+export async function getPropertyOwner(address: string): Promise<PropertyOwner> {
+  const fallback: PropertyOwner = {
+    names: [],
+    ownerType: null,
+    heldInTrust: false,
+    ownerOccupied: null,
+    available: false,
+    source: "estimated",
+  };
+
+  if (!RENTCAST_API_KEY) return fallback;
+
+  try {
+    const params = new URLSearchParams({ address });
+    const response = await fetch(`${RENTCAST_BASE_URL}/properties?${params.toString()}`, {
+      headers: { Accept: "application/json", "X-Api-Key": RENTCAST_API_KEY },
+    });
+
+    if (!response.ok) return fallback;
+
+    const json = await response.json();
+    // /properties returns an array of matching records (or, rarely, a single object).
+    const record: RentCastPropertyRecord | undefined = Array.isArray(json) ? json[0] : json;
+
+    const names = (record?.owner?.names || [])
+      .map((n) => (typeof n === "string" ? n.trim() : ""))
+      .filter((n) => n.length > 0);
+
+    if (names.length === 0) return fallback;
+
+    const ownerType = record?.owner?.type?.trim() || null;
+
+    return {
+      names,
+      ownerType,
+      heldInTrust: inferHeldInTrust(names, ownerType),
+      ownerOccupied: typeof record?.ownerOccupied === "boolean" ? record.ownerOccupied : null,
       available: true,
       source: "rentcast",
     };
