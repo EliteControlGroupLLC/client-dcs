@@ -11,7 +11,13 @@
 export const COMPANY_INFO = {
   name: "Distinct Construction Solutions",
   shortName: "DCS",
-  office: "Chula Vista, CA",
+  office: "3527 Citrus St, Lemon Grove, CA 91945",
+  address: {
+    street: "3527 Citrus St",
+    city: "Lemon Grove",
+    state: "CA",
+    zip: "91945",
+  },
   email: "jtalavera@distinctcsolutions.com",
   phone: "(858) 833-0705",
   phoneHref: "+18588330705",

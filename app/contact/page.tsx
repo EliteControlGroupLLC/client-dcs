@@ -137,7 +137,7 @@ export default function ContactPage() {
                   </div>
                   <div>
                     <h3 className="font-semibold text-secondary">Office</h3>
-                    <p className="text-muted-foreground">Chula Vista, CA</p>
+                    <p className="text-muted-foreground">{COMPANY_INFO.office}</p>
                     <p className="text-sm text-muted-foreground">Serving all of San Diego County</p>
                   </div>
                 </div>

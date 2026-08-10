@@ -92,14 +92,16 @@ const jsonLd = {
   telephone: "+1-858-833-0705",
   address: {
     "@type": "PostalAddress",
-    addressLocality: "San Diego",
+    streetAddress: "3527 Citrus St",
+    addressLocality: "Lemon Grove",
     addressRegion: "CA",
+    postalCode: "91945",
     addressCountry: "US",
   },
   geo: {
     "@type": "GeoCoordinates",
-    latitude: 32.7157,
-    longitude: -117.1611,
+    latitude: 32.7425,
+    longitude: -117.0314,
   },
   areaServed: {
     "@type": "City",

@@ -290,7 +290,7 @@ export async function sendUserConfirmation(user: {
       </div>
       <div style="background: #f5f5f5; padding: 16px; border-radius: 0 0 12px 12px; text-align: center; border: 1px solid #e5e5e5; border-top: none;">
         <p style="margin: 0; font-size: 11px; color: #999;">
-          Distinct Construction Solutions | Chula Vista, CA | Serving all of San Diego County
+          Distinct Construction Solutions | 3527 Citrus St, Lemon Grove, CA 91945 | Serving all of San Diego County
         </p>
       </div>
     </div>

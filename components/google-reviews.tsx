@@ -6,7 +6,7 @@ import { Star, ExternalLink } from "lucide-react";
  * MANUAL REVIEW INSERTION REQUIRED
  * 
  * Replace these placeholder reviews with REAL curated reviews from:
- * - Google Business Profile for Distinct Construction Solutions, Chula Vista
+ * - Google Business Profile for Distinct Construction Solutions, Lemon Grove
  * - Yelp for Distinct Construction Solutions
  * 
  * Only use actual verified customer reviews with their consent.

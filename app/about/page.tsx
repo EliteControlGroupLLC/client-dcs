@@ -51,7 +51,7 @@ export default function AboutPage() {
               {getYearsExperience()}+ years of field experience, design-build discipline, and premium residential execution.
             </h1>
             <p className="text-xl text-white/80 mb-8">
-              Distinct Construction Solutions is a Chula Vista-based design-build firm shaped by hands-on construction experience that began in 2014 and matured into a more disciplined way to deliver residential projects across San Diego County.
+              Distinct Construction Solutions is a Lemon Grove-based design-build firm shaped by hands-on construction experience that began in 2014 and matured into a more disciplined way to deliver residential projects across San Diego County.
             </p>
           </div>
         </div>
