@@ -134,7 +134,7 @@ export function PropertyReportModal({
             <ReportRow label="Recommended Path" value={analysisData.bestRecommendation} />
             <ReportRow
               label="Buildable Envelope"
-              value={`${analysisData.buildable.estimatedBuildableEnvelopeSqFt.toLocaleString()} sq ft`}
+              value={analysisData.buildable.envelopeLabel ?? `${analysisData.buildable.estimatedBuildableEnvelopeSqFt.toLocaleString()} sq ft`}
             />
             {analysisData.recommendations.map((rec) => (
               <ReportRow key={rec.type} label={rec.type} value={`${rec.feasibility} — ${rec.estimatedSizeRange}`} />
@@ -611,7 +611,7 @@ function generateStructuraPDFContent(data: PropertyAnalysisResult): string {
           </div>
           <div class="data-row">
             <span class="data-label">Buildable Envelope</span>
-            <span class="data-value highlight">${data.buildable.estimatedBuildableEnvelopeSqFt.toLocaleString()} sq ft</span>
+            <span class="data-value highlight">${data.buildable.envelopeLabel ?? `${data.buildable.estimatedBuildableEnvelopeSqFt.toLocaleString()} sq ft`}</span>
           </div>
         </div>
       </div>

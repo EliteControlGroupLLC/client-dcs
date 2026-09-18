@@ -1,6 +1,7 @@
 // Enhanced Feasibility Engine — Jurisdiction-aware ADU feasibility analysis
 
 import type { JurisdictionProfile, FeasibilityResult, FeasibilityLevel } from "./jurisdictions/types";
+import type { AduTypeName, AduTypeVerdict } from "./adu-fit-rules";
 
 interface FeasibilityInput {
   lotSizeSqFt: number;
@@ -40,7 +41,66 @@ function assessFeasibilityLevel(score: number): FeasibilityLevel {
   return "not-recommended";
 }
 
+const VERDICT_LEVEL: Record<AduTypeVerdict["level"], FeasibilityLevel> = {
+  Likely: "likely",
+  Possible: "possible",
+  Limited: "limited",
+  "Not Recommended": "not-recommended",
+};
+const VERDICT_CONFIDENCE: Record<AduTypeVerdict["level"], number> = {
+  Likely: 85,
+  Possible: 65,
+  Limited: 45,
+  "Not Recommended": 20,
+};
+const VERDICT_COST_KEY: Record<string, string> = {
+  "Detached ADU": "detached-adu",
+  "Attached ADU": "attached-adu",
+  "Garage Conversion": "garage-conversion",
+  JADU: "jadu",
+};
+
+function verdictToResult(v: AduTypeVerdict): FeasibilityResult {
+  const hasSize = v.maxSqFt > 0;
+  return {
+    type: v.type,
+    feasibility: VERDICT_LEVEL[v.level],
+    maxSizeSqft: v.maxSqFt,
+    minSizeSqft: v.minSqFt,
+    estimatedSizeRange: v.sizeLabel,
+    priceRange: hasSize ? formatPriceRange(v.minSqFt || v.maxSqFt, v.maxSqFt, VERDICT_COST_KEY[v.type] ?? "detached-adu") : "N/A",
+    description: v.description,
+    constraints: v.constraints,
+    confidence: VERDICT_CONFIDENCE[v.level],
+  };
+}
+
+/**
+ * Evaluate feasibility. When `verdicts` (from adu-fit-rules, driven by real
+ * parcel/footprint/assessor data) are supplied they are authoritative for
+ * Detached, Attached, Garage Conversion and JADU so this list can never
+ * contradict the recommendation cards.
+ */
 export function evaluateFeasibility(
+  input: FeasibilityInput,
+  jurisdiction: JurisdictionProfile,
+  verdicts?: Record<AduTypeName, AduTypeVerdict>
+): FeasibilityResult[] {
+  const heuristic = evaluateFeasibilityHeuristic(input, jurisdiction);
+  if (!verdicts) return heuristic;
+  const out = heuristic.map((r) => (r.type in verdicts ? verdictToResult(verdicts[r.type as AduTypeName]) : r));
+  // Garage conversion is only emitted by the heuristic when a garage was
+  // assumed; with real assessor data always show the honest verdict.
+  if (jurisdiction.eligibility.allowsConversionAdu && !out.some((r) => r.type === "Garage Conversion")) {
+    const jaduIdx = out.findIndex((r) => r.type === "JADU");
+    const entry = verdictToResult(verdicts["Garage Conversion"]);
+    if (jaduIdx >= 0) out.splice(jaduIdx, 0, entry);
+    else out.push(entry);
+  }
+  return out;
+}
+
+function evaluateFeasibilityHeuristic(
   input: FeasibilityInput,
   jurisdiction: JurisdictionProfile
 ): FeasibilityResult[] {

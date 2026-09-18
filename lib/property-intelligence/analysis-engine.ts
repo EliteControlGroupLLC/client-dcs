@@ -6,7 +6,6 @@
 import {
   type PropertyAnalysisResult,
   type ADURecommendation,
-  type FeasibilityLevel,
   type BuildableAnalysis,
   type SmartBannerData,
   type LotDimensions,
@@ -20,6 +19,21 @@ import {
   type SanDiegoParcel,
 } from "./sandiego-data-service";
 import { getZoningForParcel, type CityZoningResult } from "./city-zoning-service";
+import {
+  getSanDiegoBuildings,
+  getSanDiegoAdjacentParcels,
+  shareInside,
+  type SanDiegoBuildingsResult,
+} from "./sandiego-data-service";
+import {
+  evaluateAduTypeFit,
+  estimateStories,
+  pickBestAduType,
+  GARAGE_SQFT_PER_STALL,
+  type AduTypeName,
+  type AduTypeVerdict,
+  type SiteFacts,
+} from "./adu-fit-rules";
 import { getElevationData } from "./elevation-service";
 import { getOSMPropertyData } from "./osm-service";
 import { getAttomPropertyData } from "./attom-service";
@@ -77,8 +91,6 @@ import {
 import {
   estimateAduPriceRange,
   formatPriceRange,
-  getRecommendedFloorPlan,
-  normalizeAduType,
 } from "../data/site-data";
 
 export async function analyzeProperty(address: string): Promise<PropertyAnalysisResult> {
@@ -134,6 +146,27 @@ export async function analyzeProperty(address: string): Promise<PropertyAnalysis
     // Zoning from the parcel's OWN jurisdiction (SANDAG situs_juris), never
     // City-of-San-Diego codes for another city. available:false if unknown.
     cityZoning = await getZoningForParcel(geocoded.lat, geocoded.lng, sdParcel?.jurisdiction ?? null);
+  }
+
+  // Step 2b: REAL site geometry — SANDAG building outlines on the real
+  // parcel polygon (county-wide, free) + adjacent parcels (to find the
+  // street frontage). These are authoritative over OSM/Microsoft/estimates.
+  let sdBuildings: SanDiegoBuildingsResult | undefined;
+  let sdAdjacentRings: number[][][][] | undefined;
+  if (sdParcel?.available && sdParcel.parcelRings) {
+    const [bldgs, adjacent] = await Promise.all([
+      getSanDiegoBuildings(sdParcel.parcelRings),
+      getSanDiegoAdjacentParcels(sdParcel.parcelRings, sdParcel.apn),
+    ]);
+    sdBuildings = bldgs;
+    sdAdjacentRings = adjacent.available ? adjacent.rings : undefined;
+    if (!bldgs.available) {
+      console.error(`[PROVIDER-ERROR] SANDAG Building Outlines: query failed for APN ${sdParcel.apn}`);
+    } else {
+      console.log(
+        `[SANDAG-BUILDINGS] ${bldgs.buildings.length} building(s) on parcel (${bldgs.totalFootprintSqFt} sq ft), ${bldgs.excludedCount} neighbor outline(s) excluded`
+      );
+    }
   }
 
   // Step 3: Resolve property data from all sources (ATTOM + OSM + estimates)
@@ -248,6 +281,27 @@ export async function analyzeProperty(address: string): Promise<PropertyAnalysis
   // Runs after jurisdiction profile is loaded so we can use real setback values.
   // SURGICAL FIX: Intelligent merge of OSM + Microsoft footprints (not OSM-only blocker)
   let footprintMergeNotes: string[] = [];
+  // Real parcel polygon (SANDAG/SanGIS) — authoritative when present.
+  const realParcelRings = sdParcel?.available && sdParcel.parcelRings ? sdParcel.parcelRings : null;
+  const sdMainBuilding = sdBuildings?.buildings[0] ?? null;
+  const sdSecondaryBuildings = sdBuildings?.buildings.slice(1) ?? [];
+  // Garage: the assessor gives stall count; if a separate outline on the lot
+  // is garage-sized we treat the garage as detached, otherwise it's inside
+  // the main outline (attached) — which matters for the stories estimate.
+  const assessorStalls = sdParcel?.available ? sdParcel.garageStalls ?? 0 : null;
+  const detachedGarageOutline =
+    assessorStalls && assessorStalls > 0
+      ? sdSecondaryBuildings.find(
+          (b) => b.areaSqFt >= assessorStalls * GARAGE_SQFT_PER_STALL * 0.6 && b.areaSqFt <= assessorStalls * GARAGE_SQFT_PER_STALL * 1.8
+        ) ?? null
+      : null;
+  const garageAttached: boolean | null = assessorStalls && assessorStalls > 0 ? !detachedGarageOutline : null;
+  const storiesInfo = estimateStories(
+    sdParcel?.livingAreaSqFt ?? null,
+    sdMainBuilding?.areaSqFt ?? null,
+    assessorStalls,
+    garageAttached
+  );
   try {
     const rawOsmBuildings = (osmData?.parcel?.buildings || []).map((b) => ({
       areaSqFt: b.areaSqFt,
@@ -260,7 +314,13 @@ export async function analyzeProperty(address: string): Promise<PropertyAnalysis
 
     // Intelligent merge: both sources contribute, best polygons selected
     const mergedFootprints = mergeFootprintSources(rawOsmBuildings, rawMsBuildings, rawLotSizeSqFt);
-    const osmBuildings = mergedFootprints.buildings;
+    // With a real parcel, keep only OSM/Microsoft buildings mostly inside it
+    // (a neighbor's house must never count as this owner's footprint).
+    const osmBuildings = realParcelRings
+      ? mergedFootprints.buildings.filter(
+          (b) => b.nodes.length >= 3 && shareInside([b.nodes.map((n) => [n.lon, n.lat])], realParcelRings) >= 0.5
+        )
+      : mergedFootprints.buildings;
     footprintMergeNotes = mergedFootprints.mergeNotes;
     console.log(
       `[FOOTPRINT-MERGE] Source: ${mergedFootprints.source}, buildings: ${osmBuildings.length}, notes: ${mergedFootprints.mergeNotes.join(
@@ -275,7 +335,7 @@ export async function analyzeProperty(address: string): Promise<PropertyAnalysis
       attomLotWidth: attomData?.lotWidth || null,
       attomLotDepth: attomData?.lotDepth || null,
       attomFootprintSqFt: attomData?.footprintSqFt || null,
-      attomLivingAreaSqFt: attomData?.homeAreaSqFt || null,
+      attomLivingAreaSqFt: attomData?.homeAreaSqFt || sdParcel?.livingAreaSqFt || null,
       attomStories: attomData?.stories || null,
       osmBuildings,
       osmBoundingBox: osmData?.boundingBox || null,
@@ -283,6 +343,26 @@ export async function analyzeProperty(address: string): Promise<PropertyAnalysis
       rearSetbackFt: profile.setbacks.rearSetbackFt,
       sideSetbackFt: profile.setbacks.sideSetbackFt,
       separationFt: profile.separation.minDistanceFromPrimaryHomeFt,
+      realParcel: realParcelRings
+        ? {
+            polygon: { type: "Polygon", coordinates: realParcelRings },
+            areaSqFt: sdParcel?.lotSizeSqFt || 0,
+            source: "San Diego County parcel (SANDAG/SanGIS)",
+            adjacentParcelRings: sdAdjacentRings,
+          }
+        : null,
+      authoritativeBuildings:
+        sdBuildings?.available && sdBuildings.buildings.length > 0
+          ? {
+              source: sdBuildings.source,
+              buildings: sdBuildings.buildings.map((b) => ({
+                areaSqFt: b.areaSqFt,
+                nodes: b.nodes,
+                buildingType: detachedGarageOutline === b ? "garage" : undefined,
+              })),
+            }
+          : null,
+      storiesEstimate: storiesInfo.stories,
     });
 
     const geoSanity = runGeometrySanityChecks(geometryAnalysis, attomData?.homeAreaSqFt || intelligence.homeAreaSqFt.value);
@@ -301,6 +381,47 @@ export async function analyzeProperty(address: string): Promise<PropertyAnalysis
     );
   } catch (err) {
     console.error("[GEOMETRY-ENGINE] Failed to run geometry analysis:", err);
+  }
+
+  // Step 3e: Real footprint + open yard from SANDAG outlines on the real
+  // parcel (replaces "estimated from zone averages"). Open yard = lot − all
+  // building footprints, so it can never exceed the lot.
+  // Parcel identity: the assessor situs matches the house number, or (when
+  // the county has no situs for this number) the geocoded point lies inside
+  // the parcel. A merely "nearest" parcel is never treated as verified.
+  const exactParcelMatch = sdParcel?.matchQuality === "exact-address" || sdParcel?.geocodeInParcel === true;
+  const geometryVerified = Boolean(
+    geometryAnalysis?.parcelIsReal &&
+      geometryAnalysis.footprintIsReal &&
+      geometryAnalysis.geometryStatus === "polygon-verified" &&
+      sdBuildings?.available &&
+      (sdBuildings.buildings.length ?? 0) > 0 &&
+      exactParcelMatch
+  );
+  if (geometryAnalysis?.parcelIsReal && geometryAnalysis.footprintIsReal && sdBuildings?.buildings.length) {
+    const conf = exactParcelMatch ? 92 : 78;
+    const summary = geometryAnalysis.areaSummary;
+    intelligence.footprintSqFt = {
+      ...realField(summary.mainFootprintSqFt, conf, "SANDAG Building Outlines (traced footprint, incl. attached garage)"),
+      displayValue:
+        sdBuildings.buildings.length > 1
+          ? `${summary.mainFootprintSqFt.toLocaleString()} sq ft main building (+${(summary.totalStructureFootprintSqFt - summary.mainFootprintSqFt).toLocaleString()} sq ft other structures)`
+          : undefined,
+    };
+    const yard = summary.openYardSqFt ?? Math.max(0, summary.parcelSqFt - summary.totalStructureFootprintSqFt);
+    intelligence.openYardSqFt = realField(
+      yard,
+      conf - 4,
+      "County parcel area minus SANDAG building outlines (includes driveway/hardscape)"
+    );
+    rawFootprintSqFt = summary.mainFootprintSqFt;
+  }
+  // A parcel that is merely the NEAREST to the address point is real
+  // geometry, but not verified to be THIS property — never label it so.
+  if (geometryAnalysis?.parcelIsReal && !exactParcelMatch && geometryAnalysis.geometryStatus === "polygon-verified") {
+    geometryAnalysis.geometryStatus = "polygon-estimated";
+    geometryAnalysis.geometryConfidence = Math.min(geometryAnalysis.geometryConfidence, 60);
+    geometryAnalysis.parcelSource = `${geometryAnalysis.parcelSource} — nearest parcel to the address point (house number not on County record)`;
   }
 
   // Step 4a.5: LiDAR / Enhanced Terrain Analysis
@@ -354,6 +475,36 @@ export async function analyzeProperty(address: string): Promise<PropertyAnalysis
     }
   }
 
+  // Step 4b.1: With verified SANDAG geometry, the site diagram must show the
+  // SAME buildable zone the verdicts use (the strict pipeline's own envelope
+  // assumes a north-facing rear yard and doesn't subtract the house).
+  if (strictGeometry && geometryAnalysis && geometryAnalysis.parcelIsReal && geometryAnalysis.footprintIsReal) {
+    strictGeometry.parcelSource = geometryAnalysis.parcelSource;
+    strictGeometry.buildingSource = geometryAnalysis.footprintSource;
+    const y = geometryAnalysis.measuredYards;
+    if (strictGeometry.metrics && y) {
+      strictGeometry.metrics.frontYardDepthFt = y.frontFt;
+      strictGeometry.metrics.rearYardDepthFt = y.rearFt;
+      strictGeometry.metrics.leftSideYardFt = y.leftFt;
+      strictGeometry.metrics.rightSideYardFt = y.rightFt;
+      strictGeometry.metrics.openYardAreaSqFt = geometryAnalysis.areaSummary.openYardSqFt ?? strictGeometry.metrics.openYardAreaSqFt;
+      if (geometryAnalysis.orientedLotDims) {
+        strictGeometry.metrics.parcelWidthFt = geometryAnalysis.orientedLotDims.widthFt;
+        strictGeometry.metrics.parcelDepthFt = geometryAnalysis.orientedLotDims.depthFt;
+      }
+    }
+    if (strictGeometry.buildableEnvelope) {
+      const z = geometryAnalysis.bestAduZone;
+      strictGeometry.buildableEnvelope.buildablePolygon = z ? z.polygon : null;
+      strictGeometry.buildableEnvelope.buildableAreaSqFt = z ? z.areaSqFt : 0;
+      strictGeometry.buildableEnvelope.bestZone =
+        z && (z.position === "rear" || z.position === "left-side" || z.position === "right-side") ? z.position : "none";
+      strictGeometry.buildableEnvelope.constraints = z
+        ? [`Largest detached footprint after setbacks: ${z.minWidthFt} x ${z.minDepthFt} ft`]
+        : ["No detached ADU footprint fits after required setbacks and separation"];
+    }
+  }
+
   // Step 4c: Slope percent extraction for constraint analysis
   const slopeStr = intelligence.slope.value;
   let slopePercent: number = 0;
@@ -392,6 +543,83 @@ export async function analyzeProperty(address: string): Promise<PropertyAnalysis
   // SURGICAL FIX: Build FinalBuildabilityResult — single source of truth
   const finalBuildability = buildFinalBuildabilityResult(geometryAnalysis, rectangleFallback, rawLotSizeSqFt);
 
+  // Step 5b: Real site facts → ADU-type verdicts (single source of truth for
+  // cards, feasibility list, best recommendation, banner and financials).
+  const bestDetachedZone = geometryAnalysis?.bestAduZone ?? null;
+  const siteFacts: SiteFacts = {
+    stories: storiesInfo.stories,
+    storiesMethod:
+      storiesInfo.ratio != null
+        ? `(assessor living area ${sdParcel?.livingAreaSqFt?.toLocaleString()} sq ft${garageAttached && assessorStalls ? ` + ${assessorStalls}-car attached garage ≈ ${(assessorStalls * GARAGE_SQFT_PER_STALL).toLocaleString()} sq ft` : ""}) ÷ building footprint ${sdMainBuilding?.areaSqFt.toLocaleString()} sq ft = ${storiesInfo.ratio}`
+        : "Unavailable — needs assessor living area and a real building outline",
+    garageStalls: sdParcel?.available ? assessorStalls : null,
+    garageConverted: sdParcel?.hasGarageConversion === true,
+    garageAttached,
+    garageSqFtEstimate: detachedGarageOutline
+      ? detachedGarageOutline.areaSqFt
+      : assessorStalls && assessorStalls > 0
+        ? assessorStalls * GARAGE_SQFT_PER_STALL
+        : null,
+    livingAreaSqFt: sdParcel?.livingAreaSqFt ?? null,
+    lotSizeSqFt: sdParcel?.lotSizeSqFt ?? null,
+    mainFootprintSqFt: sdMainBuilding?.areaSqFt ?? null,
+    totalFootprintSqFt: sdBuildings?.available ? sdBuildings.totalFootprintSqFt : null,
+    buildingCount: sdBuildings?.available ? sdBuildings.buildings.length : null,
+    openYardSqFt: geometryAnalysis?.parcelIsReal && geometryAnalysis.footprintIsReal
+      ? geometryAnalysis.areaSummary.openYardSqFt ?? null
+      : null,
+    geometryVerified,
+    geometrySource: geometryAnalysis
+      ? `${geometryAnalysis.parcelSource}; ${geometryAnalysis.footprintSource}`
+      : "Unavailable",
+    detachedZone:
+      geometryVerified && bestDetachedZone
+        ? {
+            areaSqFt: bestDetachedZone.areaSqFt,
+            widthFt: bestDetachedZone.minWidthFt,
+            depthFt: bestDetachedZone.minDepthFt,
+            position: bestDetachedZone.position,
+            contiguousAreaSqFt: bestDetachedZone.contiguousAreaSqFt ?? null,
+          }
+        : null,
+    attachedFit: geometryAnalysis?.attachedFit
+      ? {
+          areaSqFt: geometryAnalysis.attachedFit.areaSqFt,
+          widthFt: geometryAnalysis.attachedFit.widthFt,
+          depthFt: geometryAnalysis.attachedFit.depthFt,
+        }
+      : null,
+    measuredYards: geometryAnalysis?.measuredYards ?? null,
+    setbacksUsed: {
+      sideRearFt: Math.max(profile.setbacks.sideSetbackFt, profile.setbacks.rearSetbackFt),
+      frontFt: 15,
+      separationFt: profile.separation.minDistanceFromPrimaryHomeFt,
+    },
+    frontEdgeMethod: geometryAnalysis?.frontEdgeMethod,
+    parcelMatch: !sdParcel?.available
+      ? "none"
+      : sdParcel.matchQuality === "exact-address"
+        ? "exact-address"
+        : sdParcel.geocodeInParcel
+          ? "address-point"
+          : "nearest",
+    sources: [
+      ...(sdParcel?.available ? ["San Diego County Assessor (SANDAG parcels)"] : []),
+      ...(realParcelRings ? ["SANDAG/SanGIS parcel polygon"] : []),
+      ...(sdBuildings?.buildings.length ? ["SANDAG Building Outlines"] : []),
+    ],
+  };
+  const aduVerdicts = evaluateAduTypeFit(siteFacts, profile);
+  if (!geometryVerified) {
+    finalBuildability.warnings.push(
+      "Real parcel/building geometry could not be verified for this address — detached ADU size requires a manual site review."
+    );
+  } else if (sdParcel?.matchQuality !== "exact-address") {
+    finalBuildability.warnings.push(
+      `County records have no situs for this house number; analyzed the parcel containing the address point (APN ${sdParcel?.apn}, situs ${sdParcel?.situsAddress ?? "n/a"}).`
+    );
+  }
+
   // GEOMETRY ASSERTION: If polygon geometry exists with valid zones,
   // user-facing buildable area MUST come from polygon, not rectangle.
   if (geometryAnalysis && geometryAnalysis.leftoverZones.length > 0 && finalBuildability.geometryMethodUsed === "rectangle-fallback") {
@@ -404,16 +632,30 @@ export async function analyzeProperty(address: string): Promise<PropertyAnalysis
   const allowanceCapSqFt = parseAduAllowanceCap(intelligence.aduAllowances.value) ?? profile.sizeRules.detachedAduMaxSqft;
   const effectiveAduCapSqFt = Math.min(finalBuildability.totalBuildableAreaSqFt, allowanceCapSqFt);
 
-  const buildable: BuildableAnalysis = {
-    requiredMainHomeSeparationFt: rectangleFallback.requiredMainHomeSeparationFt,
-    requiredPropertyLineSetbackFt: rectangleFallback.requiredPropertyLineSetbackFt,
-    estimatedBuildableEnvelopeSqFt: effectiveAduCapSqFt,
-    oneStoryPotential: `Recommended up to ${effectiveAduCapSqFt.toLocaleString()} sq ft`,
-    twoStoryPotential:
-      profile.height.twoStoryAllowed && effectiveAduCapSqFt > 400
-        ? `Recommended up to ${Math.min(1200, effectiveAduCapSqFt).toLocaleString()} sq ft with city review`
-        : "Limited — lot constraints may restrict two-story options",
-  };
+  const detachedVerdict = aduVerdicts["Detached ADU"];
+  const buildable: BuildableAnalysis = geometryVerified
+    ? {
+        requiredMainHomeSeparationFt: rectangleFallback.requiredMainHomeSeparationFt,
+        requiredPropertyLineSetbackFt: rectangleFallback.requiredPropertyLineSetbackFt,
+        estimatedBuildableEnvelopeSqFt: detachedVerdict.maxSqFt,
+        envelopeLabel: detachedVerdict.maxSqFt > 0 ? undefined : "None after required setbacks",
+        oneStoryPotential:
+          detachedVerdict.maxSqFt > 0
+            ? `Detached footprint up to ${detachedVerdict.maxSqFt.toLocaleString()} sq ft fits after setbacks`
+            : "Not recommended — no detached footprint fits after required setbacks",
+        twoStoryPotential:
+          detachedVerdict.maxSqFt > 0 && profile.height.twoStoryAllowed
+            ? `Two-story detached up to ${Math.min(profile.sizeRules.detachedAduMaxSqft, detachedVerdict.maxSqFt * 2).toLocaleString()} sq ft with city review`
+            : "Not recommended — no detached footprint fits after required setbacks",
+      }
+    : {
+        requiredMainHomeSeparationFt: rectangleFallback.requiredMainHomeSeparationFt,
+        requiredPropertyLineSetbackFt: rectangleFallback.requiredPropertyLineSetbackFt,
+        estimatedBuildableEnvelopeSqFt: effectiveAduCapSqFt,
+        envelopeLabel: "Site review needed",
+        oneStoryPotential: "Site review needed — real yard geometry unverified",
+        twoStoryPotential: "Site review needed — real yard geometry unverified",
+      };
 
   // Step 6: Detect overlays (base detection + Zoneomics enrichment)
   const baseOverlays = detectOverlays(formattedAddress, jurisdictionResult.jurisdictionId, slopePercent);
@@ -456,8 +698,9 @@ export async function analyzeProperty(address: string): Promise<PropertyAnalysis
   }
 
   // Step 7: Enhanced feasibility analysis
-  const lotWidth = Math.round(Math.sqrt(rawLotSizeSqFt * 0.5));
-  const lotDepth = Math.round(rawLotSizeSqFt / lotWidth);
+  // Real frontage-aligned lot dimensions when the SANDAG parcel is known.
+  const lotWidth = geometryAnalysis?.orientedLotDims?.widthFt || Math.round(Math.sqrt(rawLotSizeSqFt * 0.5));
+  const lotDepth = geometryAnalysis?.orientedLotDims?.depthFt || Math.round(rawLotSizeSqFt / lotWidth);
   const openYard = intelligence.openYardSqFt.value;
   const zoning = intelligence.zoning.value;
   const homeArea = intelligence.homeAreaSqFt.value;
@@ -479,7 +722,8 @@ export async function analyzeProperty(address: string): Promise<PropertyAnalysis
       zoning,
       overlays: overlays.filter((o) => o.detected).map((o) => o.type),
     },
-    profile
+    profile,
+    aduVerdicts
   );
 
   // Step 8: Detect upside opportunities
@@ -500,8 +744,9 @@ export async function analyzeProperty(address: string): Promise<PropertyAnalysis
 
   // Step 9: Generate recommendations FIRST to determine primary recommendation
   // This ensures all downstream outputs derive from the same recommendation
-  let recommendations = generateRecommendations(rawLotSizeSqFt, openYard, effectiveAduCapSqFt);
-  let bestRec = determineBestRecommendation(recommendations);
+  let recommendations = generateRecommendations(aduVerdicts);
+  let bestRec: string = pickBestAduType(aduVerdicts);
+  const bestVerdict: AduTypeVerdict = aduVerdicts[bestRec as AduTypeName];
 
   // Step 9b: Generate UNIFIED recommendation that drives rent and financial scenarios
   // This is the single source of truth for the entire page
@@ -514,12 +759,17 @@ export async function analyzeProperty(address: string): Promise<PropertyAnalysis
       zipCode,
       lotSizeSqFt: rawLotSizeSqFt,
       openYardSqFt: openYard,
-      buildableEnvelopeSqFt: finalBuildability.totalBuildableAreaSqFt,
+      buildableEnvelopeSqFt: bestVerdict.maxSqFt > 0 ? bestVerdict.maxSqFt : Math.min(600, effectiveAduCapSqFt || 600),
       hasGarage: (sdParcel?.garageStalls ?? 0) > 0 || sdParcel?.hasGarageConversion === true || rawFootprintSqFt > 800,
       feasibilityResults: enhancedFeasibility,
       bestRecommendationType: bestRec,
-      maxAllowedSqFt: effectiveAduCapSqFt,
+      maxAllowedSqFt:
+        bestRec === "Detached ADU" ? allowanceCapSqFt : bestVerdict.maxSqFt > 0 ? bestVerdict.maxSqFt : allowanceCapSqFt,
       jaduMaxSqFt: profile.sizeRules.jaduMaxSqft,
+      // Never model a unit bigger than what really fits; unverified sites are
+      // modeled conservatively (≤ 600 sq ft) pending a site review.
+      hardSizeCapSqFt: bestVerdict.maxSqFt > 0 ? bestVerdict.maxSqFt : 600,
+      contextNote: buildBestContextNote(bestRec as AduTypeName, aduVerdicts, siteFacts),
     });
   } catch (err) {
     console.error("[UNIFIED-RECOMMENDATION] Failed to generate unified recommendation:", err);
@@ -527,7 +777,7 @@ export async function analyzeProperty(address: string): Promise<PropertyAnalysis
 
   if (unifiedRecommendation) {
     bestRec = unifiedRecommendation.primaryType;
-    recommendations = synchronizeRecommendations(recommendations, unifiedRecommendation, effectiveAduCapSqFt);
+    recommendations = synchronizeRecommendations(recommendations, unifiedRecommendation, aduVerdicts);
   }
 
   // Step 9c: Build rent estimates map from unified recommendation (for backward compatibility)
@@ -558,7 +808,7 @@ export async function analyzeProperty(address: string): Promise<PropertyAnalysis
 
   // Step 10: Generate financial scenarios from UNIFIED recommendation
   // This ensures financial preview matches the primary recommendation exactly
-  let financialScenarios = unifiedRecommendation
+  const financialScenarios = unifiedRecommendation
     ? buildUnifiedFinancialScenarios(unifiedRecommendation)
     : generateFinancialScenarios(enhancedFeasibility, rentEstimates);
 
@@ -686,10 +936,10 @@ export async function analyzeProperty(address: string): Promise<PropertyAnalysis
   if (geometryAnalysis) {
     if (geometryAnalysis.geometryStatus === "polygon-verified") {
       adjustedScore = Math.min(100, adjustedScore + 4);
-      additionalPositiveSignals.push("Polygon-verified building footprints from OSM");
+      additionalPositiveSignals.push(`Polygon-verified geometry: ${geometryAnalysis.footprintSource} on ${geometryAnalysis.parcelSource}`);
     } else if (geometryAnalysis.geometryStatus === "polygon-estimated") {
       adjustedScore = Math.min(100, adjustedScore + 2);
-      additionalPositiveSignals.push("Estimated polygon footprints from ATTOM data");
+      additionalPositiveSignals.push(`Estimated polygon geometry (${geometryAnalysis.footprintSource})`);
     } else {
       additionalNegativeSignals.push("Rectangle-fallback geometry — low confidence placement");
     }
@@ -764,6 +1014,7 @@ export async function analyzeProperty(address: string): Promise<PropertyAnalysis
 
   return {
     property: intelligence,
+    siteFacts,
     buildable,
     finalBuildability,
     recommendations,
@@ -1038,6 +1289,51 @@ function buildFinalBuildabilityResult(
   const notes: string[] = [];
   const warnings: string[] = [];
 
+  // Case 0: REAL parcel polygon + REAL building outlines (SANDAG). The raster
+  // analysis is authoritative even when nothing fits — "0 sq ft buildable"
+  // is a true, verified answer, never a reason to fall back to a rectangle.
+  if (geometryAnalysis && geometryAnalysis.parcelIsReal && geometryAnalysis.footprintIsReal && geometryAnalysis.geometryStatus === "polygon-verified") {
+    const bestZone = geometryAnalysis.bestAduZone;
+    const bestZoneArea = bestZone ? Math.min(bestZone.areaSqFt, 1200) : 0;
+    const y = geometryAnalysis.measuredYards;
+    notes.push(`Parcel: ${geometryAnalysis.parcelSource}; footprints: ${geometryAnalysis.footprintSource}`);
+    notes.push(`Street frontage identified by ${geometryAnalysis.frontEdgeMethod ?? "n/a"}`);
+    if (y) notes.push(`Measured yards around main home: front ${y.frontFt} ft, rear ${y.rearFt} ft, sides ${y.leftFt} ft / ${y.rightFt} ft`);
+    notes.push(
+      bestZone
+        ? `Largest detached footprint after setbacks + separation: ${bestZone.minWidthFt} x ${bestZone.minDepthFt} ft (${bestZone.areaSqFt} sq ft, ${bestZone.position})`
+        : "No area large enough for a detached ADU remains after setbacks + separation"
+    );
+    const rectArea = rectangleFallback.estimatedBuildableEnvelopeSqFt;
+    return {
+      totalBuildableAreaSqFt: bestZoneArea,
+      bestAduZoneAreaSqFt: bestZoneArea,
+      bestAduZonePolygon: bestZone ? bestZone.polygon : null,
+      candidateZones: geometryAnalysis.leftoverZones.map((z) => ({
+        polygon: z.polygon,
+        areaSqFt: z.areaSqFt,
+        position: z.position,
+        buildQuality: z.buildQuality,
+        minWidthFt: z.minWidthFt,
+        minDepthFt: z.minDepthFt,
+        suitableFor: z.suitableFor,
+        contiguousAreaSqFt: z.contiguousAreaSqFt,
+      })),
+      candidateZoneCount: geometryAnalysis.leftoverZones.filter((z) => z.suitableFor.length > 0).length,
+      buildabilityConfidence: geometryAnalysis.geometryConfidence,
+      structurePlacementConfidence: geometryAnalysis.placement?.confidence || 0,
+      geometryMethodUsed: "polygon-verified",
+      notes,
+      warnings,
+      debugComparison: {
+        rectangleBuildableAreaSqFt: rectArea,
+        polygonBuildableAreaSqFt: bestZoneArea,
+        deltaPercent: rectArea > 0 ? Math.round(((bestZoneArea - rectArea) / rectArea) * 100) : 0,
+        polygonIsSource: true,
+      },
+    };
+  }
+
   // Case 1: Polygon geometry available with valid candidate zones
   if (geometryAnalysis && geometryAnalysis.leftoverZones.length > 0 && geometryAnalysis.geometryConfidence > 30) {
     const bestZone = geometryAnalysis.bestAduZone || geometryAnalysis.leftoverZones[0];
@@ -1151,80 +1447,60 @@ function calculateBuildableArea(
   };
 }
 
-function generateRecommendations(lotSizeSqFt: number, openYardSqFt: number, buildableEnvelope: number): ADURecommendation[] {
-  const isLargeLot = lotSizeSqFt > 6500;
-  const hasGoodYard = openYardSqFt > 2000;
-  const hasModerateYard = openYardSqFt > 1200;
-
-  const detachedFeasibility: FeasibilityLevel =
-    hasGoodYard && buildableEnvelope > 500 ? "Likely" : hasModerateYard ? "Possible" : "Limited";
-
-  const attachedFeasibility: FeasibilityLevel = buildableEnvelope > 300 ? "Possible" : "Limited";
-
-  const garageFeasibility: FeasibilityLevel = isLargeLot || lotSizeSqFt > 5500 ? "Likely" : "Possible";
-
-  const secondStoryFeasibility: FeasibilityLevel = lotSizeSqFt > 5000 ? "Possible" : "Limited";
-
-  return [
-    {
-      type: "Detached ADU",
-      feasibility: detachedFeasibility,
-      estimatedSizeRange: hasGoodYard ? "600 - 1,200 sq ft" : hasModerateYard ? "400 - 600 sq ft" : "Up to 400 sq ft",
-      priceRange: hasGoodYard ? "$175K - $350K" : "$120K - $200K",
-      description: hasGoodYard
-        ? "Based on this preliminary scan, a detached ADU appears feasible. Your lot has sufficient open area to accommodate a standalone unit with required setbacks."
-        : "Your lot appears tight for a detached ADU. Limited buildable area may restrict unit size, but a smaller detached unit may still be possible.",
-    },
-    {
-      type: "Attached ADU",
-      feasibility: attachedFeasibility,
-      estimatedSizeRange: "400 - 800 sq ft",
-      priceRange: "$130K - $250K",
-      description:
-        "An attached ADU extends from your existing home. This option can work well when yard space is limited, as it shares a wall with the main residence.",
-    },
-    {
-      type: "Garage Conversion",
-      feasibility: garageFeasibility,
-      estimatedSizeRange: "350 - 500 sq ft",
-      priceRange: "$80K - $160K",
-      description:
-        "Your property may qualify for a garage conversion. This is often the most cost-effective ADU option, converting existing structure into livable space.",
-    },
-    {
-      type: "Second-Story ADU",
-      feasibility: secondStoryFeasibility,
-      estimatedSizeRange: "400 - 1,000 sq ft",
-      priceRange: "$200K - $400K",
-      description:
-        "A second-story ADU is built above your existing home or garage. This option maximizes yard space while adding significant livable area.",
-    },
-  ];
+/**
+ * Recommendation cards straight from the real-data ADU-type verdicts
+ * (adu-fit-rules). JADU is shown only when it's the best available path.
+ */
+function generateRecommendations(verdicts: Record<AduTypeName, AduTypeVerdict>): ADURecommendation[] {
+  const types: AduTypeName[] = ["Detached ADU", "Attached ADU", "Garage Conversion", "Second-Story ADU"];
+  if (pickBestAduType(verdicts) === "JADU") types.push("JADU");
+  return types.map((type) => {
+    const v = verdicts[type];
+    return {
+      type,
+      feasibility: v.level,
+      estimatedSizeRange: v.sizeLabel,
+      priceRange: verdictPriceRange(v),
+      description: v.description,
+    };
+  });
 }
 
-function determineBestRecommendation(recommendations: ADURecommendation[]): string {
-  const priority: Record<FeasibilityLevel, number> = {
-    Likely: 4,
-    Possible: 3,
-    Limited: 2,
-    "Not Recommended": 1,
-  };
-
-  // Prefer: Detached > Garage > Attached > Second-Story when feasibility is equal
-  const typePriority: Record<string, number> = {
-    "Detached ADU": 4,
-    "Garage Conversion": 3,
-    "Attached ADU": 2,
-    "Second-Story ADU": 1,
-  };
-
-  const sorted = [...recommendations].sort((a, b) => {
-    const fDiff = priority[b.feasibility] - priority[a.feasibility];
-    if (fDiff !== 0) return fDiff;
-    return (typePriority[b.type] || 0) - (typePriority[a.type] || 0);
+function verdictPriceRange(v: AduTypeVerdict): string {
+  if (v.maxSqFt <= 0 || v.level === "Not Recommended") return "N/A";
+  const price = estimateAduPriceRange({
+    sqFt: v.maxSqFt,
+    type: v.type === "JADU" ? "Attached ADU" : v.type,
+    stories: v.type === "Second-Story ADU" ? 2 : 1,
+    garageStalls: v.type === "Garage Conversion" ? (v.maxSqFt >= 3 * GARAGE_SQFT_PER_STALL ? 3 : 2) : undefined,
   });
+  return formatPriceRange(price.low, price.high);
+}
 
-  return sorted[0].type;
+/** One plain-English sentence explaining why the best type was chosen. */
+function buildBestContextNote(
+  best: AduTypeName,
+  verdicts: Record<AduTypeName, AduTypeVerdict>,
+  facts: SiteFacts
+): string | undefined {
+  const detached = verdicts["Detached ADU"];
+  const parts: string[] = [];
+  if (best !== "Detached ADU" && detached.level === "Not Recommended") {
+    parts.push(`A detached ADU doesn't fit: ${detached.description.split(";")[0].replace(/\.$/, "")}.`);
+  } else if (best !== "Detached ADU" && !facts.geometryVerified) {
+    parts.push("Detached ADU size couldn't be verified from real parcel data and needs a site review.");
+  }
+  if (best === "Garage Conversion" && facts.garageStalls) {
+    parts.push(
+      facts.parcelMatch === "nearest"
+        ? `County records for the nearest parcel show a ${facts.garageStalls}-car garage — confirm on site.`
+        : `County records show a ${facts.garageStalls}-car garage that can be converted.`
+    );
+  }
+  if (facts.stories != null && facts.stories >= 2 && best !== "Second-Story ADU") {
+    parts.push(`The home is already ${facts.stories === 2 ? "two" : facts.stories} stories.`);
+  }
+  return parts.length ? parts.join(" ") : undefined;
 }
 
 function parseAduAllowanceCap(value: string): number | null {
@@ -1237,60 +1513,25 @@ function parseAduAllowanceCap(value: string): number | null {
 function synchronizeRecommendations(
   recommendations: ADURecommendation[],
   unifiedRecommendation: UnifiedRecommendation,
-  maxAllowedSqFt: number
+  verdicts: Record<AduTypeName, AduTypeVerdict>
 ): ADURecommendation[] {
   return recommendations
     .map((recommendation) => {
-      const normalizedType = normalizeAduType(
-        recommendation.type,
-        recommendation.type === "Second-Story ADU" ? 2 : 1
-      );
-      const candidatePlan = getRecommendedFloorPlan({
-        sqFt: maxAllowedSqFt,
-        type: recommendation.type,
-        stories: normalizedType === "two-story" ? 2 : 1,
-        garageStalls: 2,
-      });
-      const recommendedSqFt =
-        recommendation.type === unifiedRecommendation.primaryType
-          ? unifiedRecommendation.primarySizeSqFt
-          : Math.min(candidatePlan?.sqFt ?? maxAllowedSqFt, maxAllowedSqFt);
-      const price = estimateAduPriceRange({
-        sqFt: recommendedSqFt,
-        type: recommendation.type,
-        bedrooms: candidatePlan?.bedrooms,
-        bathrooms: candidatePlan?.bathrooms,
-        stories: candidatePlan?.stories,
-        garageStalls: recommendation.type === "Garage Conversion" ? 2 : undefined,
-      });
-
-      if (recommendation.type === unifiedRecommendation.primaryType) {
-        return {
-          ...recommendation,
-          feasibility: "Likely" as FeasibilityLevel,
-          estimatedSizeRange: `${unifiedRecommendation.primarySizeSqFt.toLocaleString()} sq ft`,
-          priceRange: unifiedRecommendation.priceRange,
-          description: `Primary DCS recommendation for this parcel: ${unifiedRecommendation.primaryUnitLabel} with estimated market rent of $${unifiedRecommendation.primaryRentEstimate.rentRangeLow.toLocaleString()}-$${unifiedRecommendation.primaryRentEstimate.rentRangeHigh.toLocaleString()}/month.`,
-        };
-      }
-
-      if (recommendation.type === "Garage Conversion" && unifiedRecommendation.primaryType !== "Garage Conversion" && unifiedRecommendation.primarySizeSqFt >= 850) {
-        return {
-          ...recommendation,
-          feasibility: "Limited" as FeasibilityLevel,
-          estimatedSizeRange: "400 sq ft",
-          priceRange: formatPriceRange(price.low, price.high),
-          description: "A garage conversion remains a secondary fallback path, but the stronger DCS recommendation for this property is the larger detached product shown above.",
-        };
-      }
-
+      if (recommendation.type !== unifiedRecommendation.primaryType) return recommendation;
+      const verdict = verdicts[recommendation.type as AduTypeName];
+      const sizeKnown = verdict ? verdict.maxSqFt > 0 : true;
+      const rent = `$${unifiedRecommendation.primaryRentEstimate.rentRangeLow.toLocaleString()}-$${unifiedRecommendation.primaryRentEstimate.rentRangeHigh.toLocaleString()}/month`;
       return {
         ...recommendation,
-        estimatedSizeRange:
-          recommendation.type === "Garage Conversion"
-            ? "400 sq ft"
-            : `Up to ${recommendedSqFt.toLocaleString()} sq ft`,
-        priceRange: formatPriceRange(price.low, price.high),
+        // Feasibility stays exactly what the real-data rules said — the
+        // primary pick is never promoted to "Likely" just for being first.
+        estimatedSizeRange: sizeKnown
+          ? `${unifiedRecommendation.primarySizeSqFt.toLocaleString()} sq ft`
+          : recommendation.estimatedSizeRange,
+        priceRange: unifiedRecommendation.priceRange,
+        description: sizeKnown
+          ? `${recommendation.description} Best fit: ${unifiedRecommendation.primaryUnitLabel} at ${unifiedRecommendation.primarySizeSqFt.toLocaleString()} sq ft, estimated market rent ${rent}.`
+          : `${recommendation.description} Financials below model a ${unifiedRecommendation.primarySizeSqFt.toLocaleString()} sq ft unit pending site review.`,
       };
     })
     .sort((a, b) => Number(b.type === unifiedRecommendation.primaryType) - Number(a.type === unifiedRecommendation.primaryType));
