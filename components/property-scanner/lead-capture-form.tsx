@@ -23,6 +23,7 @@ interface EmailValidationState {
 interface PhoneVerificationState {
   codeSent: boolean;
   verified: boolean;
+  token?: string;
   lastSentAt?: number;
 }
 
@@ -204,8 +205,9 @@ export function LeadCaptureForm({
         setPhoneVerification(prev => ({
           ...prev,
           verified: true,
+          token: data.phoneToken || undefined,
         }));
-        return true;
+        return (data.phoneToken as string | null) || true;
       }
 
       return false;
@@ -322,6 +324,7 @@ export function LeadCaptureForm({
     // Verify OTP
     const otpValid = await verifyOtpCode();
     if (!otpValid) return;
+    const phoneToken = typeof otpValid === "string" ? otpValid : phoneVerification.token;
 
     // Submit the verified lead
     setSubmitting(true);
@@ -344,6 +347,7 @@ export function LeadCaptureForm({
             emailScore: emailValidation?.score || 0,
             emailIsDisposable: emailValidation?.isDisposable || false,
             phoneVerified: true,
+            phoneToken,
             verificationCompletedAt: new Date().toISOString(),
           },
         }),

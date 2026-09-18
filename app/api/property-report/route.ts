@@ -6,6 +6,7 @@ import { notifyTeamADULead, sendUserConfirmation } from "@/lib/email";
 import { checkRateLimit, getClientIp, RATE_LIMITS } from "@/lib/rate-limit";
 import { buildAduReportPdf } from "@/lib/adu-report-pdf";
 import { pushLeadToBuildCore } from "@/lib/buildcore-intake";
+import { isPhoneTokenValid } from "@/lib/verification-token";
 
 // pdf-lib + Buffer need the Node runtime; PDF build + CRM push can take a few seconds.
 export const runtime = "nodejs";
@@ -41,13 +42,15 @@ export async function POST(request: NextRequest) {
       verification,
     } = body;
 
-    // Extract verification data
-    const verificationData = verification || {
+    // Extract verification data. phoneVerified is NOT trusted from the client:
+    // it must be backed by the signed token /api/verify-phone issued.
+    const verificationData = {
       emailValidated: false,
       emailScore: 0,
       emailIsDisposable: false,
-      phoneVerified: false,
       verificationCompletedAt: null,
+      ...(verification || {}),
+      phoneVerified: isPhoneTokenValid(verification?.phoneToken, String(phone || "")),
     };
 
     // Validate required fields
