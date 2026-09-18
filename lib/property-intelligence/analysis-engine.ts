@@ -10,9 +10,17 @@ import {
   type BuildableAnalysis,
   type SmartBannerData,
   type LotDimensions,
+  type IntelligenceField,
+  getConfidenceStatus,
 } from "./types";
 import { resolvePropertyData } from "./property-data-resolver";
 import { geocodeAddress } from "./geocoding-service";
+import {
+  getSanDiegoParcel,
+  getSanDiegoZoning,
+  type SanDiegoParcel,
+  type SanDiegoZoning,
+} from "./sandiego-data-service";
 import { getElevationData } from "./elevation-service";
 import { getOSMPropertyData } from "./osm-service";
 import { getAttomPropertyData } from "./attom-service";
@@ -117,11 +125,50 @@ export async function analyzeProperty(address: string): Promise<PropertyAnalysis
     }
   }
 
+  // Real San Diego parcel + zoning from free government GIS (SANDAG parcels +
+  // City of San Diego DSD zoning). This is the accurate core that replaces
+  // the old address-seeded fabrication for the headline facts.
+  let sdParcel: SanDiegoParcel | undefined;
+  let sdZoning: SanDiegoZoning | undefined;
+  if (geocoded) {
+    [sdParcel, sdZoning] = await Promise.all([
+      getSanDiegoParcel(geocoded.lat, geocoded.lng, geocoded.components.streetNumber, geocoded.components.route),
+      getSanDiegoZoning(geocoded.lat, geocoded.lng),
+    ]);
+  }
+
   // Step 3: Resolve property data from all sources (ATTOM + OSM + estimates)
   const resolved = resolvePropertyData(address, geocoded?.formattedAddress, slopeData, osmData, attomData);
 
   const { intelligence } = resolved;
   let { rawLotSizeSqFt, rawFootprintSqFt } = resolved;
+
+  // Step 3-REAL: Override the fabricated/estimated headline facts with REAL
+  // San Diego records where we have them. Honest source labels + high
+  // confidence. If SD data is unavailable, the resolver's values stand
+  // (and confidence stays low), never fabricated as "verified".
+  const realField = <T,>(value: T, confidence: number, source: string): IntelligenceField<T> => ({
+    value,
+    confidence,
+    status: getConfidenceStatus(confidence),
+    sources: [source],
+  });
+  if (sdParcel?.available) {
+    const exact = sdParcel.matchQuality === "exact-address";
+    if (sdParcel.lotSizeSqFt && sdParcel.lotSizeSqFt > 0) {
+      intelligence.lotSizeSqFt = realField(sdParcel.lotSizeSqFt, exact ? 95 : 80, "San Diego County Assessor (SanGIS)");
+      rawLotSizeSqFt = sdParcel.lotSizeSqFt;
+    }
+    if (sdParcel.livingAreaSqFt && sdParcel.livingAreaSqFt > 0) {
+      intelligence.homeAreaSqFt = realField(sdParcel.livingAreaSqFt, exact ? 92 : 78, "San Diego County Assessor");
+    }
+    if (sdParcel.apn) {
+      intelligence.apn = realField(sdParcel.apn, 96, "San Diego County Assessor");
+    }
+  }
+  if (sdZoning?.available && sdZoning.zoneName) {
+    intelligence.zoning = realField(sdZoning.zoneName, 92, "City of San Diego (DSD Zoning)");
+  }
 
   // Step 3b: Run sanity checks before proceeding
   const sanityResult = runSanityChecks({
