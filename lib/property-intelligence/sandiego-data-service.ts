@@ -56,18 +56,35 @@ const truthyFlag = (v: unknown): boolean => {
   return s === "y" || s === "yes" || s === "1" || s === "true";
 };
 
+/** Rough centroid (avg of exterior ring vertices) of an Esri polygon. */
+function ringCentroid(geometry?: { rings?: number[][][] }): { x: number; y: number } | null {
+  const ring = geometry?.rings?.[0];
+  if (!ring || ring.length === 0) return null;
+  let sx = 0;
+  let sy = 0;
+  for (const [x, y] of ring) {
+    sx += x;
+    sy += y;
+  }
+  return { x: sx / ring.length, y: sy / ring.length };
+}
+
 /**
- * Resolve the parcel for a geocoded point + street number. Because free
- * geocoders (Census/ArcGIS) return an interpolated point that can land just
- * off the parcel, we query a small buffer and pick the parcel whose situs
- * house-number matches; otherwise the closest returned parcel.
+ * Resolve the parcel for a geocoded point + the original address. Free
+ * geocoders (Census/ArcGIS) return an interpolated point that often lands
+ * just off the parcel and give a block RANGE, not the house number — so we:
+ *   1. parse the house number from the input address,
+ *   2. query a small buffer WITH geometry,
+ *   3. prefer the parcel whose situs house-number matches exactly,
+ *   4. otherwise pick the geometrically NEAREST parcel (not query order).
  */
 export async function getSanDiegoParcel(
   lat: number,
   lng: number,
-  houseNumber?: string,
+  address?: string,
   streetName?: string
 ): Promise<SanDiegoParcel> {
+  const houseNumber = address ? (address.trim().match(/^\s*(\d+)/)?.[1] ?? undefined) : undefined;
   const empty: SanDiegoParcel = {
     available: false,
     apn: null,
@@ -92,45 +109,52 @@ export async function getSanDiegoParcel(
   ].join(",");
 
   try {
-    // 1) Try exact point first (cheapest, works when geocode is rooftop).
+    // Query a small buffer WITH geometry so we can rank by distance.
+    // (The exact point often misses the polygon because free geocoders
+    // interpolate along the block.)
     let features = await queryParcels(`${lng},${lat}`, outFields, 0);
-    let matchQuality: SanDiegoParcel["matchQuality"] = features.length ? "nearest" : "none";
-
-    // 2) Buffer if the point missed the polygon.
-    if (features.length === 0) {
-      features = await queryParcels(`${lng},${lat}`, outFields, 45);
-    }
+    if (features.length === 0) features = await queryParcels(`${lng},${lat}`, outFields, 35);
     if (features.length === 0) return empty;
 
-    // Pick the parcel whose situs house-number matches the input.
-    let chosen: ParcelAttrs | undefined;
-    if (houseNumber) {
-      const hn = houseNumber.trim();
-      const streetU = (streetName ?? "").trim().toUpperCase();
-      chosen = features.find((a) => {
-        const addrNum = String(a.situs_address ?? "").trim();
-        const streetOk = !streetU || String(a.situs_street ?? "").toUpperCase().includes(streetU.split(" ")[0]);
-        return addrNum === hn && streetOk;
-      });
-      if (chosen) matchQuality = "exact-address";
-    }
-    if (!chosen) chosen = features[0]; // nearest by query order
+    let matchQuality: SanDiegoParcel["matchQuality"] = "nearest";
+    let chosen: ParcelFeature | undefined;
 
-    const lot = num(chosen.SHAPE__Area);
+    // 1) Prefer the parcel whose situs house-number matches exactly (and
+    //    same street). This is the reliable match once we've parsed the
+    //    real house number from the input address.
+    if (houseNumber) {
+      const streetU = (streetName ?? "").trim().toUpperCase().split(" ")[0];
+      const matches = features.filter((f) => {
+        const addrNum = String(f.attrs.situs_address ?? "").trim();
+        const streetOk = !streetU || String(f.attrs.situs_street ?? "").toUpperCase().includes(streetU);
+        return addrNum === houseNumber && streetOk;
+      });
+      if (matches.length > 0) {
+        chosen = nearest(matches, lng, lat);
+        matchQuality = "exact-address";
+      }
+    }
+
+    // 2) Fall back to the geometrically NEAREST parcel (by centroid), never
+    //    query order — that's what previously grabbed a random condo unit.
+    if (!chosen) chosen = nearest(features, lng, lat);
+
+    const attrs = chosen.attrs;
+    const lot = num(attrs.SHAPE__Area);
     return {
       available: true,
-      apn: chosen.apn ? String(chosen.apn) : null,
+      apn: attrs.apn ? String(attrs.apn) : null,
       lotSizeSqFt: lot ? Math.round(lot) : null,
-      livingAreaSqFt: num(chosen.total_lvg_area),
-      existingUnits: num(chosen.unitqty),
-      bedrooms: num(chosen.bedrooms),
-      bathrooms: num(chosen.baths),
-      garageStalls: num(chosen.garage_stalls),
-      hasGarageConversion: truthyFlag(chosen.garage_conversion),
-      hasPool: truthyFlag(chosen.pool),
-      jurisdiction: chosen.situs_juris ? String(chosen.situs_juris) : null,
-      situsAddress: [chosen.situs_address, chosen.situs_street].filter(Boolean).join(" ") || null,
-      yearEffective: num(chosen.year_effective),
+      livingAreaSqFt: num(attrs.total_lvg_area),
+      existingUnits: num(attrs.unitqty),
+      bedrooms: num(attrs.bedrooms),
+      bathrooms: num(attrs.baths),
+      garageStalls: num(attrs.garage_stalls),
+      hasGarageConversion: truthyFlag(attrs.garage_conversion),
+      hasPool: truthyFlag(attrs.pool),
+      jurisdiction: attrs.situs_juris ? String(attrs.situs_juris) : null,
+      situsAddress: [attrs.situs_address, attrs.situs_street].filter(Boolean).join(" ") || null,
+      yearEffective: num(attrs.year_effective),
       matchQuality,
     };
   } catch {
@@ -138,17 +162,40 @@ export async function getSanDiegoParcel(
   }
 }
 
+interface ParcelFeature {
+  attrs: ParcelAttrs;
+  centroid: { x: number; y: number } | null;
+}
+
+/** Pick the parcel whose centroid is closest to the query point. */
+function nearest(features: ParcelFeature[], lng: number, lat: number): ParcelFeature {
+  let best = features[0];
+  let bestD = Infinity;
+  for (const f of features) {
+    if (!f.centroid) continue;
+    const dx = f.centroid.x - lng;
+    const dy = f.centroid.y - lat;
+    const d = dx * dx + dy * dy;
+    if (d < bestD) {
+      bestD = d;
+      best = f;
+    }
+  }
+  return best;
+}
+
 async function queryParcels(
   geometry: string,
   outFields: string,
   distanceM: number
-): Promise<ParcelAttrs[]> {
+): Promise<ParcelFeature[]> {
   const params = new URLSearchParams({
     geometry,
     geometryType: "esriGeometryPoint",
     inSR: "4326",
+    outSR: "4326",
     spatialRel: "esriSpatialRelIntersects",
-    returnGeometry: "false",
+    returnGeometry: "true",
     outFields,
     f: "json",
   });
@@ -160,8 +207,13 @@ async function queryParcels(
     headers: { Accept: "application/json" },
   });
   if (!res.ok) return [];
-  const data = (await res.json()) as { features?: Array<{ attributes: ParcelAttrs }> };
-  return (data.features ?? []).map((f) => f.attributes);
+  const data = (await res.json()) as {
+    features?: Array<{ attributes: ParcelAttrs; geometry?: { rings?: number[][][] } }>;
+  };
+  return (data.features ?? []).map((f) => ({
+    attrs: f.attributes,
+    centroid: ringCentroid(f.geometry),
+  }));
 }
 
 export interface SanDiegoZoning {

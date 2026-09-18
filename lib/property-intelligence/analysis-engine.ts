@@ -132,7 +132,7 @@ export async function analyzeProperty(address: string): Promise<PropertyAnalysis
   let sdZoning: SanDiegoZoning | undefined;
   if (geocoded) {
     [sdParcel, sdZoning] = await Promise.all([
-      getSanDiegoParcel(geocoded.lat, geocoded.lng, geocoded.components.streetNumber, geocoded.components.route),
+      getSanDiegoParcel(geocoded.lat, geocoded.lng, address, geocoded.components.route),
       getSanDiegoZoning(geocoded.lat, geocoded.lng),
     ]);
   }
@@ -463,7 +463,7 @@ export async function analyzeProperty(address: string): Promise<PropertyAnalysis
       slope: slopeStr,
       parcelShape,
       cornerLot: false,
-      hasGarage: rawFootprintSqFt > 800,
+      hasGarage: (sdParcel?.garageStalls ?? 0) > 0 || sdParcel?.hasGarageConversion === true || rawFootprintSqFt > 800,
       yearBuilt: attomData?.yearBuilt || null,
       zoning,
       overlays: overlays.filter((o) => o.detected).map((o) => o.type),
@@ -481,7 +481,7 @@ export async function analyzeProperty(address: string): Promise<PropertyAnalysis
       lotWidth,
       lotDepth,
       zoning,
-      hasGarage: rawFootprintSqFt > 800,
+      hasGarage: (sdParcel?.garageStalls ?? 0) > 0 || sdParcel?.hasGarageConversion === true || rawFootprintSqFt > 800,
       feasibilityResults: enhancedFeasibility,
     },
     profile
@@ -504,7 +504,7 @@ export async function analyzeProperty(address: string): Promise<PropertyAnalysis
       lotSizeSqFt: rawLotSizeSqFt,
       openYardSqFt: openYard,
       buildableEnvelopeSqFt: finalBuildability.totalBuildableAreaSqFt,
-      hasGarage: rawFootprintSqFt > 800,
+      hasGarage: (sdParcel?.garageStalls ?? 0) > 0 || sdParcel?.hasGarageConversion === true || rawFootprintSqFt > 800,
       feasibilityResults: enhancedFeasibility,
       bestRecommendationType: bestRec,
       maxAllowedSqFt: effectiveAduCapSqFt,
