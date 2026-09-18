@@ -4,6 +4,12 @@
 import { NextRequest, NextResponse } from "next/server";
 import { notifyTeamADULead, sendUserConfirmation } from "@/lib/email";
 import { checkRateLimit, getClientIp, RATE_LIMITS } from "@/lib/rate-limit";
+import { buildAduReportPdf } from "@/lib/adu-report-pdf";
+import { pushLeadToBuildCore } from "@/lib/buildcore-intake";
+
+// pdf-lib + Buffer need the Node runtime; PDF build + CRM push can take a few seconds.
+export const runtime = "nodejs";
+export const maxDuration = 30;
 
 export async function POST(request: NextRequest) {
   // Rate limit check
@@ -196,6 +202,37 @@ export async function POST(request: NextRequest) {
       .then(result => console.log(`[API] User confirmation email result:`, JSON.stringify(result)))
       .catch(err => console.error(`[API] User confirmation email error:`, err));
 
+    // Push the lead + the exact report the visitor unlocked into BuildCore CRM.
+    // Non-blocking for the visitor: failures are logged, never surfaced.
+    let reportPdf: Uint8Array | null = null;
+    try {
+      reportPdf = await buildAduReportPdf(
+        { firstName, lastName, email, phone, propertyAddress },
+        scanResults
+      );
+    } catch (err) {
+      console.error("[API] ADU report PDF build failed:", err);
+    }
+    const buildCoreResult = await pushLeadToBuildCore({
+      firstName,
+      lastName,
+      email,
+      phone,
+      propertyAddress,
+      city: scanResults?.geocoded?.city ?? null,
+      notes: [
+        "Build Your ADU property scan (website lead magnet).",
+        `Recommended: ${reportData.feasibilitySummary.recommendedPath}.`,
+        `Zoning: ${reportData.propertySummary.zoning}. Lot: ${reportData.propertySummary.lotSizeSqFt || "?"} sq ft. APN: ${reportData.propertySummary.apn}.`,
+        `Confidence: ${reportData.confidenceScore}% (${reportData.confidenceBand}).`,
+        `Email validated: ${verificationData.emailValidated ? "yes" : "no"}. Phone verified: ${verificationData.phoneVerified ? "yes" : "no"}.`,
+      ].join("\n"),
+      reportPdf,
+    });
+    if (!buildCoreResult.success) {
+      console.error(`[API] BuildCore push failed:`, JSON.stringify(buildCoreResult));
+    }
+
     // Return success even if email failed (lead is still captured)
     // But include email status for debugging
     return NextResponse.json({
@@ -203,6 +240,7 @@ export async function POST(request: NextRequest) {
       leadSaved,
       emailSent: teamEmailResult.success,
       emailError: teamEmailResult.error || null,
+      crmSynced: buildCoreResult.success,
       report: reportData,
     });
   } catch (error) {
