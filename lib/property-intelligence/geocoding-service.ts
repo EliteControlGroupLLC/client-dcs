@@ -11,7 +11,11 @@
 
 const GOOGLE_API_KEY = process.env.NEXT_PUBLIC_GOOGLE_PLACES_API_KEY;
 
+export type GeocodingProvider = "Google Geocoding" | "U.S. Census Geocoder" | "ArcGIS World Geocoder";
+
 export interface GeocodingResult {
+  /** Which geocoder actually produced this result (for honest source labels). */
+  provider: GeocodingProvider;
   formattedAddress: string;
   lat: number;
   lng: number;
@@ -69,6 +73,7 @@ async function geocodeGoogle(address: string): Promise<GeocodingResult | null> {
     if (comp.types.includes("postal_code")) components.zip = comp.long_name;
   }
   return {
+    provider: "Google Geocoding",
     formattedAddress: result.formatted_address,
     lat: result.geometry.location.lat,
     lng: result.geometry.location.lng,
@@ -104,6 +109,7 @@ async function geocodeCensus(address: string): Promise<GeocodingResult | null> {
   if (!match?.coordinates) return null;
   const c = match.addressComponents ?? {};
   return {
+    provider: "U.S. Census Geocoder",
     formattedAddress: match.matchedAddress ?? address,
     lat: match.coordinates.y, // Census x=lng, y=lat
     lng: match.coordinates.x,
@@ -137,6 +143,7 @@ async function geocodeArcGIS(address: string): Promise<GeocodingResult | null> {
   if (!cand?.location) return null;
   const a = cand.attributes ?? {};
   return {
+    provider: "ArcGIS World Geocoder",
     formattedAddress: cand.address ?? address,
     lat: cand.location.y,
     lng: cand.location.x,

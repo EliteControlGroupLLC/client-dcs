@@ -34,6 +34,8 @@ export {
 export {
   detectJurisdictionFromAddress,
   detectOverlays,
+  jurisdictionIdFromSitusJuris,
+  SITUS_JURIS_TO_JURISDICTION,
 } from "./detector";
 
 export type { JurisdictionDetectionResult as JurisdictionResult } from "./detector";

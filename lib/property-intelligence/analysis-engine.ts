@@ -17,10 +17,9 @@ import { resolvePropertyData } from "./property-data-resolver";
 import { geocodeAddress } from "./geocoding-service";
 import {
   getSanDiegoParcel,
-  getSanDiegoZoning,
   type SanDiegoParcel,
-  type SanDiegoZoning,
 } from "./sandiego-data-service";
+import { getZoningForParcel, type CityZoningResult } from "./city-zoning-service";
 import { getElevationData } from "./elevation-service";
 import { getOSMPropertyData } from "./osm-service";
 import { getAttomPropertyData } from "./attom-service";
@@ -129,16 +128,19 @@ export async function analyzeProperty(address: string): Promise<PropertyAnalysis
   // City of San Diego DSD zoning). This is the accurate core that replaces
   // the old address-seeded fabrication for the headline facts.
   let sdParcel: SanDiegoParcel | undefined;
-  let sdZoning: SanDiegoZoning | undefined;
+  let cityZoning: CityZoningResult | undefined;
   if (geocoded) {
-    [sdParcel, sdZoning] = await Promise.all([
-      getSanDiegoParcel(geocoded.lat, geocoded.lng, address, geocoded.components.route),
-      getSanDiegoZoning(geocoded.lat, geocoded.lng),
-    ]);
+    sdParcel = await getSanDiegoParcel(geocoded.lat, geocoded.lng, address, geocoded.components.route);
+    // Zoning from the parcel's OWN jurisdiction (SANDAG situs_juris), never
+    // City-of-San-Diego codes for another city. available:false if unknown.
+    cityZoning = await getZoningForParcel(geocoded.lat, geocoded.lng, sdParcel?.jurisdiction ?? null);
   }
 
   // Step 3: Resolve property data from all sources (ATTOM + OSM + estimates)
-  const resolved = resolvePropertyData(address, geocoded?.formattedAddress, slopeData, osmData, attomData);
+  const resolved = resolvePropertyData(address, geocoded?.formattedAddress, slopeData, osmData, attomData, {
+    situsJuris: sdParcel?.jurisdiction ?? null,
+    geocodeProvider: geocoded?.provider,
+  });
 
   const { intelligence } = resolved;
   let { rawLotSizeSqFt, rawFootprintSqFt } = resolved;
@@ -166,8 +168,17 @@ export async function analyzeProperty(address: string): Promise<PropertyAnalysis
       intelligence.apn = realField(sdParcel.apn, 96, "San Diego County Assessor");
     }
   }
-  if (sdZoning?.available && sdZoning.zoneName) {
-    intelligence.zoning = realField(sdZoning.zoneName, 92, "City of San Diego (DSD Zoning)");
+  if (cityZoning) {
+    intelligence.zoning = cityZoning.available && cityZoning.zoneCode
+      ? {
+          ...realField(
+            cityZoning.zoneDescription ? `${cityZoning.zoneCode} (${cityZoning.zoneDescription})` : cityZoning.zoneCode,
+            cityZoning.match === "point" ? 92 : 80,
+            cityZoning.source
+          ),
+          sources: [cityZoning.source, ...(cityZoning.sourceUrl ? [cityZoning.sourceUrl] : [])],
+        }
+      : realField("Not available", 0, cityZoning.reason ? `${cityZoning.source} — ${cityZoning.reason}` : cityZoning.source);
   }
 
   // Step 3b: Run sanity checks before proceeding
@@ -230,7 +241,7 @@ export async function analyzeProperty(address: string): Promise<PropertyAnalysis
 
   // Step 4: Detect jurisdiction
   const formattedAddress = geocoded?.formattedAddress || address;
-  const jurisdictionResult = detectJurisdictionFromAddress(formattedAddress);
+  const jurisdictionResult = detectJurisdictionFromAddress(formattedAddress, sdParcel?.jurisdiction ?? null);
   const profile = jurisdictionResult.profile;
 
   // Step 3d (cont.): v7 — Polygon-based geometry analysis
@@ -890,6 +901,9 @@ export async function analyzeProperty(address: string): Promise<PropertyAnalysis
       resolvedFootprintSqFt: rawFootprintSqFt,
       resolvedOpenYardSqFt: intelligence.openYardSqFt.value,
       resolvedZoning: intelligence.zoning.value,
+      resolvedZoningSource: intelligence.zoning.sources[0],
+      resolvedZoningConfidence: intelligence.zoning.confidence,
+      geocodeProvider: geocoded?.provider,
       resolvedParcelShape: intelligence.parcelShape.value,
       resolvedApn: intelligence.apn.value,
       bestRecommendation: bestRec,
