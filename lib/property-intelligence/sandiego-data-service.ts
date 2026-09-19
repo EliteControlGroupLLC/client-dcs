@@ -152,6 +152,14 @@ export async function getSanDiegoParcel(
         matches = exactMatches(buffered);
         if (features.length === 0) features = buffered;
       }
+      // Free geocoders interpolate along long/winding streets and can land
+      // 100 m+ from big hillside lots (e.g. 4928 Vista Arroyo, La Mesa), so
+      // fall back to an attribute lookup: same house number + street words
+      // from the user's own input, within ~1.5 km of the geocoded point.
+      if (matches.length === 0) {
+        const tokens = streetTokens(address ?? "");
+        if (tokens.length > 0) matches = await queryParcelsByAddress(houseN, tokens, lng, lat, outFields);
+      }
       if (matches.length > 0) {
         chosen = nearest(matches, lng, lat);
         matchQuality = "exact-address";
@@ -197,6 +205,64 @@ interface ParcelFeature {
   attrs: ParcelAttrs;
   centroid: { x: number; y: number } | null;
   rings: number[][][] | null;
+}
+
+const STREET_NOISE = new Set([
+  "ST", "STREET", "AVE", "AVENUE", "AV", "RD", "ROAD", "DR", "DRIVE", "BLVD", "BOULEVARD",
+  "LN", "LANE", "CT", "COURT", "PL", "PLACE", "WAY", "WY", "CIR", "CIRCLE", "TER", "TERRACE",
+  "PKWY", "PARKWAY", "HWY", "LOOP", "TRL", "TRAIL", "ROW", "SQ", "PT", "N", "S", "E", "W",
+  "NORTH", "SOUTH", "EAST", "WEST", "APT", "UNIT", "STE",
+]);
+
+/** Distinctive street-name words from "4928 Vista Arroyo, La Mesa, CA" -> ["VISTA", "ARROYO"]. */
+function streetTokens(address: string): string[] {
+  const street = address.split(",")[0].replace(/^\s*\d+[A-Za-z]?\s+/, "");
+  return street
+    .toUpperCase()
+    .replace(/[^A-Z0-9 ]/g, " ")
+    .split(/\s+/)
+    .filter((t) => t.length > 0 && !STREET_NOISE.has(t));
+}
+
+/** Parcels with this situs house number whose street contains every token, near the point. */
+async function queryParcelsByAddress(
+  houseNumber: number,
+  tokens: string[],
+  lng: number,
+  lat: number,
+  outFields: string
+): Promise<ParcelFeature[]> {
+  if (!Number.isFinite(houseNumber)) return [];
+  const d = 0.015; // ~1.5 km box around the geocoded point
+  const where = [
+    `situs_address = ${Math.trunc(houseNumber)}`,
+    ...tokens.map((t) => `UPPER(situs_street) LIKE '%${t.replace(/'/g, "''")}%'`),
+  ].join(" AND ");
+  const params = new URLSearchParams({
+    where,
+    geometry: `${lng - d},${lat - d},${lng + d},${lat + d}`,
+    geometryType: "esriGeometryEnvelope",
+    inSR: "4326",
+    outSR: "4326",
+    spatialRel: "esriSpatialRelIntersects",
+    returnGeometry: "true",
+    outFields,
+    f: "json",
+  });
+  try {
+    const res = await fetch(`${PARCELS_URL}?${params.toString()}`, { headers: { Accept: "application/json" } });
+    if (!res.ok) return [];
+    const data = (await res.json()) as {
+      features?: Array<{ attributes: ParcelAttrs; geometry?: { rings?: number[][][] } }>;
+    };
+    return (data.features ?? []).map((f) => ({
+      attrs: f.attributes,
+      centroid: ringCentroid(f.geometry),
+      rings: f.geometry?.rings && f.geometry.rings.length > 0 ? f.geometry.rings : null,
+    }));
+  } catch {
+    return [];
+  }
 }
 
 /** Pick the parcel whose centroid is closest to the query point. */
