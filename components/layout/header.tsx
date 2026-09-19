@@ -47,6 +47,7 @@ const navigation: NavGroup[] = [
   {
     name: "Company",
     children: [
+      { name: "Our Story", href: "/our-story" },
       { name: "About", href: "/about" },
       { name: "Our Process", href: "/process" },
       { name: "Contact", href: "/contact" },

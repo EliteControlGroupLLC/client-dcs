@@ -65,6 +65,13 @@ export default function AboutPage() {
             <p className="text-xl text-white/80">
               Distinct Construction Solutions is a Lemon Grove-based design-build firm shaped by hands-on construction experience that began in 2014 and matured into a more disciplined way to deliver residential projects across San Diego County. Today we do business as TruthCore, our DBA &mdash; the same licensed team and the same standards.
             </p>
+            <Link
+              href="/our-story"
+              className="mt-6 inline-flex items-center gap-2 text-sm font-semibold text-accent hover:text-accent-light transition-colors"
+            >
+              Read how TruthCore was born
+              <span aria-hidden="true">&rarr;</span>
+            </Link>
           </div>
         </div>
       </section>
