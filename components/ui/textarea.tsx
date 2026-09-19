@@ -7,12 +7,12 @@ export interface TextareaProps
 
 /** Multi-line field in the sitewide form style (see components/ui/form.tsx). */
 const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
-  ({ className, invalid, valid, rows = 5, ...props }, ref) => (
+  ({ className, invalid, valid, tone, rows = 5, ...props }, ref) => (
     <textarea
       ref={ref}
       rows={rows}
       aria-invalid={invalid || undefined}
-      className={fieldClass({ invalid, valid }, ["h-auto py-2.5 resize-none", className].filter(Boolean).join(" "))}
+      className={fieldClass({ invalid, valid, tone }, ["h-auto py-2.5 resize-none", className].filter(Boolean).join(" "))}
       {...props}
     />
   )

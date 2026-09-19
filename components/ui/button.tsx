@@ -17,8 +17,14 @@ const buttonVariants = cva(
           "border-2 border-white text-white bg-transparent hover:bg-white hover:text-secondary",
         ghost:
           "text-secondary hover:bg-secondary/10",
+        /** Ghost button on dark surfaces. */
+        ghostDark:
+          "text-white/80 hover:bg-white/10 hover:text-white",
         link:
           "text-primary underline-offset-4 hover:underline",
+        /** Text link on dark surfaces (gold). */
+        linkGold:
+          "text-accent underline-offset-4 hover:underline hover:text-accent-light",
         destructive:
           "bg-destructive text-destructive-foreground hover:bg-destructive/90",
       },

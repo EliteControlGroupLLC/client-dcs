@@ -16,7 +16,7 @@ export interface InputProps
  * a raw `<input className={inputClass(...)}>` was used.
  */
 const Input = React.forwardRef<HTMLInputElement, InputProps>(
-  ({ className, type = "text", label, error, invalid, valid, id, ...props }, ref) => {
+  ({ className, type = "text", label, error, invalid, valid, tone, id, ...props }, ref) => {
     const autoId = React.useId();
     const inputId = id ?? (label ? autoId : undefined);
     const input = (
@@ -25,13 +25,13 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
         type={type}
         ref={ref}
         aria-invalid={invalid || !!error || undefined}
-        className={fieldClass({ invalid: invalid || !!error, valid }, className)}
+        className={fieldClass({ invalid: invalid || !!error, valid, tone }, className)}
         {...props}
       />
     );
     if (!label && !error) return input;
     return (
-      <FormField label={label} htmlFor={inputId} error={error}>
+      <FormField label={label} htmlFor={inputId} error={error} tone={tone}>
         {input}
       </FormField>
     );

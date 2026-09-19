@@ -1,5 +1,5 @@
 import * as React from "react";
-import { fieldClass, type FieldState } from "@/components/ui/form";
+import { fieldClass, selectPlaceholderClass, type FieldState } from "@/components/ui/form";
 
 export interface SelectProps
   extends React.SelectHTMLAttributes<HTMLSelectElement>,
@@ -10,7 +10,7 @@ export interface SelectProps
 
 /** Native <select> in the sitewide form style (see components/ui/form.tsx). */
 const Select = React.forwardRef<HTMLSelectElement, SelectProps>(
-  ({ className, invalid, valid, placeholder, children, value, defaultValue, ...props }, ref) => {
+  ({ className, invalid, valid, tone, placeholder, children, value, defaultValue, ...props }, ref) => {
     const empty = placeholder !== undefined && (value ?? defaultValue ?? "") === "";
     return (
       <select
@@ -18,7 +18,7 @@ const Select = React.forwardRef<HTMLSelectElement, SelectProps>(
         value={value}
         defaultValue={defaultValue}
         aria-invalid={invalid || undefined}
-        className={fieldClass({ invalid, valid }, [empty ? "text-muted-foreground/70" : "", className].filter(Boolean).join(" "))}
+        className={fieldClass({ invalid, valid, tone }, [empty ? selectPlaceholderClass(tone) : "", className].filter(Boolean).join(" "))}
         {...props}
       >
         {placeholder !== undefined && <option value="">{placeholder}</option>}

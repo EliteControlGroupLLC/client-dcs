@@ -15,6 +15,10 @@ const badgeVariants = cva(
         destructive:
           "border-transparent bg-destructive text-destructive-foreground hover:bg-destructive/80",
         outline: "border-border text-secondary",
+        /** Gold badge for dark surfaces (all-dark site). */
+        gold: "border-accent/30 bg-accent/10 text-accent-light",
+        /** Neutral outline badge for dark surfaces. */
+        outlineDark: "border-white/15 bg-white/5 text-white/80",
       },
     },
     defaultVariants: {
