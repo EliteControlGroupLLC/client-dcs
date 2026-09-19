@@ -2,14 +2,26 @@
 
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { ArrowRight, Shield, Clock, Users, Palette, Bitcoin } from "lucide-react";
+import { ArrowRight, Shield, BadgeCheck, Scale, Eye, MessageCircle } from "lucide-react";
 import { useState, useRef, useEffect } from "react";
-import { COMPANY_INFO, SERVICE_PRICING, getYearsExperience } from "@/lib/data/site-data";
+import { COMPANY_INFO, getYearsExperience } from "@/lib/data/site-data";
 
 const stats = [
   { value: COMPANY_INFO.stats.projectsCompleted, label: "Projects Completed" },
   { value: `${getYearsExperience()}+`, label: "Years Experience" },
   { value: COMPANY_INFO.stats.valueDelivered, label: "Value Delivered" },
+];
+
+// The standard the company runs by — Colossians 3:23-24, Easy-to-Read Version (ERV).
+const scripture = {
+  text: "In all the work you are doing, work the best you can. Work as if you are working for the Lord, not for people. Remember that you will receive your reward from the Lord, who will give you what he promised his people. You are serving the Lord Christ.",
+  reference: "Colossians 3:23-24 (ERV)",
+};
+
+const pillars = [
+  { icon: Scale, title: "Truth", text: "Honest answers and real numbers, even when it isn't what you hoped to hear." },
+  { icon: Eye, title: "Transparency", text: "Clear pricing and scope, so you know what you're paying for and why." },
+  { icon: MessageCircle, title: "Communication", text: "You always know where your project stands and what comes next." },
 ];
 
 const heroVideos = [
@@ -83,29 +95,20 @@ export function Hero() {
             {/* Trust badge */}
             <div className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-sm rounded-full px-4 py-2 mb-8">
               <Shield className="h-4 w-4 text-primary" />
-              <span className="text-sm">San Diego&apos;s Trusted Design-Build Partner</span>
+              <span className="text-sm">San Diego Design-Build &middot; Restoring Truth to Construction</span>
             </div>
 
             <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold leading-tight mb-6">
-              Build Your Dream <span className="text-primary">Home</span> or <span className="text-primary">ADU</span>
-              <span className="block">with confidence</span>
+              Your Home.
+              <span className="block">Every Project.</span>
+              <span className="block text-primary">One Honest Team.</span>
             </h1>
 
-            <p className="text-lg text-white/80 max-w-xl mb-4 leading-relaxed">
-              From concept to completion, we manage design, permitting, and construction with
-              one disciplined team. You get clearer pricing, tighter coordination, and a
-              finished project that feels premium from day one.
+            <p className="text-lg text-white/80 max-w-xl mb-8 leading-relaxed">
+              Whatever your home needs &mdash; big or small, inside or out &mdash; we design,
+              permit, and build it with one accountable team. No runaround, no surprise
+              costs, and no guessing where your project stands.
             </p>
-
-            {/* Pricing info */}
-            <div className="mb-8 space-y-1">
-              <p className="text-white/90 font-medium">
-                Detached ADU starting at <span className="text-primary font-bold">{SERVICE_PRICING.adu.detachedStartingPrice}</span>
-              </p>
-              <p className="text-white/90 font-medium">
-                Garage conversions starting at <span className="text-primary font-bold">{SERVICE_PRICING.adu.startingPrice}</span>
-              </p>
-            </div>
 
             {/* Key benefits */}
             <div className="flex flex-wrap gap-6 mb-8">
@@ -118,22 +121,22 @@ export function Hero() {
                 In-House Design Team
               </div>
               <div className="flex items-center gap-2 text-sm text-white/70">
-                <Clock className="h-4 w-4 text-primary" />
-                Average 4-Month Build
+                <BadgeCheck className="h-4 w-4 text-primary" />
+                Design, Permits &amp; Construction
               </div>
             </div>
 
             {/* CTAs */}
             <div className="flex flex-wrap gap-4 mb-12">
-              <Link href="/build-your-adu">
+              <Link href="/contact">
                 <Button size="lg" rounded="full" className="group">
-                  Build Your ADU
+                  Start Your Project
                   <ArrowRight className="h-5 w-5 group-hover:translate-x-1 transition-transform" />
                 </Button>
               </Link>
-              <Link href="/showroom">
+              <Link href="/planning-tools">
                 <Button variant="outlineWhite" size="lg" rounded="full">
-                  Visit Our Showroom
+                  Get an Instant Estimate
                 </Button>
               </Link>
             </div>
@@ -152,8 +155,8 @@ export function Hero() {
           </div>
 
           {/* Right Content - Featured Info Card */}
-          <div className="relative hidden md:block">
-            <div className="relative rounded-3xl overflow-hidden shadow-2xl bg-white/10 backdrop-blur-md border border-white/20 p-8 animate-pulse-glow">
+          <div className="relative">
+            <div className="relative rounded-3xl overflow-hidden shadow-2xl bg-white/10 backdrop-blur-md border border-white/20 p-6 sm:p-8 animate-pulse-glow">
               {/* Video progress indicator */}
               <div className="flex gap-2 mb-6">
                 {heroVideos.map((_, index) => (
@@ -170,76 +173,35 @@ export function Hero() {
                 ))}
               </div>
 
-              <h3 className="text-2xl font-bold text-white mb-4">
-                What Sets Us Apart?
-              </h3>
+              <p className="text-xs font-semibold uppercase tracking-[0.2em] text-primary mb-4">
+                The Standard We Build By
+              </p>
 
-              <div className="space-y-4 mb-6">
-                <div className="flex items-start gap-3">
-                  <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center flex-shrink-0 mt-0.5">
-                    <Users className="h-4 w-4 text-primary" />
-                  </div>
-                  <div>
-                    <p className="font-semibold text-white">Integrated Design-Build Team</p>
-                    <p className="text-sm text-white/60">Design, estimating, permitting, and construction stay coordinated under one team so decisions move faster and scope stays aligned.</p>
-                  </div>
-                </div>
-                <div className="flex items-start gap-3">
-                  <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center flex-shrink-0 mt-0.5">
-                    <Palette className="h-4 w-4 text-primary" />
-                  </div>
-                  <div>
-                    <p className="font-semibold text-white">Interactive Online Showroom</p>
-                    <p className="text-sm text-white/60">Review finishes, fixtures, and material directions before selections become expensive field changes.</p>
-                  </div>
-                </div>
-                <div className="flex items-start gap-3">
-                  <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center flex-shrink-0 mt-0.5">
-                    <Bitcoin className="h-4 w-4 text-primary" />
-                  </div>
-                  <div>
-                    <p className="font-semibold text-white">Cryptocurrency Payments Accepted</p>
-                    <p className="text-sm text-white/60">Flexible payment options are available for qualified projects, including Bitcoin, Ethereum, and USDC.</p>
-                  </div>
-                </div>
-              </div>
+              <blockquote className="mb-3">
+                <p className="font-serif text-lg lg:text-xl leading-relaxed text-white">
+                  &ldquo;{scripture.text}&rdquo;
+                </p>
+              </blockquote>
+              <p className="text-sm text-white/60 mb-6">&mdash; {scripture.reference}</p>
 
-              {/* Crypto Badge */}
-              <div className="bg-white/5 backdrop-blur-sm rounded-xl p-4 border border-white/10">
-                <p className="text-xs text-white/50 uppercase tracking-wider mb-2">We Accept Cryptocurrency</p>
-                <div className="flex items-center gap-4">
-                  <div className="flex items-center gap-2">
-                    <div className="w-8 h-8 rounded-full overflow-hidden bg-[#F7931A]/20 flex items-center justify-center">
-                      <img 
-                        src="/images/crypto/bitcoin.png" 
-                        alt="Bitcoin logo" 
-                        className="w-full h-full object-cover"
-                      />
+              <p className="text-sm text-white/80 leading-relaxed mb-5">
+                We don&apos;t build to impress people &mdash; we build as if the work is for the
+                Lord. That&apos;s how we&apos;re working to restore truth, transparency, and
+                communication to construction and real estate.
+              </p>
+
+              <div className="space-y-3">
+                {pillars.map((pillar) => (
+                  <div key={pillar.title} className="flex items-start gap-3">
+                    <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center flex-shrink-0 mt-0.5">
+                      <pillar.icon className="h-4 w-4 text-primary" />
                     </div>
-                    <span className="text-white/70 text-sm">Bitcoin</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <div className="w-8 h-8 rounded-full overflow-hidden bg-[#627EEA]/20 flex items-center justify-center">
-                      <img 
-                        src="/images/crypto/ethereum.jpg" 
-                        alt="Ethereum logo" 
-                        className="w-full h-full object-cover"
-                      />
+                    <div>
+                      <p className="font-semibold text-white">{pillar.title}</p>
+                      <p className="text-sm text-white/60">{pillar.text}</p>
                     </div>
-                    <span className="text-white/70 text-sm">Ethereum</span>
                   </div>
-                  <div className="flex items-center gap-2">
-                    <div className="w-8 h-8 rounded-full overflow-hidden bg-[#2775CA]/20 flex items-center justify-center">
-                      <img 
-                        src="/images/crypto/usdc.jpg" 
-                        alt="USDC logo" 
-                        className="w-full h-full object-cover"
-                      />
-                    </div>
-                    <span className="text-white/70 text-sm">USDC</span>
-                  </div>
-                </div>
-                <p className="text-xs text-white/40 mt-2">Pay for your construction project using major cryptocurrencies.</p>
+                ))}
               </div>
             </div>
 
