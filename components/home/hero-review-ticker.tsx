@@ -2,33 +2,18 @@
 
 import { useEffect, useState } from "react";
 import { Star } from "lucide-react";
-import { CLIENT_REVIEWS, type ReviewSource } from "@/lib/data/reviews";
+import { CLIENT_REVIEWS } from "@/lib/data/reviews";
 
-const SHOW_MS = 6500; // how long each review stays up
-const GAP_MS = 900; // pause between reviews (fade out → next pops in)
+const SHOW_MS = 7000; // how long each review stays up
+const GAP_MS = 700; // pause between reviews
 
-function SourceMark({ source }: { source: ReviewSource }) {
-  if (source === "Google") {
-    return (
-      <svg className="h-3.5 w-3.5" viewBox="0 0 24 24" aria-hidden="true">
-        <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 01-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z" />
-        <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" />
-        <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" />
-        <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" />
-      </svg>
-    );
-  }
-  return (
-    <span className="inline-flex h-3.5 w-3.5 items-center justify-center rounded-sm bg-[#D32323] text-[8px] font-bold leading-none text-white" aria-hidden="true">
-      y
-    </span>
-  );
-}
+// TruthCore palette (brand manual): Misty Emerald #336666, Antique Gold #B99A5A,
+// deep emerald-charcoal #1A2B2B for dark surfaces.
 
 /**
- * Real client reviews that pop up one at a time beside "The Standard We Build
- * By": each slides in, holds, fades out, and the next one follows. Pauses on
- * hover/focus; click jumps to the full reviews section.
+ * Boutique review "pop-up": real client reviews glide in one at a time within
+ * the hero, hold, and fade out. Emerald-charcoal glass, gold hairlines, serif
+ * quote, a thin gold timer line. Pauses on hover/focus; click → #reviews.
  */
 export function HeroReviewTicker() {
   const [index, setIndex] = useState(0);
@@ -37,47 +22,74 @@ export function HeroReviewTicker() {
 
   useEffect(() => {
     if (paused) return;
-    // Pop in shortly after load / after the previous one faded out.
     if (!visible) {
       const t = window.setTimeout(() => setVisible(true), GAP_MS);
       return () => window.clearTimeout(t);
     }
     const t = window.setTimeout(() => {
       setVisible(false);
-      window.setTimeout(() => setIndex((i) => (i + 1) % CLIENT_REVIEWS.length), 500);
+      window.setTimeout(() => setIndex((i) => (i + 1) % CLIENT_REVIEWS.length), 600);
     }, SHOW_MS);
     return () => window.clearTimeout(t);
   }, [visible, paused, index]);
 
   const review = CLIENT_REVIEWS[index];
+  const counter = `${String(index + 1).padStart(2, "0")} / ${String(CLIENT_REVIEWS.length).padStart(2, "0")}`;
 
   return (
-    <div className="min-h-[9.5rem]" aria-live="polite">
+    <div className="min-h-[12rem]" aria-live="polite">
       <a
         href="#reviews"
         onMouseEnter={() => setPaused(true)}
         onMouseLeave={() => setPaused(false)}
         onFocus={() => setPaused(true)}
         onBlur={() => setPaused(false)}
-        className={`block rounded-2xl border border-white/20 bg-white/95 p-5 text-left shadow-2xl backdrop-blur-md transition-all duration-500 ease-out motion-reduce:transition-none ${
-          visible ? "translate-y-0 opacity-100" : "pointer-events-none translate-y-3 opacity-0"
+        className={`group relative block overflow-hidden rounded-xl border border-[#B99A5A]/35 bg-[#1A2B2B]/80 px-7 pb-6 pt-6 text-left shadow-[0_24px_60px_-24px_rgba(0,0,0,0.7)] backdrop-blur-xl transition-all duration-700 ease-out focus:outline-none focus-visible:ring-2 focus-visible:ring-[#B99A5A]/70 motion-reduce:transition-none ${
+          visible ? "translate-x-0 opacity-100" : "pointer-events-none translate-x-6 opacity-0"
         }`}
       >
-        <div className="flex items-center justify-between gap-3">
-          <div className="flex gap-0.5" role="img" aria-label={`${review.rating} out of 5 stars`}>
+        {/* Header: label · counter · stars */}
+        <div className="flex items-center justify-between gap-4">
+          <span className="text-[10px] font-semibold uppercase tracking-[0.28em] text-[#B99A5A]">
+            Client Review <span className="ml-2 text-white/40">{counter}</span>
+          </span>
+          <span className="flex gap-0.5" role="img" aria-label={`${review.rating} out of 5 stars`}>
             {Array.from({ length: review.rating }).map((_, i) => (
-              <Star key={i} className="h-4 w-4 fill-yellow-400 text-yellow-400" aria-hidden="true" />
+              <Star key={i} className="h-3.5 w-3.5 fill-[#B99A5A] text-[#B99A5A]" aria-hidden="true" />
             ))}
-          </div>
-          <span className="inline-flex items-center gap-1.5 text-xs font-medium text-muted-foreground">
-            <SourceMark source={review.source} />
-            {review.source} review
           </span>
         </div>
-        <p className="mt-3 text-sm leading-relaxed text-secondary">&ldquo;{review.excerpt}&rdquo;</p>
-        <p className="mt-3 text-xs text-muted-foreground">
-          <span className="font-semibold text-secondary">{review.author}</span> &middot; {review.project}
+
+        {/* Quote */}
+        <p className="relative mt-4 font-serif text-lg italic leading-relaxed text-white/90">
+          <span aria-hidden="true" className="absolute -left-4 -top-2 font-serif text-4xl not-italic leading-none text-[#B99A5A]/60">
+            &ldquo;
+          </span>
+          {review.excerpt}
         </p>
+
+        {/* Hairline + attribution */}
+        <div className="mt-5 h-px w-12 bg-[#B99A5A]/50" aria-hidden="true" />
+        <div className="mt-4 flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
+          <span className="text-[11px] font-semibold uppercase tracking-[0.2em] text-[#D8C49A]">{review.author}</span>
+          <span className="text-xs text-white/55">
+            {review.project} · {review.source}
+          </span>
+        </div>
+
+        {/* Thin gold timer line (restarts per review, freezes while paused) */}
+        {visible && (
+          <span
+            aria-hidden="true"
+            key={index}
+            className="absolute bottom-0 left-0 h-[2px] w-full origin-left bg-[#B99A5A]/70 motion-reduce:hidden"
+            style={{
+              animation: `tc-review-timer ${SHOW_MS}ms linear forwards`,
+              animationPlayState: paused ? "paused" : "running",
+            }}
+          />
+        )}
+        <style>{`@keyframes tc-review-timer { from { transform: scaleX(0); } to { transform: scaleX(1); } }`}</style>
       </a>
     </div>
   );
