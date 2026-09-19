@@ -1,5 +1,6 @@
-// Founder's story — Jordan Talavera's own words (lightly edited for spelling,
-// grammar and flow only). Used by the /our-story page and the homepage teaser.
+// Founder's story — written from Jordan Talavera's own account (his context,
+// shaped into a narrative in his voice). Used by /our-story and the homepage
+// teaser.
 
 export const FOUNDER = {
   name: "Jordan Talavera",
@@ -7,7 +8,7 @@ export const FOUNDER = {
 };
 
 export const FOUNDER_STORY_TEASER =
-  "After 12 years in the construction industry, I've seen it all — and I've lived it: cutting corners to meet the market price, homeowners hurt by bad work and change orders, building for free just to stay afloat. I made those mistakes myself. TruthCore was born to change that.";
+  "Twelve years on every side of construction taught me what goes wrong when the cheapest bid wins — because I lived it and made those mistakes myself. TruthCore is the company I built so it never happens again.";
 
 export interface StorySection {
   heading?: string;
@@ -19,43 +20,51 @@ export interface StorySection {
 export const FOUNDER_STORY: StorySection[] = [
   {
     paragraphs: [
-      "After 12 years in the construction industry — working for other general contractors, homeowners, and developers — I've seen it all. And I haven't just seen it: everything I describe here, I've lived. I've been in every one of these positions, and I've made these mistakes myself.",
-      "I've seen contractors cut corners to make budgets work and still turn a profit, all because we \u201Cneed\u201D to meet the market price — and I've been in that position. That market price is set by newly licensed contractors with no experience doing work for close to cost, and everyone else is pressured to match it. I know the frustration and stress of cutting corners just to make ends meet, because I've lived it.",
-      "I've seen understanding homeowners hurt by change orders and bad work because they didn't know any better and hired the cheapest guy — and I've been in that position. I've seen what looked like great contractors who, behind the scenes, had no systems, no team, no procedures and no accounting, so their clients' funds were poorly managed — and I've been in that position too.",
-      "I've seen developers hand job after job to freshly licensed contractors, making them feel like they're growing and expanding — and I've been in that position. In the end, the contractor finds out he's been building for free, is in debt to subcontractors he never meant to affect, and is robbing Peter to pay Paul just to keep his company alive. I know that feeling firsthand.",
+      "I've spent twelve years in construction — working for other general contractors, for homeowners, and for developers. I haven't just watched what goes wrong in this industry. I've lived it, and I've made those mistakes myself.",
     ],
+  },
+  {
+    heading: "The race to the bottom",
+    paragraphs: [
+      "In this business, the “market price” is often set by the newest contractor in town — freshly licensed, little experience, bidding close to cost just to win the job. Everyone else is expected to match it. I've been that contractor, and I've been the one forced to match him. To make a number like that work, something has to give, and it's almost always the quality of the work.",
+      "I've seen understanding homeowners hire the lowest bid and pay for it later — in change orders, in rework, in stress. I've been part of that story. I've also seen, and been, the contractor who looked great from the outside but had no real systems behind the scenes: no team, no procedures, no accounting. When that happens, clients' money gets managed poorly, even when nobody means for it to.",
+      "And I've seen developers hand job after job to new contractors, making them feel like they're growing — until the contractor realizes he's been building for free, owes subcontractors he never meant to hurt, and is robbing Peter to pay Paul just to keep the doors open. I know that feeling firsthand.",
+    ],
+    pullQuote: "When the cheapest bid wins, everyone loses — the homeowner, the crew, and the builder.",
   },
   {
     heading: "The turning point",
     paragraphs: [
-      "Throughout the last several years, I've experienced all of this myself. After months of figuring out how I could make a real change in the construction industry — how to be a general contractor that can actually be trusted — TruthCore was born.",
-      "Distinct Construction Solutions was a name that came to me in the moment, when I filed for my license. TruthCore is not only our name; it is the roots, the soul and the foundation of my company.",
+      "After living all of it, I spent months asking one question: how do I build a general contractor that people can actually trust? The answer became TruthCore.",
+      "Distinct Construction Solutions was simply the name I needed in the moment I filed for my license. TruthCore is who we really are — the roots, the soul and the foundation of this company.",
     ],
-    pullQuote: "TruthCore is the roots, the soul and the foundation of my company.",
   },
   {
     heading: "Built on systems, not promises",
     paragraphs: [
-      "I've spent long nights, early mornings and months developing BuildCore, our custom in-house CRM. It isn't just for me — my team, our clients and our vendors all use it, so every project stays organized and everyone involved gets a boutique experience.",
+      "Trust isn't a slogan; it's a system. I spent long nights and early mornings building BuildCore, our own in-house platform. Our team, our clients and our vendors all work in it, so every schedule, update, change and dollar is organized and visible. Nothing gets lost, and nobody is left guessing.",
     ],
   },
   {
     heading: "A team that carries the vision",
     paragraphs: [
-      "After months of hiring and firing, in the field and in the office, I've been able to build a team that is accountable, honest and — most importantly — carries the same vision I do: be honest, take accountability, and get better every time. All of it while depending on Jesus Christ.",
+      "Building the right team took time — months of hiring and letting people go, in the field and in the office. Today we have a team that is accountable, honest, and shares one vision: tell the truth, own the outcome, and get better every single time. We do all of it depending on Jesus Christ.",
     ],
   },
   {
     heading: "Owning our mistakes",
     paragraphs: [
-      "I've made many mistakes in my career that affected not only me but my colleagues, vendors and subcontractors. It was never done to hurt anyone. We were simply stuck trying to meet and compete with the market's expectations.",
+      "The mistakes I made in my career affected more than me — they affected colleagues, vendors and subcontractors. None of it was ever intentional. We were stuck trying to meet a market that rewards cutting corners.",
     ],
     pullQuote: "Not anymore.",
   },
   {
+    heading: "Why we're not the cheapest",
     paragraphs: [
-      "We value our team's hard work and experience, as well as our subcontractors and the people around us. TruthCore is here to make a change.",
-      "Everything you've read in my testimony is why TruthCore is different — and why you'll never go elsewhere after choosing us.",
+      "We value our team's experience and our time — and experience and time cost money. Our pricing reflects what it truly takes to build it right: skilled people, trusted subcontractors who get paid fairly, real systems, and a company that will still be here to stand behind the work years from now.",
+      "We'll never be the lowest bid, and that's on purpose. We'll give you an honest number up front and explain exactly what it covers. If the cheapest price is the only thing that matters, we're not the right fit — and we'll tell you that respectfully. We work with homeowners who value experience and time the way we do.",
+      "That is what makes TruthCore different — and why, once you build with us, you won't want to go anywhere else.",
     ],
+    pullQuote: "Experience and time cost money. Cutting corners costs more.",
   },
 ];
