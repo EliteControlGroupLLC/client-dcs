@@ -78,6 +78,9 @@ export function PropertyScanner() {
   const [address, setAddress] = useState("");
   const [selectedAddress, setSelectedAddress] = useState("");
   const [analysisData, setAnalysisData] = useState<PropertyAnalysisResult | null>(null);
+  // Server signature over analysisData — lets /api/property-report verify the
+  // scan a lead submits wasn't altered in the browser.
+  const [reportToken, setReportToken] = useState<string | null>(null);
   const [reportUnlocked, setReportUnlocked] = useState(false);
   const [showReportModal, setShowReportModal] = useState(false);
   const [reportData, setReportData] = useState<Record<string, unknown> | undefined>(undefined);
@@ -106,6 +109,7 @@ export function PropertyScanner() {
     setAddress(target);
     setSelectedAddress(target);
     setAnalysisData(null);
+    setReportToken(null);
     setIssue(null);
     setAnimationDone(false);
     setReportUnlocked(false);
@@ -124,6 +128,7 @@ export function PropertyScanner() {
           setSelectedAddress(data.meta.resolvedAddress);
         }
         setAnalysisData(data.result);
+        setReportToken(typeof data.reportToken === "string" ? data.reportToken : null);
         return;
       }
       if (data && SERVER_LOOKUP_CODES.has(data.code)) {
@@ -214,6 +219,7 @@ export function PropertyScanner() {
     setAddress("");
     setSelectedAddress("");
     setAnalysisData(null);
+    setReportToken(null);
     setIssue(null);
     setReportUnlocked(false);
   };
@@ -402,6 +408,7 @@ export function PropertyScanner() {
         {phase === "results" && analysisData && !reportUnlocked && (
           <LockedReportPreview
             analysisData={analysisData}
+            reportToken={reportToken}
             propertyAddress={selectedAddress}
             onReportUnlocked={handleReportUnlocked}
           />

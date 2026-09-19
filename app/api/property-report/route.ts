@@ -4,6 +4,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { checkRateLimit, getClientIp, RATE_LIMITS } from "@/lib/rate-limit";
 import { buildAduReportPdf } from "@/lib/adu-report-pdf";
+import { isReportSignatureValid } from "@/lib/report-signature";
 import { pushLeadToBuildCore } from "@/lib/buildcore-intake";
 import { isPhoneTokenValid, normalizePhoneE164 } from "@/lib/verification-token";
 import {
@@ -45,9 +46,19 @@ export async function POST(request: NextRequest) {
       email,
       phone,
       propertyAddress,
-      scanResults,
+      scanResults: submittedScan,
+      reportToken,
       verification,
     } = body;
+
+    // Only trust scan data our own /api/analyze-property produced and signed.
+    // Unsigned/altered data still saves the lead (never lose a real person),
+    // but no PDF or scan facts are attached and the CRM notes say so.
+    const scanVerified = isReportSignatureValid(submittedScan, reportToken);
+    const scanResults = scanVerified ? submittedScan : null;
+    if (submittedScan && !scanVerified) {
+      console.warn("[API] property-report: scan data failed signature check — not attaching it to the lead");
+    }
 
     // Extract verification data. phoneVerified is NOT trusted from the client:
     // it must be backed by the signed token /api/verify-phone issued.
@@ -197,13 +208,15 @@ export async function POST(request: NextRequest) {
     // Push the lead + the exact report the visitor unlocked into BuildCore CRM.
     // Non-blocking for the visitor: failures are logged, never surfaced.
     let reportPdf: Uint8Array | null = null;
-    try {
-      reportPdf = await buildAduReportPdf(
-        { firstName, lastName, email, phone, propertyAddress },
-        scanResults
-      );
-    } catch (err) {
-      console.error("[API] ADU report PDF build failed:", err);
+    if (scanVerified) {
+      try {
+        reportPdf = await buildAduReportPdf(
+          { firstName, lastName, email, phone, propertyAddress },
+          scanResults
+        );
+      } catch (err) {
+        console.error("[API] ADU report PDF build failed:", err);
+      }
     }
     const buildCoreResult = await pushLeadToBuildCore({
       firstName,
@@ -214,9 +227,13 @@ export async function POST(request: NextRequest) {
       city: scanResults?.geocoded?.city ?? null,
       notes: [
         "Build Your ADU property scan (website lead magnet).",
-        `Recommended: ${reportData.feasibilitySummary.recommendedPath}.`,
-        `Zoning: ${reportData.propertySummary.zoning}. Lot: ${reportData.propertySummary.lotSizeSqFt || "?"} sq ft. APN: ${reportData.propertySummary.apn}.`,
-        `Confidence: ${reportData.confidenceScore != null ? `${reportData.confidenceScore}%` : "not available"} (${reportData.confidenceBand}).`,
+        ...(scanVerified
+          ? [
+              `Recommended: ${reportData.feasibilitySummary.recommendedPath}.`,
+              `Zoning: ${reportData.propertySummary.zoning}. Lot: ${reportData.propertySummary.lotSizeSqFt || "?"} sq ft. APN: ${reportData.propertySummary.apn}.`,
+              `Confidence: ${reportData.confidenceScore != null ? `${reportData.confidenceScore}%` : "not available"} (${reportData.confidenceBand}).`,
+            ]
+          : ["Scan data could not be verified (missing/altered) — no report attached; re-run the scan for this address."]),
         `Email validated: ${verificationData.emailValidated ? "yes" : "no"}. Phone verified: ${verificationData.phoneVerified ? "yes" : "no"}.`,
       ].join("\n"),
       reportPdf,

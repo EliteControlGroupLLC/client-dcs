@@ -7,12 +7,14 @@ import { displayFieldValue } from "@/lib/property-intelligence/types";
 
 interface LockedReportPreviewProps {
   analysisData: PropertyAnalysisResult;
+  reportToken?: string | null;
   propertyAddress: string;
   onReportUnlocked: () => void;
 }
 
 export function LockedReportPreview({
   analysisData,
+  reportToken,
   propertyAddress,
   onReportUnlocked,
 }: LockedReportPreviewProps) {
@@ -45,6 +47,7 @@ export function LockedReportPreview({
             <LeadCaptureForm
               propertyAddress={propertyAddress}
               scanResults={analysisData as unknown as Record<string, unknown>}
+              reportToken={reportToken}
               onReportUnlocked={onReportUnlocked}
             />
           </div>
