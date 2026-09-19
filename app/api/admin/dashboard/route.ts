@@ -29,7 +29,6 @@ export async function GET(request: NextRequest) {
     { name: "Mapbox", envVar: "NEXT_PUBLIC_MAPBOX_TOKEN", configured: !!process.env.NEXT_PUBLIC_MAPBOX_TOKEN },
     { name: "Zoneomics", envVar: "NEXT_PUBLIC_ZONEOMICS_API_KEY", configured: !!process.env.NEXT_PUBLIC_ZONEOMICS_API_KEY },
     { name: "RentCast", envVar: "NEXT_PUBLIC_RENTCAST_API_KEY", configured: !!process.env.NEXT_PUBLIC_RENTCAST_API_KEY },
-    { name: "Resend (Email)", envVar: "RESEND_API_KEY", configured: !!process.env.RESEND_API_KEY },
   ];
 
   // 2. Regulation Monitoring Status

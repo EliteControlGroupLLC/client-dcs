@@ -1,8 +1,7 @@
 // Property Report API — Lead capture + report generation endpoint
-// Saves lead info and sends notification to jtalavera@distinctcsolutions.com
+// Saves the lead and pushes it (with the report PDF) into BuildCore CRM
 
 import { NextRequest, NextResponse } from "next/server";
-import { notifyTeamADULead, sendUserConfirmation } from "@/lib/email";
 import { checkRateLimit, getClientIp, RATE_LIMITS } from "@/lib/rate-limit";
 import { buildAduReportPdf } from "@/lib/adu-report-pdf";
 import { pushLeadToBuildCore } from "@/lib/buildcore-intake";
@@ -173,38 +172,6 @@ export async function POST(request: NextRequest) {
       leadSaved = false;
     }
 
-    // Send email to jtalavera@distinctcsolutions.com with the lead info
-    console.log(`[API] Sending lead notification email...`);
-    console.log(`[API] Lead data:`, JSON.stringify({ firstName, lastName, email, phone, propertyAddress }));
-    
-    const timestamp = new Date().toISOString();
-    
-    // Send team notification (critical - must succeed)
-    const teamEmailResult = await notifyTeamADULead({
-      firstName,
-      lastName,
-      email,
-      phone,
-      propertyAddress,
-      timestamp,
-      source: "Build Your ADU",
-      // Verification status
-      verification: {
-        emailValidated: verificationData.emailValidated,
-        emailScore: verificationData.emailScore,
-        emailIsDisposable: verificationData.emailIsDisposable,
-        phoneVerified: verificationData.phoneVerified,
-        verificationCompletedAt: verificationData.verificationCompletedAt,
-      },
-    });
-    
-    console.log(`[API] Team email result:`, JSON.stringify(teamEmailResult));
-    
-    // Send user confirmation (non-critical - fire and forget)
-    sendUserConfirmation({ name: fullName, email, propertyAddress })
-      .then(result => console.log(`[API] User confirmation email result:`, JSON.stringify(result)))
-      .catch(err => console.error(`[API] User confirmation email error:`, err));
-
     // Push the lead + the exact report the visitor unlocked into BuildCore CRM.
     // Non-blocking for the visitor: failures are logged, never surfaced.
     let reportPdf: Uint8Array | null = null;
@@ -236,13 +203,9 @@ export async function POST(request: NextRequest) {
       console.error(`[API] BuildCore push failed:`, JSON.stringify(buildCoreResult));
     }
 
-    // Return success even if email failed (lead is still captured)
-    // But include email status for debugging
     return NextResponse.json({
       success: true,
       leadSaved,
-      emailSent: teamEmailResult.success,
-      emailError: teamEmailResult.error || null,
       crmSynced: buildCoreResult.success,
       report: reportData,
     });

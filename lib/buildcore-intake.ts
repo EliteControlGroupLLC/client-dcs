@@ -1,11 +1,21 @@
-// BuildCore intake — pushes a "Build Your ADU" lead (plus the report PDF the
-// visitor unlocked) into the BuildCore CRM so sales sees exactly what the
-// client received. Server-only: uses BUILDCORE_INTAKE_SECRET.
+// BuildCore intake — pushes website leads into the BuildCore CRM: "Build Your
+// ADU" leads (plus the report PDF the visitor unlocked, so sales sees exactly
+// what the client received) and contact-form messages. Server-only: uses
+// BUILDCORE_INTAKE_SECRET.
 
 const DEFAULT_INTAKE_URL = "https://www.buildcoreus.ai/api/intake/consultations";
 const TIMEOUT_MS = 15_000;
 
+export type BuildCoreServiceLine =
+  | "adu"
+  | "custom-home"
+  | "remodel"
+  | "roofing"
+  | "general-construction";
+
 export interface BuildCoreLeadInput {
+  serviceLine?: BuildCoreServiceLine;
+  source?: "adu-builder" | "website-contact";
   firstName: string;
   lastName: string;
   email: string;
@@ -57,8 +67,8 @@ export async function pushLeadToBuildCore(input: BuildCoreLeadInput): Promise<Bu
     lastName: input.lastName,
     email: input.email,
     phone: input.phone,
-    serviceLine: "adu",
-    source: "adu-builder",
+    serviceLine: input.serviceLine ?? "adu",
+    source: input.source ?? "adu-builder",
     propertyAddress: input.propertyAddress,
     city: resolveCity(input.propertyAddress, input.city),
     notes: input.notes ?? "",
