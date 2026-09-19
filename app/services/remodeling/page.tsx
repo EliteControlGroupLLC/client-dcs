@@ -13,7 +13,7 @@ const remodelTypes = [
     icon: ChefHat,
     title: "Kitchen Remodeling",
     description: "Transform your kitchen with modern layouts, premium countertops, custom cabinetry, and updated appliances.",
-    starting: "$18,000",
+    starting: "$25,000",
     href: "/services/kitchen",
   },
   {
