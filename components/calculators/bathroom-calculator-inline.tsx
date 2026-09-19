@@ -5,7 +5,15 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { ArrowRight, Bath } from "lucide-react";
-import { optionClass, ResultIcon, resultCardClass } from "@/components/calculators/calculator-ui";
+import {
+  calcSectionClass,
+  checkboxClass,
+  controlLabelClass,
+  inputPanelClass,
+  optionClass,
+  ResultIcon,
+  resultCardClass,
+} from "@/components/calculators/calculator-ui";
 import { LeadGate } from "@/components/lead-gate/lead-gate";
 import { LEAD_GATE_INTERESTS } from "@/lib/lead-gate-interests";
 
@@ -53,7 +61,7 @@ const addOns = [
 ];
 
 /**
- * Rendered on the service page (muted band with its own heading) and, with
+ * Rendered on the service page (dark band with its own heading) and, with
  * `standalone`, as the body of the /tools page (the page hero carries the title).
  */
 export function BathroomCalculatorInline({ standalone = false }: { standalone?: boolean }) {
@@ -77,24 +85,24 @@ export function BathroomCalculatorInline({ standalone = false }: { standalone?: 
   return (
     <div id="calculator">
       <LeadGate
-        className={standalone ? undefined : "bg-muted"}
+        className={calcSectionClass}
         interest={LEAD_GATE_INTERESTS.bathroomCalculator}
         headline="Unlock your bathroom remodel estimate"
         subhead="See your bathroom remodel price range based on size, finish level and upgrades."
         ctaLabel="Unlock My Bathroom Estimate"
       >
-        <section className={standalone ? "py-20" : "py-20 bg-muted"}>
+        <section className={`py-20 ${calcSectionClass}`}>
           <div className="container mx-auto px-4 max-w-5xl">
             {!standalone && (
               <div className="text-center mb-12">
-                <h2 className="text-3xl md:text-4xl font-bold text-secondary mb-4">Bathroom Remodel Estimator</h2>
-                <p className="text-lg text-muted-foreground">Estimate your bathroom renovation cost. Starting at $18,000 for a standard 5x10 bathroom.</p>
+                <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">Bathroom Remodel Estimator</h2>
+                <p className="text-lg text-white/80">Estimate your bathroom renovation cost. Starting at $18,000 for a standard 5x10 bathroom.</p>
               </div>
             )}
             <div className="grid md:grid-cols-2 gap-8 [&>*]:min-w-0">
-              <div className="space-y-8">
+              <div className={`space-y-8 ${inputPanelClass}`}>
                 <div>
-                  <label className="block text-sm font-semibold text-secondary mb-3">Bathroom Size</label>
+                  <label className={controlLabelClass}>Bathroom Size</label>
                   <div className="space-y-2">
                     {bathroomSizes.map((s, i) => (
                       <button
@@ -109,7 +117,7 @@ export function BathroomCalculatorInline({ standalone = false }: { standalone?: 
                 </div>
 
                 <div>
-                  <label className="block text-sm font-semibold text-secondary mb-3">Finish Level</label>
+                  <label className={controlLabelClass}>Finish Level</label>
                   <div className="space-y-2">
                     {finishLevels.map((f, i) => (
                       <button
@@ -118,14 +126,14 @@ export function BathroomCalculatorInline({ standalone = false }: { standalone?: 
                         className={optionClass(finishIndex === i)}
                       >
                         <span className="font-medium">{f.label}</span>
-                        <span className="block text-xs text-muted-foreground mt-1">{f.description}</span>
+                        <span className="block text-xs text-white/80 font-normal mt-1">{f.description}</span>
                       </button>
                     ))}
                   </div>
                 </div>
 
                 <div>
-                  <label className="block text-sm font-semibold text-secondary mb-3">Optional Upgrades</label>
+                  <label className={controlLabelClass}>Optional Upgrades</label>
                   <div className="space-y-2">
                     {addOns.map((a, i) => (
                       <label
@@ -136,10 +144,10 @@ export function BathroomCalculatorInline({ standalone = false }: { standalone?: 
                           type="checkbox"
                           checked={selectedAddOns.includes(i)}
                           onChange={() => toggleAddOn(i)}
-                          className="w-4 h-4 accent-primary"
+                          className={checkboxClass}
                         />
-                        <span className="text-sm text-secondary">{a.label}</span>
-                        <span className="text-sm text-muted-foreground ml-auto">+${a.cost.toLocaleString()}</span>
+                        <span className="text-sm">{a.label}</span>
+                        <span className="text-sm ml-auto tabular-nums">+${a.cost.toLocaleString()}</span>
                       </label>
                     ))}
                   </div>

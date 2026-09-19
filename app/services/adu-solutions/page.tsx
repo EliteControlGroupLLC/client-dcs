@@ -86,7 +86,7 @@ const process = [
 
 export default function ADUSolutionsPage() {
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen bg-secondary">
       {/* Hero Section */}
       <section className="bg-secondary bg-[radial-gradient(ellipse_at_top,rgba(51,102,102,0.35),transparent_60%)] text-white pt-40 pb-20">
         <div className="container mx-auto px-4">
@@ -114,13 +114,13 @@ export default function ADUSolutionsPage() {
       </section>
 
       {/* ADU Types */}
-      <section className="py-20 bg-muted">
+      <section className="py-20 bg-secondary border-t border-white/10 text-white">
         <div className="container mx-auto px-4">
           <div className="text-center mb-12">
-            <h2 className="text-3xl md:text-4xl font-bold text-secondary mb-4">
+            <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">
               Types of ADUs We Build
             </h2>
-            <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+            <p className="text-lg text-white/80 max-w-2xl mx-auto">
               Every property is different. We help you choose the product that fits the lot, budget, permit path, and long-term use case.
             </p>
           </div>
@@ -131,27 +131,31 @@ export default function ADUSolutionsPage() {
             {aduTypes.map((type, index) => {
               const FloorPlan = floorPlanComponents[index];
               return (
-              <Card key={type.title} className="w-full md:w-[calc(50%-0.75rem)] lg:w-[calc(33.333%-1rem)] flex flex-col overflow-hidden">
-                <div className="bg-gradient-to-br from-primary/5 to-secondary/5 p-4 flex items-center justify-center">
-                  <FloorPlan className="w-full max-w-[380px] h-auto" />
+              <Card key={type.title} className="w-full md:w-[calc(50%-0.75rem)] lg:w-[calc(33.333%-1rem)] flex flex-col overflow-hidden bg-secondary-light text-white border-white/10 shadow-lg shadow-black/20 hover:border-accent/50 transition-colors">
+                {/* Plans stay on their light drafting "paper" (legibility of the linework
+                    and room tints) — framed as a sheet inside the dark card. */}
+                <div className="bg-secondary p-4 flex items-center justify-center border-b border-white/10">
+                  <div data-paper-panel className="w-full max-w-[380px] rounded-xl overflow-hidden ring-1 ring-white/15 shadow-lg shadow-black/30">
+                    <FloorPlan className="block w-full h-auto" />
+                  </div>
                 </div>
                 <CardContent className="p-8 flex-1">
-                  <h3 className="text-xl font-semibold text-secondary mb-2">{type.title}</h3>
-                  <p className="text-muted-foreground mb-4">{type.description}</p>
-                  <div className="flex gap-4 text-sm mb-4">
+                  <h3 className="text-xl font-semibold text-white mb-2">{type.title}</h3>
+                  <p className="text-white/80 mb-4">{type.description}</p>
+                  <div className="flex gap-4 text-sm text-white/80 mb-4">
                     <span className="flex items-center gap-1">
-                      <Home className="h-4 w-4 text-primary" />
+                      <Home className="h-4 w-4 text-accent" />
                       {type.sqFt}
                     </span>
                     <span className="flex items-center gap-1">
-                      <Clock className="h-4 w-4 text-primary" />
+                      <Clock className="h-4 w-4 text-accent" />
                       {type.timeline}
                     </span>
                   </div>
                   <ul className="space-y-2">
                     {type.features.map((feature) => (
-                      <li key={feature} className="flex items-center gap-2 text-sm">
-                        <CheckCircle className="h-4 w-4 text-primary shrink-0" />
+                      <li key={feature} className="flex items-center gap-2 text-sm text-white/80">
+                        <CheckCircle className="h-4 w-4 text-accent shrink-0" />
                         {feature}
                       </li>
                     ))}
@@ -165,10 +169,10 @@ export default function ADUSolutionsPage() {
       </section>
 
       {/* Benefits */}
-      <section className="py-20">
+      <section className="py-20 bg-secondary border-t border-white/10 text-white bg-[radial-gradient(ellipse_at_top,rgba(51,102,102,0.35),transparent_60%)]">
         <div className="container mx-auto px-4">
           <div className="text-center mb-12">
-            <h2 className="text-3xl md:text-4xl font-bold text-secondary mb-4">
+            <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">
               Why Build an ADU?
             </h2>
           </div>
@@ -177,13 +181,13 @@ export default function ADUSolutionsPage() {
             {benefits.map((benefit) => {
               const Icon = benefit.icon;
               return (
-                <Card key={benefit.title} className="h-full">
+                <Card key={benefit.title} className="h-full bg-secondary-light text-white border-white/10 shadow-lg shadow-black/20 hover:border-accent/50 transition-colors">
                   <CardContent className="p-6 text-center">
-                    <div className="w-14 h-14 rounded-xl bg-primary/10 flex items-center justify-center mx-auto mb-4">
-                      <Icon className="h-7 w-7 text-primary" />
+                    <div className="w-14 h-14 rounded-xl bg-primary flex items-center justify-center mx-auto mb-4">
+                      <Icon className="h-7 w-7 text-white" />
                     </div>
-                    <h3 className="text-xl font-semibold text-secondary mb-2">{benefit.title}</h3>
-                    <p className="text-sm text-muted-foreground">{benefit.description}</p>
+                    <h3 className="text-xl font-semibold text-white mb-2">{benefit.title}</h3>
+                    <p className="text-sm text-white/75">{benefit.description}</p>
                   </CardContent>
                 </Card>
               );
@@ -193,13 +197,13 @@ export default function ADUSolutionsPage() {
       </section>
 
       {/* Process */}
-      <section className="py-20 bg-muted">
+      <section className="py-20 bg-secondary border-t border-white/10 text-white">
         <div className="container mx-auto px-4">
           <div className="text-center mb-12">
-            <h2 className="text-3xl md:text-4xl font-bold text-secondary mb-4">
+            <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">
               Our ADU Process
             </h2>
-            <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+            <p className="text-lg text-white/80 max-w-2xl mx-auto">
               From first conversation to move-in day, here is how we bring your ADU to life.
             </p>
           </div>
@@ -211,8 +215,8 @@ export default function ADUSolutionsPage() {
                 <div className="w-12 h-12 bg-primary text-white rounded-full flex items-center justify-center mx-auto mb-4 font-bold">
                   {item.step}
                 </div>
-                <h3 className="text-lg font-semibold text-secondary mb-2 text-balance">{item.title}</h3>
-                <p className="text-sm text-muted-foreground leading-relaxed">{item.description}</p>
+                <h3 className="text-lg font-semibold text-white mb-2 text-balance">{item.title}</h3>
+                <p className="text-sm text-white/75 leading-relaxed">{item.description}</p>
               </div>
             ))}
           </div>
@@ -220,7 +224,7 @@ export default function ADUSolutionsPage() {
       </section>
 
       {/* CTA */}
-      <section className="py-20 bg-secondary bg-[radial-gradient(ellipse_at_top,rgba(51,102,102,0.35),transparent_60%)] text-white">
+      <section className="py-20 bg-secondary border-t border-white/10 bg-[radial-gradient(ellipse_at_top,rgba(51,102,102,0.35),transparent_60%)] text-white">
         <div className="container mx-auto px-4 text-center">
           <h2 className="text-3xl md:text-4xl font-bold mb-4">
             Ready to Build Your ADU?

@@ -5,7 +5,15 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { ArrowRight, Home } from "lucide-react";
-import { optionClass, ResultIcon, resultCardClass } from "@/components/calculators/calculator-ui";
+import {
+  calcSectionClass,
+  controlLabelClass,
+  inputPanelClass,
+  optionClass,
+  rangeClass,
+  ResultIcon,
+  resultCardClass,
+} from "@/components/calculators/calculator-ui";
 import { LeadGate } from "@/components/lead-gate/lead-gate";
 import { LEAD_GATE_INTERESTS } from "@/lib/lead-gate-interests";
 
@@ -25,7 +33,7 @@ const complexityLevels = [
 ];
 
 /**
- * Rendered on the service page (muted band with its own heading) and, with
+ * Rendered on the service page (dark band with its own heading) and, with
  * `standalone`, as the body of the /tools page (the page hero carries the title).
  */
 export function RoofCalculatorInline({ standalone = false }: { standalone?: boolean }) {
@@ -43,24 +51,24 @@ export function RoofCalculatorInline({ standalone = false }: { standalone?: bool
   return (
     <div id="calculator">
       <LeadGate
-        className={standalone ? undefined : "bg-muted"}
+        className={calcSectionClass}
         interest={LEAD_GATE_INTERESTS.roofCalculator}
         headline="Unlock your roofing estimate"
         subhead="Compare shingle, tile, metal and flat-roof pricing for your home in seconds."
         ctaLabel="Unlock My Roofing Estimate"
       >
-        <section className={standalone ? "py-20" : "py-20 bg-muted"}>
+        <section className={`py-20 ${calcSectionClass}`}>
           <div className="container mx-auto px-4 max-w-5xl">
             {!standalone && (
               <div className="text-center mb-12">
-                <h2 className="text-3xl md:text-4xl font-bold text-secondary mb-4">Roof Price Calculator</h2>
-                <p className="text-lg text-muted-foreground">Adjust roof size, material, and complexity to see your estimated range.</p>
+                <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">Roof Price Calculator</h2>
+                <p className="text-lg text-white/80">Adjust roof size, material, and complexity to see your estimated range.</p>
               </div>
             )}
             <div className="grid md:grid-cols-2 gap-8 [&>*]:min-w-0">
-              <div className="space-y-8">
+              <div className={`space-y-8 ${inputPanelClass}`}>
                 <div>
-                  <label className="block text-sm font-semibold text-secondary mb-3">
+                  <label className={controlLabelClass}>
                     Roof Area: {roofArea.toLocaleString()} sq ft
                   </label>
                   <input
@@ -70,16 +78,16 @@ export function RoofCalculatorInline({ standalone = false }: { standalone?: bool
                     step={100}
                     value={roofArea}
                     onChange={(e) => setRoofArea(Number(e.target.value))}
-                    className="w-full h-11 -my-3.5 accent-primary cursor-pointer"
+                    className={rangeClass}
                   />
-                  <div className="flex justify-between text-xs text-muted-foreground mt-1">
+                  <div className="flex justify-between text-xs text-white/70 mt-1">
                     <span>800 sq ft</span>
                     <span>5,000 sq ft</span>
                   </div>
                 </div>
 
                 <div>
-                  <label className="block text-sm font-semibold text-secondary mb-3">Roof Type</label>
+                  <label className={controlLabelClass}>Roof Type</label>
                   <div className="space-y-2">
                     {roofTypes.map((t, i) => (
                       <button
@@ -94,7 +102,7 @@ export function RoofCalculatorInline({ standalone = false }: { standalone?: bool
                 </div>
 
                 <div>
-                  <label className="block text-sm font-semibold text-secondary mb-3">Roof Complexity</label>
+                  <label className={controlLabelClass}>Roof Complexity</label>
                   <div className="space-y-2">
                     {complexityLevels.map((c, i) => (
                       <button

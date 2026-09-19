@@ -4,7 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { selectClass } from "@/components/calculators/calculator-ui";
+import { controlLabelClass, inputPanelClass, selectClass } from "@/components/calculators/calculator-ui";
 import { LeadGate } from "@/components/lead-gate/lead-gate";
 import { LEAD_GATE_INTERESTS } from "@/lib/lead-gate-interests";
 import { ArrowRight, ArrowLeftRight, Check } from "lucide-react";
@@ -92,7 +92,7 @@ export default function CompareADUSizesPage() {
   const right = aduOptions[rightIndex];
 
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen bg-secondary">
       <section className="bg-secondary bg-[radial-gradient(ellipse_at_top,rgba(51,102,102,0.35),transparent_60%)] text-white pt-40 pb-20">
         <div className="container mx-auto px-4">
           <div className="max-w-3xl">
@@ -111,17 +111,18 @@ export default function CompareADUSizesPage() {
       </section>
 
       <LeadGate
+        className="bg-secondary border-t border-white/10"
         interest={LEAD_GATE_INTERESTS.compareAduSizes}
         headline="Unlock the ADU size comparison"
         subhead="Compare ADU sizes side by side — cost, rent and return for each option."
         ctaLabel="Unlock the Comparison"
       >
-        <section className="py-20">
+        <section className="py-20 bg-secondary border-t border-white/10 text-white">
           <div className="container mx-auto px-4 max-w-5xl">
             {/* Selectors */}
-            <div className="grid grid-cols-[1fr_auto_1fr] gap-4 items-center mb-12">
+            <div className={`${inputPanelClass} grid grid-cols-[1fr_auto_1fr] gap-4 items-center mb-12`}>
               <div>
-                <label className="block text-sm font-semibold text-secondary mb-3">Option A</label>
+                <label className={controlLabelClass}>Option A</label>
                 <select
                   value={leftIndex}
                   onChange={(e) => setLeftIndex(Number(e.target.value))}
@@ -133,10 +134,10 @@ export default function CompareADUSizesPage() {
                 </select>
               </div>
               <div className="flex items-end pb-2">
-                <ArrowLeftRight className="h-6 w-6 text-primary" />
+                <ArrowLeftRight className="h-6 w-6 text-accent" />
               </div>
               <div>
-                <label className="block text-sm font-semibold text-secondary mb-3">Option B</label>
+                <label className={controlLabelClass}>Option B</label>
                 <select
                   value={rightIndex}
                   onChange={(e) => setRightIndex(Number(e.target.value))}
@@ -150,7 +151,7 @@ export default function CompareADUSizesPage() {
             </div>
 
             {/* Comparison Table */}
-            <div className="bg-white rounded-2xl border overflow-hidden">
+            <div className="bg-secondary-light rounded-2xl border border-white/10 shadow-lg shadow-black/20 overflow-hidden">
               {/* Header */}
               <div className="grid grid-cols-3 bg-secondary text-white">
                 <div className="p-4 text-sm font-semibold">Category</div>
@@ -164,12 +165,12 @@ export default function CompareADUSizesPage() {
 
               {/* Rows */}
               {fields.map((field, i) => (
-                <div key={field.key} className={`grid grid-cols-3 ${i % 2 === 0 ? "bg-muted" : "bg-white"}`}>
-                  <div className="p-4 text-sm font-semibold text-secondary border-t">{field.label}</div>
-                  <div className="p-4 text-sm text-muted-foreground border-t border-l text-center">
+                <div key={field.key} className={`grid grid-cols-3 ${i % 2 === 0 ? "bg-white/[0.03]" : ""}`}>
+                  <div className="p-4 text-sm font-semibold text-white border-t border-white/10">{field.label}</div>
+                  <div className="p-4 text-sm text-white/80 border-t border-l border-white/10 text-center">
                     {left[field.key]}
                   </div>
-                  <div className="p-4 text-sm text-muted-foreground border-t border-l text-center">
+                  <div className="p-4 text-sm text-white/80 border-t border-l border-white/10 text-center">
                     {right[field.key]}
                   </div>
                 </div>
@@ -178,12 +179,12 @@ export default function CompareADUSizesPage() {
 
             {/* Summary Cards */}
             <div className="grid md:grid-cols-2 gap-6 mt-12">
-              <Card className="h-full flex flex-col">
+              <Card className="h-full flex flex-col bg-secondary-light border-white/10 shadow-lg shadow-black/20 hover:border-accent/50 transition-colors">
                 <CardContent className="p-6 flex flex-col flex-1">
-                  <h3 className="text-xl font-semibold text-secondary mb-3">{left.label} ADU</h3>
+                  <h3 className="text-xl font-semibold text-white mb-3">{left.label} ADU</h3>
                   <ul className="space-y-2 mb-4">
-                    <li className="flex items-start gap-2 text-sm text-muted-foreground">
-                      <Check className="h-4 w-4 text-primary mt-0.5 shrink-0" />
+                    <li className="flex items-start gap-2 text-sm text-white/80">
+                      <Check className="h-4 w-4 text-accent mt-0.5 shrink-0" />
                       {left.bestFor}
                     </li>
                   </ul>
@@ -194,12 +195,12 @@ export default function CompareADUSizesPage() {
                   </Button>
                 </CardContent>
               </Card>
-              <Card className="h-full flex flex-col">
+              <Card className="h-full flex flex-col bg-secondary-light border-white/10 shadow-lg shadow-black/20 hover:border-accent/50 transition-colors">
                 <CardContent className="p-6 flex flex-col flex-1">
-                  <h3 className="text-xl font-semibold text-secondary mb-3">{right.label} ADU</h3>
+                  <h3 className="text-xl font-semibold text-white mb-3">{right.label} ADU</h3>
                   <ul className="space-y-2 mb-4">
-                    <li className="flex items-start gap-2 text-sm text-muted-foreground">
-                      <Check className="h-4 w-4 text-primary mt-0.5 shrink-0" />
+                    <li className="flex items-start gap-2 text-sm text-white/80">
+                      <Check className="h-4 w-4 text-accent mt-0.5 shrink-0" />
                       {right.bestFor}
                     </li>
                   </ul>
@@ -215,7 +216,7 @@ export default function CompareADUSizesPage() {
         </section>
       </LeadGate>
 
-      <section className="py-20 bg-secondary bg-[radial-gradient(ellipse_at_top,rgba(51,102,102,0.35),transparent_60%)] text-white">
+      <section className="py-20 bg-secondary bg-[radial-gradient(ellipse_at_top,rgba(51,102,102,0.35),transparent_60%)] border-t border-white/10 text-white">
         <div className="container mx-auto px-4 text-center">
           <h2 className="text-3xl md:text-4xl font-bold mb-4">
             Still Not Sure? Let Us Help.

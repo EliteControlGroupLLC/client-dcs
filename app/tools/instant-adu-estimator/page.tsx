@@ -4,7 +4,7 @@ import { useState, useMemo } from "react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { optionClass, ResultIcon, resultCardClass } from "@/components/calculators/calculator-ui";
+import { controlLabelClass, inputPanelClass, optionClass, ResultIcon, resultCardClass } from "@/components/calculators/calculator-ui";
 import { LeadGate } from "@/components/lead-gate/lead-gate";
 import { LEAD_GATE_INTERESTS } from "@/lib/lead-gate-interests";
 import { ArrowRight, Zap, Check, X } from "lucide-react";
@@ -119,7 +119,7 @@ export default function InstantADUEstimatorPage() {
   ];
 
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen bg-secondary">
       <section className="bg-secondary bg-[radial-gradient(ellipse_at_top,rgba(51,102,102,0.35),transparent_60%)] text-white pt-40 pb-20">
         <div className="container mx-auto px-4">
           <div className="max-w-3xl">
@@ -138,17 +138,18 @@ export default function InstantADUEstimatorPage() {
       </section>
 
       <LeadGate
+        className="bg-secondary border-t border-white/10"
         interest={LEAD_GATE_INTERESTS.instantAduEstimator}
         headline="Unlock your instant ADU estimate"
         subhead="Pick your ADU type, size and configuration to see an estimated price range in seconds."
         ctaLabel="Unlock My ADU Estimate"
       >
-        <section className="py-20">
+        <section className="py-20 bg-secondary border-t border-white/10 text-white">
           <div className="container mx-auto px-4 max-w-5xl">
             <div className="grid md:grid-cols-2 gap-8 [&>*]:min-w-0">
-              <div className="space-y-8">
+              <div className={`${inputPanelClass} space-y-8 self-start`}>
                 <div>
-                  <label className="block text-sm font-semibold text-secondary mb-3">ADU Type</label>
+                  <label className={controlLabelClass}>ADU Type</label>
                   <div className="space-y-2">
                     {aduTypes.map((t, i) => (
                       <button
@@ -164,7 +165,7 @@ export default function InstantADUEstimatorPage() {
 
                 {!isGarage && (
                   <div>
-                    <label className="block text-sm font-semibold text-secondary mb-3">Size</label>
+                    <label className={controlLabelClass}>Size</label>
                     <div className="flex flex-wrap gap-2">
                       {availableSizes.map((s) => (
                         <button
@@ -180,7 +181,7 @@ export default function InstantADUEstimatorPage() {
                 )}
 
                 <div>
-                  <label className="block text-sm font-semibold text-secondary mb-3">Bedrooms</label>
+                  <label className={controlLabelClass}>Bedrooms</label>
                   <div className="flex flex-wrap gap-2">
                     {[0, 1, 2, 3, 4].filter(b => b <= maxBedrooms || b === 0).map((b) => (
                       <button
@@ -196,7 +197,7 @@ export default function InstantADUEstimatorPage() {
 
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-sm font-semibold text-secondary mb-3">Bathrooms</label>
+                    <label className={controlLabelClass}>Bathrooms</label>
                     <div className="flex gap-2">
                       {bathroomOptions.map((b) => (
                         <button
@@ -210,7 +211,7 @@ export default function InstantADUEstimatorPage() {
                     </div>
                   </div>
                   <div>
-                    <label className="block text-sm font-semibold text-secondary mb-3">Stories</label>
+                    <label className={controlLabelClass}>Stories</label>
                     <div className="flex gap-2">
                       {[1, 2].map((s) => (
                         <button
@@ -298,7 +299,7 @@ export default function InstantADUEstimatorPage() {
         </section>
       </LeadGate>
 
-      <section className="py-20 bg-secondary bg-[radial-gradient(ellipse_at_top,rgba(51,102,102,0.35),transparent_60%)] text-white">
+      <section className="py-20 bg-secondary bg-[radial-gradient(ellipse_at_top,rgba(51,102,102,0.35),transparent_60%)] border-t border-white/10 text-white">
         <div className="container mx-auto px-4 text-center">
           <h2 className="text-3xl md:text-4xl font-bold mb-4">
             Want to Compare Options?

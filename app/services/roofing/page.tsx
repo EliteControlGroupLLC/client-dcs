@@ -68,7 +68,7 @@ const includes = [
 
 export default function RoofingPage() {
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen bg-secondary">
       <section className="bg-secondary bg-[radial-gradient(ellipse_at_top,rgba(51,102,102,0.35),transparent_60%)] text-white pt-40 pb-20">
         <div className="container mx-auto px-4">
           <div className="max-w-3xl">
@@ -89,21 +89,21 @@ export default function RoofingPage() {
 
       <RoofCalculatorInline />
 
-      <section className="py-20">
+      <section className="py-20 bg-secondary border-t border-white/10 text-white bg-[radial-gradient(ellipse_at_top,rgba(51,102,102,0.35),transparent_60%)]">
         <div className="container mx-auto px-4">
           <div className="text-center mb-12">
-            <h2 className="text-3xl md:text-4xl font-bold text-secondary mb-4">Roofing Materials</h2>
-            <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+            <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">Roofing Materials</h2>
+            <p className="text-lg text-white/80 max-w-2xl mx-auto">
               We install all major roofing materials. Every option includes professional installation, cleanup, and warranty.
             </p>
           </div>
           <div className="grid md:grid-cols-2 gap-6 max-w-6xl mx-auto">
             {roofTypes.map((type) => (
-              <Card key={type.title} className="h-full flex flex-col overflow-hidden hover:shadow-lg transition-shadow">
+              <Card key={type.title} className="h-full flex flex-col overflow-hidden bg-secondary-light text-white border-white/10 shadow-lg shadow-black/20 hover:border-accent/50 transition-colors">
                 <CardContent className="p-8 flex flex-col flex-1">
-                  <h3 className="text-xl font-semibold text-secondary mb-2">{type.title}</h3>
-                  <p className="text-muted-foreground mb-4">{type.description}</p>
-                  <p className="text-lg font-bold text-primary mt-auto">{type.price}</p>
+                  <h3 className="text-xl font-semibold text-white mb-2">{type.title}</h3>
+                  <p className="text-white/80 mb-4">{type.description}</p>
+                  <p className="text-lg font-bold text-accent-light mt-auto">{type.price}</p>
                 </CardContent>
               </Card>
             ))}
@@ -111,22 +111,22 @@ export default function RoofingPage() {
         </div>
       </section>
 
-      <section className="py-20 bg-muted">
+      <section className="py-20 bg-secondary border-t border-white/10 text-white">
         <div className="container mx-auto px-4">
           <div className="text-center mb-12">
-            <h2 className="text-3xl md:text-4xl font-bold text-secondary mb-4">Why Homeowners Choose Us for Roofing</h2>
+            <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">Why Homeowners Choose Us for Roofing</h2>
           </div>
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 max-w-6xl mx-auto">
             {features.map((feature) => {
               const Icon = feature.icon;
               return (
-                <Card key={feature.title} className="h-full">
+                <Card key={feature.title} className="h-full bg-secondary-light text-white border-white/10 shadow-lg shadow-black/20 hover:border-accent/50 transition-colors">
                   <CardContent className="p-6 text-center">
-                    <div className="w-14 h-14 rounded-xl bg-primary/10 flex items-center justify-center mx-auto mb-4">
-                      <Icon className="h-7 w-7 text-primary" />
+                    <div className="w-14 h-14 rounded-xl bg-primary flex items-center justify-center mx-auto mb-4">
+                      <Icon className="h-7 w-7 text-white" />
                     </div>
-                    <h3 className="text-xl font-semibold text-secondary mb-2">{feature.title}</h3>
-                    <p className="text-sm text-muted-foreground">{feature.description}</p>
+                    <h3 className="text-xl font-semibold text-white mb-2">{feature.title}</h3>
+                    <p className="text-sm text-white/75">{feature.description}</p>
                   </CardContent>
                 </Card>
               );
@@ -135,17 +135,17 @@ export default function RoofingPage() {
         </div>
       </section>
 
-      <section className="py-20">
+      <section className="py-20 bg-secondary border-t border-white/10 text-white bg-[radial-gradient(ellipse_at_top,rgba(51,102,102,0.35),transparent_60%)]">
         <div className="container mx-auto px-4">
           <div className="max-w-3xl mx-auto">
-            <h2 className="text-3xl md:text-4xl font-bold text-secondary mb-12 text-center">
+            <h2 className="text-3xl md:text-4xl font-bold text-white mb-12 text-center">
               What&apos;s Included
             </h2>
             <ul className="space-y-4">
               {includes.map((item) => (
                 <li key={item} className="flex items-start gap-3">
-                  <CheckCircle className="h-5 w-5 text-primary shrink-0 mt-0.5" />
-                  <span className="text-lg text-muted-foreground">{item}</span>
+                  <CheckCircle className="h-5 w-5 text-accent shrink-0 mt-0.5" />
+                  <span className="text-lg text-white/80">{item}</span>
                 </li>
               ))}
             </ul>
@@ -153,7 +153,7 @@ export default function RoofingPage() {
         </div>
       </section>
 
-      <section className="py-20 bg-secondary bg-[radial-gradient(ellipse_at_top,rgba(51,102,102,0.35),transparent_60%)] text-white">
+      <section className="py-20 bg-secondary border-t border-white/10 bg-[radial-gradient(ellipse_at_top,rgba(51,102,102,0.35),transparent_60%)] text-white">
         <div className="container mx-auto px-4 text-center">
           <h2 className="text-3xl md:text-4xl font-bold mb-4">Need a Professional Roof Inspection?</h2>
           <p className="text-lg text-white/80 mb-8 max-w-2xl mx-auto">

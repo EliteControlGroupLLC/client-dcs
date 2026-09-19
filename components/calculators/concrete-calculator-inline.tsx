@@ -5,7 +5,15 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { ArrowRight, Layers } from "lucide-react";
-import { optionClass, ResultIcon, resultCardClass } from "@/components/calculators/calculator-ui";
+import {
+  calcSectionClass,
+  controlLabelClass,
+  inputPanelClass,
+  optionClass,
+  rangeClass,
+  ResultIcon,
+  resultCardClass,
+} from "@/components/calculators/calculator-ui";
 import {
   RETAINING_WALL_BASE_HEIGHT_FT,
   RETAINING_WALL_BASE_PRICE_PER_LF,
@@ -32,7 +40,7 @@ const thicknessOptions = [
 ];
 
 /**
- * Rendered on the service page (muted band with its own heading) and, with
+ * Rendered on the service page (dark band with its own heading) and, with
  * `standalone`, as the body of the /tools page (the page hero carries the title).
  */
 export function ConcreteCalculatorInline({ standalone = false }: { standalone?: boolean }) {
@@ -57,25 +65,25 @@ export function ConcreteCalculatorInline({ standalone = false }: { standalone?: 
   return (
     <div id="calculator">
       <LeadGate
-        className={standalone ? undefined : "bg-muted"}
+        className={calcSectionClass}
         interest={LEAD_GATE_INTERESTS.concreteCalculator}
         headline="Unlock your concrete estimate"
         subhead="Driveways, patios, walkways and slabs — see your price range with finish, thickness and retaining-wall options."
         ctaLabel="Unlock My Concrete Estimate"
       >
-        <section className={standalone ? "py-20" : "py-20 bg-muted"}>
+        <section className={`py-20 ${calcSectionClass}`}>
           <div className="container mx-auto px-4 max-w-5xl">
             {!standalone && (
               <div className="text-center mb-12">
-                <h2 className="text-3xl md:text-4xl font-bold text-secondary mb-4">Concrete Project Estimator</h2>
-                <p className="text-lg text-muted-foreground">Estimate costs for driveways, patios, walkways, and slabs.</p>
+                <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">Concrete Project Estimator</h2>
+                <p className="text-lg text-white/80">Estimate costs for driveways, patios, walkways, and slabs.</p>
               </div>
             )}
             <div className="grid md:grid-cols-2 gap-8 [&>*]:min-w-0">
-              <div className="space-y-8">
+              <div className={`space-y-8 ${inputPanelClass}`}>
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-sm font-semibold text-secondary mb-3">
+                    <label className={controlLabelClass}>
                       Length: {length} ft
                     </label>
                     <input
@@ -85,11 +93,11 @@ export function ConcreteCalculatorInline({ standalone = false }: { standalone?: 
                       step={1}
                       value={length}
                       onChange={(e) => setLength(Number(e.target.value))}
-                      className="w-full h-11 -my-3.5 accent-primary cursor-pointer"
+                      className={rangeClass}
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-semibold text-secondary mb-3">
+                    <label className={controlLabelClass}>
                       Width: {width} ft
                     </label>
                     <input
@@ -99,19 +107,19 @@ export function ConcreteCalculatorInline({ standalone = false }: { standalone?: 
                       step={1}
                       value={width}
                       onChange={(e) => setWidth(Number(e.target.value))}
-                      className="w-full h-11 -my-3.5 accent-primary cursor-pointer"
+                      className={rangeClass}
                     />
                   </div>
                 </div>
 
                 <div>
-                  <label className="block text-sm font-semibold text-secondary mb-3">
-                    Total Area: <span className="text-primary">{sqFt.toLocaleString()} sq ft</span>
+                  <label className={controlLabelClass}>
+                    Total Area: <span className="text-accent-light">{sqFt.toLocaleString()} sq ft</span>
                   </label>
                 </div>
 
                 <div>
-                  <label className="block text-sm font-semibold text-secondary mb-3">Thickness</label>
+                  <label className={controlLabelClass}>Thickness</label>
                   <div className="flex gap-3">
                     {thicknessOptions.map((t, i) => (
                       <button
@@ -126,7 +134,7 @@ export function ConcreteCalculatorInline({ standalone = false }: { standalone?: 
                 </div>
 
                 <div>
-                  <label className="block text-sm font-semibold text-secondary mb-3">Finish Type</label>
+                  <label className={controlLabelClass}>Finish Type</label>
                   <div className="space-y-2">
                     {finishTypes.map((f, i) => (
                       <button
@@ -135,26 +143,26 @@ export function ConcreteCalculatorInline({ standalone = false }: { standalone?: 
                         className={optionClass(finish === i)}
                       >
                         <span>{f.label}</span>
-                        <span className="text-muted-foreground ml-2 text-sm">(from {formatRate(f.pricePerSqFt)}/sq ft)</span>
+                        <span className="ml-2 text-sm font-normal opacity-90">(from {formatRate(f.pricePerSqFt)}/sq ft)</span>
                       </button>
                     ))}
                   </div>
                 </div>
 
-                <div className="border-t pt-6">
+                <div className="border-t border-white/10 pt-6">
                   <label className="flex items-center gap-3 min-h-11 cursor-pointer">
                     <input
                       type="checkbox"
                       checked={hasRetainingWall}
                       onChange={(e) => setHasRetainingWall(e.target.checked)}
-                      className="w-5 h-5 accent-primary"
+                      className="w-5 h-5 shrink-0 accent-accent [color-scheme:dark]"
                     />
-                    <span className="text-sm font-semibold text-secondary">Add Retaining Wall Estimate</span>
+                    <span className="text-sm font-semibold text-white">Add Retaining Wall Estimate</span>
                   </label>
                   {hasRetainingWall && (
                     <div className="mt-4 grid grid-cols-2 gap-4">
                       <div>
-                        <label className="block text-sm text-muted-foreground mb-2">
+                        <label className="block text-sm text-white/80 mb-2">
                           Wall Length: {wallLength} ft
                         </label>
                         <input
@@ -164,11 +172,11 @@ export function ConcreteCalculatorInline({ standalone = false }: { standalone?: 
                           step={1}
                           value={wallLength}
                           onChange={(e) => setWallLength(Number(e.target.value))}
-                          className="w-full h-11 -my-3.5 accent-primary cursor-pointer"
+                          className={rangeClass}
                         />
                       </div>
                       <div>
-                        <label className="block text-sm text-muted-foreground mb-2">
+                        <label className="block text-sm text-white/80 mb-2">
                           Wall Height: {wallHeight} ft
                         </label>
                         <input
@@ -178,13 +186,13 @@ export function ConcreteCalculatorInline({ standalone = false }: { standalone?: 
                           step={1}
                           value={wallHeight}
                           onChange={(e) => setWallHeight(Number(e.target.value))}
-                          className="w-full h-11 -my-3.5 accent-primary cursor-pointer"
+                          className={rangeClass}
                         />
                       </div>
                     </div>
                   )}
                   {hasRetainingWall && (
-                    <p className="mt-3 text-xs text-muted-foreground">
+                    <p className="mt-3 text-xs text-white/75">
                       Retaining walls are {formatRate(RETAINING_WALL_BASE_PRICE_PER_LF)} per linear foot up to {RETAINING_WALL_BASE_HEIGHT_FT} ft tall;
                       each additional foot of height adds {formatRate(RETAINING_WALL_BASE_PRICE_PER_LF / RETAINING_WALL_BASE_HEIGHT_FT)}/LF.
                     </p>

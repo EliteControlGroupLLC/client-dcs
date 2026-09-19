@@ -4,7 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { optionClass, ResultIcon, resultCardClass, resultTileClass } from "@/components/calculators/calculator-ui";
+import { controlLabelClass, inputPanelClass, optionClass, rangeClass, ResultIcon, resultCardClass, resultTileClass } from "@/components/calculators/calculator-ui";
 import { LeadGate } from "@/components/lead-gate/lead-gate";
 import { LEAD_GATE_INTERESTS } from "@/lib/lead-gate-interests";
 import { ArrowRight, DollarSign, TrendingUp } from "lucide-react";
@@ -32,7 +32,7 @@ export default function ADUIncomeCalculatorPage() {
   const tenYearIncome = annualIncome * 10;
 
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen bg-secondary">
       <section className="bg-secondary bg-[radial-gradient(ellipse_at_top,rgba(51,102,102,0.35),transparent_60%)] text-white pt-40 pb-20">
         <div className="container mx-auto px-4">
           <div className="max-w-3xl">
@@ -51,17 +51,18 @@ export default function ADUIncomeCalculatorPage() {
       </section>
 
       <LeadGate
+        className="bg-secondary border-t border-white/10"
         interest={LEAD_GATE_INTERESTS.aduIncomeCalculator}
         headline="Unlock your ADU rental income estimate"
         subhead="See what an ADU on your property could earn in rent each month and year."
         ctaLabel="Unlock My Income Estimate"
       >
-        <section className="py-20">
+        <section className="py-20 bg-secondary border-t border-white/10 text-white">
           <div className="container mx-auto px-4 max-w-5xl">
             <div className="grid md:grid-cols-2 gap-8 [&>*]:min-w-0">
-              <div className="space-y-8">
+              <div className={`${inputPanelClass} space-y-8 self-start`}>
                 <div>
-                  <label className="block text-sm font-semibold text-secondary mb-3">ADU Size</label>
+                  <label className={controlLabelClass}>ADU Size</label>
                   <div className="space-y-2">
                     {aduSizes.map((s, i) => (
                       <button
@@ -70,7 +71,7 @@ export default function ADUIncomeCalculatorPage() {
                         className={optionClass(sizeIndex === i)}
                       >
                         <span>{s.label}</span>
-                        <span className="text-primary ml-2 text-sm font-semibold">
+                        <span className={`ml-2 text-sm font-semibold ${sizeIndex === i ? "text-white" : "text-accent"}`}>
                           ~${s.baselineRent.toLocaleString()}/mo
                         </span>
                       </button>
@@ -79,7 +80,7 @@ export default function ADUIncomeCalculatorPage() {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-semibold text-secondary mb-3">
+                  <label className={controlLabelClass}>
                     Estimated Project Cost: ${projectCost.toLocaleString()}
                   </label>
                   <input
@@ -89,16 +90,16 @@ export default function ADUIncomeCalculatorPage() {
                     step={5000}
                     value={projectCost}
                     onChange={(e) => setProjectCost(Number(e.target.value))}
-                    className="w-full h-11 -my-3.5 accent-primary cursor-pointer"
+                    className={rangeClass}
                   />
-                  <div className="flex justify-between text-xs text-muted-foreground mt-1">
+                  <div className="flex justify-between text-xs text-white/70 mt-1">
                     <span>$80K</span>
                     <span>$800K</span>
                   </div>
                 </div>
 
                 <div>
-                  <label className="block text-sm font-semibold text-secondary mb-3">
+                  <label className={controlLabelClass}>
                     Monthly Rent (adjust if needed): ${monthlyRent.toLocaleString()}
                   </label>
                   <input
@@ -108,9 +109,9 @@ export default function ADUIncomeCalculatorPage() {
                     step={100}
                     value={monthlyRent}
                     onChange={(e) => setCustomRent(Number(e.target.value))}
-                    className="w-full h-11 -my-3.5 accent-primary cursor-pointer"
+                    className={rangeClass}
                   />
-                  <div className="flex justify-between text-xs text-muted-foreground mt-1">
+                  <div className="flex justify-between text-xs text-white/70 mt-1">
                     <span>$1,500/mo</span>
                     <span>$7,000/mo</span>
                   </div>
@@ -150,8 +151,8 @@ export default function ADUIncomeCalculatorPage() {
                       <TrendingUp className="h-5 w-5 text-accent mb-2" />
                       <p className="text-sm text-white/80">
                         Based on the approved TruthCore rent assumptions, your {size.sqFt} sq ft ADU could generate
-                        <strong className="text-accent"> ${tenYearIncome.toLocaleString()}</strong> over 10 years,
-                        potentially paying for itself in <strong className="text-accent">~{yearsToBreakeven} years</strong>.
+                        <strong className="text-accent-light"> ${tenYearIncome.toLocaleString()}</strong> over 10 years,
+                        potentially paying for itself in <strong className="text-accent-light">~{yearsToBreakeven} years</strong>.
                       </p>
                     </div>
 
@@ -172,7 +173,7 @@ export default function ADUIncomeCalculatorPage() {
         </section>
       </LeadGate>
 
-      <section className="py-20 bg-secondary bg-[radial-gradient(ellipse_at_top,rgba(51,102,102,0.35),transparent_60%)] text-white">
+      <section className="py-20 bg-secondary bg-[radial-gradient(ellipse_at_top,rgba(51,102,102,0.35),transparent_60%)] border-t border-white/10 text-white">
         <div className="container mx-auto px-4 text-center">
           <h2 className="text-3xl md:text-4xl font-bold mb-4">
             Want a Detailed Feasibility Report?

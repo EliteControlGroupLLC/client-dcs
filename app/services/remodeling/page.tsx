@@ -41,7 +41,7 @@ const remodelTypes = [
 
 export default function RemodelingPage() {
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen bg-secondary">
       <section className="bg-secondary bg-[radial-gradient(ellipse_at_top,rgba(51,102,102,0.35),transparent_60%)] text-white pt-40 pb-20">
         <div className="container mx-auto px-4">
           <div className="max-w-3xl">
@@ -65,11 +65,11 @@ export default function RemodelingPage() {
         </div>
       </section>
 
-      <section className="py-20">
+      <section className="py-20 bg-secondary border-t border-white/10 text-white">
         <div className="container mx-auto px-4">
           <div className="text-center mb-12">
-            <h2 className="text-3xl md:text-4xl font-bold text-secondary mb-4">Remodeling Services</h2>
-            <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+            <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">Remodeling Services</h2>
+            <p className="text-lg text-white/80 max-w-2xl mx-auto">
               We handle every type of residential remodel with the same attention to detail and quality.
             </p>
           </div>
@@ -77,15 +77,15 @@ export default function RemodelingPage() {
             {remodelTypes.map((type) => {
               const Icon = type.icon;
               return (
-                <Card key={type.title} className="h-full flex flex-col overflow-hidden hover:shadow-lg transition-shadow">
+                <Card key={type.title} className="h-full flex flex-col overflow-hidden bg-secondary-light text-white border-white/10 shadow-lg shadow-black/20 hover:border-accent/50 transition-colors">
                   <CardContent className="p-8 flex flex-col flex-1">
-                    <div className="w-14 h-14 rounded-xl bg-primary/10 flex items-center justify-center mb-6">
-                      <Icon className="h-7 w-7 text-primary" />
+                    <div className="w-14 h-14 rounded-xl bg-primary flex items-center justify-center mb-6">
+                      <Icon className="h-7 w-7 text-white" />
                     </div>
-                    <h3 className="text-xl font-semibold text-secondary mb-2">{type.title}</h3>
-                    <p className="text-muted-foreground mb-4">{type.description}</p>
-                    <p className="text-lg font-bold text-primary mt-auto mb-6">Starting at {type.starting}</p>
-                    <Button asChild variant="outline" rounded="full" className="group self-start">
+                    <h3 className="text-xl font-semibold text-white mb-2">{type.title}</h3>
+                    <p className="text-white/80 mb-4">{type.description}</p>
+                    <p className="text-lg font-bold text-accent-light mt-auto mb-6">Starting at {type.starting}</p>
+                    <Button asChild variant="outlineWhite" rounded="full" className="group self-start">
                       <Link href={type.href}>
                         Learn More <ArrowRight className="h-4 w-4 ml-2 group-hover:translate-x-1 transition-transform" />
                       </Link>
@@ -98,7 +98,7 @@ export default function RemodelingPage() {
         </div>
       </section>
 
-      <section className="py-20 bg-secondary bg-[radial-gradient(ellipse_at_top,rgba(51,102,102,0.35),transparent_60%)] text-white">
+      <section className="py-20 bg-secondary border-t border-white/10 bg-[radial-gradient(ellipse_at_top,rgba(51,102,102,0.35),transparent_60%)] text-white">
         <div className="container mx-auto px-4 text-center">
           <h2 className="text-3xl md:text-4xl font-bold mb-4">Ready to Remodel?</h2>
           <p className="text-lg text-white/80 mb-8 max-w-2xl mx-auto">

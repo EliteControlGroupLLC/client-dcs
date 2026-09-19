@@ -1,5 +1,9 @@
 // Architectural floor plan illustrations for ADU service pages
-// SVG-based components with clean, professional line drawings
+// SVG-based components with clean, professional line drawings.
+// All-dark site: the drawings keep their light drafting-paper sheet (dark ink
+// linework + tinted rooms read best that way); the page frames each sheet in a
+// `data-paper-panel` wrapper inside a dark card. The legend is styled for dark
+// sections (it sits on bg-secondary).
 
 // Room fills are tints of the brand tokens so the plans (and the legend
 // below them) read clearly without leaving the palette:
@@ -284,14 +288,14 @@ const legendItems = [
 
 export function FloorPlanLegend({ className = "" }: FloorPlanProps) {
   return (
-    <div className={`flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-sm text-muted-foreground ${className}`}>
+    <div className={`flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-sm text-white/80 ${className}`}>
       {legendItems.map((item) => (
         <span key={item.label} className="flex items-center gap-2">
           {"line" in item ? (
             <span className="w-5 h-1 rounded-full inline-block" style={{ backgroundColor: item.color }} />
           ) : (
             <span
-              className="w-4 h-4 rounded-sm inline-block border border-secondary/40"
+              className="w-4 h-4 rounded-sm inline-block border border-white/30"
               style={{ backgroundColor: item.color }}
             />
           )}

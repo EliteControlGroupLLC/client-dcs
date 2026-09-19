@@ -4,7 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { selectClass, ResultIcon, resultCardClass, resultTileClass } from "@/components/calculators/calculator-ui";
+import { controlLabelClass, inputPanelClass, rangeClass, selectClass, ResultIcon, resultCardClass, resultTileClass } from "@/components/calculators/calculator-ui";
 import { LeadGate } from "@/components/lead-gate/lead-gate";
 import { LEAD_GATE_INTERESTS } from "@/lib/lead-gate-interests";
 import { ArrowRight, BarChart3 } from "lucide-react";
@@ -86,7 +86,7 @@ export default function ADUROISimulatorPage() {
   const tenYearNetCashFlow = tenYearIncome - tenYearPayments;
 
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen bg-secondary">
       <section className="bg-secondary bg-[radial-gradient(ellipse_at_top,rgba(51,102,102,0.35),transparent_60%)] text-white pt-40 pb-20">
         <div className="container mx-auto px-4">
           <div className="max-w-3xl">
@@ -105,17 +105,18 @@ export default function ADUROISimulatorPage() {
       </section>
 
       <LeadGate
+        className="bg-secondary border-t border-white/10"
         interest={LEAD_GATE_INTERESTS.aduRoiSimulator}
         headline="Unlock the ADU ROI simulator"
         subhead="Model build cost, financing and rent to see your ADU payback period and return."
         ctaLabel="Unlock the ROI Simulator"
       >
-        <section className="py-20">
+        <section className="py-20 bg-secondary border-t border-white/10 text-white">
           <div className="container mx-auto px-4 max-w-5xl">
             <div className="grid md:grid-cols-2 gap-8 [&>*]:min-w-0">
-              <div className="space-y-8">
+              <div className={`${inputPanelClass} space-y-8 self-start`}>
                 <div>
-                  <label className="block text-sm font-semibold text-secondary mb-3">
+                  <label className={controlLabelClass}>
                     Recommended Scenario
                   </label>
                   <select
@@ -145,69 +146,69 @@ export default function ADUROISimulatorPage() {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-semibold text-secondary mb-3">
+                  <label className={controlLabelClass}>
                     Project Cost: ${projectCost.toLocaleString()}
                   </label>
                   <input
                     type="range" min={80000} max={800000} step={5000}
                     value={projectCost}
                     onChange={(e) => { setProjectCost(Number(e.target.value)); if (Number(e.target.value) < loanAmount) setLoanAmount(Number(e.target.value)); }}
-                    className="w-full h-11 -my-3.5 accent-primary cursor-pointer"
+                    className={rangeClass}
                   />
-                  <div className="flex justify-between text-xs text-muted-foreground mt-1">
+                  <div className="flex justify-between text-xs text-white/70 mt-1">
                     <span>$80K</span><span>$800K</span>
                   </div>
                 </div>
 
                 <div>
-                  <label className="block text-sm font-semibold text-secondary mb-3">
+                  <label className={controlLabelClass}>
                     Monthly Rent: ${monthlyRent.toLocaleString()}
                   </label>
                   <input
                     type="range" min={1500} max={7000} step={100}
                     value={monthlyRent}
                     onChange={(e) => setMonthlyRent(Number(e.target.value))}
-                    className="w-full h-11 -my-3.5 accent-primary cursor-pointer"
+                    className={rangeClass}
                   />
-                  <div className="flex justify-between text-xs text-muted-foreground mt-1">
+                  <div className="flex justify-between text-xs text-white/70 mt-1">
                     <span>$1,500</span><span>$7,000</span>
                   </div>
                 </div>
 
-                <div className="border-t pt-6">
-                  <p className="text-sm font-semibold text-secondary mb-4">Financing Assumptions</p>
+                <div className="border-t border-white/10 pt-6">
+                  <p className="text-sm font-semibold text-white mb-4">Financing Assumptions</p>
                   <div className="space-y-4">
                     <div>
-                      <label className="block text-sm text-muted-foreground mb-2">
-                        Loan Amount: ${loanAmount.toLocaleString()} <span className="text-primary">(Down: ${downPayment.toLocaleString()})</span>
+                      <label className="block text-sm text-white/80 mb-2">
+                        Loan Amount: ${loanAmount.toLocaleString()} <span className="text-accent-light">(Down: ${downPayment.toLocaleString()})</span>
                       </label>
                       <input
                         type="range" min={0} max={projectCost} step={5000}
                         value={loanAmount}
                         onChange={(e) => setLoanAmount(Number(e.target.value))}
-                        className="w-full h-11 -my-3.5 accent-primary cursor-pointer"
+                        className={rangeClass}
                       />
                     </div>
                     <div>
-                      <label className="block text-sm text-muted-foreground mb-2">
+                      <label className="block text-sm text-white/80 mb-2">
                         Interest Rate: {interestRate}%
                       </label>
                       <input
                         type="range" min={3} max={12} step={0.25}
                         value={interestRate}
                         onChange={(e) => setInterestRate(Number(e.target.value))}
-                        className="w-full h-11 -my-3.5 accent-primary cursor-pointer"
+                        className={rangeClass}
                       />
                     </div>
                     <div>
-                      <label className="block text-sm text-muted-foreground mb-2">
+                      <label className="block text-sm text-white/80 mb-2">
                         Loan Term: {loanTermYears} years
                       </label>
                       <input
                         type="range" min={5} max={40} step={5}
                         value={loanTermYears}
                         onChange={(e) => setLoanTermYears(Number(e.target.value))}
-                        className="w-full h-11 -my-3.5 accent-primary cursor-pointer"
+                        className={rangeClass}
                       />
                     </div>
                   </div>
@@ -258,10 +259,10 @@ export default function ADUROISimulatorPage() {
 
                   <div className={`${resultTileClass} p-4 mb-6`}>
                     <p className="text-sm text-white/80">
-                      <strong className="text-accent">10-Year Outlook:</strong>{" "}
+                      <strong className="text-accent-light">10-Year Outlook:</strong>{" "}
                       ${tenYearIncome.toLocaleString()} gross rental income
                       {loanAmount > 0 && <> minus ${tenYearPayments.toLocaleString()} in loan payments</>}
-                      {" "}= <strong className="text-accent">${tenYearNetCashFlow.toLocaleString()} net</strong>
+                      {" "}= <strong className="text-accent-light">${tenYearNetCashFlow.toLocaleString()} net</strong>
                     </p>
                   </div>
 
@@ -281,7 +282,7 @@ export default function ADUROISimulatorPage() {
         </section>
       </LeadGate>
 
-      <section className="py-20 bg-secondary bg-[radial-gradient(ellipse_at_top,rgba(51,102,102,0.35),transparent_60%)] text-white">
+      <section className="py-20 bg-secondary bg-[radial-gradient(ellipse_at_top,rgba(51,102,102,0.35),transparent_60%)] border-t border-white/10 text-white">
         <div className="container mx-auto px-4 text-center">
           <h2 className="text-3xl md:text-4xl font-bold mb-4">
             Get Realistic Numbers Before You Commit

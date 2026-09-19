@@ -24,7 +24,7 @@ const iconMap = {
 
 export default function ServicesPage() {
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen bg-secondary">
       <section className="bg-secondary bg-[radial-gradient(ellipse_at_top,rgba(51,102,102,0.35),transparent_60%)] text-white pt-40 pb-20">
         <div className="container mx-auto px-4">
           <div className="max-w-3xl">
@@ -42,26 +42,26 @@ export default function ServicesPage() {
         </div>
       </section>
 
-      <section className="py-20">
+      <section className="py-20 bg-secondary border-t border-white/10 text-white">
         <div className="container mx-auto px-4">
           <div className="flex flex-wrap justify-center gap-6 max-w-6xl mx-auto">
             {SERVICE_CARDS.map((service) => {
               const Icon = iconMap[service.id as keyof typeof iconMap];
               return (
-                <Card key={service.title} className="relative w-full md:w-[calc(50%-0.75rem)] lg:w-[calc(33.333%-1rem)] flex flex-col overflow-hidden hover:shadow-lg transition-shadow">
+                <Card key={service.title} className="relative w-full md:w-[calc(50%-0.75rem)] lg:w-[calc(33.333%-1rem)] flex flex-col overflow-hidden bg-secondary-light text-white border-white/10 shadow-lg shadow-black/20 hover:border-accent/50 transition-colors">
                   {service.badge && (
                     <div className="absolute top-4 right-4 bg-primary text-white text-xs font-bold px-3 py-1 rounded-full">
                       {service.badge}
                     </div>
                   )}
                   <CardContent className="p-8 flex flex-col flex-1">
-                    <div className="w-14 h-14 rounded-xl bg-primary/10 flex items-center justify-center mb-6">
-                      <Icon className="h-7 w-7 text-primary" />
+                    <div className="w-14 h-14 rounded-xl bg-primary flex items-center justify-center mb-6">
+                      <Icon className="h-7 w-7 text-white" />
                     </div>
-                    <h3 className="text-xl font-semibold text-secondary mb-2">{service.title}</h3>
-                    <p className="text-muted-foreground mb-4">{service.description}</p>
-                    <p className="text-lg font-bold text-primary mt-auto mb-6">{service.priceLabel}</p>
-                    <Button asChild variant="outline" rounded="full" className="group self-start">
+                    <h3 className="text-xl font-semibold text-white mb-2">{service.title}</h3>
+                    <p className="text-white/80 mb-4">{service.description}</p>
+                    <p className="text-lg font-bold text-accent-light mt-auto mb-6">{service.priceLabel}</p>
+                    <Button asChild variant="outlineWhite" rounded="full" className="group self-start">
                       <Link href={service.href}>
                         Learn More <ArrowRight className="h-4 w-4 ml-2 group-hover:translate-x-1 transition-transform" />
                       </Link>
@@ -74,7 +74,7 @@ export default function ServicesPage() {
         </div>
       </section>
 
-      <section className="py-20 bg-secondary bg-[radial-gradient(ellipse_at_top,rgba(51,102,102,0.35),transparent_60%)] text-white">
+      <section className="py-20 bg-secondary border-t border-white/10 bg-[radial-gradient(ellipse_at_top,rgba(51,102,102,0.35),transparent_60%)] text-white">
         <div className="container mx-auto px-4 text-center">
           <h2 className="text-3xl md:text-4xl font-bold mb-4">Ready to Start Your Project?</h2>
           <p className="text-lg text-white/80 mb-8 max-w-2xl mx-auto">

@@ -126,15 +126,19 @@ const serviceCalculators: ToolItem[] = [
 function ToolCard({ tool, isPrimary = false }: { tool: ToolItem; isPrimary?: boolean }) {
   const Icon = tool.icon;
   return (
-    <Card className="h-full flex flex-col overflow-hidden hover:shadow-lg transition-shadow">
+    <Card
+      className={`h-full flex flex-col overflow-hidden bg-secondary-light shadow-lg shadow-black/20 transition-colors ${
+        isPrimary ? "border-accent/60 ring-1 ring-accent/30 hover:border-accent" : "border-white/10 hover:border-accent/50"
+      }`}
+    >
       <CardContent className="p-8 flex flex-col flex-1">
-        <div className="w-14 h-14 rounded-xl bg-primary/10 flex items-center justify-center mb-6">
-          <Icon className="h-7 w-7 text-primary" />
+        <div className="w-14 h-14 rounded-xl bg-primary flex items-center justify-center mb-6">
+          <Icon className="h-7 w-7 text-white" />
         </div>
-        <h3 className="text-xl font-semibold text-secondary mb-2">{tool.title}</h3>
-        <p className="text-muted-foreground mb-6">{tool.description}</p>
+        <h3 className="text-xl font-semibold text-white mb-2">{tool.title}</h3>
+        <p className="text-white/80 mb-6">{tool.description}</p>
         <div className="mt-auto">
-          <Button asChild variant={isPrimary ? "default" : "outline"} rounded="full">
+          <Button asChild variant={isPrimary ? "default" : "outlineWhite"} rounded="full">
             <Link href={tool.href}>
               {tool.cta}
               <ArrowRight className="h-4 w-4 ml-2" />
@@ -153,15 +157,15 @@ const cardCell3 = "w-full md:w-[calc(50%-0.75rem)] lg:w-[calc(33.333%-1rem)]";
 function SectionHeader({ title, subtitle }: { title: string; subtitle: string }) {
   return (
     <div className="text-center mb-12">
-      <h2 className="text-3xl md:text-4xl font-bold text-secondary mb-4">{title}</h2>
-      <p className="text-lg text-muted-foreground max-w-2xl mx-auto">{subtitle}</p>
+      <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">{title}</h2>
+      <p className="text-lg text-white/80 max-w-2xl mx-auto">{subtitle}</p>
     </div>
   );
 }
 
 export default function PlanningToolsPage() {
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen bg-secondary text-white">
       {/* Hero */}
       <section className="bg-secondary bg-[radial-gradient(ellipse_at_top,rgba(51,102,102,0.35),transparent_60%)] text-white pt-40 pb-20">
         <div className="container mx-auto px-4">
@@ -181,7 +185,7 @@ export default function PlanningToolsPage() {
       </section>
 
       {/* Primary Tools */}
-      <section className="py-20">
+      <section className="py-20 bg-secondary border-t border-white/10">
         <div className="container mx-auto px-4">
           <SectionHeader title="Get Started" subtitle="Our most powerful planning and estimating tools." />
           <div className="flex flex-wrap justify-center gap-6 max-w-6xl mx-auto">
@@ -195,7 +199,7 @@ export default function PlanningToolsPage() {
       </section>
 
       {/* ADU Investment & Design Tools */}
-      <section className="py-20 bg-muted">
+      <section className="py-20 bg-secondary bg-[radial-gradient(ellipse_at_top,rgba(51,102,102,0.35),transparent_60%)] border-t border-white/10">
         <div className="container mx-auto px-4">
           <SectionHeader title="ADU Investment & Design Tools" subtitle="Understand your ADU as an investment and explore design options." />
           <div className="flex flex-wrap justify-center gap-6 max-w-6xl mx-auto">
@@ -209,7 +213,7 @@ export default function PlanningToolsPage() {
       </section>
 
       {/* Service Calculators */}
-      <section className="py-20">
+      <section className="py-20 bg-secondary border-t border-white/10">
         <div className="container mx-auto px-4">
           <SectionHeader title="Service Calculators" subtitle="Estimate costs for roofing, concrete, kitchen, and bathroom projects." />
           <div className="flex flex-wrap justify-center gap-6 max-w-6xl mx-auto">
@@ -223,7 +227,7 @@ export default function PlanningToolsPage() {
       </section>
 
       {/* CTA */}
-      <section className="py-20 bg-secondary bg-[radial-gradient(ellipse_at_top,rgba(51,102,102,0.35),transparent_60%)] text-white">
+      <section className="py-20 bg-secondary bg-[radial-gradient(ellipse_at_top,rgba(51,102,102,0.35),transparent_60%)] border-t border-white/10 text-white">
         <div className="container mx-auto px-4 text-center">
           <h2 className="text-3xl md:text-4xl font-bold mb-4">
             Need Expert Guidance?
