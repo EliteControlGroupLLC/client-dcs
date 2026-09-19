@@ -37,13 +37,13 @@ const remodelTypes = [
 export default function RemodelingPage() {
   return (
     <div className="min-h-screen">
-      <section className="bg-secondary text-white py-20">
+      <section className="bg-secondary text-white pt-40 pb-20">
         <div className="container mx-auto px-4">
           <div className="max-w-3xl">
             <span className="inline-block text-primary-light font-semibold text-sm uppercase tracking-wider mb-4">
               REMODELING SERVICES
             </span>
-            <h1 className="text-4xl md:text-5xl font-bold mb-6">
+            <h1 className="text-4xl md:text-5xl font-bold mb-6 text-balance">
               Transform Your Home
             </h1>
             <p className="text-xl text-white/80 mb-8">
@@ -52,7 +52,7 @@ export default function RemodelingPage() {
             </p>
             <p className="text-2xl font-bold text-primary-light mb-8">Starting at $18,000</p>
             <Link href="/contact">
-              <Button size="lg" className="bg-primary hover:bg-primary-dark text-white font-semibold">
+              <Button size="lg" rounded="full">
                 Schedule On-Site Consultation <ArrowRight className="h-5 w-5 ml-2" />
               </Button>
             </Link>
@@ -68,20 +68,20 @@ export default function RemodelingPage() {
               We handle every type of residential remodel with the same attention to detail and quality.
             </p>
           </div>
-          <div className="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
+          <div className="grid md:grid-cols-2 gap-6 max-w-6xl mx-auto">
             {remodelTypes.map((type) => {
               const Icon = type.icon;
               return (
-                <Card key={type.title} className="overflow-hidden hover:shadow-lg transition-shadow">
-                  <CardContent className="p-8">
+                <Card key={type.title} className="h-full flex flex-col overflow-hidden hover:shadow-lg transition-shadow">
+                  <CardContent className="p-8 flex flex-col flex-1">
                     <div className="w-14 h-14 rounded-xl bg-primary/10 flex items-center justify-center mb-6">
                       <Icon className="h-7 w-7 text-primary" />
                     </div>
-                    <h3 className="text-xl font-bold text-secondary mb-2">{type.title}</h3>
+                    <h3 className="text-xl font-semibold text-secondary mb-2">{type.title}</h3>
                     <p className="text-muted-foreground mb-4">{type.description}</p>
-                    <p className="text-lg font-bold text-primary mb-4">Starting at {type.starting}</p>
+                    <p className="text-lg font-bold text-primary mt-auto mb-6">Starting at {type.starting}</p>
                     <Link href={type.href}>
-                      <Button variant="outline" className="group">
+                      <Button variant="outline" rounded="full" className="group">
                         Learn More <ArrowRight className="h-4 w-4 ml-2 group-hover:translate-x-1 transition-transform" />
                       </Button>
                     </Link>
@@ -100,7 +100,7 @@ export default function RemodelingPage() {
             Tell us about your project and get a free, no-obligation quote.
           </p>
           <Link href="/contact">
-            <Button size="lg" className="bg-primary hover:bg-primary-dark text-white font-semibold">
+            <Button size="lg" rounded="full">
               Schedule On-Site Consultation <ArrowRight className="h-5 w-5 ml-2" />
             </Button>
           </Link>

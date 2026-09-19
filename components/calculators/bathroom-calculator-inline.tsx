@@ -5,6 +5,7 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { ArrowRight, Bath } from "lucide-react";
+import { optionClass } from "@/components/calculators/calculator-ui";
 import { LeadGate } from "@/components/lead-gate/lead-gate";
 import { LEAD_GATE_INTERESTS } from "@/lib/lead-gate-interests";
 
@@ -77,13 +78,13 @@ export function BathroomCalculatorInline() {
         subhead="See your bathroom remodel price range based on size, finish level and upgrades."
         ctaLabel="Unlock My Bathroom Estimate"
       >
-        <section className="py-16 bg-muted">
+        <section className="py-20 bg-muted">
           <div className="container mx-auto px-4 max-w-5xl">
-            <div className="text-center mb-10">
-              <h2 className="text-3xl md:text-4xl font-bold text-secondary mb-3">Bathroom Remodel Estimator</h2>
-              <p className="text-muted-foreground">Estimate your bathroom renovation cost. Starting at $18,000 for a standard 5x10 bathroom.</p>
+            <div className="text-center mb-12">
+              <h2 className="text-3xl md:text-4xl font-bold text-secondary mb-4">Bathroom Remodel Estimator</h2>
+              <p className="text-lg text-muted-foreground">Estimate your bathroom renovation cost. Starting at $18,000 for a standard 5x10 bathroom.</p>
             </div>
-            <div className="grid md:grid-cols-2 gap-8">
+            <div className="grid md:grid-cols-2 gap-8 [&>*]:min-w-0">
               <div className="space-y-8">
                 <div>
                   <label className="block text-sm font-semibold text-secondary mb-3">Bathroom Size</label>
@@ -92,11 +93,7 @@ export function BathroomCalculatorInline() {
                       <button
                         key={s.label}
                         onClick={() => setSizeIndex(i)}
-                        className={`w-full text-left px-4 py-3 rounded-lg border transition-all ${
-                          sizeIndex === i
-                            ? "border-primary bg-primary/5 text-secondary font-medium"
-                            : "border-gray-200 text-muted-foreground hover:border-primary/30"
-                        }`}
+                        className={optionClass(sizeIndex === i)}
                       >
                         {s.label}
                       </button>
@@ -111,11 +108,7 @@ export function BathroomCalculatorInline() {
                       <button
                         key={f.label}
                         onClick={() => setFinishIndex(i)}
-                        className={`w-full text-left px-4 py-3 rounded-lg border transition-all ${
-                          finishIndex === i
-                            ? "border-primary bg-primary/5 text-secondary font-medium"
-                            : "border-gray-200 text-muted-foreground hover:border-primary/30"
-                        }`}
+                        className={optionClass(finishIndex === i)}
                       >
                         <span className="font-medium">{f.label}</span>
                         <span className="block text-xs text-muted-foreground mt-1">{f.description}</span>
@@ -130,11 +123,7 @@ export function BathroomCalculatorInline() {
                     {addOns.map((a, i) => (
                       <label
                         key={a.label}
-                        className={`flex items-center gap-3 px-4 py-3 rounded-lg border cursor-pointer transition-all ${
-                          selectedAddOns.includes(i)
-                            ? "border-primary bg-primary/5"
-                            : "border-gray-200 hover:border-primary/30"
-                        }`}
+                        className={optionClass(selectedAddOns.includes(i), "flex items-center gap-3 px-4 py-3 cursor-pointer")}
                       >
                         <input
                           type="checkbox"
@@ -150,15 +139,15 @@ export function BathroomCalculatorInline() {
                 </div>
               </div>
 
-              <Card className="bg-secondary text-white">
-                <CardContent className="p-8 flex flex-col justify-center h-full">
+              <Card className="bg-secondary text-white border-secondary min-w-0">
+                <CardContent className="p-6 md:p-8 flex flex-col justify-center h-full">
                   <div className="text-center">
                     <Bath className="h-12 w-12 text-primary-light mx-auto mb-4" />
                     <p className="text-white/70 text-sm mb-2">Estimated Bathroom Remodel</p>
-                    <p className="text-3xl md:text-4xl font-bold text-primary-light mb-1">
-                      ${totalLow.toLocaleString()} &ndash; ${totalHigh.toLocaleString()}
+                    <p className="text-3xl md:text-4xl font-bold text-primary-light mb-1 text-balance">
+                      ${totalLow.toLocaleString()}&nbsp;&ndash; ${totalHigh.toLocaleString()}
                     </p>
-                    <p className="text-white/50 text-sm mb-6">
+                    <p className="text-white/60 text-sm mb-6">
                       {size.label} &bull; {finish.label} Finish
                     </p>
 
@@ -174,12 +163,12 @@ export function BathroomCalculatorInline() {
                       </ul>
                     </div>
 
-                    <p className="text-xs text-white/40 mb-6">
+                    <p className="text-xs text-white/60 mb-6">
                       * Estimate only. Final pricing depends on material selections, plumbing conditions, and design scope.
                     </p>
 
                     <Link href="/contact">
-                      <Button size="lg" className="w-full bg-primary hover:bg-primary-dark text-white font-semibold">
+                      <Button size="lg" rounded="full" className="w-full">
                         Request Exact Pricing <ArrowRight className="h-5 w-5 ml-2" />
                       </Button>
                     </Link>

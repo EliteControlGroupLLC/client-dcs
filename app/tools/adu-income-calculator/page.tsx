@@ -4,6 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { optionClass } from "@/components/calculators/calculator-ui";
 import { LeadGate } from "@/components/lead-gate/lead-gate";
 import { LEAD_GATE_INTERESTS } from "@/lib/lead-gate-interests";
 import { ArrowRight, DollarSign, TrendingUp } from "lucide-react";
@@ -36,13 +37,13 @@ export default function ADUIncomeCalculatorPage() {
 
   return (
     <div className="min-h-screen">
-      <section className="bg-secondary text-white py-20">
+      <section className="bg-secondary text-white pt-40 pb-20">
         <div className="container mx-auto px-4">
           <div className="max-w-3xl">
             <span className="inline-block text-primary-light font-semibold text-sm uppercase tracking-wider mb-4">
               ADU INCOME CALCULATOR
             </span>
-            <h1 className="text-4xl md:text-5xl font-bold mb-6">
+            <h1 className="text-4xl md:text-5xl font-bold mb-6 text-balance">
               See What Your ADU Could Earn
             </h1>
             <p className="text-xl text-white/80">
@@ -61,7 +62,7 @@ export default function ADUIncomeCalculatorPage() {
       >
         <section className="py-20">
           <div className="container mx-auto px-4 max-w-5xl">
-            <div className="grid md:grid-cols-2 gap-8">
+            <div className="grid md:grid-cols-2 gap-8 [&>*]:min-w-0">
               <div className="space-y-8">
                 <div>
                   <label className="block text-sm font-semibold text-secondary mb-3">ADU Size</label>
@@ -73,11 +74,7 @@ export default function ADUIncomeCalculatorPage() {
                         <button
                           key={s.label}
                           onClick={() => { setSizeIndex(i); setCustomRent(null); }}
-                          className={`w-full text-left px-4 py-3 rounded-lg border transition-all ${
-                            sizeIndex === i
-                              ? "border-primary bg-primary/5 text-secondary font-medium"
-                              : "border-gray-200 text-muted-foreground hover:border-primary/30"
-                          }`}
+                          className={optionClass(sizeIndex === i)}
                         >
                           <span>{s.label}</span>
                           <span className="text-primary ml-2 text-sm font-semibold">
@@ -129,13 +126,13 @@ export default function ADUIncomeCalculatorPage() {
               </div>
 
               <div className="space-y-6">
-                <Card className="bg-secondary text-white">
-                  <CardContent className="p-8">
+                <Card className="bg-secondary text-white border-secondary min-w-0">
+                  <CardContent className="p-6 md:p-8">
                     <div className="text-center mb-6">
-                      <DollarSign className="h-12 w-12 text-primary-light mx-auto mb-3" />
-                      <p className="text-white/70 text-sm">Projected Monthly Income</p>
-                      <p className="text-4xl font-bold text-primary-light">${monthlyRent.toLocaleString()}</p>
-                      <p className="text-white/50 text-sm">per month</p>
+                      <DollarSign className="h-12 w-12 text-primary-light mx-auto mb-4" />
+                      <p className="text-white/70 text-sm mb-2">Projected Monthly Income</p>
+                      <p className="text-3xl md:text-4xl font-bold text-primary-light mb-1">${monthlyRent.toLocaleString()}</p>
+                      <p className="text-white/60 text-sm">per month</p>
                     </div>
 
                     <div className="grid grid-cols-2 gap-4 mb-6">
@@ -160,18 +157,18 @@ export default function ADUIncomeCalculatorPage() {
                     <div className="bg-primary/10 border border-primary/20 rounded-xl p-4 mb-6">
                       <TrendingUp className="h-5 w-5 text-primary-light mb-2" />
                       <p className="text-sm text-white/80">
-                        Based on the approved DCS rent assumptions, your {size.sqFt} sq ft ADU could generate
+                        Based on the approved TruthCore rent assumptions, your {size.sqFt} sq ft ADU could generate
                         <strong className="text-primary-light"> ${tenYearIncome.toLocaleString()}</strong> over 10 years,
                         potentially paying for itself in <strong className="text-primary-light">~{yearsToBreakeven} years</strong>.
                       </p>
                     </div>
 
-                    <p className="text-xs text-white/40 mb-4">
-                      * Baseline rent targets follow the current DCS plan library and San Diego market assumptions. Actual rental income depends on location, finish quality, and lease strategy.
+                    <p className="text-xs text-white/60 mb-4">
+                      * Baseline rent targets follow the current TruthCore plan library and San Diego market assumptions. Actual rental income depends on location, finish quality, and lease strategy.
                     </p>
 
                     <Link href="/contact">
-                      <Button size="lg" className="w-full bg-primary hover:bg-primary-dark text-white font-semibold">
+                      <Button size="lg" rounded="full" className="w-full">
                         Explore Your ADU Options <ArrowRight className="h-5 w-5 ml-2" />
                       </Button>
                     </Link>
@@ -193,12 +190,12 @@ export default function ADUIncomeCalculatorPage() {
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link href="/build-your-adu">
-              <Button size="lg" className="bg-primary hover:bg-primary-dark text-white font-semibold">
+              <Button size="lg" rounded="full">
                 Scan Your Property <ArrowRight className="h-5 w-5 ml-2" />
               </Button>
             </Link>
             <Link href="/contact">
-              <Button size="lg" variant="outline">
+              <Button size="lg" variant="outline" rounded="full">
                 Schedule Consultation
               </Button>
             </Link>

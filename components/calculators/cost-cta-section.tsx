@@ -25,7 +25,7 @@ export function CostCtaSection({
             Use our calculator to estimate your project in seconds.
           </p>
           <Link href={calculatorHref}>
-            <Button size="lg" className="bg-primary hover:bg-primary-dark text-white font-semibold group">
+            <Button size="lg" rounded="full" className="group">
               {calculatorLabel}
               <ArrowRight className="h-5 w-5 ml-2 group-hover:translate-x-1 transition-transform" />
             </Button>

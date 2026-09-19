@@ -4,6 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { optionClass } from "@/components/calculators/calculator-ui";
 import { LeadGate } from "@/components/lead-gate/lead-gate";
 import { LEAD_GATE_INTERESTS } from "@/lib/lead-gate-interests";
 import { ArrowRight, ChefHat } from "lucide-react";
@@ -69,13 +70,13 @@ export default function KitchenCalculatorPage() {
 
   return (
     <div className="min-h-screen">
-      <section className="bg-secondary text-white py-20">
+      <section className="bg-secondary text-white pt-40 pb-20">
         <div className="container mx-auto px-4">
           <div className="max-w-3xl">
             <span className="inline-block text-primary-light font-semibold text-sm uppercase tracking-wider mb-4">
               KITCHEN CALCULATOR
             </span>
-            <h1 className="text-4xl md:text-5xl font-bold mb-6">
+            <h1 className="text-4xl md:text-5xl font-bold mb-6 text-balance">
               Kitchen Remodel Estimator
             </h1>
             <p className="text-xl text-white/80">
@@ -94,7 +95,7 @@ export default function KitchenCalculatorPage() {
       >
         <section className="py-20">
           <div className="container mx-auto px-4 max-w-5xl">
-            <div className="grid md:grid-cols-2 gap-8">
+            <div className="grid md:grid-cols-2 gap-8 [&>*]:min-w-0">
               <div className="space-y-8">
                 <div>
                   <label className="block text-sm font-semibold text-secondary mb-3">Kitchen Size</label>
@@ -103,11 +104,7 @@ export default function KitchenCalculatorPage() {
                       <button
                         key={s.label}
                         onClick={() => setSizeIndex(i)}
-                        className={`w-full text-left px-4 py-3 rounded-lg border transition-all ${
-                          sizeIndex === i
-                            ? "border-primary bg-primary/5 text-secondary font-medium"
-                            : "border-gray-200 text-muted-foreground hover:border-primary/30"
-                        }`}
+                        className={optionClass(sizeIndex === i)}
                       >
                         {s.label} — {s.sqFt} sq ft
                       </button>
@@ -122,11 +119,7 @@ export default function KitchenCalculatorPage() {
                       <button
                         key={f.label}
                         onClick={() => setFinishIndex(i)}
-                        className={`w-full text-left px-4 py-3 rounded-lg border transition-all ${
-                          finishIndex === i
-                            ? "border-primary bg-primary/5 text-secondary font-medium"
-                            : "border-gray-200 text-muted-foreground hover:border-primary/30"
-                        }`}
+                        className={optionClass(finishIndex === i)}
                       >
                         <span className="font-medium">{f.label}</span>
                         <span className="block text-xs text-muted-foreground mt-1">{f.description}</span>
@@ -141,11 +134,7 @@ export default function KitchenCalculatorPage() {
                     {addOns.map((a, i) => (
                       <label
                         key={a.label}
-                        className={`flex items-center gap-3 px-4 py-3 rounded-lg border cursor-pointer transition-all ${
-                          selectedAddOns.includes(i)
-                            ? "border-primary bg-primary/5"
-                            : "border-gray-200 hover:border-primary/30"
-                        }`}
+                        className={optionClass(selectedAddOns.includes(i), "flex items-center gap-3 px-4 py-3 cursor-pointer")}
                       >
                         <input
                           type="checkbox"
@@ -161,15 +150,15 @@ export default function KitchenCalculatorPage() {
                 </div>
               </div>
 
-              <Card className="bg-secondary text-white">
-                <CardContent className="p-8 flex flex-col justify-center h-full">
+              <Card className="bg-secondary text-white border-secondary min-w-0">
+                <CardContent className="p-6 md:p-8 flex flex-col justify-center h-full">
                   <div className="text-center">
                     <ChefHat className="h-12 w-12 text-primary-light mx-auto mb-4" />
                     <p className="text-white/70 text-sm mb-2">Estimated Kitchen Remodel</p>
-                    <p className="text-3xl md:text-4xl font-bold text-primary-light mb-1">
-                      ${totalLow.toLocaleString()} &ndash; ${totalHigh.toLocaleString()}
+                    <p className="text-3xl md:text-4xl font-bold text-primary-light mb-1 text-balance">
+                      ${totalLow.toLocaleString()}&nbsp;&ndash; ${totalHigh.toLocaleString()}
                     </p>
-                    <p className="text-white/50 text-sm mb-6">
+                    <p className="text-white/60 text-sm mb-6">
                       {size.label} &bull; {finish.label} Finish
                     </p>
 
@@ -185,12 +174,12 @@ export default function KitchenCalculatorPage() {
                       </ul>
                     </div>
 
-                    <p className="text-xs text-white/40 mb-6">
+                    <p className="text-xs text-white/60 mb-6">
                       * Estimate only. Final pricing depends on material selections, site conditions, and design scope.
                     </p>
 
                     <Link href="/contact">
-                      <Button size="lg" className="w-full bg-primary hover:bg-primary-dark text-white font-semibold">
+                      <Button size="lg" rounded="full" className="w-full">
                         Design Your Kitchen <ArrowRight className="h-5 w-5 ml-2" />
                       </Button>
                     </Link>
@@ -211,7 +200,7 @@ export default function KitchenCalculatorPage() {
             Schedule a free consultation and let&apos;s design the kitchen you&apos;ve always wanted.
           </p>
           <Link href="/contact">
-            <Button size="lg" className="bg-primary hover:bg-primary-dark text-white font-semibold">
+            <Button size="lg" rounded="full">
               Schedule Free Consultation <ArrowRight className="h-5 w-5 ml-2" />
             </Button>
           </Link>

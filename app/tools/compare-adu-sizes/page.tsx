@@ -4,10 +4,14 @@ import { useState } from "react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { selectClass } from "@/components/calculators/calculator-ui";
 import { LeadGate } from "@/components/lead-gate/lead-gate";
 import { LEAD_GATE_INTERESTS } from "@/lib/lead-gate-interests";
 import { ArrowRight, ArrowLeftRight, Check } from "lucide-react";
-import { estimateAduPriceRange, formatPriceRange, getRentEstimate } from "@/lib/data/site-data";
+import { estimateAduPriceRange, formatPriceFull } from "@/lib/data/site-data";
+
+// "$X – $Y" — same range format as the estimate panels on every other tool.
+const formatPriceRange = (low: number, high: number) => `${formatPriceFull(low)}\u00A0– ${formatPriceFull(high)}`;
 
 const aduOptions = [
   {
@@ -15,8 +19,8 @@ const aduOptions = [
     label: "400 sq ft",
     bedBath: "Studio / 1 Bed, 1 Bath",
     useCase: "Compact rental, home office, guest suite",
-    estimatedCost: "$155K - $215K",
-    estimatedRent: "$2,000 - $2,800/mo",
+    estimatedCost: "$155,000 – $215,000",
+    estimatedRent: "$2,000 – $2,800/mo",
     yardDemand: "Minimal (~500 sq ft footprint)",
     bestFor: "Garage conversions, tight lots, budget-conscious builds",
   },
@@ -29,7 +33,7 @@ const aduOptions = [
       estimateAduPriceRange({ sqFt: 500, type: "attached", bedrooms: 1, bathrooms: 1 }).low,
       estimateAduPriceRange({ sqFt: 500, type: "attached", bedrooms: 1, bathrooms: 1 }).high
     ),
-    estimatedRent: "$2,500 - $2,800/mo",
+    estimatedRent: "$2,500 – $2,800/mo",
     yardDemand: "Low (~600 sq ft footprint)",
     bestFor: "First-time ADU builders, strong rental ROI",
   },
@@ -42,7 +46,7 @@ const aduOptions = [
       estimateAduPriceRange({ sqFt: 700, type: "detached", bedrooms: 2, bathrooms: 1 }).low,
       estimateAduPriceRange({ sqFt: 700, type: "detached", bedrooms: 2, bathrooms: 1 }).high
     ),
-    estimatedRent: "$3,000 - $3,700/mo",
+    estimatedRent: "$3,000 – $3,700/mo",
     yardDemand: "Moderate (~800 sq ft footprint)",
     bestFor: "Balanced size and ROI, flexible use",
   },
@@ -55,7 +59,7 @@ const aduOptions = [
       estimateAduPriceRange({ sqFt: 1000, type: "detached", bedrooms: 3, bathrooms: 2 }).low,
       estimateAduPriceRange({ sqFt: 1000, type: "detached", bedrooms: 3, bathrooms: 2 }).high
     ),
-    estimatedRent: "$4,000 - $4,500/mo",
+    estimatedRent: "$4,000 – $4,500/mo",
     yardDemand: "Significant (~1,100 sq ft footprint)",
     bestFor: "Larger lots, family housing, higher rental income",
   },
@@ -64,8 +68,8 @@ const aduOptions = [
     label: "1,200 sq ft",
     bedBath: "3-4 Bed, 2-2.5 Bath",
     useCase: "Full-size home, two-story option, maximum rental",
-    estimatedCost: "$495,000-$520,000",
-    estimatedRent: "$5,000 - $6,000/mo",
+    estimatedCost: "$495,000 – $520,000",
+    estimatedRent: "$5,000 – $6,000/mo",
     yardDemand: "High (~1,300 sq ft or two-story)",
     bestFor: "Large lots, maximum livable space, two-story builds, up to 4 bedrooms",
   },
@@ -89,13 +93,13 @@ export default function CompareADUSizesPage() {
 
   return (
     <div className="min-h-screen">
-      <section className="bg-secondary text-white py-20">
+      <section className="bg-secondary text-white pt-40 pb-20">
         <div className="container mx-auto px-4">
           <div className="max-w-3xl">
             <span className="inline-block text-primary-light font-semibold text-sm uppercase tracking-wider mb-4">
               COMPARE ADU SIZES
             </span>
-            <h1 className="text-4xl md:text-5xl font-bold mb-6">
+            <h1 className="text-4xl md:text-5xl font-bold mb-6 text-balance">
               Compare ADU Options Side by Side
             </h1>
             <p className="text-xl text-white/80">
@@ -113,15 +117,15 @@ export default function CompareADUSizesPage() {
         ctaLabel="Unlock the Comparison"
       >
         <section className="py-20">
-          <div className="container mx-auto px-4 max-w-4xl">
+          <div className="container mx-auto px-4 max-w-5xl">
             {/* Selectors */}
             <div className="grid grid-cols-[1fr_auto_1fr] gap-4 items-center mb-12">
               <div>
-                <label className="block text-sm font-semibold text-secondary mb-2">Option A</label>
+                <label className="block text-sm font-semibold text-secondary mb-3">Option A</label>
                 <select
                   value={leftIndex}
                   onChange={(e) => setLeftIndex(Number(e.target.value))}
-                  className="w-full px-4 py-3 rounded-lg border border-gray-200 text-secondary font-medium bg-white"
+                  className={selectClass}
                 >
                   {aduOptions.map((opt, i) => (
                     <option key={opt.sqFt} value={i}>{opt.label}</option>
@@ -132,11 +136,11 @@ export default function CompareADUSizesPage() {
                 <ArrowLeftRight className="h-6 w-6 text-primary" />
               </div>
               <div>
-                <label className="block text-sm font-semibold text-secondary mb-2">Option B</label>
+                <label className="block text-sm font-semibold text-secondary mb-3">Option B</label>
                 <select
                   value={rightIndex}
                   onChange={(e) => setRightIndex(Number(e.target.value))}
-                  className="w-full px-4 py-3 rounded-lg border border-gray-200 text-secondary font-medium bg-white"
+                  className={selectClass}
                 >
                   {aduOptions.map((opt, i) => (
                     <option key={opt.sqFt} value={i}>{opt.label}</option>
@@ -160,7 +164,7 @@ export default function CompareADUSizesPage() {
 
               {/* Rows */}
               {fields.map((field, i) => (
-                <div key={field.key} className={`grid grid-cols-3 ${i % 2 === 0 ? "bg-gray-50" : "bg-white"}`}>
+                <div key={field.key} className={`grid grid-cols-3 ${i % 2 === 0 ? "bg-muted" : "bg-white"}`}>
                   <div className="p-4 text-sm font-semibold text-secondary border-t">{field.label}</div>
                   <div className="p-4 text-sm text-muted-foreground border-t border-l text-center">
                     {left[field.key]}
@@ -174,33 +178,33 @@ export default function CompareADUSizesPage() {
 
             {/* Summary Cards */}
             <div className="grid md:grid-cols-2 gap-6 mt-12">
-              <Card className="border-primary/20">
-                <CardContent className="p-6">
-                  <h3 className="font-bold text-secondary text-lg mb-3">{left.label} ADU</h3>
+              <Card className="h-full flex flex-col">
+                <CardContent className="p-6 flex flex-col flex-1">
+                  <h3 className="text-xl font-semibold text-secondary mb-3">{left.label} ADU</h3>
                   <ul className="space-y-2 mb-4">
                     <li className="flex items-start gap-2 text-sm text-muted-foreground">
                       <Check className="h-4 w-4 text-primary mt-0.5 shrink-0" />
                       {left.bestFor}
                     </li>
                   </ul>
-                  <Link href="/build-your-adu">
-                    <Button className="w-full bg-primary hover:bg-primary-dark text-white font-semibold">
+                  <Link href="/build-your-adu" className="mt-auto">
+                    <Button rounded="full" className="w-full">
                       Build a {left.label} ADU <ArrowRight className="h-4 w-4 ml-2" />
                     </Button>
                   </Link>
                 </CardContent>
               </Card>
-              <Card className="border-primary/20">
-                <CardContent className="p-6">
-                  <h3 className="font-bold text-secondary text-lg mb-3">{right.label} ADU</h3>
+              <Card className="h-full flex flex-col">
+                <CardContent className="p-6 flex flex-col flex-1">
+                  <h3 className="text-xl font-semibold text-secondary mb-3">{right.label} ADU</h3>
                   <ul className="space-y-2 mb-4">
                     <li className="flex items-start gap-2 text-sm text-muted-foreground">
                       <Check className="h-4 w-4 text-primary mt-0.5 shrink-0" />
                       {right.bestFor}
                     </li>
                   </ul>
-                  <Link href="/build-your-adu">
-                    <Button className="w-full bg-primary hover:bg-primary-dark text-white font-semibold">
+                  <Link href="/build-your-adu" className="mt-auto">
+                    <Button rounded="full" className="w-full">
                       Build a {right.label} ADU <ArrowRight className="h-4 w-4 ml-2" />
                     </Button>
                   </Link>
@@ -220,7 +224,7 @@ export default function CompareADUSizesPage() {
             Our team can evaluate your property and recommend the best ADU size and type for your goals.
           </p>
           <Link href="/contact">
-            <Button size="lg" className="bg-primary hover:bg-primary-dark text-white font-semibold">
+            <Button size="lg" rounded="full">
               Schedule Free Consultation <ArrowRight className="h-5 w-5 ml-2" />
             </Button>
           </Link>

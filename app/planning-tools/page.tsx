@@ -121,24 +121,36 @@ const serviceCalculators: ToolItem[] = [
 function ToolCard({ tool, isPrimary = false }: { tool: ToolItem; isPrimary?: boolean }) {
   const Icon = tool.icon;
   return (
-    <Card className="overflow-hidden hover:shadow-lg transition-shadow">
-      <CardContent className="p-8">
+    <Card className="h-full flex flex-col overflow-hidden hover:shadow-lg transition-shadow">
+      <CardContent className="p-8 flex flex-col flex-1">
         <div className="w-14 h-14 rounded-xl bg-primary/10 flex items-center justify-center mb-6">
           <Icon className="h-7 w-7 text-primary" />
         </div>
-        <h3 className="text-xl font-bold text-secondary mb-3">{tool.title}</h3>
+        <h3 className="text-xl font-semibold text-secondary mb-2">{tool.title}</h3>
         <p className="text-muted-foreground mb-6">{tool.description}</p>
-        <Link href={tool.href}>
-          <Button
-            className={isPrimary ? "bg-primary hover:bg-primary-dark text-white font-semibold" : ""}
-            variant={isPrimary ? "default" : "outline"}
-          >
-            {tool.cta}
-            <ArrowRight className="h-4 w-4 ml-2" />
-          </Button>
-        </Link>
+        <div className="mt-auto">
+          <Link href={tool.href}>
+            <Button variant={isPrimary ? "default" : "outline"} rounded="full">
+              {tool.cta}
+              <ArrowRight className="h-4 w-4 ml-2" />
+            </Button>
+          </Link>
+        </div>
       </CardContent>
     </Card>
+  );
+}
+
+// Cards wrap and center so an odd last row (e.g. 5 tools in 3 columns) stays centered.
+const cardCell = "w-full md:w-[calc(50%-0.75rem)]";
+const cardCell3 = "w-full md:w-[calc(50%-0.75rem)] lg:w-[calc(33.333%-1rem)]";
+
+function SectionHeader({ title, subtitle }: { title: string; subtitle: string }) {
+  return (
+    <div className="text-center mb-12">
+      <h2 className="text-3xl md:text-4xl font-bold text-secondary mb-4">{title}</h2>
+      <p className="text-lg text-muted-foreground max-w-2xl mx-auto">{subtitle}</p>
+    </div>
   );
 }
 
@@ -146,16 +158,16 @@ export default function PlanningToolsPage() {
   return (
     <div className="min-h-screen">
       {/* Hero */}
-      <section className="bg-secondary text-white py-20">
+      <section className="bg-secondary text-white pt-40 pb-20">
         <div className="container mx-auto px-4">
           <div className="max-w-3xl">
             <span className="inline-block text-primary-light font-semibold text-sm uppercase tracking-wider mb-4">
               PLANNING TOOLS
             </span>
-            <h1 className="text-4xl md:text-5xl font-bold mb-6">
+            <h1 className="text-4xl md:text-5xl font-bold mb-6 text-balance">
               Estimate Your Project Instantly
             </h1>
-            <p className="text-xl text-white/80 mb-8">
+            <p className="text-xl text-white/80">
               Use our smart tools to calculate pricing, feasibility, and options
               before starting your project.
             </p>
@@ -166,13 +178,12 @@ export default function PlanningToolsPage() {
       {/* Primary Tools */}
       <section className="py-20">
         <div className="container mx-auto px-4">
-          <h2 className="text-2xl md:text-3xl font-bold text-secondary mb-2 text-center">Get Started</h2>
-          <p className="text-muted-foreground text-center mb-10 max-w-xl mx-auto">
-            Our most powerful planning and estimating tools.
-          </p>
-          <div className="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
+          <SectionHeader title="Get Started" subtitle="Our most powerful planning and estimating tools." />
+          <div className="flex flex-wrap justify-center gap-6 max-w-6xl mx-auto">
             {primaryTools.map((tool) => (
-              <ToolCard key={tool.title} tool={tool} isPrimary={tool.primary} />
+              <div key={tool.title} className={cardCell}>
+                <ToolCard tool={tool} isPrimary={tool.primary} />
+              </div>
             ))}
           </div>
         </div>
@@ -181,13 +192,12 @@ export default function PlanningToolsPage() {
       {/* ADU Investment & Design Tools */}
       <section className="py-20 bg-muted">
         <div className="container mx-auto px-4">
-          <h2 className="text-2xl md:text-3xl font-bold text-secondary mb-2 text-center">ADU Investment &amp; Design Tools</h2>
-          <p className="text-muted-foreground text-center mb-10 max-w-xl mx-auto">
-            Understand your ADU as an investment and explore design options.
-          </p>
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-5xl mx-auto">
+          <SectionHeader title="ADU Investment & Design Tools" subtitle="Understand your ADU as an investment and explore design options." />
+          <div className="flex flex-wrap justify-center gap-6 max-w-6xl mx-auto">
             {aduTools.map((tool) => (
-              <ToolCard key={tool.title} tool={tool} />
+              <div key={tool.title} className={cardCell3}>
+                <ToolCard tool={tool} />
+              </div>
             ))}
           </div>
         </div>
@@ -196,13 +206,12 @@ export default function PlanningToolsPage() {
       {/* Service Calculators */}
       <section className="py-20">
         <div className="container mx-auto px-4">
-          <h2 className="text-2xl md:text-3xl font-bold text-secondary mb-2 text-center">Service Calculators</h2>
-          <p className="text-muted-foreground text-center mb-10 max-w-xl mx-auto">
-            Estimate costs for roofing, concrete, kitchen, and bathroom projects.
-          </p>
-          <div className="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
+          <SectionHeader title="Service Calculators" subtitle="Estimate costs for roofing, concrete, kitchen, and bathroom projects." />
+          <div className="flex flex-wrap justify-center gap-6 max-w-6xl mx-auto">
             {serviceCalculators.map((tool) => (
-              <ToolCard key={tool.title} tool={tool} />
+              <div key={tool.title} className={cardCell}>
+                <ToolCard tool={tool} />
+              </div>
             ))}
           </div>
         </div>
@@ -218,7 +227,7 @@ export default function PlanningToolsPage() {
             Our team is ready to help you explore your options and find the best path forward for your project.
           </p>
           <Link href="/contact">
-            <Button size="lg" className="bg-primary hover:bg-primary-dark text-white font-semibold">
+            <Button size="lg" rounded="full">
               Schedule a Consultation
               <ArrowRight className="h-5 w-5 ml-2" />
             </Button>

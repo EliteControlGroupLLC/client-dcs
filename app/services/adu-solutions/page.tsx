@@ -6,7 +6,8 @@ import {
   CheckCircle,
   DollarSign,
   Users,
-  Shield
+  Shield,
+  ArrowRight,
 } from "lucide-react";
 import Link from "next/link";
 import {
@@ -59,10 +60,13 @@ export default function ADUSolutionsPage() {
   return (
     <div className="min-h-screen">
       {/* Hero Section */}
-      <section className="bg-secondary text-white py-20">
+      <section className="bg-secondary text-white pt-40 pb-20">
         <div className="container mx-auto px-4">
           <div className="max-w-3xl">
-            <h1 className="text-4xl md:text-5xl font-bold mb-6">
+            <span className="inline-block text-primary-light font-semibold text-sm uppercase tracking-wider mb-4">
+              ADU SOLUTIONS
+            </span>
+            <h1 className="text-4xl md:text-5xl font-bold mb-6 text-balance">
               ADU Solutions in San Diego
             </h1>
             <p className="text-xl text-white/80 mb-8">
@@ -74,8 +78,8 @@ export default function ADUSolutionsPage() {
             </p>
             <div className="flex flex-col sm:flex-row gap-4">
               <Link href="/build-your-adu">
-                <Button size="lg" className="bg-primary hover:bg-primary-dark text-white font-semibold">
-                  Open ADU Calculator
+                <Button size="lg" rounded="full">
+                  Open ADU Calculator <ArrowRight className="h-5 w-5 ml-2" />
                 </Button>
               </Link>
             </div>
@@ -97,16 +101,16 @@ export default function ADUSolutionsPage() {
 
           <FloorPlanLegend className="mb-8" />
 
-          <div className="grid md:grid-cols-2 gap-8">
+          <div className="flex flex-wrap justify-center gap-6 max-w-6xl mx-auto">
             {aduTypes.map((type, index) => {
               const FloorPlan = floorPlanComponents[index];
               return (
-              <Card key={type.title} className="overflow-hidden">
+              <Card key={type.title} className="w-full md:w-[calc(50%-0.75rem)] lg:w-[calc(33.333%-1rem)] flex flex-col overflow-hidden">
                 <div className="bg-gradient-to-br from-primary/5 to-secondary/5 p-4 flex items-center justify-center">
                   <FloorPlan className="w-full max-w-[380px] h-auto" />
                 </div>
-                <CardContent className="p-6">
-                  <h3 className="text-xl font-bold text-secondary mb-2">{type.title}</h3>
+                <CardContent className="p-8 flex-1">
+                  <h3 className="text-xl font-semibold text-secondary mb-2">{type.title}</h3>
                   <p className="text-muted-foreground mb-4">{type.description}</p>
                   <div className="flex gap-4 text-sm mb-4">
                     <span className="flex items-center gap-1">
@@ -143,21 +147,21 @@ export default function ADUSolutionsPage() {
             </h2>
           </div>
 
-          <div className="grid md:grid-cols-4 gap-8">
+          <div className="grid sm:grid-cols-2 md:grid-cols-4 gap-6 max-w-6xl mx-auto">
             <div className="text-center">
               <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4">
                 <DollarSign className="h-8 w-8 text-primary" />
               </div>
-              <h3 className="font-semibold text-secondary mb-2">Rental Income</h3>
+              <h3 className="text-xl font-semibold text-secondary mb-2">Rental Income</h3>
               <p className="text-sm text-muted-foreground">
-                Typical DCS ADU products can support roughly $2,000-$6,000/month depending on size and layout
+                Typical TruthCore ADU products can support roughly $2,000 – $6,000/month depending on size and layout
               </p>
             </div>
             <div className="text-center">
               <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4">
                 <Home className="h-8 w-8 text-primary" />
               </div>
-              <h3 className="font-semibold text-secondary mb-2">Property Value</h3>
+              <h3 className="text-xl font-semibold text-secondary mb-2">Property Value</h3>
               <p className="text-sm text-muted-foreground">
                 Add usable square footage and create a more valuable long-term real estate asset
               </p>
@@ -166,7 +170,7 @@ export default function ADUSolutionsPage() {
               <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4">
                 <Users className="h-8 w-8 text-primary" />
               </div>
-              <h3 className="font-semibold text-secondary mb-2">Multi-Gen Living</h3>
+              <h3 className="text-xl font-semibold text-secondary mb-2">Multi-Gen Living</h3>
               <p className="text-sm text-muted-foreground">
                 Create independent living space for family without leaving the property
               </p>
@@ -175,7 +179,7 @@ export default function ADUSolutionsPage() {
               <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4">
                 <Shield className="h-8 w-8 text-primary" />
               </div>
-              <h3 className="font-semibold text-secondary mb-2">Financial Security</h3>
+              <h3 className="text-xl font-semibold text-secondary mb-2">Financial Security</h3>
               <p className="text-sm text-muted-foreground">
                 Add an income-producing or family-supporting asset on land you already own
               </p>
@@ -196,7 +200,7 @@ export default function ADUSolutionsPage() {
             </p>
           </div>
 
-          <div className="grid md:grid-cols-5 gap-6">
+          <div className="grid md:grid-cols-5 gap-6 max-w-6xl mx-auto">
             {process.map((item) => (
               <div key={item.step} className="text-center">
                 <div className="w-12 h-12 bg-primary text-white rounded-full flex items-center justify-center mx-auto mb-4 font-bold">
@@ -221,12 +225,12 @@ export default function ADUSolutionsPage() {
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link href="/build-your-adu">
-              <Button size="lg" className="bg-primary hover:bg-primary-dark text-white font-semibold">
-                Design Your ADU
+              <Button size="lg" rounded="full">
+                Design Your ADU <ArrowRight className="h-5 w-5 ml-2" />
               </Button>
             </Link>
             <Link href="/contact">
-              <Button size="lg" variant="outline" className="border-white text-white hover:bg-white/10">
+              <Button size="lg" variant="outlineWhite" rounded="full">
                 Contact Us
               </Button>
             </Link>

@@ -1,5 +1,7 @@
 import { Card, CardContent } from "@/components/ui/card";
-import { Shield, CheckCircle, Clock, Award, Layers } from "lucide-react";
+import Link from "next/link";
+import { Button } from "@/components/ui/button";
+import { ArrowRight, Shield, CheckCircle, Clock, Award, Layers } from "lucide-react";
 import { RoofCalculatorInline } from "@/components/calculators/roof-calculator-inline";
 
 const roofTypes = [
@@ -62,13 +64,13 @@ const includes = [
 export default function RoofingPage() {
   return (
     <div className="min-h-screen">
-      <section className="bg-secondary text-white py-20">
+      <section className="bg-secondary text-white pt-40 pb-20">
         <div className="container mx-auto px-4">
           <div className="max-w-3xl">
             <span className="inline-block text-primary-light font-semibold text-sm uppercase tracking-wider mb-4">
               ROOFING SERVICES
             </span>
-            <h1 className="text-4xl md:text-5xl font-bold mb-6">
+            <h1 className="text-4xl md:text-5xl font-bold mb-6 text-balance">
               Professional Roofing Solutions
             </h1>
             <p className="text-xl text-white/80 mb-8">
@@ -90,13 +92,13 @@ export default function RoofingPage() {
               We install all major roofing materials. Every option includes professional installation, cleanup, and warranty.
             </p>
           </div>
-          <div className="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
+          <div className="grid md:grid-cols-2 gap-6 max-w-6xl mx-auto">
             {roofTypes.map((type) => (
-              <Card key={type.title} className="overflow-hidden hover:shadow-lg transition-shadow">
-                <CardContent className="p-8">
-                  <h3 className="text-xl font-bold text-secondary mb-2">{type.title}</h3>
+              <Card key={type.title} className="h-full flex flex-col overflow-hidden hover:shadow-lg transition-shadow">
+                <CardContent className="p-8 flex flex-col flex-1">
+                  <h3 className="text-xl font-semibold text-secondary mb-2">{type.title}</h3>
                   <p className="text-muted-foreground mb-4">{type.description}</p>
-                  <p className="text-lg font-bold text-primary">{type.price}</p>
+                  <p className="text-lg font-bold text-primary mt-auto">{type.price}</p>
                 </CardContent>
               </Card>
             ))}
@@ -109,16 +111,16 @@ export default function RoofingPage() {
           <div className="text-center mb-12">
             <h2 className="text-3xl md:text-4xl font-bold text-secondary mb-4">Why Homeowners Choose Us for Roofing</h2>
           </div>
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
+          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 max-w-6xl mx-auto">
             {features.map((feature) => {
               const Icon = feature.icon;
               return (
-                <Card key={feature.title}>
+                <Card key={feature.title} className="h-full">
                   <CardContent className="p-6 text-center">
                     <div className="w-14 h-14 rounded-xl bg-primary/10 flex items-center justify-center mx-auto mb-4">
                       <Icon className="h-7 w-7 text-primary" />
                     </div>
-                    <h3 className="font-bold text-secondary mb-2">{feature.title}</h3>
+                    <h3 className="text-xl font-semibold text-secondary mb-2">{feature.title}</h3>
                     <p className="text-sm text-muted-foreground">{feature.description}</p>
                   </CardContent>
                 </Card>
@@ -131,7 +133,7 @@ export default function RoofingPage() {
       <section className="py-20">
         <div className="container mx-auto px-4">
           <div className="max-w-3xl mx-auto">
-            <h2 className="text-3xl md:text-4xl font-bold text-secondary mb-8 text-center">
+            <h2 className="text-3xl md:text-4xl font-bold text-secondary mb-12 text-center">
               What&apos;s Included
             </h2>
             <ul className="space-y-4">
@@ -143,6 +145,20 @@ export default function RoofingPage() {
               ))}
             </ul>
           </div>
+        </div>
+      </section>
+
+      <section className="py-20 bg-secondary text-white">
+        <div className="container mx-auto px-4 text-center">
+          <h2 className="text-3xl md:text-4xl font-bold mb-4">Need a Professional Roof Inspection?</h2>
+          <p className="text-lg text-white/80 mb-8 max-w-2xl mx-auto">
+            Our team can inspect your roof, provide exact measurements, and deliver a detailed quote with no obligation.
+          </p>
+          <Link href="/contact">
+            <Button size="lg" rounded="full">
+              Schedule On-Site Consultation <ArrowRight className="h-5 w-5 ml-2" />
+            </Button>
+          </Link>
         </div>
       </section>
     </div>

@@ -47,8 +47,8 @@ export interface LeadGateProps {
 
 const DEFAULT_BULLETS = [
   "Instant, San Diego–specific pricing ranges",
-  "One quick form unlocks every DCS planning tool",
-  "Optional follow-up from a licensed DCS project expert",
+  "One quick form unlocks every TruthCore planning tool",
+  "Optional follow-up from a licensed TruthCore project expert",
   "No spam, no obligation",
 ];
 
@@ -75,7 +75,7 @@ function FieldError({ message }: { message?: string }) {
 
 function GateSkeleton() {
   return (
-    <section className="py-12 md:py-20" data-lead-gate="checking" aria-busy="true">
+    <section className="py-20" data-lead-gate="checking" aria-busy="true">
       <div className="container mx-auto px-4 max-w-5xl">
         <div className="rounded-2xl border border-border bg-white shadow-sm p-6 md:p-8 animate-pulse">
           <div className="h-5 w-40 rounded bg-muted mb-4" />
@@ -273,7 +273,7 @@ export function LeadGate({
   const busyDetails = checkingEmail || sending || submitting;
 
   return (
-    <section className="py-12 md:py-20" data-lead-gate="locked">
+    <section className="py-20" data-lead-gate="locked">
       <div className="container mx-auto px-4 max-w-5xl">
         <div className="rounded-2xl border-2 border-primary/30 bg-white shadow-2xl overflow-hidden grid lg:grid-cols-5">
           {/* Value panel */}
@@ -307,8 +307,8 @@ export function LeadGate({
             {step === "details" ? (
               <form onSubmit={handleDetailsSubmit} className="space-y-4" noValidate>
                 <div>
-                  <p className="text-xs font-semibold uppercase tracking-wider text-primary-dark">Step 1 of 2</p>
-                  <h3 className="text-lg font-bold text-secondary">Tell us where to send your results</h3>
+                  <p className="text-sm font-semibold uppercase tracking-wider text-primary mb-1">Step 1 of 2</p>
+                  <h3 className="text-xl font-semibold text-secondary">Tell us where to send your results</h3>
                 </div>
                 <div className="grid sm:grid-cols-2 gap-4">
                   <div>
@@ -428,15 +428,15 @@ export function LeadGate({
                   </span>
                   <span className="flex items-center gap-1.5">
                     <Lock className="h-3.5 w-3.5 text-primary" />
-                    Your info stays with DCS
+                    Your info stays with TruthCore
                   </span>
                 </div>
               </form>
             ) : (
               <form onSubmit={handleVerify} className="space-y-4" noValidate>
                 <div>
-                  <p className="text-xs font-semibold uppercase tracking-wider text-primary-dark">Step 2 of 2</p>
-                  <h3 className="text-lg font-bold text-secondary">Enter the code we texted you</h3>
+                  <p className="text-sm font-semibold uppercase tracking-wider text-primary mb-1">Step 2 of 2</p>
+                  <h3 className="text-xl font-semibold text-secondary">Enter the code we texted you</h3>
                   <p className="text-sm text-muted-foreground mt-1">
                     Sent to <strong className="text-secondary">{phone}</strong>
                   </p>

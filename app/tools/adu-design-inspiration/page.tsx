@@ -4,6 +4,7 @@ import { useMemo, useState } from "react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { optionClass } from "@/components/calculators/calculator-ui";
 import { LeadGate } from "@/components/lead-gate/lead-gate";
 import { LEAD_GATE_INTERESTS } from "@/lib/lead-gate-interests";
 import { ArrowRight, Palette, Check, Sparkles } from "lucide-react";
@@ -367,13 +368,13 @@ export default function ADUDesignInspirationPage() {
 
   return (
     <div className="min-h-screen">
-      <section className="bg-secondary text-white py-20">
+      <section className="bg-secondary text-white pt-40 pb-20">
         <div className="container mx-auto px-4">
           <div className="max-w-3xl">
             <span className="inline-block text-primary-light font-semibold text-sm uppercase tracking-wider mb-4">
               DESIGN INSPIRATION
             </span>
-            <h1 className="text-4xl md:text-5xl font-bold mb-6">
+            <h1 className="text-4xl md:text-5xl font-bold mb-6 text-balance">
               ADU Design Inspiration Builder
             </h1>
             <p className="text-xl text-white/80">
@@ -397,7 +398,7 @@ export default function ADUDesignInspirationPage() {
                 <span>Step {Math.min(step + 1, steps.length)} of {steps.length}</span>
                 <span>{progress}% complete</span>
               </div>
-              <div className="w-full bg-gray-200 rounded-full h-2">
+              <div className="w-full bg-border rounded-full h-2">
                 <div
                   className="bg-primary h-2 rounded-full transition-all duration-500"
                   style={{ width: `${progress}%` }}
@@ -415,11 +416,7 @@ export default function ADUDesignInspirationPage() {
                     <button
                       key={opt.id}
                       onClick={() => select(currentStep.key, opt.id)}
-                      className={`text-left px-5 py-4 rounded-xl border-2 transition-all ${
-                        selections[currentStep.key] === opt.id
-                          ? "border-primary bg-primary/5"
-                          : "border-gray-200 hover:border-primary/30"
-                      }`}
+                      className={optionClass(selections[currentStep.key] === opt.id, "text-left px-5 py-4")}
                     >
                       <span className="font-semibold text-secondary block">{opt.label}</span>
                       {"description" in opt && (
@@ -436,14 +433,14 @@ export default function ADUDesignInspirationPage() {
 
                 <div className="flex gap-3">
                   {step > 0 && (
-                    <Button variant="outline" onClick={() => setStep(step - 1)}>
+                    <Button variant="outline" rounded="full" onClick={() => setStep(step - 1)}>
                       Back
                     </Button>
                   )}
                   <Button
                     onClick={() => setStep(step + 1)}
                     disabled={!selections[currentStep.key]}
-                    className="bg-primary hover:bg-primary-dark text-white font-semibold"
+                    rounded="full"
                   >
                     {step === steps.length - 1 ? "Generate Concepts" : "Next"}
                     <ArrowRight className="h-4 w-4 ml-2" />
@@ -452,10 +449,10 @@ export default function ADUDesignInspirationPage() {
               </div>
             ) : (
               <div>
-                <div className="text-center mb-10">
+                <div className="text-center mb-12">
                   <Sparkles className="h-14 w-14 text-primary mx-auto mb-4" />
-                  <h2 className="text-3xl font-bold text-secondary mb-2">Your Generated Concept Direction</h2>
-                  <p className="text-muted-foreground max-w-2xl mx-auto">
+                  <h2 className="text-3xl md:text-4xl font-bold text-secondary mb-4">Your Generated Concept Direction</h2>
+                  <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
                     These concept visuals are generated from your chosen project scale, architectural style,
                     exterior materials, and interior moods so you can react to something visual instead of abstract descriptions.
                   </p>
@@ -478,36 +475,36 @@ export default function ADUDesignInspirationPage() {
 
                 <div className="grid md:grid-cols-2 gap-6 mb-8">
                   {conceptCards.map((concept) => (
-                    <div key={concept.title} className="overflow-hidden rounded-2xl border bg-white shadow-sm">
+                    <div key={concept.title} className="overflow-hidden rounded-2xl border border-border bg-white shadow-sm">
                       <img
                         src={concept.image}
                         alt={concept.title}
                         className="h-72 w-full object-cover"
                       />
                       <div className="p-5">
-                        <h3 className="font-bold text-secondary text-lg mb-2">{concept.title}</h3>
+                        <h3 className="text-xl font-semibold text-secondary mb-2">{concept.title}</h3>
                         <p className="text-sm text-muted-foreground">{concept.caption}</p>
                       </div>
                     </div>
                   ))}
                 </div>
 
-                <Card className="bg-secondary text-white mb-8">
+                <Card className="bg-secondary text-white border-secondary mb-8">
                   <CardContent className="p-8 text-center">
                     <Palette className="h-12 w-12 text-primary-light mx-auto mb-4" />
-                    <h3 className="text-xl font-bold mb-3">Use These Concepts to Start a Real Design Conversation</h3>
-                    <p className="text-white/70 mb-6">
+                    <h3 className="text-xl font-semibold mb-3">Use These Concepts to Start a Real Design Conversation</h3>
+                    <p className="text-white/80 mb-6">
                       Bring this direction into a consultation and we can turn it into floor-plan refinements,
                       exterior massing options, finish packages, and a buildable scope for your property.
                     </p>
                     <div className="flex flex-col sm:flex-row gap-3 justify-center">
                       <Link href="/build-your-adu">
-                        <Button size="lg" className="bg-primary hover:bg-primary-dark text-white font-semibold">
+                        <Button size="lg" rounded="full">
                           Start Building Your ADU <ArrowRight className="h-5 w-5 ml-2" />
                         </Button>
                       </Link>
                       <Link href="/contact">
-                        <Button size="lg" variant="outlineWhite">
+                        <Button size="lg" variant="outlineWhite" rounded="full">
                           Schedule Consultation
                         </Button>
                       </Link>
@@ -538,6 +535,22 @@ export default function ADUDesignInspirationPage() {
           </div>
         </section>
       </LeadGate>
+
+      <section className="py-20 bg-muted">
+        <div className="container mx-auto px-4 text-center">
+          <h2 className="text-3xl md:text-4xl font-bold text-secondary mb-4">
+            Ready to Turn Inspiration Into Plans?
+          </h2>
+          <p className="text-lg text-muted-foreground mb-8 max-w-2xl mx-auto">
+            Our design team can refine your concept direction into a buildable ADU plan, finish package, and price for your property.
+          </p>
+          <Link href="/contact">
+            <Button size="lg" rounded="full">
+              Schedule Free Consultation <ArrowRight className="h-5 w-5 ml-2" />
+            </Button>
+          </Link>
+        </div>
+      </section>
     </div>
   );
 }

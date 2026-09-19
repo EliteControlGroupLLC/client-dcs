@@ -5,6 +5,7 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { ArrowRight, Home } from "lucide-react";
+import { optionClass } from "@/components/calculators/calculator-ui";
 import { LeadGate } from "@/components/lead-gate/lead-gate";
 import { LEAD_GATE_INTERESTS } from "@/lib/lead-gate-interests";
 
@@ -43,13 +44,13 @@ export function RoofCalculatorInline() {
         subhead="Compare shingle, tile, metal and flat-roof pricing for your home in seconds."
         ctaLabel="Unlock My Roofing Estimate"
       >
-        <section className="py-16 bg-muted">
-          <div className="container mx-auto px-4 max-w-4xl">
-            <div className="text-center mb-10">
-              <h2 className="text-3xl md:text-4xl font-bold text-secondary mb-3">Roof Price Calculator</h2>
-              <p className="text-muted-foreground">Adjust roof size, material, and complexity to see your estimated range.</p>
+        <section className="py-20 bg-muted">
+          <div className="container mx-auto px-4 max-w-5xl">
+            <div className="text-center mb-12">
+              <h2 className="text-3xl md:text-4xl font-bold text-secondary mb-4">Roof Price Calculator</h2>
+              <p className="text-lg text-muted-foreground">Adjust roof size, material, and complexity to see your estimated range.</p>
             </div>
-            <div className="grid md:grid-cols-2 gap-8">
+            <div className="grid md:grid-cols-2 gap-8 [&>*]:min-w-0">
               <div className="space-y-8">
                 <div>
                   <label className="block text-sm font-semibold text-secondary mb-3">
@@ -77,11 +78,7 @@ export function RoofCalculatorInline() {
                       <button
                         key={t.label}
                         onClick={() => setRoofType(i)}
-                        className={`w-full text-left px-4 py-3 rounded-lg border transition-all ${
-                          roofType === i
-                            ? "border-primary bg-primary/5 text-secondary font-medium"
-                            : "border-gray-200 text-muted-foreground hover:border-primary/30"
-                        }`}
+                        className={optionClass(roofType === i)}
                       >
                         {t.label}
                       </button>
@@ -96,11 +93,7 @@ export function RoofCalculatorInline() {
                       <button
                         key={c.label}
                         onClick={() => setComplexity(i)}
-                        className={`w-full text-left px-4 py-3 rounded-lg border transition-all ${
-                          complexity === i
-                            ? "border-primary bg-primary/5 text-secondary font-medium"
-                            : "border-gray-200 text-muted-foreground hover:border-primary/30"
-                        }`}
+                        className={optionClass(complexity === i)}
                       >
                         {c.label}
                       </button>
@@ -109,15 +102,15 @@ export function RoofCalculatorInline() {
                 </div>
               </div>
 
-              <Card className="bg-secondary text-white">
-                <CardContent className="p-8 flex flex-col justify-center h-full">
+              <Card className="bg-secondary text-white border-secondary min-w-0">
+                <CardContent className="p-6 md:p-8 flex flex-col justify-center h-full">
                   <div className="text-center">
                     <Home className="h-12 w-12 text-primary-light mx-auto mb-4" />
                     <p className="text-white/70 text-sm mb-2">Estimated Roof Cost</p>
-                    <p className="text-3xl md:text-4xl font-bold text-primary-light mb-1">
-                      ${lowEstimate.toLocaleString()} &ndash; ${highEstimate.toLocaleString()}
+                    <p className="text-3xl md:text-4xl font-bold text-primary-light mb-1 text-balance">
+                      ${lowEstimate.toLocaleString()}&nbsp;&ndash; ${highEstimate.toLocaleString()}
                     </p>
-                    <p className="text-white/50 text-sm mb-6">
+                    <p className="text-white/60 text-sm mb-6">
                       {squares} squares &bull; {selected.label} &bull; {comp.label}
                     </p>
 
@@ -137,12 +130,12 @@ export function RoofCalculatorInline() {
                       </ul>
                     </div>
 
-                    <p className="text-xs text-white/40 mb-6">
+                    <p className="text-xs text-white/60 mb-6">
                       * Estimate only. Actual pricing depends on site conditions, access, and materials selected.
                     </p>
 
                     <Link href="/contact">
-                      <Button size="lg" className="w-full bg-primary hover:bg-primary-dark text-white font-semibold">
+                      <Button size="lg" rounded="full" className="w-full">
                         Get Exact Inspection &amp; Quote <ArrowRight className="h-5 w-5 ml-2" />
                       </Button>
                     </Link>

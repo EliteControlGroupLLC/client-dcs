@@ -73,13 +73,13 @@ export default function CustomHomesPage() {
   return (
     <div className="min-h-screen">
       {/* Hero */}
-      <section className="bg-secondary text-white py-24">
+      <section className="bg-secondary text-white pt-40 pb-20">
         <div className="container mx-auto px-4">
           <div className="max-w-3xl">
             <span className="inline-block text-primary-light font-semibold text-sm uppercase tracking-wider mb-4">
               CUSTOM HOMES
             </span>
-            <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-6 leading-tight">
+            <h1 className="text-4xl md:text-5xl font-bold mb-6 text-balance">
               A Home Designed Around <span className="text-primary-light">Your Life</span>
             </h1>
             <p className="text-xl text-white/80 mb-4 leading-relaxed max-w-2xl">
@@ -93,7 +93,7 @@ export default function CustomHomesPage() {
               collaboration — shaped by how you live, not by a template.
             </p>
             <Link href="/contact">
-              <Button size="lg" className="bg-primary hover:bg-primary-dark text-white font-semibold group">
+              <Button size="lg" rounded="full" className="group">
                 Start Your Custom Home Journey <ArrowRight className="h-5 w-5 ml-2 group-hover:translate-x-1 transition-transform" />
               </Button>
             </Link>
@@ -102,13 +102,13 @@ export default function CustomHomesPage() {
       </section>
 
       {/* The Custom Home Journey */}
-      <section className="py-24">
+      <section className="py-20">
         <div className="container mx-auto px-4">
-          <div className="max-w-3xl mx-auto text-center mb-16">
+          <div className="max-w-3xl mx-auto text-center mb-12">
             <span className="inline-block text-primary font-semibold text-sm uppercase tracking-wider mb-4">
               THE JOURNEY
             </span>
-            <h2 className="text-3xl md:text-4xl font-bold text-secondary mb-6">
+            <h2 className="text-3xl md:text-4xl font-bold text-secondary mb-4">
               What Building a Custom Home Feels Like
             </h2>
             <p className="text-lg text-muted-foreground leading-relaxed">
@@ -117,13 +117,13 @@ export default function CustomHomesPage() {
             </p>
           </div>
 
-          <div className="max-w-4xl mx-auto space-y-16">
+          <div className="max-w-3xl mx-auto space-y-12">
             {journeySections.map((section) => (
               <div key={section.number} className="relative pl-20">
                 <div className="absolute left-0 top-0 w-12 h-12 rounded-full bg-primary/10 border-2 border-primary flex items-center justify-center">
                   <span className="text-sm font-bold text-primary">{section.number}</span>
                 </div>
-                <h3 className="text-xl md:text-2xl font-bold text-secondary mb-4">
+                <h3 className="text-xl md:text-2xl font-semibold text-secondary mb-4">
                   {section.title}
                 </h3>
                 <p className="text-muted-foreground leading-relaxed text-lg">
@@ -136,13 +136,13 @@ export default function CustomHomesPage() {
       </section>
 
       {/* Process */}
-      <section className="py-24 bg-muted">
+      <section className="py-20 bg-muted">
         <div className="container mx-auto px-4">
-          <div className="text-center mb-16">
+          <div className="text-center mb-12">
             <span className="inline-block text-primary font-semibold text-sm uppercase tracking-wider mb-4">
               OUR PROCESS
             </span>
-            <h2 className="text-3xl md:text-4xl font-bold text-secondary mb-6">
+            <h2 className="text-3xl md:text-4xl font-bold text-secondary mb-4">
               How We Build Your Custom Home
             </h2>
             <p className="text-lg text-muted-foreground max-w-2xl mx-auto leading-relaxed">
@@ -166,10 +166,10 @@ export default function CustomHomesPage() {
       </section>
 
       {/* Closing Emotional CTA */}
-      <section className="py-24 bg-secondary text-white">
+      <section className="py-20 bg-secondary text-white">
         <div className="container mx-auto px-4">
           <div className="max-w-3xl mx-auto text-center">
-            <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold mb-6 leading-tight">
+            <h2 className="text-3xl md:text-4xl font-bold mb-4">
               Imagine Walking Into Your Finished Home at Sunset
             </h2>
             <p className="text-lg text-white/70 mb-4 leading-relaxed">
@@ -182,12 +182,12 @@ export default function CustomHomesPage() {
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Link href="/contact">
-                <Button size="lg" className="bg-primary hover:bg-primary-dark text-white font-semibold group">
+                <Button size="lg" rounded="full" className="group">
                   Start Your Custom Home Journey <ArrowRight className="h-5 w-5 ml-2 group-hover:translate-x-1 transition-transform" />
                 </Button>
               </Link>
               <Link href="/gallery">
-                <Button size="lg" variant="outline" className="border-white text-white hover:bg-white/10">
+                <Button size="lg" variant="outlineWhite" rounded="full">
                   View Our Work
                 </Button>
               </Link>

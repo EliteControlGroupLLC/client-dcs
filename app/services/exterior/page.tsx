@@ -68,13 +68,13 @@ const includes = [
 export default function ExteriorPage() {
   return (
     <div className="min-h-screen">
-      <section className="bg-secondary text-white py-20">
+      <section className="bg-secondary text-white pt-40 pb-20">
         <div className="container mx-auto px-4">
           <div className="max-w-3xl">
             <span className="inline-block text-primary-light font-semibold text-sm uppercase tracking-wider mb-4">
               EXTERIOR IMPROVEMENTS
             </span>
-            <h1 className="text-4xl md:text-5xl font-bold mb-6">
+            <h1 className="text-4xl md:text-5xl font-bold mb-6 text-balance">
               Enhance Your Home&apos;s Exterior
             </h1>
             <p className="text-xl text-white/80 mb-8">
@@ -83,7 +83,7 @@ export default function ExteriorPage() {
             </p>
             <p className="text-2xl font-bold text-primary-light mb-8">Starting at $12,000</p>
             <Link href="/contact">
-              <Button size="lg" className="bg-primary hover:bg-primary-dark text-white font-semibold">
+              <Button size="lg" rounded="full">
                 Schedule On-Site Consultation <ArrowRight className="h-5 w-5 ml-2" />
               </Button>
             </Link>
@@ -99,13 +99,13 @@ export default function ExteriorPage() {
               Exterior scopes designed to elevate curb presence, extend livable space, and support long-term property value.
             </p>
           </div>
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-5xl mx-auto">
+          <div className="flex flex-wrap justify-center gap-6 max-w-6xl mx-auto">
             {exteriorServices.map((service) => (
-              <Card key={service.title} className="overflow-hidden hover:shadow-lg transition-shadow">
-                <CardContent className="p-8">
-                  <h3 className="text-xl font-bold text-secondary mb-2">{service.title}</h3>
+              <Card key={service.title} className="w-full md:w-[calc(50%-0.75rem)] lg:w-[calc(33.333%-1rem)] flex flex-col overflow-hidden hover:shadow-lg transition-shadow">
+                <CardContent className="p-8 flex flex-col flex-1">
+                  <h3 className="text-xl font-semibold text-secondary mb-2">{service.title}</h3>
                   <p className="text-muted-foreground mb-4">{service.description}</p>
-                  <p className="text-lg font-bold text-primary">{service.price}</p>
+                  <p className="text-lg font-bold text-primary mt-auto">{service.price}</p>
                 </CardContent>
               </Card>
             ))}
@@ -118,16 +118,16 @@ export default function ExteriorPage() {
           <div className="text-center mb-12">
             <h2 className="text-3xl md:text-4xl font-bold text-secondary mb-4">Why Invest in Your Exterior?</h2>
           </div>
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
+          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 max-w-6xl mx-auto">
             {features.map((feature) => {
               const Icon = feature.icon;
               return (
-                <Card key={feature.title}>
+                <Card key={feature.title} className="h-full">
                   <CardContent className="p-6 text-center">
                     <div className="w-14 h-14 rounded-xl bg-primary/10 flex items-center justify-center mx-auto mb-4">
                       <Icon className="h-7 w-7 text-primary" />
                     </div>
-                    <h3 className="font-bold text-secondary mb-2">{feature.title}</h3>
+                    <h3 className="text-xl font-semibold text-secondary mb-2">{feature.title}</h3>
                     <p className="text-sm text-muted-foreground">{feature.description}</p>
                   </CardContent>
                 </Card>
@@ -140,7 +140,7 @@ export default function ExteriorPage() {
       <section className="py-20">
         <div className="container mx-auto px-4">
           <div className="max-w-3xl mx-auto">
-            <h2 className="text-3xl md:text-4xl font-bold text-secondary mb-8 text-center">
+            <h2 className="text-3xl md:text-4xl font-bold text-secondary mb-12 text-center">
               What&apos;s Included
             </h2>
             <ul className="space-y-4">
@@ -162,7 +162,7 @@ export default function ExteriorPage() {
             Let&apos;s discuss your vision. Free consultation and detailed estimates with no obligation.
           </p>
           <Link href="/contact">
-            <Button size="lg" className="bg-primary hover:bg-primary-dark text-white font-semibold">
+            <Button size="lg" rounded="full">
               Schedule On-Site Consultation <ArrowRight className="h-5 w-5 ml-2" />
             </Button>
           </Link>

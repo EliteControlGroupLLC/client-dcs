@@ -4,6 +4,7 @@ import { useState, useMemo, useEffect } from "react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { optionClass } from "@/components/calculators/calculator-ui";
 import { LeadGate } from "@/components/lead-gate/lead-gate";
 import { LEAD_GATE_INTERESTS } from "@/lib/lead-gate-interests";
 import { ArrowRight, Zap, Check, X } from "lucide-react";
@@ -116,13 +117,13 @@ export default function InstantADUEstimatorPage() {
 
   return (
     <div className="min-h-screen">
-      <section className="bg-secondary text-white py-20">
+      <section className="bg-secondary text-white pt-40 pb-20">
         <div className="container mx-auto px-4">
           <div className="max-w-3xl">
             <span className="inline-block text-primary-light font-semibold text-sm uppercase tracking-wider mb-4">
               INSTANT ESTIMATOR
             </span>
-            <h1 className="text-4xl md:text-5xl font-bold mb-6">
+            <h1 className="text-4xl md:text-5xl font-bold mb-6 text-balance">
               Instant ADU Price Estimator
             </h1>
             <p className="text-xl text-white/80">
@@ -141,7 +142,7 @@ export default function InstantADUEstimatorPage() {
       >
         <section className="py-20">
           <div className="container mx-auto px-4 max-w-5xl">
-            <div className="grid md:grid-cols-2 gap-8">
+            <div className="grid md:grid-cols-2 gap-8 [&>*]:min-w-0">
               <div className="space-y-8">
                 <div>
                   <label className="block text-sm font-semibold text-secondary mb-3">ADU Type</label>
@@ -150,11 +151,7 @@ export default function InstantADUEstimatorPage() {
                       <button
                         key={t.id}
                         onClick={() => setTypeIndex(i)}
-                        className={`w-full text-left px-4 py-3 rounded-lg border transition-all ${
-                          typeIndex === i
-                            ? "border-primary bg-primary/5 text-secondary font-medium"
-                            : "border-gray-200 text-muted-foreground hover:border-primary/30"
-                        }`}
+                        className={optionClass(typeIndex === i)}
                       >
                         {t.label}
                       </button>
@@ -170,11 +167,7 @@ export default function InstantADUEstimatorPage() {
                         <button
                           key={s}
                           onClick={() => setSize(s)}
-                          className={`px-4 py-2 rounded-lg border text-sm font-medium transition-all ${
-                            size === s
-                              ? "border-primary bg-primary/5 text-secondary"
-                              : "border-gray-200 text-muted-foreground hover:border-primary/30"
-                          }`}
+                          className={optionClass(size === s, "px-4 py-2 text-sm font-medium")}
                         >
                           {s.toLocaleString()} sq ft
                         </button>
@@ -183,37 +176,30 @@ export default function InstantADUEstimatorPage() {
                   </div>
                 )}
 
-                <div className="grid grid-cols-3 gap-4">
-                  <div>
-                    <label className="block text-sm font-semibold text-secondary mb-2">Bedrooms</label>
-                    <div className="flex flex-wrap gap-2">
-                      {[0, 1, 2, 3, 4].filter(b => b <= maxBedrooms || b === 0).map((b) => (
-                        <button
-                          key={b}
-                          onClick={() => setBedrooms(b)}
-                          className={`flex-1 min-w-[40px] py-2 rounded-lg border text-sm font-medium transition-all ${
-                            bedrooms === b
-                              ? "border-primary bg-primary/5 text-secondary"
-                              : "border-gray-200 text-muted-foreground hover:border-primary/30"
-                          }`}
-                        >
-                          {b === 0 ? "Studio" : b}
-                        </button>
-                      ))}
-                    </div>
+                <div>
+                  <label className="block text-sm font-semibold text-secondary mb-3">Bedrooms</label>
+                  <div className="flex flex-wrap gap-2">
+                    {[0, 1, 2, 3, 4].filter(b => b <= maxBedrooms || b === 0).map((b) => (
+                      <button
+                        key={b}
+                        onClick={() => setBedrooms(b)}
+                        className={optionClass(bedrooms === b, "flex-1 px-3 py-2 text-sm font-medium")}
+                      >
+                        {b === 0 ? "Studio" : b}
+                      </button>
+                    ))}
                   </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-sm font-semibold text-secondary mb-2">Bathrooms</label>
+                    <label className="block text-sm font-semibold text-secondary mb-3">Bathrooms</label>
                     <div className="flex gap-2">
                       {bathroomOptions.map((b) => (
                         <button
                           key={b}
                           onClick={() => setBathrooms(b)}
-                          className={`flex-1 py-2 rounded-lg border text-sm font-medium transition-all ${
-                            bathrooms === b
-                              ? "border-primary bg-primary/5 text-secondary"
-                              : "border-gray-200 text-muted-foreground hover:border-primary/30"
-                          }`}
+                          className={optionClass(bathrooms === b, "flex-1 py-2 text-sm font-medium")}
                         >
                           {b}
                         </button>
@@ -221,18 +207,14 @@ export default function InstantADUEstimatorPage() {
                     </div>
                   </div>
                   <div>
-                    <label className="block text-sm font-semibold text-secondary mb-2">Stories</label>
+                    <label className="block text-sm font-semibold text-secondary mb-3">Stories</label>
                     <div className="flex gap-2">
                       {[1, 2].map((s) => (
                         <button
                           key={s}
                           onClick={() => setStories(s)}
                           disabled={selected.id === "garage-2" || selected.id === "garage-3" || selected.id === "attached"}
-                          className={`flex-1 py-2 rounded-lg border text-sm font-medium transition-all ${
-                            stories === s
-                              ? "border-primary bg-primary/5 text-secondary"
-                              : "border-gray-200 text-muted-foreground hover:border-primary/30"
-                          }`}
+                          className={optionClass(stories === s, "flex-1 py-2 text-sm font-medium")}
                         >
                           {s}
                         </button>
@@ -242,26 +224,26 @@ export default function InstantADUEstimatorPage() {
                 </div>
               </div>
 
-              <Card className="bg-secondary text-white">
-                <CardContent className="p-8">
+              <Card className="bg-secondary text-white border-secondary min-w-0">
+                <CardContent className="p-6 md:p-8">
                   <div className="text-center mb-6">
-                    <Zap className="h-12 w-12 text-primary-light mx-auto mb-3" />
-                    <p className="text-white/70 text-sm mb-1">Estimated Price Range</p>
-                    <p className="text-3xl md:text-4xl font-bold text-primary-light mb-1">
-                      ${lowEstimate.toLocaleString()} &ndash; ${highEstimate.toLocaleString()}
+                    <Zap className="h-12 w-12 text-primary-light mx-auto mb-4" />
+                    <p className="text-white/70 text-sm mb-2">Estimated Price Range</p>
+                    <p className="text-3xl md:text-4xl font-bold text-primary-light mb-1 text-balance">
+                      ${lowEstimate.toLocaleString()}&nbsp;&ndash; ${highEstimate.toLocaleString()}
                     </p>
-                    <p className="text-white/50 text-sm">
+                    <p className="text-white/60 text-sm">
                       {selected.label} &bull; {isGarage ? "Existing garage shell" : `${size.toLocaleString()} sq ft`} &bull; {effectiveBedrooms === 0 ? "Studio" : `${effectiveBedrooms} Bed`}, {effectiveBathrooms} Bath
                     </p>
                   </div>
 
                   <div className="border-t border-white/10 pt-6 mb-4">
-                    <p className="text-white/60 text-sm mb-2">Estimated Rental Potential</p>
+                    <p className="text-white/70 text-sm mb-1">Estimated Rental Potential</p>
                     <p className="text-2xl font-bold text-white">
-                      ${rentEstimate.low.toLocaleString()} - ${rentEstimate.high.toLocaleString()}/mo
+                      ${rentEstimate.low.toLocaleString()}&nbsp;&ndash; ${rentEstimate.high.toLocaleString()}/mo
                     </p>
-                    <p className="text-white/40 text-xs mt-1">
-                      Based on the current DCS plan library and San Diego market rates for the selected build path
+                    <p className="text-white/60 text-xs mt-1">
+                      Based on the current TruthCore plan library and San Diego market rates for the selected build path
                     </p>
                   </div>
 
@@ -282,7 +264,7 @@ export default function InstantADUEstimatorPage() {
                       <ul className="space-y-1.5">
                         {excluded.map((item) => (
                           <li key={item} className="flex items-start gap-2 text-sm text-white/60">
-                            <X className="h-4 w-4 text-white/40 shrink-0 mt-0.5" />
+                            <X className="h-4 w-4 text-white/60 shrink-0 mt-0.5" />
                             {item}
                           </li>
                         ))}
@@ -290,18 +272,18 @@ export default function InstantADUEstimatorPage() {
                     </div>
                   </div>
 
-                  <p className="text-xs text-white/40 mb-6">
+                  <p className="text-xs text-white/60 mb-6">
                     * Estimate only. Pricing based on standard scope for San Diego. Actual pricing depends on site, design, and selections.
                   </p>
 
                   <div className="space-y-3">
-                    <Link href="/contact">
-                      <Button size="lg" className="w-full bg-primary hover:bg-primary-dark text-white font-semibold">
+                    <Link href="/contact" className="block">
+                      <Button size="lg" rounded="full" className="w-full">
                         Request Exact Pricing <ArrowRight className="h-5 w-5 ml-2" />
                       </Button>
                     </Link>
-                    <Link href="/build-your-adu">
-                      <Button size="lg" variant="outlineWhite" className="w-full">
+                    <Link href="/build-your-adu" className="block">
+                      <Button size="lg" variant="outlineWhite" rounded="full" className="w-full">
                         Scan Your Property <ArrowRight className="h-5 w-5 ml-2" />
                       </Button>
                     </Link>
@@ -323,12 +305,12 @@ export default function InstantADUEstimatorPage() {
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link href="/tools/compare-adu-sizes">
-              <Button size="lg" className="bg-primary hover:bg-primary-dark text-white font-semibold">
+              <Button size="lg" rounded="full">
                 Compare ADU Sizes <ArrowRight className="h-5 w-5 ml-2" />
               </Button>
             </Link>
             <Link href="/tools/adu-income-calculator">
-              <Button size="lg" variant="outline">
+              <Button size="lg" variant="outline" rounded="full">
                 Calculate Income Potential
               </Button>
             </Link>

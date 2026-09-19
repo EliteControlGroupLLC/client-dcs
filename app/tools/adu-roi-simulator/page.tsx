@@ -4,6 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { selectClass } from "@/components/calculators/calculator-ui";
 import { LeadGate } from "@/components/lead-gate/lead-gate";
 import { LEAD_GATE_INTERESTS } from "@/lib/lead-gate-interests";
 import { ArrowRight, BarChart3 } from "lucide-react";
@@ -86,13 +87,13 @@ export default function ADUROISimulatorPage() {
 
   return (
     <div className="min-h-screen">
-      <section className="bg-secondary text-white py-20">
+      <section className="bg-secondary text-white pt-40 pb-20">
         <div className="container mx-auto px-4">
           <div className="max-w-3xl">
             <span className="inline-block text-primary-light font-semibold text-sm uppercase tracking-wider mb-4">
               ROI SIMULATOR
             </span>
-            <h1 className="text-4xl md:text-5xl font-bold mb-6">
+            <h1 className="text-4xl md:text-5xl font-bold mb-6 text-balance">
               ADU ROI Scenario Simulator
             </h1>
             <p className="text-xl text-white/80">
@@ -111,10 +112,10 @@ export default function ADUROISimulatorPage() {
       >
         <section className="py-20">
           <div className="container mx-auto px-4 max-w-5xl">
-            <div className="grid md:grid-cols-2 gap-8">
-              <div className="space-y-6">
+            <div className="grid md:grid-cols-2 gap-8 [&>*]:min-w-0">
+              <div className="space-y-8">
                 <div>
-                  <label className="block text-sm font-semibold text-secondary mb-2">
+                  <label className="block text-sm font-semibold text-secondary mb-3">
                     Recommended Scenario
                   </label>
                   <select
@@ -133,7 +134,7 @@ export default function ADUROISimulatorPage() {
                       );
                       setLoanAmount(nextCost);
                     }}
-                    className="w-full px-4 py-3 rounded-lg border border-gray-200 text-secondary font-medium bg-white"
+                    className={selectClass}
                   >
                     {scenarioPresets.map((preset, index) => (
                       <option key={preset.label} value={index}>
@@ -144,7 +145,7 @@ export default function ADUROISimulatorPage() {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-semibold text-secondary mb-2">
+                  <label className="block text-sm font-semibold text-secondary mb-3">
                     Project Cost: ${projectCost.toLocaleString()}
                   </label>
                   <input
@@ -159,7 +160,7 @@ export default function ADUROISimulatorPage() {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-semibold text-secondary mb-2">
+                  <label className="block text-sm font-semibold text-secondary mb-3">
                     Monthly Rent: ${monthlyRent.toLocaleString()}
                   </label>
                   <input
@@ -213,10 +214,10 @@ export default function ADUROISimulatorPage() {
                 </div>
               </div>
 
-              <Card className="bg-secondary text-white">
-                <CardContent className="p-8">
-                  <BarChart3 className="h-10 w-10 text-primary-light mx-auto mb-4" />
-                  <h3 className="text-lg font-bold text-center text-white mb-6">Investment Projection</h3>
+              <Card className="bg-secondary text-white border-secondary min-w-0">
+                <CardContent className="p-6 md:p-8">
+                  <BarChart3 className="h-12 w-12 text-primary-light mx-auto mb-4" />
+                  <h3 className="text-xl font-semibold text-center text-white mb-6">Investment Projection</h3>
 
                   <div className="space-y-4 mb-6">
                     <div className="flex justify-between items-center border-b border-white/10 pb-3">
@@ -264,12 +265,12 @@ export default function ADUROISimulatorPage() {
                     </p>
                   </div>
 
-                  <p className="text-xs text-white/40 mb-6">
+                  <p className="text-xs text-white/60 mb-6">
                     * Simplified projection. Does not account for taxes, insurance, maintenance, vacancy, or rent increases. Consult a financial advisor.
                   </p>
 
                   <Link href="/contact">
-                    <Button size="lg" className="w-full bg-primary hover:bg-primary-dark text-white font-semibold">
+                    <Button size="lg" rounded="full" className="w-full">
                       Explore Your ADU Investment <ArrowRight className="h-5 w-5 ml-2" />
                     </Button>
                   </Link>
@@ -289,7 +290,7 @@ export default function ADUROISimulatorPage() {
             Our team can provide a detailed feasibility analysis and financing guidance specific to your property.
           </p>
           <Link href="/build-your-adu">
-            <Button size="lg" className="bg-primary hover:bg-primary-dark text-white font-semibold">
+            <Button size="lg" rounded="full">
               Scan Your Property <ArrowRight className="h-5 w-5 ml-2" />
             </Button>
           </Link>

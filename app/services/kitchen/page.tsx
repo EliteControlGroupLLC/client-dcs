@@ -1,4 +1,6 @@
-import { CheckCircle } from "lucide-react";
+import Link from "next/link";
+import { Button } from "@/components/ui/button";
+import { ArrowRight, CheckCircle } from "lucide-react";
 import { KitchenCalculatorInline } from "@/components/calculators/kitchen-calculator-inline";
 
 const features = [
@@ -15,13 +17,13 @@ const features = [
 export default function KitchenPage() {
   return (
     <div className="min-h-screen">
-      <section className="bg-secondary text-white py-20">
+      <section className="bg-secondary text-white pt-40 pb-20">
         <div className="container mx-auto px-4">
           <div className="max-w-3xl">
             <span className="inline-block text-primary-light font-semibold text-sm uppercase tracking-wider mb-4">
               KITCHEN REMODELING
             </span>
-            <h1 className="text-4xl md:text-5xl font-bold mb-6">
+            <h1 className="text-4xl md:text-5xl font-bold mb-6 text-balance">
               Create Your Dream Kitchen
             </h1>
             <p className="text-xl text-white/80 mb-8">
@@ -38,7 +40,7 @@ export default function KitchenPage() {
       <section className="py-20">
         <div className="container mx-auto px-4">
           <div className="max-w-3xl mx-auto">
-            <h2 className="text-3xl md:text-4xl font-bold text-secondary mb-8 text-center">
+            <h2 className="text-3xl md:text-4xl font-bold text-secondary mb-12 text-center">
               What&apos;s Included
             </h2>
             <ul className="space-y-4">
@@ -50,6 +52,20 @@ export default function KitchenPage() {
               ))}
             </ul>
           </div>
+        </div>
+      </section>
+
+      <section className="py-20 bg-secondary text-white">
+        <div className="container mx-auto px-4 text-center">
+          <h2 className="text-3xl md:text-4xl font-bold mb-4">Ready to Transform Your Kitchen?</h2>
+          <p className="text-lg text-white/80 mb-8 max-w-2xl mx-auto">
+            Schedule a free consultation and let&apos;s design the kitchen you&apos;ve always wanted.
+          </p>
+          <Link href="/contact">
+            <Button size="lg" rounded="full">
+              Schedule On-Site Consultation <ArrowRight className="h-5 w-5 ml-2" />
+            </Button>
+          </Link>
         </div>
       </section>
     </div>
