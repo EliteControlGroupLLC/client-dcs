@@ -1211,7 +1211,7 @@ export async function analyzeProperty(address: string): Promise<PropertyAnalysis
           aduType: type,
           monthlyRent: est.estimatedMonthlyRent,
           annualRent: est.estimatedAnnualRent,
-          rentRange: `$${est.rentRangeLow.toLocaleString()} - $${est.rentRangeHigh.toLocaleString()}`,
+          rentRange: `$${est.rentRangeLow.toLocaleString()}\u00A0– $${est.rentRangeHigh.toLocaleString()}`,
           pricePerSqft: est.pricePerSqft,
           source: est.source,
           confidence: est.confidence,
@@ -1844,7 +1844,7 @@ function synchronizeRecommendations(
       if (recommendation.type !== unifiedRecommendation.primaryType) return recommendation;
       const verdict = verdicts[recommendation.type as AduTypeName];
       const sizeKnown = verdict ? verdict.maxSqFt > 0 : true;
-      const rent = `$${unifiedRecommendation.primaryRentEstimate.rentRangeLow.toLocaleString()}-$${unifiedRecommendation.primaryRentEstimate.rentRangeHigh.toLocaleString()}/month (${unifiedRecommendation.rentSource === "market-data" ? "RentCast market estimate for this address" : "TruthCore rent-table planning estimate"})`;
+      const rent = `$${unifiedRecommendation.primaryRentEstimate.rentRangeLow.toLocaleString()}\u00A0– $${unifiedRecommendation.primaryRentEstimate.rentRangeHigh.toLocaleString()}/month (${unifiedRecommendation.rentSource === "market-data" ? "RentCast market estimate for this address" : "TruthCore rent-table planning estimate"})`;
       return {
         ...recommendation,
         // Feasibility stays exactly what the real-data rules said — the

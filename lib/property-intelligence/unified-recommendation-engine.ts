@@ -305,7 +305,7 @@ function generateSmartBannerText(
 
   return {
     bannerRecommendation: `Best fit for this property: ${planName} at ${sizeLabel} sq ft`,
-    bannerDetails: `${primaryType} recommendation aligned to the current parcel allowance${sizeIsCappedByRules ? " and city size cap" : ""}. Recommended configuration: ${layoutLabel}. Estimated project investment (TruthCore plan pricing): ${formatPriceRange(priceLow, priceHigh)}. ${rentKind === "market" ? "Market rent estimate for this address (RentCast)" : "Planning rent estimate (TruthCore rent table; live market rent unavailable)"}: $${rentLow.toLocaleString()}-$${rentHigh.toLocaleString()}/month.`,
+    bannerDetails: `${primaryType} recommendation aligned to the current parcel allowance${sizeIsCappedByRules ? " and city size cap" : ""}. Recommended configuration: ${layoutLabel}. Estimated project investment (TruthCore plan pricing): ${formatPriceRange(priceLow, priceHigh)}. ${rentKind === "market" ? "Market rent estimate for this address (RentCast)" : "Planning rent estimate (TruthCore rent table; live market rent unavailable)"}: $${rentLow.toLocaleString()}\u00A0– $${rentHigh.toLocaleString()}/month.`,
   };
 }
 
