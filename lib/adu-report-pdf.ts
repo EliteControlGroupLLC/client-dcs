@@ -238,7 +238,7 @@ class ReportWriter {
     const p = this.page;
     const top = PAGE_H - 40;
     p.drawRectangle({ x: 0, y: PAGE_H - 6, width: PAGE_W, height: 6, color: C.accent });
-    p.drawText(sanitize("Distinct Construction Solutions"), {
+    p.drawText(sanitize("TruthCore"), {
       x: MARGIN_X, y: top, size: 14, font: bold, color: C.accent,
     });
     p.drawText(sanitize("ADU Property Report"), {
@@ -263,7 +263,7 @@ class ReportWriter {
         start: { x: MARGIN_X, y: 36 }, end: { x: PAGE_W - MARGIN_X, y: 36 },
         thickness: 0.5, color: C.rule,
       });
-      const left = sanitize("Distinct Construction Solutions  |  Preliminary planning estimate, not a permit determination");
+      const left = sanitize("TruthCore, a DBA of Distinct Construction Solutions  |  Preliminary planning estimate, not a permit determination");
       p.drawText(left, { x: MARGIN_X, y: 24, size: 7.5, font: regular, color: C.faint });
       const right = sanitize(`Page ${i + 1} of ${total}`);
       const w = regular.widthOfTextAtSize(right, 8);
@@ -536,9 +536,9 @@ export async function buildAduReportPdf(lead: AduReportLead, scanResults: unknow
   const address = str(safeLead.propertyAddress) || str(get(scan, "property", "address", "value")) || str(get(scan, "geocoded", "formattedAddress"));
 
   doc.setTitle(sanitize(`ADU Property Report${address ? ` - ${address}` : ""}`));
-  doc.setAuthor("Distinct Construction Solutions");
+  doc.setAuthor("TruthCore (Distinct Construction Solutions)");
   doc.setSubject("Build Your ADU property report");
-  doc.setCreator("Distinct Construction Solutions");
+  doc.setCreator("TruthCore");
   doc.setProducer("pdf-lib");
   doc.setCreationDate(now);
   doc.setModificationDate(now);
@@ -625,7 +625,7 @@ export async function buildAduReportPdf(lead: AduReportLead, scanResults: unknow
   if (best) {
     w.callout("BEST RECOMMENDATION", bannerDetails && bannerDetails !== best ? `${best}\n${bannerDetails}` : best);
   }
-  // Same rows (and DCS plan pricing) the client saw in "Recommended ADU Paths".
+  // Same rows (and TruthCore plan pricing) the client saw in "Recommended ADU Paths".
   const recs = arr(get(scan, "recommendations")).filter(isObj);
   const feasRows = (recs.length ? recs : arr(get(scan, "enhancedFeasibility")).filter(isObj)).slice(0, 12);
   if (feasRows.length) {
@@ -779,7 +779,7 @@ export async function buildAduReportPdf(lead: AduReportLead, scanResults: unknow
   w.paragraph(finDisclaimer, { size: 8.5, color: C.muted });
   w.space(6);
   w.paragraph(
-    "This report is a pre-feasibility assessment, not a permit approval determination. Contact Distinct Construction Solutions for a site visit and formal feasibility review.",
+    "This report is a pre-feasibility assessment, not a permit approval determination. Contact TruthCore for a site visit and formal feasibility review.",
     { size: 8.5, color: C.muted },
   );
 

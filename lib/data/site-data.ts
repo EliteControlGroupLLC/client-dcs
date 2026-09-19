@@ -10,7 +10,7 @@
 
 export const COMPANY_INFO = {
   name: "Distinct Construction Solutions",
-  shortName: "DCS",
+  shortName: "TruthCore",
   office: "3527 Citrus St, Lemon Grove, CA 91945",
   address: {
     street: "3527 Citrus St",

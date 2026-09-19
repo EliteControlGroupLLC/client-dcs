@@ -1,7 +1,9 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { usePathname } from "next/navigation";
 import { Calculator } from "lucide-react";
+import { isLandingPage } from "@/components/layout/site-chrome";
 import { InstantEstimateModal } from "./instant-estimate-modal";
 
 // Show the floating button only once the visitor has scrolled past the top of
@@ -9,6 +11,7 @@ import { InstantEstimateModal } from "./instant-estimate-modal";
 const REVEAL_AFTER_PX = 480;
 
 export function FloatingEstimateButton() {
+  const pathname = usePathname();
   const [isOpen, setIsOpen] = useState(false);
   const [revealed, setRevealed] = useState(false);
 
@@ -23,6 +26,9 @@ export function FloatingEstimateButton() {
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
+
+  // Ad landing pages (/lp/*) keep visitors on their single lead form
+  if (isLandingPage(pathname)) return null;
 
   return (
     <>

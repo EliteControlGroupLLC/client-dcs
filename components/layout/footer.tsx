@@ -3,6 +3,7 @@ import { Mail, Phone, MapPin, Star, ArrowRight, Shield, CheckCircle2, Building2,
 import { Button } from "@/components/ui/button";
 import { COMPANY_INFO } from "@/lib/data/site-data";
 import { Logo } from "@/components/layout/logo";
+import { SiteChrome } from "@/components/layout/site-chrome";
 
 const footerLinks = {
   services: [
@@ -46,8 +47,17 @@ const trustBadges = [
   { icon: CreditCard, label: "Financing Available" },
 ];
 
+// Footer link: 44px tap target on touch layouts, compact rhythm from lg up.
+const linkClass =
+  "inline-flex min-h-11 items-center text-sm text-white/70 hover:text-primary-light transition-colors lg:min-h-0";
+const legalLinkClass =
+  "inline-flex min-h-11 items-center text-xs text-white/50 hover:text-primary-light transition-colors lg:min-h-0";
+const listClass = "lg:space-y-3";
+
 export function Footer() {
   return (
+    // Ad landing pages (/lp/*) render their own minimal footer
+    <SiteChrome>
     <footer className="relative bg-secondary text-white overflow-hidden">
 
       {/* Soft CTA Section - Replaces Newsletter */}
@@ -60,12 +70,12 @@ export function Footer() {
                 Explore what you can build on your property in minutes using our interactive ADU builder.
               </p>
             </div>
-            <Link href="/build-your-adu">
-              <Button variant="default" size="lg" rounded="full" className="group">
+            <Button asChild size="lg" rounded="full" className="group shrink-0">
+              <Link href="/build-your-adu">
                 Start Building Your ADU
                 <ArrowRight className="h-5 w-5 group-hover:translate-x-1 transition-transform" aria-hidden="true" />
-              </Button>
-            </Link>
+              </Link>
+            </Button>
           </div>
         </div>
       </div>
@@ -105,41 +115,41 @@ export function Footer() {
             </p>
             
             {/* Contact Info */}
-            <div className="space-y-3">
-              <div className="flex items-center gap-3 text-sm">
-                <Phone className="h-4 w-4 text-white/70" />
+            <div className="lg:space-y-3">
+              <div className="flex items-center gap-3 text-sm text-white/70">
+                <Phone className="h-4 w-4 shrink-0" aria-hidden="true" />
                 <div className="flex items-center gap-2">
-                  <a href={`tel:${COMPANY_INFO.phoneHref}`} className="text-white/70 hover:text-primary-light transition-colors">
+                  <a href={`tel:${COMPANY_INFO.phoneHref}`} className="inline-flex min-h-11 items-center hover:text-primary-light transition-colors lg:min-h-0">
                     {COMPANY_INFO.phone}
                   </a>
-                  <span className="text-white/30">|</span>
-                  <a href={`sms:${COMPANY_INFO.phoneHref}`} className="text-white/70 hover:text-primary-light transition-colors text-xs">
+                  <span className="text-white/30" aria-hidden="true">|</span>
+                  <a href={`sms:${COMPANY_INFO.phoneHref}`} className="inline-flex min-h-11 items-center px-1 text-xs hover:text-primary-light transition-colors lg:min-h-0 lg:px-0">
                     Text
                   </a>
                 </div>
               </div>
-              <a href={`mailto:${COMPANY_INFO.email}`} className="flex items-center gap-3 text-sm text-white/70 hover:text-primary-light transition-colors">
-                <Mail className="h-4 w-4" />
-                {COMPANY_INFO.email}
+              <a href={`mailto:${COMPANY_INFO.email}`} className="flex min-h-11 items-center gap-3 text-sm text-white/70 hover:text-primary-light transition-colors lg:min-h-0">
+                <Mail className="h-4 w-4 shrink-0" aria-hidden="true" />
+                <span className="min-w-0 break-all">{COMPANY_INFO.email}</span>
               </a>
-              <div className="flex items-start gap-3 text-sm text-white/70">
-                <MapPin className="h-4 w-4 mt-0.5 shrink-0" />
+              <div className="flex items-start gap-3 py-3 text-sm text-white/70 lg:py-0">
+                <MapPin className="h-4 w-4 mt-0.5 shrink-0" aria-hidden="true" />
                 <span>{COMPANY_INFO.office}</span>
               </div>
             </div>
 
             {/* Social Links */}
-            <div className="flex gap-3 mt-6">
+            <div className="flex flex-wrap gap-3 mt-6">
               {socialLinks.map((social) => (
                 <a
                   key={social.name}
                   href={social.href}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center hover:bg-primary transition-colors"
-                  aria-label={social.name}
+                  className="inline-flex h-11 items-center gap-2 rounded-full bg-white/10 px-4 text-sm font-medium text-white/85 hover:bg-white/15 hover:text-white transition-colors"
                 >
-                  <social.icon className="h-5 w-5" />
+                  <social.icon className="h-4 w-4 fill-accent text-accent" aria-hidden="true" />
+                  {social.name}
                 </a>
               ))}
             </div>
@@ -148,10 +158,10 @@ export function Footer() {
           {/* Services */}
           <div>
             <h3 className="text-sm font-semibold uppercase tracking-wider mb-4">Services</h3>
-            <ul className="space-y-3">
+            <ul className={listClass}>
               {footerLinks.services.map((link) => (
                 <li key={link.name}>
-                  <Link href={link.href} className="text-sm text-white/70 hover:text-primary-light transition-colors">
+                  <Link href={link.href} className={linkClass}>
                     {link.name}
                   </Link>
                 </li>
@@ -162,10 +172,10 @@ export function Footer() {
           {/* Tools */}
           <div>
             <h3 className="text-sm font-semibold uppercase tracking-wider mb-4">Tools</h3>
-            <ul className="space-y-3">
+            <ul className={listClass}>
               {footerLinks.tools.map((link) => (
                 <li key={link.name}>
-                  <Link href={link.href} className="text-sm text-white/70 hover:text-primary-light transition-colors">
+                  <Link href={link.href} className={linkClass}>
                     {link.name}
                   </Link>
                 </li>
@@ -176,10 +186,10 @@ export function Footer() {
           {/* Company */}
           <div>
             <h3 className="text-sm font-semibold uppercase tracking-wider mb-4">Company</h3>
-            <ul className="space-y-3">
+            <ul className={listClass}>
               {footerLinks.company.map((link) => (
                 <li key={link.name}>
-                  <Link href={link.href} className="text-sm text-white/70 hover:text-primary-light transition-colors">
+                  <Link href={link.href} className={linkClass}>
                     {link.name}
                   </Link>
                 </li>
@@ -190,10 +200,10 @@ export function Footer() {
           {/* Resources */}
           <div>
             <h3 className="text-sm font-semibold uppercase tracking-wider mb-4">Resources</h3>
-            <ul className="space-y-3">
+            <ul className={listClass}>
               {footerLinks.resources.map((link) => (
                 <li key={link.name}>
-                  <Link href={link.href} className="text-sm text-white/70 hover:text-primary-light transition-colors">
+                  <Link href={link.href} className={linkClass}>
                     {link.name}
                   </Link>
                 </li>
@@ -201,14 +211,14 @@ export function Footer() {
             </ul>
             {/* Legal links separately */}
             <div className="mt-6 pt-4 border-t border-white/10">
-              <ul className="space-y-3">
+              <ul className={listClass}>
                 <li>
-                  <Link href="/privacy" className="text-xs text-white/50 hover:text-primary-light transition-colors">
+                  <Link href="/privacy" className={legalLinkClass}>
                     Privacy Policy
                   </Link>
                 </li>
                 <li>
-                  <Link href="/terms" className="text-xs text-white/50 hover:text-primary-light transition-colors">
+                  <Link href="/terms" className={legalLinkClass}>
                     Terms of Service
                   </Link>
                 </li>
@@ -230,7 +240,7 @@ export function Footer() {
                 {COMPANY_INFO.name} dba TruthCore • California CSLB License #1098531 • Bonded & Insured
               </p>
             </div>
-            <p className="text-xs text-white/40">
+            <p className="text-xs text-white/50">
               Made by{" "}
               <a
                 href="https://www.ikingdom.org"
@@ -245,5 +255,6 @@ export function Footer() {
         </div>
       </div>
     </footer>
+    </SiteChrome>
   );
 }

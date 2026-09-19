@@ -6,13 +6,35 @@
  * variant="light" -> dark backgrounds      (TRUTH white  + CORE gold)
  */
 
-type LogoVariant = "color" | "light";
+export type LogoVariant = "color" | "light";
 
-const VIEW_BOX = "57.74 510.92 493.58 68.03";
-const TRUTH_PATH =
+export const LOGO_VIEW_BOX = "57.74 510.92 493.58 68.03";
+export const LOGO_TRUTH_PATH =
   "M 147.08 531.88 C 150.64 531.88 153.59 533.61 152.76 538.53 C 152.01 542.91 149.11 544.87 144.88 544.87 L 130.22 544.87 L 132.42 531.88 L 147.08 531.88 Z M 107.83 573.44 L 125.36 573.44 L 127.73 559.53 L 137.55 559.53 L 144.78 573.44 L 165.49 573.44 L 155.11 555.83 C 162.71 552.88 168.86 546.91 170.50 537.24 C 172.99 522.58 164.16 516.76 151.24 516.76 L 117.96 516.76 L 117.46 516.76 L 64.31 516.76 L 61.74 531.88 L 79.80 531.88 L 72.74 573.44 L 90.28 573.44 L 97.33 531.88 L 114.89 531.88 L 107.83 573.44 Z M 283.06 573.44 L 300.59 573.44 L 310.22 516.76 L 292.69 516.76 L 289.16 537.54 L 266.19 537.54 L 266.71 534.45 L 249.18 534.45 L 242.56 573.44 L 260.09 573.44 L 263.62 552.66 L 286.59 552.66 L 283.06 573.44 Z M 168.88 549.63 C 166.06 566.26 174.86 574.95 191.56 574.95 C 208.63 574.95 220.61 566.26 223.44 549.63 L 226.02 534.45 L 208.49 534.45 L 205.70 550.84 C 204.64 557.11 199.87 559.84 194.50 559.84 C 189.06 559.84 185.14 557.11 186.21 550.84 L 191.99 516.76 L 174.46 516.76 L 168.88 549.63 Z M 222.21 573.44 L 239.74 573.44 L 246.80 531.88 L 267.07 531.88 C 267.93 526.84 268.78 521.80 269.64 516.76 C 250.28 516.76 230.92 516.76 211.57 516.76 L 209.00 531.88 L 229.27 531.88 L 222.21 573.44 Z";
-const CORE_PATH =
+export const LOGO_CORE_PATH =
   "M 402.93 559.83 C 393.88 559.83 390.10 554.18 391.67 544.91 C 393.26 535.56 398.95 529.99 408.00 529.99 C 417.11 529.99 420.87 535.41 419.25 544.91 C 417.68 554.18 411.97 559.83 402.93 559.83 Z M 373.96 544.91 C 370.61 564.65 381.30 574.90 400.37 574.90 C 419.51 574.90 433.61 564.65 436.96 544.91 C 440.32 525.16 429.70 514.92 410.56 514.92 C 391.42 514.92 377.32 525.16 373.96 544.91 Z M 471.86 531.72 C 475.40 531.72 478.35 533.45 477.52 538.35 C 476.77 542.72 473.88 544.68 469.66 544.68 L 455.04 544.68 L 457.24 531.72 L 471.86 531.72 Z M 490.22 573.17 L 537.72 573.17 L 540.28 558.10 L 509.61 558.10 L 510.80 551.09 L 538.91 551.09 L 541.01 538.73 L 512.90 538.73 L 514.09 531.72 L 544.76 531.72 L 547.32 516.65 L 499.17 516.65 L 489.71 572.31 L 479.86 555.61 C 487.44 552.67 493.58 546.72 495.22 537.07 C 497.70 522.45 488.89 516.65 476.00 516.65 L 442.32 516.65 L 432.72 573.17 L 450.20 573.17 L 452.56 559.30 L 462.35 559.30 L 469.57 573.17 L 489.57 573.17 L 490.22 573.17 Z M 355.93 551.09 C 353.26 556.59 348.68 559.60 341.52 559.60 C 332.10 559.60 328.73 554.18 330.30 544.91 C 331.89 535.56 337.09 530.21 346.51 530.21 C 353.90 530.21 357.51 533.38 358.15 539.33 L 375.85 536.32 C 375.12 522.38 365.05 515.14 349.07 515.14 C 330.08 515.14 316.07 525.32 312.74 544.91 C 309.41 564.50 320.05 574.68 338.96 574.68 C 354.56 574.68 366.80 567.82 372.53 554.48 L 355.93 551.09 Z";
+
+/** Brand colors of the wordmark (TRUTH on light / on dark, CORE always gold). */
+export const LOGO_COLORS = {
+  truth: "#336666",
+  truthOnDark: "#FFFFFF",
+  core: "#B99A5A",
+} as const;
+
+/**
+ * The wordmark as a standalone SVG string — for HTML string templates such as
+ * the printable property report, where the React <Logo> can't be rendered.
+ * `height` is in CSS px; width follows the aspect ratio.
+ */
+export function logoSvgMarkup(variant: LogoVariant = "color", height = 26): string {
+  const truth = variant === "light" ? LOGO_COLORS.truthOnDark : LOGO_COLORS.truth;
+  return (
+    `<svg xmlns="http://www.w3.org/2000/svg" role="img" aria-label="TruthCore" viewBox="${LOGO_VIEW_BOX}" ` +
+    `height="${height}" style="display:block;height:${height}px;width:auto">` +
+    `<path d="${LOGO_TRUTH_PATH}" fill="${truth}" fill-rule="evenodd"/>` +
+    `<path d="${LOGO_CORE_PATH}" fill="${LOGO_COLORS.core}"/></svg>`
+  );
+}
 
 export function Logo({
   variant = "color",
@@ -21,19 +43,19 @@ export function Logo({
   variant?: LogoVariant;
   className?: string;
 }) {
-  const truthColor = variant === "light" ? "#FFFFFF" : "#336666";
-  const coreColor = "#B99A5A";
+  const truthColor = variant === "light" ? LOGO_COLORS.truthOnDark : LOGO_COLORS.truth;
+  const coreColor = LOGO_COLORS.core;
 
   return (
     <svg
       role="img"
       aria-label="TruthCore"
-      viewBox={VIEW_BOX}
+      viewBox={LOGO_VIEW_BOX}
       className={className}
       style={{ display: "block", width: "auto" }}
     >
-      <path d={TRUTH_PATH} fill={truthColor} fillRule="evenodd" />
-      <path d={CORE_PATH} fill={coreColor} />
+      <path d={LOGO_TRUTH_PATH} fill={truthColor} fillRule="evenodd" />
+      <path d={LOGO_CORE_PATH} fill={coreColor} />
     </svg>
   );
 }

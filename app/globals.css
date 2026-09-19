@@ -25,10 +25,17 @@
   --ring: #336666;
   --radius: 0.5rem;
   
-  /* Status Colors */
-  --destructive: #EF4444;
+  /* Status Colors
+     Success is the brand emerald (no off-palette green). Errors use a red that
+     passes AA as small text on white (4.8:1) plus the soft fill/line/border
+     shades of the sitewide form style (components/ui/form.tsx). */
+  --destructive: #DC2626;
   --destructive-foreground: #ffffff;
-  --success: #22C55E;
+  --destructive-soft: #FEF2F2;    /* invalid field / error box fill */
+  --destructive-line: #FECACA;    /* error box border */
+  --destructive-border: #F87171;  /* invalid field border */
+  --success: #336666;
+  --success-foreground: #ffffff;
   --warning: #F59E0B;
 }
 
@@ -53,7 +60,11 @@
   --color-ring: var(--ring);
   --color-destructive: var(--destructive);
   --color-destructive-foreground: var(--destructive-foreground);
+  --color-destructive-soft: var(--destructive-soft);
+  --color-destructive-line: var(--destructive-line);
+  --color-destructive-border: var(--destructive-border);
   --color-success: var(--success);
+  --color-success-foreground: var(--success-foreground);
   --color-warning: var(--warning);
   --font-sans: var(--font-redhat), 'Red Hat Display', system-ui, sans-serif;
   --font-serif: var(--font-crimson), 'Crimson Text', Georgia, serif;

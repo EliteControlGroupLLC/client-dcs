@@ -1,35 +1,39 @@
 import * as React from "react";
-import { cn } from "@/lib/utils";
+import { fieldClass, FormField, type FieldState } from "@/components/ui/form";
 
 export interface InputProps
-  extends React.InputHTMLAttributes<HTMLInputElement> {
+  extends React.InputHTMLAttributes<HTMLInputElement>,
+    FieldState {
+  /** Convenience: wraps the input in <FormField> with this label. */
   label?: string;
+  /** Convenience: shows an inline error below and applies invalid styling. */
   error?: string;
 }
 
+/**
+ * Text input in the sitewide form style (see components/ui/form.tsx).
+ * Without `label`/`error` it renders a bare <input>, so it drops in anywhere
+ * a raw `<input className={inputClass(...)}>` was used.
+ */
 const Input = React.forwardRef<HTMLInputElement, InputProps>(
-  ({ className, type, label, error, ...props }, ref) => {
+  ({ className, type = "text", label, error, invalid, valid, id, ...props }, ref) => {
+    const autoId = React.useId();
+    const inputId = id ?? (label ? autoId : undefined);
+    const input = (
+      <input
+        id={inputId}
+        type={type}
+        ref={ref}
+        aria-invalid={invalid || !!error || undefined}
+        className={fieldClass({ invalid: invalid || !!error, valid }, className)}
+        {...props}
+      />
+    );
+    if (!label && !error) return input;
     return (
-      <div className="w-full">
-        {label && (
-          <label className="block text-sm font-medium text-foreground mb-2">
-            {label}
-          </label>
-        )}
-        <input
-          type={type}
-          className={cn(
-            "flex h-12 w-full rounded-lg border border-input bg-background px-4 py-3 text-base transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:border-primary disabled:cursor-not-allowed disabled:opacity-50",
-            error && "border-destructive focus-visible:ring-destructive",
-            className
-          )}
-          ref={ref}
-          {...props}
-        />
-        {error && (
-          <p className="mt-1 text-sm text-destructive">{error}</p>
-        )}
-      </div>
+      <FormField label={label} htmlFor={inputId} error={error}>
+        {input}
+      </FormField>
     );
   }
 );

@@ -5,6 +5,7 @@ import { Header } from "@/components/layout/header";
 import { Footer } from "@/components/layout/footer";
 import { FloatingEstimateButton } from "@/components/instant-estimate/floating-estimate-button";
 import { SITE_URL } from "@/lib/site-url";
+import { COMPANY_INFO } from "@/lib/data/site-data";
 
 // TruthCore brand typefaces: Red Hat Display (primary) + Crimson Text (secondary)
 const redHat = Red_Hat_Display({
@@ -29,7 +30,12 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
-  title: "TruthCore | San Diego ADU & Home Construction",
+  // Pages export a bare title ("About Us") and get the brand suffix from the
+  // template; the home page (no title of its own) uses the default.
+  title: {
+    default: "TruthCore | San Diego ADU & Home Construction",
+    template: "%s | TruthCore",
+  },
   description:
     "TruthCore, a DBA of Distinct Construction Solutions, is San Diego's premier design-build construction company specializing in ADUs, custom homes, remodeling, and renovations. Get your free consultation today.",
   keywords: [
@@ -94,20 +100,20 @@ const jsonLd = {
   "@context": "https://schema.org",
   "@type": "LocalBusiness",
   name: "TruthCore",
-  legalName: "Distinct Construction Solutions",
-  alternateName: "Distinct Construction Solutions",
+  legalName: COMPANY_INFO.name,
+  alternateName: COMPANY_INFO.name,
   description:
     "San Diego's premier design-build construction company specializing in ADUs, custom homes, remodeling, and renovations.",
   url: SITE_URL,
   logo: `${SITE_URL}/images/truthcore-logo.png`,
   image: `${SITE_URL}/og-image.jpg`,
-  telephone: "+1-858-833-0705",
+  telephone: COMPANY_INFO.phoneHref,
   address: {
     "@type": "PostalAddress",
-    streetAddress: "3527 Citrus St",
-    addressLocality: "Lemon Grove",
-    addressRegion: "CA",
-    postalCode: "91945",
+    streetAddress: COMPANY_INFO.address.street,
+    addressLocality: COMPANY_INFO.address.city,
+    addressRegion: COMPANY_INFO.address.state,
+    postalCode: COMPANY_INFO.address.zip,
     addressCountry: "US",
   },
   geo: {
@@ -131,7 +137,7 @@ const jsonLd = {
     "@type": "OpeningHoursSpecification",
     dayOfWeek: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"],
     opens: "08:00",
-    closes: "18:00",
+    closes: "16:30", // matches COMPANY_INFO.businessHours
   },
   sameAs: [],
 };

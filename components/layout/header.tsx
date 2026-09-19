@@ -6,6 +6,7 @@ import { usePathname } from "next/navigation";
 import { Menu, X, ChevronDown, ArrowRight, ArrowUpRight, Phone, Store } from "lucide-react";
 import { COMPANY_INFO } from "@/lib/data/site-data";
 import { Logo } from "@/components/layout/logo";
+import { isLandingPage } from "@/components/layout/site-chrome";
 
 const SHOWROOM_HREF = "/showroom";
 const AI_DESIGN_HREF = "https://www.distinctcsolutions.com/showroom/design-ai";
@@ -125,6 +126,9 @@ export function Header() {
     ? "text-secondary/70 hover:text-secondary"
     : "text-white/75 hover:text-white";
   const activeTone = light ? "text-secondary" : "text-white";
+
+  // Ad landing pages (/lp/*) render their own minimal header
+  if (isLandingPage(pathname)) return null;
 
   return (
     <header

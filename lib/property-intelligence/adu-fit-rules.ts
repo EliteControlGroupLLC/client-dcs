@@ -292,7 +292,7 @@ export function evaluateAduTypeFit(facts: SiteFacts, profile: JurisdictionProfil
         sizeLabel: `${range(ADU_MIN_SMALL_SQFT, c.sizeSqFt)} (${c.stories === 2 ? "two-story" : "one-story"})`,
         description: `Only a compact detached unit fits${c.replaces ? ` (by replacing the existing ${removedLabel})` : ""}: the largest open area after required setbacks (${phraseFor(c.stories === 1 ? oneStorySideRearFt : sideRearFt)}) is about ${c.zone.widthFt} × ${c.zone.depthFt} ft.`,
         constraints: [
-          "Compact footprint — below the smallest standard DCS detached plan (400 sq ft)",
+          "Compact footprint — below the smallest standard TruthCore detached plan (400 sq ft)",
           ...(c.replaces ? [`Requires demolishing the existing ${removedLabel}`] : []),
         ],
         stories: c.stories,

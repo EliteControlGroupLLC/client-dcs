@@ -3,7 +3,7 @@ import { cva, type VariantProps } from "class-variance-authority";
 import { cn } from "@/lib/utils";
 
 const buttonVariants = cva(
-  "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-lg text-sm font-semibold transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0",
+  "inline-flex items-center justify-center gap-2 whitespace-nowrap text-sm font-semibold transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0",
   {
     variants: {
       variant: {
@@ -29,15 +29,18 @@ const buttonVariants = cva(
         xl: "h-16 px-10 text-lg",
         icon: "h-11 w-11",
       },
+      // Sitewide CTAs are pills (rounded="full"), so that's the default.
+      // "default"/"lg" keep the squarer rounded-lg shape for internal tools.
       rounded: {
-        default: "rounded-lg",
         full: "rounded-full",
+        default: "rounded-lg",
+        lg: "rounded-lg",
       },
     },
     defaultVariants: {
       variant: "default",
       size: "default",
-      rounded: "default",
+      rounded: "full",
     },
   }
 );
@@ -45,17 +48,27 @@ const buttonVariants = cva(
 export interface ButtonProps
   extends React.ButtonHTMLAttributes<HTMLButtonElement>,
     VariantProps<typeof buttonVariants> {
+  /**
+   * Render the single child element (e.g. a next/link <Link>) with the button
+   * styles instead of a <button> — avoids nesting a <button> inside an <a>:
+   *   <Button asChild size="lg"><Link href="/contact">Start</Link></Button>
+   */
   asChild?: boolean;
 }
 
 const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
-  ({ className, variant, size, rounded, ...props }, ref) => {
+  ({ className, variant, size, rounded, asChild = false, children, ...props }, ref) => {
+    const classes = cn(buttonVariants({ variant, size, rounded, className }));
+    if (asChild && React.isValidElement<{ className?: string }>(children)) {
+      return React.cloneElement(children, {
+        ...(props as Record<string, unknown>),
+        className: cn(classes, children.props.className),
+      });
+    }
     return (
-      <button
-        className={cn(buttonVariants({ variant, size, rounded, className }))}
-        ref={ref}
-        {...props}
-      />
+      <button className={classes} ref={ref} {...props}>
+        {children}
+      </button>
     );
   }
 );
