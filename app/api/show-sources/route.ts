@@ -1,9 +1,11 @@
 // Show Sources API Route
-// SURGICAL FIX: Internal debugging endpoint that shows source candidates,
-// tiers, confidence, and rejection reasons for each important field.
+// Internal debugging endpoint that shows source candidates, tiers, confidence,
+// and rejection reasons for each important field. Admin-only (CRON_SECRET) —
+// nothing on the site calls it, and every call runs a full paid analysis.
+// Uses the same verified-analysis gate as /api/analyze-property.
 
 import { NextRequest, NextResponse } from "next/server";
-import { analyzeProperty } from "@/lib/property-intelligence";
+import { runVerifiedAnalysis } from "@/lib/property-intelligence/verified-analysis";
 import { displayFieldValue, type IntelligenceField } from "@/lib/property-intelligence/types";
 
 /** Tier label from the field's ACTUAL source and status (not a fixed string). */
@@ -16,6 +18,12 @@ function tierOf(f: IntelligenceField<string | number>): string {
 }
 
 export async function POST(request: NextRequest) {
+  const cronSecret = process.env.CRON_SECRET;
+  const provided = request.headers.get("authorization")?.replace(/^Bearer\s+/i, "");
+  if (!cronSecret || provided !== cronSecret) {
+    return NextResponse.json({ error: "Unauthorized — admin access required" }, { status: 401 });
+  }
+
   try {
     const body = await request.json();
     const { address } = body;
@@ -28,7 +36,14 @@ export async function POST(request: NextRequest) {
     }
 
     console.log(`[SHOW-SOURCES] Running source audit for: ${address}`);
-    const result = await analyzeProperty(address);
+    const analysis = await runVerifiedAnalysis(address);
+    if (!analysis.ok) {
+      return NextResponse.json(
+        { success: false, code: analysis.code, message: analysis.message, candidates: analysis.candidates },
+        { status: 422 }
+      );
+    }
+    const { result } = analysis;
 
     // Build the source audit trail for each mandatory field
     const sourceAudit = {

@@ -7,6 +7,8 @@ import { Button } from "@/components/ui/button";
 interface LeadCaptureFormProps {
   propertyAddress: string;
   scanResults: Record<string, unknown>;
+  /** Server signature over scanResults from /api/analyze-property */
+  reportToken?: string | null;
   onReportUnlocked?: () => void;
 }
 
@@ -30,6 +32,7 @@ interface PhoneVerificationState {
 export function LeadCaptureForm({
   propertyAddress,
   scanResults,
+  reportToken,
   onReportUnlocked,
 }: LeadCaptureFormProps) {
   const [step, setStep] = useState<VerificationStep>("form");
@@ -288,6 +291,7 @@ export function LeadCaptureForm({
           phone: phone.trim(),
           propertyAddress: address.trim(),
           scanResults,
+          reportToken,
           verification: {
             emailValidated: emailValidation?.valid || false,
             emailScore: emailValidation?.score || 0,
@@ -369,6 +373,7 @@ export function LeadCaptureForm({
           phone: phone.trim(),
           propertyAddress: address.trim(),
           scanResults,
+          reportToken,
           // Verification data
           verification: {
             emailValidated: emailValidation?.valid || false,
