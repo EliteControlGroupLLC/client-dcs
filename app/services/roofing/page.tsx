@@ -11,13 +11,13 @@ export const metadata: Metadata = {
 
 const roofTypes = [
   {
-    title: "30-Year Composition Shingle",
-    description: "Industry-standard asphalt shingles with excellent value and reliable weather protection for San Diego homes.",
+    title: "GAF Shingle — Value Line",
+    description: "Budget-friendly GAF Timberline architectural shingles, installed as a complete GAF system with a 50-year GAF warranty.",
     price: "$852 / roofing square",
   },
   {
-    title: "50-Year Composition Shingle",
-    description: "Premium architectural shingles with enhanced durability, longer warranty, and superior curb appeal.",
+    title: "GAF Shingle — Premium Line",
+    description: "GAF's thicker, higher-grade shingles for superior curb appeal and performance — same 50-year GAF warranty.",
     price: "$1,100 / roofing square",
   },
   {
@@ -45,8 +45,8 @@ const features = [
   },
   {
     icon: Award,
-    title: "Warranty Protection",
-    description: "Manufacturer warranties up to 50 years plus our workmanship guarantee for peace of mind.",
+    title: "GAF Certified · 50-Year Warranty",
+    description: "As a GAF certified installer, every GAF shingle roof we install carries a 50-year GAF warranty, plus our workmanship guarantee.",
   },
   {
     icon: Layers,

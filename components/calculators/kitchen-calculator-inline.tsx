@@ -15,6 +15,8 @@ import {
   resultCardClass,
 } from "@/components/calculators/calculator-ui";
 import { KITCHEN_ADD_ONS } from "@/components/calculators/pricing";
+import { TierComparison, TierWhy } from "@/components/calculators/tier-explainer";
+import { KITCHEN_TIERS } from "@/components/calculators/tier-details";
 import { LeadGate } from "@/components/lead-gate/lead-gate";
 import { LEAD_GATE_INTERESTS } from "@/lib/lead-gate-interests";
 
@@ -160,6 +162,11 @@ export function KitchenCalculatorInline({ standalone = false }: { standalone?: b
                       {size.label} &bull; {finish.label} Finish
                     </p>
 
+                    <TierWhy
+                      title={finishIndex === 0 ? "What Standard gets you" : `Why ${finish.label} costs more`}
+                      text={KITCHEN_TIERS.options[finishIndex].why}
+                    />
+
                     <div className="border-t border-white/10 pt-6 space-y-3 text-left mb-6">
                       <p className="text-white text-sm font-semibold">Base scope includes:</p>
                       <ul className="text-white/80 text-sm space-y-1">
@@ -185,6 +192,14 @@ export function KitchenCalculatorInline({ standalone = false }: { standalone?: b
                 </CardContent>
               </Card>
             </div>
+
+            <TierComparison
+              title="What you're really paying for"
+              intro="Two kitchens can look similar in a photo and be built completely differently. Here's what changes inside the cabinets, under the counters and behind the walls at every level."
+              ladder={KITCHEN_TIERS}
+              selected={finishIndex}
+              onSelect={setFinishIndex}
+            />
           </div>
         </section>
       </LeadGate>

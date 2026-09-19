@@ -14,6 +14,8 @@ import {
   ResultIcon,
   resultCardClass,
 } from "@/components/calculators/calculator-ui";
+import { TierComparison, TierWhy } from "@/components/calculators/tier-explainer";
+import { BATHROOM_TIERS } from "@/components/calculators/tier-details";
 import { LeadGate } from "@/components/lead-gate/lead-gate";
 import { LEAD_GATE_INTERESTS } from "@/lib/lead-gate-interests";
 
@@ -166,6 +168,11 @@ export function BathroomCalculatorInline({ standalone = false }: { standalone?: 
                       {size.label} &bull; {finish.label} Finish
                     </p>
 
+                    <TierWhy
+                      title={finishIndex === 0 ? "What Standard gets you" : `Why ${finish.label} costs more`}
+                      text={BATHROOM_TIERS.options[finishIndex].why}
+                    />
+
                     <div className="border-t border-white/10 pt-6 space-y-3 text-left mb-6">
                       <p className="text-white text-sm font-semibold">Base scope includes:</p>
                       <ul className="text-white/80 text-sm space-y-1">
@@ -191,6 +198,14 @@ export function BathroomCalculatorInline({ standalone = false }: { standalone?: 
                 </CardContent>
               </Card>
             </div>
+
+            <TierComparison
+              title="It starts behind the wall"
+              intro="Tile and fixtures are what you see. What keeps water out of your walls for decades is underneath. Here's exactly what changes at every finish level."
+              ladder={BATHROOM_TIERS}
+              selected={finishIndex}
+              onSelect={setFinishIndex}
+            />
           </div>
         </section>
       </LeadGate>

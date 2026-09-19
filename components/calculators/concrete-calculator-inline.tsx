@@ -21,6 +21,8 @@ import {
   retainingWallCost,
   retainingWallPricePerLF,
 } from "@/components/calculators/pricing";
+import { TierComparison, TierWhy } from "@/components/calculators/tier-explainer";
+import { CONCRETE_FINISH_WHY, CONCRETE_STRUCTURE } from "@/components/calculators/tier-details";
 import { LeadGate } from "@/components/lead-gate/lead-gate";
 import { LEAD_GATE_INTERESTS } from "@/lib/lead-gate-interests";
 
@@ -144,6 +146,7 @@ export function ConcreteCalculatorInline({ standalone = false }: { standalone?: 
                       >
                         <span>{f.label}</span>
                         <span className="ml-2 text-sm font-normal opacity-90">(from {formatRate(f.pricePerSqFt)}/sq ft)</span>
+                        <span className="block text-xs text-white/80 font-normal mt-1">{CONCRETE_FINISH_WHY[i]}</span>
                       </button>
                     ))}
                   </div>
@@ -223,13 +226,18 @@ export function ConcreteCalculatorInline({ standalone = false }: { standalone?: 
                       </div>
                     )}
 
+                    <TierWhy
+                      title={`Your ${thicknessOptions[thickness].label.split(" (")[0]} slab`}
+                      text={`${CONCRETE_STRUCTURE.options[thickness].specs[0]} · ${CONCRETE_STRUCTURE.options[thickness].specs[1]} · ${CONCRETE_STRUCTURE.options[thickness].specs[2]}. ${CONCRETE_STRUCTURE.options[thickness].why}`}
+                    />
+
                     <div className="border-t border-white/10 pt-6 space-y-3 text-left mb-6">
                       <p className="text-white text-sm font-semibold">Scope assumptions:</p>
                       <ul className="text-white/80 text-sm space-y-1">
-                        <li>&bull; Standard site preparation &amp; grading</li>
-                        <li>&bull; Rebar or fiber mesh reinforcement</li>
+                        <li>&bull; Site preparation, grading &amp; compacted base</li>
+                        <li>&bull; Rebar reinforcement sized to your slab</li>
                         <li>&bull; Forming, pouring &amp; finishing</li>
-                        <li>&bull; Expansion joints &amp; curing</li>
+                        <li>&bull; Control &amp; expansion joints, curing</li>
                       </ul>
                     </div>
 
@@ -246,6 +254,14 @@ export function ConcreteCalculatorInline({ standalone = false }: { standalone?: 
                 </CardContent>
               </Card>
             </div>
+
+            <TierComparison
+              title="Thicker, stronger, more steel"
+              intro="Two slabs can look identical on day one. What decides whether yours cracks under a truck in five years is the thickness, the concrete strength (PSI), the rebar and the base underneath."
+              ladder={CONCRETE_STRUCTURE}
+              selected={thickness}
+              onSelect={setThickness}
+            />
           </div>
         </section>
       </LeadGate>
