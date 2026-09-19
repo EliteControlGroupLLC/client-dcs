@@ -7,7 +7,7 @@ export const FOUNDER = {
 };
 
 export const FOUNDER_STORY_TEASER =
-  "After 12 years in the construction industry, I've seen it all — contractors cutting corners to meet the market price, homeowners taken advantage of, builders working for free just to stay afloat. TruthCore was born to change that.";
+  "After 12 years in the construction industry, I've seen it all — and I've lived it: cutting corners to meet the market price, homeowners hurt by bad work and change orders, building for free just to stay afloat. I made those mistakes myself. TruthCore was born to change that.";
 
 export interface StorySection {
   heading?: string;
@@ -19,10 +19,10 @@ export interface StorySection {
 export const FOUNDER_STORY: StorySection[] = [
   {
     paragraphs: [
-      "After 12 years in the construction industry — working for other general contractors, homeowners, and developers — I've seen it all.",
-      "I've seen dishonest contractors cut corners to make budgets work and still turn a profit, all because we “need” to meet the market price. That market price is set by newly licensed contractors with no experience doing work for close to cost, and everyone else is pressured to match it. The result is frustration and stress for builders who end up cutting corners just to make ends meet.",
-      "I've seen understanding homeowners taken advantage of with change orders and bad work, because they didn't know any better and hired the cheapest guy. And I've seen what looked like great contractors who, behind the scenes, had no systems, no team, no procedures and no accounting — so their clients' funds were poorly managed.",
-      "I've seen developers hand job after job to freshly licensed contractors, making them feel like they're growing and expanding. In the end, the contractor finds out he's been building for free, is in debt to subcontractors he never meant to affect, and is robbing Peter to pay Paul just to keep his company alive.",
+      "After 12 years in the construction industry — working for other general contractors, homeowners, and developers — I've seen it all. And I haven't just seen it: everything I describe here, I've lived. I've been in every one of these positions, and I've made these mistakes myself.",
+      "I've seen contractors cut corners to make budgets work and still turn a profit, all because we \u201Cneed\u201D to meet the market price — and I've been in that position. That market price is set by newly licensed contractors with no experience doing work for close to cost, and everyone else is pressured to match it. I know the frustration and stress of cutting corners just to make ends meet, because I've lived it.",
+      "I've seen understanding homeowners hurt by change orders and bad work because they didn't know any better and hired the cheapest guy — and I've been in that position. I've seen what looked like great contractors who, behind the scenes, had no systems, no team, no procedures and no accounting, so their clients' funds were poorly managed — and I've been in that position too.",
+      "I've seen developers hand job after job to freshly licensed contractors, making them feel like they're growing and expanding — and I've been in that position. In the end, the contractor finds out he's been building for free, is in debt to subcontractors he never meant to affect, and is robbing Peter to pay Paul just to keep his company alive. I know that feeling firsthand.",
     ],
   },
   {
