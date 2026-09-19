@@ -17,15 +17,15 @@ interface OpportunityDetectedCardProps {
 }
 
 function getLevelColor(level: string): string {
-  if (level === "high") return "bg-emerald-50 border-emerald-200 text-emerald-800";
+  if (level === "high") return "bg-primary/5 border-primary/20 text-primary";
   if (level === "moderate") return "bg-amber-50 border-amber-200 text-amber-800";
-  return "bg-blue-50 border-blue-200 text-blue-800";
+  return "bg-primary-light/10 border-primary-light/40 text-secondary";
 }
 
 function getLevelBadge(level: string): string {
-  if (level === "high") return "bg-emerald-100 text-emerald-700";
+  if (level === "high") return "bg-primary/10 text-primary";
   if (level === "moderate") return "bg-amber-100 text-amber-700";
-  return "bg-blue-100 text-blue-700";
+  return "bg-primary-light/10 text-secondary-light";
 }
 
 export function OpportunityDetectedCard({ opportunities }: OpportunityDetectedCardProps) {
@@ -56,13 +56,13 @@ export function OpportunityDetectedCard({ opportunities }: OpportunityDetectedCa
                 <TrendingUp className="h-4 w-4 flex-shrink-0" />
                 <h4 className="font-semibold text-sm">{opp.title}</h4>
               </div>
-              <span className={`text-[10px] font-medium px-2 py-0.5 rounded-full ${getLevelBadge(opp.estimatedUpsideLevel)}`}>
+              <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${getLevelBadge(opp.estimatedUpsideLevel)}`}>
                 {opp.estimatedUpsideLevel === "high" ? "High Potential" : "Worth Exploring"}
               </span>
             </div>
             <p className="text-xs leading-relaxed mb-3 opacity-90">{opp.summary}</p>
             <div className="flex items-center justify-between">
-              <span className="text-[10px] opacity-70">
+              <span className="text-xs opacity-70">
                 {opp.scenarioCount} scenario{opp.scenarioCount > 1 ? "s" : ""} available
               </span>
               <Link

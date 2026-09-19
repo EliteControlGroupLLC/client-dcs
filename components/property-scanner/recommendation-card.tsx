@@ -28,7 +28,7 @@ export function RecommendationCard({ data, isRecommended = false }: Recommendati
 
   return (
     <div
-      className={`relative rounded-2xl border-2 p-6 transition-all hover:shadow-lg ${
+      className={`relative h-full flex flex-col rounded-2xl border-2 p-6 transition-all hover:shadow-lg ${
         isRecommended
           ? "border-primary bg-primary/[0.02] shadow-md"
           : "border-border bg-white hover:border-primary/30"
@@ -44,13 +44,13 @@ export function RecommendationCard({ data, isRecommended = false }: Recommendati
 
       <div className="flex items-start justify-between mb-4">
         <div className="flex items-center gap-3">
-          <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${
+          <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${
             isRecommended ? "bg-primary/10" : "bg-muted"
           }`}>
-            <Icon className={`h-6 w-6 ${isRecommended ? "text-primary" : "text-secondary"}`} />
+            <Icon className={`h-5 w-5 ${isRecommended ? "text-primary" : "text-secondary"}`} />
           </div>
-          <div>
-            <h4 className="font-bold text-secondary">{data.type}</h4>
+          <div className="space-y-1">
+            <h3 className="text-xl font-semibold text-secondary">{data.type}</h3>
             <FeasibilityBadge level={data.feasibility} size="sm" />
           </div>
         </div>
@@ -58,13 +58,13 @@ export function RecommendationCard({ data, isRecommended = false }: Recommendati
 
       <p className="text-sm text-muted-foreground mb-4">{data.description}</p>
 
-      <div className="grid grid-cols-2 gap-3">
+      <div className="grid grid-cols-2 gap-3 mt-auto">
         <div className="bg-muted/50 rounded-xl p-3">
           <p className="text-xs text-muted-foreground">Est. Size Range</p>
           <p className="text-sm font-bold text-secondary">{data.estimatedSizeRange}</p>
         </div>
         <div className="bg-muted/50 rounded-xl p-3">
-          <p className="text-xs text-muted-foreground">Est. Price Range (DCS plan pricing)</p>
+          <p className="text-xs text-muted-foreground">Est. Price Range (TruthCore plan pricing)</p>
           <p className="text-sm font-bold text-primary">{data.priceRange}</p>
         </div>
       </div>

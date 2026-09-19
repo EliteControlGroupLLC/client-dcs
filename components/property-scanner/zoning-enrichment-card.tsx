@@ -20,15 +20,15 @@ interface ZoningEnrichmentCardProps {
 
 export function ZoningEnrichmentCard({ data }: ZoningEnrichmentCardProps) {
   return (
-    <div className="bg-white rounded-2xl border border-border p-5 hover:shadow-lg transition-shadow">
-      <div className="flex items-center justify-between mb-4">
-        <div className="flex items-center gap-2">
-          <div className="w-8 h-8 rounded-lg bg-indigo-50 flex items-center justify-center">
-            <Building2 className="h-4 w-4 text-indigo-600" />
+    <div className="bg-white rounded-2xl border border-border p-6">
+      <div className="flex flex-wrap items-center justify-between gap-3 mb-5">
+        <div className="flex items-center gap-3 min-w-0">
+          <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
+            <Building2 className="h-5 w-5 text-primary" />
           </div>
-          <h3 className="font-semibold text-secondary text-sm">Zoning Enrichment</h3>
+          <h3 className="text-xl font-semibold text-secondary">Zoning Enrichment</h3>
         </div>
-        <span className="text-[10px] bg-indigo-50 text-indigo-600 px-2 py-0.5 rounded-full">
+        <span className="text-xs bg-primary/10 text-primary px-2 py-0.5 rounded-full">
           Planning context
         </span>
       </div>
@@ -78,7 +78,7 @@ export function ZoningEnrichmentCard({ data }: ZoningEnrichmentCardProps) {
               {data.overlayDistricts.map((district) => (
                 <span
                   key={district}
-                  className="text-[10px] bg-slate-100 text-slate-600 px-2 py-0.5 rounded"
+                  className="text-xs bg-muted text-muted-foreground px-2 py-0.5 rounded"
                 >
                   {district}
                 </span>
@@ -88,17 +88,17 @@ export function ZoningEnrichmentCard({ data }: ZoningEnrichmentCardProps) {
         )}
 
         {data.interpretation && (
-          <div className="bg-indigo-50/50 rounded-lg p-3 mt-2">
-            <p className="text-[11px] text-indigo-700 leading-relaxed">{data.interpretation}</p>
+          <div className="bg-muted/30 rounded-lg p-3 mt-2">
+            <p className="text-xs text-secondary leading-relaxed">{data.interpretation}</p>
           </div>
         )}
       </div>
 
-      <div className="flex items-center justify-between mt-4 pt-3 border-t border-border/50">
-        <span className="text-[10px] text-muted-foreground">
+      <div className="flex flex-wrap items-center justify-between gap-2 mt-4 pt-3 border-t border-border/50">
+        <span className="text-xs text-muted-foreground">
           Confidence: {data.confidence}%
         </span>
-        <span className="text-[10px] text-muted-foreground">
+        <span className="text-xs text-muted-foreground">
           Source: Zoneomics zoning data
         </span>
       </div>

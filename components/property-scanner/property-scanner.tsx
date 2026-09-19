@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useCallback, useEffect, useRef } from "react";
-import { Shield, Search, MapPinOff, MapPin, Loader2 } from "lucide-react";
+import { Search, MapPinOff, MapPin, Loader2, BadgeCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { AddressAutocompleteInput } from "./address-autocomplete-input";
 import { PropertyScanLoading } from "./property-scan-loading";
@@ -266,22 +266,22 @@ export function PropertyScanner() {
   const homeAreaSqFt = homeAreaField && homeAreaField.status !== "Unavailable" ? homeAreaField.value : null;
 
   return (
-    <div className="min-h-screen bg-muted pt-20">
-      {/* Hero header */}
-      <div className="bg-gradient-to-br from-secondary via-secondary to-secondary-light text-white py-16 pb-20 relative overflow-hidden">
+    <div className="min-h-screen bg-muted">
+      {/* Hero header — same dark interior hero as the rest of the site
+          (pt-40 clears the fixed 81px header with 80px of breathing room). */}
+      <section className="bg-secondary text-white pt-40 pb-20 relative overflow-hidden">
         <div className="absolute top-10 right-10 w-72 h-72 bg-primary/10 rounded-full blur-3xl" />
         <div className="absolute bottom-0 left-0 w-96 h-96 bg-primary/5 rounded-full blur-3xl" />
 
-        <div className="relative mx-auto max-w-4xl px-4 sm:px-6 lg:px-8 text-center">
-          <div className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-sm rounded-full px-4 py-2 mb-6">
-            <Shield className="h-4 w-4 text-primary-light" />
-            <span className="text-sm">San Diego ADU Eligibility Scanner</span>
-          </div>
+        <div className="relative container mx-auto px-4 max-w-4xl text-center">
+          <span className="inline-block text-primary-light font-semibold text-sm uppercase tracking-wider mb-4">
+            San Diego ADU Eligibility Scanner
+          </span>
 
-          <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold mb-4">
-            Build Your Dream Home or ADU with confidence
+          <h1 className="text-4xl md:text-5xl font-bold mb-6">
+            Build Your Dream Home or ADU with Confidence
           </h1>
-          <p className="text-lg text-white/70 max-w-2xl mx-auto mb-10">
+          <p className="text-xl text-white/80 max-w-2xl mx-auto mb-10">
             Enter your property address and we&apos;ll scan it to estimate what you may be able to build.
           </p>
 
@@ -311,7 +311,7 @@ export function PropertyScanner() {
                   {resolving ? "Finding your property..." : "Scan My Property"}
                 </Button>
               </div>
-              <p className="text-xs text-white/40 mt-4">
+              <p className="text-sm text-white/60 mt-4">
                 Addresses in San Diego County only. Results are preliminary estimates.
               </p>
             </div>
@@ -319,12 +319,13 @@ export function PropertyScanner() {
 
           {(phase === "scanning" || phase === "results") && (
             <div className="animate-fade-in">
-              <div className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-sm rounded-xl px-5 py-3">
+              <div className="inline-flex flex-col sm:flex-row items-center gap-1 sm:gap-3 max-w-full bg-white/10 backdrop-blur-sm rounded-2xl sm:rounded-full px-5 py-3">
                 <span className="text-sm text-white/80">{selectedAddress}</span>
                 {phase === "results" && (
                   <button
+                    type="button"
                     onClick={handleRescan}
-                    className="text-xs text-primary hover:text-primary-light underline ml-2"
+                    className="text-sm font-medium text-primary-light hover:text-white underline underline-offset-4 whitespace-nowrap"
                   >
                     Scan different address
                   </button>
@@ -333,13 +334,13 @@ export function PropertyScanner() {
             </div>
           )}
         </div>
-      </div>
+      </section>
 
       {/* Content area */}
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 -mt-8 pb-16">
+      <div className="container mx-auto px-4 max-w-7xl -mt-8 pb-20">
         {/* Scanning phase */}
         {phase === "scanning" && (
-          <div className="bg-white rounded-3xl shadow-xl border border-border p-8 md:p-12">
+          <div className="bg-white rounded-2xl shadow-xl border border-border p-6 md:p-12">
             <PropertyScanLoading
               address={selectedAddress}
               onComplete={handleScanComplete}
@@ -353,7 +354,7 @@ export function PropertyScanner() {
             role="alert"
             data-testid="scan-lookup-issue"
             data-issue-code={issue.code}
-            className="bg-white rounded-3xl shadow-xl border border-border p-8 md:p-10 max-w-3xl mx-auto animate-fade-in"
+            className="bg-white rounded-2xl shadow-xl border border-border p-6 md:p-10 max-w-3xl mx-auto animate-fade-in"
           >
             <div className="flex items-start gap-4">
               <div className="w-12 h-12 rounded-full bg-primary/10 text-primary flex items-center justify-center flex-shrink-0">
@@ -369,7 +370,7 @@ export function PropertyScanner() {
 
             {issue.candidates.length > 0 && (
               <div className="mt-6">
-                <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground mb-2">
+                <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-2">
                   {issue.candidates.length === 1 ? "Did you mean" : "Choose your property"}
                 </p>
                 <div className="rounded-xl border border-border overflow-hidden">
@@ -391,10 +392,10 @@ export function PropertyScanner() {
             )}
 
             <div className="mt-6 flex flex-wrap items-center gap-3">
-              <Button variant="outline" rounded="full" onClick={handleEditAddress}>
+              <Button variant="outline" size="lg" rounded="full" onClick={handleEditAddress}>
                 Edit address
               </Button>
-              <p className="text-xs text-muted-foreground">
+              <p className="text-sm text-muted-foreground">
                 {issue.code === "OUT_OF_AREA"
                   ? "We currently serve properties in San Diego County."
                   : "Tip: start typing and pick your address from the suggestions."}
@@ -434,14 +435,14 @@ export function PropertyScanner() {
             )}
 
             {/* Main grid: Property info + Map/Diagram */}
-            <div className="grid lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
               {/* Left column - Property Summary, Jurisdiction, and Rules */}
               <div className="lg:col-span-2 space-y-6">
                 <PropertySummaryCard data={analysisData.property} />
 
                 {/* Jurisdiction + Rules side by side on large screens */}
                 {analysisData.jurisdiction && analysisData.aduRulesSnapshot && (
-                  <div className="grid md:grid-cols-2 gap-6">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <JurisdictionSnapshotCard data={analysisData.jurisdiction} />
                     <AduRulesSnapshotCard
                       data={analysisData.aduRulesSnapshot}
@@ -477,7 +478,7 @@ export function PropertyScanner() {
 
             {/* Zoning Enrichment + Rent Estimates row */}
             {(analysisData.zoningEnrichment || analysisData.rentData) && (
-              <div className="grid md:grid-cols-2 gap-6">
+              <div className={`grid grid-cols-1 gap-6 ${analysisData.zoningEnrichment && analysisData.rentData ? "md:grid-cols-2" : ""}`}>
                 {analysisData.zoningEnrichment && (
                   <ZoningEnrichmentCard data={analysisData.zoningEnrichment} />
                 )}
@@ -499,12 +500,12 @@ export function PropertyScanner() {
 
             {/* Recommended ADU Paths */}
             <div>
-              <div className="flex items-center gap-2 mb-6">
+              <div className="mb-6">
                 <h2 className="text-2xl font-bold text-secondary">Recommended ADU Paths</h2>
-                <p className="text-sm text-muted-foreground">Your property may qualify for the following options</p>
+                <p className="text-sm text-muted-foreground mt-1">Your property may qualify for the following options</p>
               </div>
 
-              <div className="grid sm:grid-cols-2 gap-6">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                 {analysisData.recommendations.map((rec) => (
                   <RecommendationCard
                     key={rec.type}
@@ -543,13 +544,13 @@ export function PropertyScanner() {
 
             {/* Disclaimer */}
             <div className="bg-muted/50 rounded-2xl border border-border/50 p-5">
-              <p className="text-[11px] text-muted-foreground leading-relaxed">
+              <p className="text-xs text-muted-foreground text-center leading-relaxed">
                 {analysisData.disclaimer}
               </p>
             </div>
 
-            {/* Floor plans + pricing — all DCS options so clients can compare */}
-            <div className="mt-12 bg-white rounded-2xl border border-border p-6 sm:p-8">
+            {/* Floor plans + pricing — every TruthCore option so clients can compare */}
+            <div className="bg-white rounded-2xl border border-border p-6 sm:p-8">
               <div className="text-center mb-8">
                 <h2 className="text-2xl font-bold text-secondary">Our ADU Floor Plans &amp; Pricing</h2>
                 <p className="text-sm text-muted-foreground mt-2">
@@ -557,24 +558,24 @@ export function PropertyScanner() {
                   turnkey estimates — your site review confirms the exact scope.
                 </p>
               </div>
-              <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
+              <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
                 {FLOOR_PLANS.map((plan) => (
                   <div
                     key={plan.id}
-                    className="rounded-xl border border-border p-5 flex flex-col hover:shadow-md transition-shadow"
+                    className="rounded-2xl border border-border p-6 flex flex-col h-full"
                   >
                     <div className="flex items-baseline justify-between gap-2">
-                      <h3 className="font-bold text-secondary">{plan.name}</h3>
-                      <span className="text-xs text-muted-foreground whitespace-nowrap">
+                      <h3 className="text-xl font-semibold text-secondary">{plan.name}</h3>
+                      <span className="text-sm text-muted-foreground whitespace-nowrap">
                         {plan.sqFt.toLocaleString()} sq ft
                       </span>
                     </div>
-                    <p className="text-xs text-muted-foreground mt-1">
+                    <p className="text-sm text-muted-foreground mt-1 mb-4">
                       {plan.bedrooms === 0 ? "Studio" : `${plan.bedrooms} bed`} · {plan.bathrooms} bath
                     </p>
-                    <div className="mt-4 pt-4 border-t border-border">
+                    <div className="mt-auto pt-4 border-t border-border">
                       <div className="text-lg font-bold text-primary">{plan.priceRange}</div>
-                      <div className="text-xs text-muted-foreground mt-1">
+                      <div className="text-sm text-muted-foreground mt-1">
                         Est. rent ${plan.rentEstimate.low.toLocaleString()}–$
                         {plan.rentEstimate.high.toLocaleString()}/mo
                       </div>
@@ -608,34 +609,36 @@ export function PropertyScanner() {
                 {
                   title: "Instant Property Scan",
                   description: "Get a preliminary ADU eligibility analysis in seconds, not weeks.",
-                  icon: "🔍",
+                  icon: Search,
                 },
                 {
                   title: "San Diego Experts",
                   description: "Our analysis is based on San Diego County ADU regulations and setback requirements.",
-                  icon: "📍",
+                  icon: MapPin,
                 },
                 {
                   title: "Free & No Obligation",
                   description: "Explore your options with zero pressure. Book a review only when you're ready.",
-                  icon: "✓",
+                  icon: BadgeCheck,
                 },
               ].map((item) => (
                 <div
                   key={item.title}
-                  className="bg-white rounded-2xl border border-border p-6 text-center hover:shadow-lg transition-shadow"
+                  className="bg-white rounded-2xl border border-border p-6 text-center h-full"
                 >
-                  <div className="text-3xl mb-3">{item.icon}</div>
-                  <h3 className="font-bold text-secondary mb-2">{item.title}</h3>
+                  <div className="w-12 h-12 rounded-full bg-primary/10 text-primary flex items-center justify-center mx-auto mb-4">
+                    <item.icon className="h-5 w-5" />
+                  </div>
+                  <h3 className="text-xl font-semibold text-secondary mb-2">{item.title}</h3>
                   <p className="text-sm text-muted-foreground">{item.description}</p>
                 </div>
               ))}
             </div>
 
             {/* How it works */}
-            <div className="bg-white rounded-2xl border border-border p-8">
+            <div className="bg-white rounded-2xl border border-border p-6 sm:p-8">
               <h2 className="text-2xl font-bold text-secondary text-center mb-8">How It Works</h2>
-              <div className="grid sm:grid-cols-4 gap-6">
+              <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
                 {[
                   { step: "1", title: "Enter Address", desc: "Type your San Diego property address" },
                   { step: "2", title: "Instant Analysis", desc: "We scan lot size, setbacks, and zoning" },
@@ -646,8 +649,8 @@ export function PropertyScanner() {
                     <div className="w-12 h-12 rounded-full bg-primary/10 text-primary font-bold text-lg flex items-center justify-center mx-auto mb-3">
                       {item.step}
                     </div>
-                    <h4 className="font-semibold text-secondary mb-1">{item.title}</h4>
-                    <p className="text-xs text-muted-foreground">{item.desc}</p>
+                    <h3 className="text-lg font-semibold text-secondary mb-1">{item.title}</h3>
+                    <p className="text-sm text-muted-foreground">{item.desc}</p>
                   </div>
                 ))}
               </div>

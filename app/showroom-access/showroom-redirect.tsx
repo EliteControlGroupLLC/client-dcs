@@ -11,7 +11,7 @@ export function ShowroomRedirect({ to }: { to: string }) {
   }, [to]);
 
   return (
-    <section className="py-16 md:py-24" data-lead-gate="unlocked">
+    <section className="py-20" data-lead-gate="unlocked">
       <div className="container mx-auto px-4 max-w-xl text-center">
         <Loader2 className="h-8 w-8 text-primary animate-spin mx-auto mb-4" />
         <h2 className="text-2xl font-bold text-secondary mb-2">You&apos;re in — opening the showroom…</h2>

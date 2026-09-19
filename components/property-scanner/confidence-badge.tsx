@@ -17,15 +17,15 @@ const config: Record<ConfidenceStatus, {
 }> = {
   Verified: {
     icon: CheckCircle2,
-    bg: "bg-emerald-50",
-    text: "text-emerald-700",
-    border: "border-emerald-200",
+    bg: "bg-primary/5",
+    text: "text-primary",
+    border: "border-primary/20",
   },
   "Cross-checked": {
     icon: RefreshCw,
-    bg: "bg-blue-50",
-    text: "text-blue-700",
-    border: "border-blue-200",
+    bg: "bg-primary-light/10",
+    text: "text-secondary-light",
+    border: "border-primary-light/40",
   },
   Estimated: {
     icon: HelpCircle,
@@ -50,8 +50,8 @@ export function ConfidenceBadge({ status, confidence, sources, size = "sm" }: Co
     <div className="relative inline-block">
       <button
         type="button"
-        className={`inline-flex items-center gap-1 rounded-full border font-medium cursor-help ${c.bg} ${c.text} ${c.border} ${
-          size === "sm" ? "px-2 py-0.5 text-[10px]" : "px-2.5 py-0.5 text-xs"
+        className={`inline-flex items-center gap-1 rounded-full border font-medium whitespace-nowrap cursor-help ${c.bg} ${c.text} ${c.border} ${
+          size === "sm" ? "px-2 py-0.5 text-xs" : "px-2.5 py-0.5 text-xs"
         }`}
         onMouseEnter={() => setShowTooltip(true)}
         onMouseLeave={() => setShowTooltip(false)}
@@ -69,13 +69,13 @@ export function ConfidenceBadge({ status, confidence, sources, size = "sm" }: Co
               {confidence}%
             </span>
           </div>
-          <div className="w-full bg-gray-100 rounded-full h-1.5 mb-2">
+          <div className="w-full bg-muted rounded-full h-1.5 mb-2">
             <div
               className={`h-1.5 rounded-full transition-all ${
                 confidence >= 90
-                  ? "bg-emerald-500"
+                  ? "bg-primary"
                   : confidence >= 75
-                  ? "bg-blue-500"
+                  ? "bg-primary-light"
                   : confidence >= 50
                   ? "bg-amber-500"
                   : "bg-red-500"
@@ -83,7 +83,7 @@ export function ConfidenceBadge({ status, confidence, sources, size = "sm" }: Co
               style={{ width: `${confidence}%` }}
             />
           </div>
-          <p className="text-[10px] text-muted-foreground">
+          <p className="text-xs text-muted-foreground">
             Confidence reflects how strongly this field was cross-checked across available records and property signals.
           </p>
           <div className="absolute top-full left-4 -mt-px">

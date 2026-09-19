@@ -44,13 +44,16 @@ export default function AboutPage() {
   return (
     <div className="min-h-screen">
       {/* Hero */}
-      <section className="bg-secondary text-white py-20">
+      <section className="bg-secondary text-white pt-40 pb-20">
         <div className="container mx-auto px-4">
           <div className="max-w-3xl">
+            <span className="inline-block text-primary-light font-semibold text-sm uppercase tracking-wider mb-4">
+              ABOUT US
+            </span>
             <h1 className="text-4xl md:text-5xl font-bold mb-6">
               {getYearsExperience()}+ years of field experience, design-build discipline, and premium residential execution.
             </h1>
-            <p className="text-xl text-white/80 mb-8">
+            <p className="text-xl text-white/80">
               Distinct Construction Solutions is a Lemon Grove-based design-build firm shaped by hands-on construction experience that began in 2014 and matured into a more disciplined way to deliver residential projects across San Diego County. Today we do business as TruthCore, our DBA &mdash; the same licensed team and the same standards.
             </p>
           </div>
@@ -77,7 +80,7 @@ export default function AboutPage() {
       <section className="py-20">
         <div className="container mx-auto px-4">
           <div className="max-w-3xl mx-auto">
-            <h2 className="text-3xl md:text-4xl font-bold text-secondary mb-6 text-center">
+            <h2 className="text-3xl md:text-4xl font-bold text-secondary mb-12 text-center">
               Our Story
             </h2>
             <div className="space-y-5 text-lg text-muted-foreground">
@@ -105,7 +108,7 @@ export default function AboutPage() {
                 before a single nail was driven.
               </p>
               <p>
-                Today, DCS is one of San Diego&apos;s most trusted ADU and residential construction firms. 
+                Today, TruthCore is one of San Diego&apos;s most trusted ADU and residential construction firms. 
                 We&apos;ve helped homeowners add income-generating units to their properties, build custom homes 
                 from scratch, and renovate spaces that had been neglected for years. Our clients don&apos;t just 
                 hire us &mdash; they refer us. That&apos;s the standard we hold ourselves to.
@@ -121,7 +124,7 @@ export default function AboutPage() {
           <h2 className="text-3xl md:text-4xl font-bold text-secondary text-center mb-12">
             What Sets Us Apart
           </h2>
-          <div className="grid md:grid-cols-4 gap-8">
+          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-8">
             {values.map((value) => {
               const Icon = value.icon;
               return (
@@ -129,7 +132,7 @@ export default function AboutPage() {
                   <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4">
                     <Icon className="h-8 w-8 text-primary" />
                   </div>
-                  <h3 className="font-semibold text-secondary mb-2">{value.title}</h3>
+                  <h3 className="text-xl font-semibold text-secondary mb-2">{value.title}</h3>
                   <p className="text-sm text-muted-foreground">{value.description}</p>
                 </div>
               );
@@ -180,7 +183,7 @@ export default function AboutPage() {
           </h2>
           <Card className="max-w-4xl mx-auto">
             <CardContent className="p-8 md:p-10 text-center">
-              <p className="text-sm font-semibold uppercase tracking-[0.24em] text-primary mb-3">
+              <p className="text-sm font-semibold uppercase tracking-wider text-primary mb-3">
                 Manual approval required
               </p>
               <p className="text-lg text-secondary font-semibold mb-3">
@@ -206,13 +209,13 @@ export default function AboutPage() {
             your vision a reality.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Link href="/contact">
-              <Button size="lg" className="bg-primary hover:bg-primary-dark text-white font-semibold">
+            <Link href="/contact" className="w-full sm:w-auto">
+              <Button size="lg" rounded="full" className="w-full sm:w-auto">
                 Get Free Consultation
               </Button>
             </Link>
-            <Link href="/services/adu-solutions">
-              <Button size="lg" variant="outline" className="border-white text-white hover:bg-white/10">
+            <Link href="/services/adu-solutions" className="w-full sm:w-auto">
+              <Button size="lg" variant="outlineWhite" rounded="full" className="w-full sm:w-auto">
                 Explore Our Services
               </Button>
             </Link>

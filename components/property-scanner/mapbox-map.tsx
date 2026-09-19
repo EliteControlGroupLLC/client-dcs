@@ -71,7 +71,7 @@ export function MapboxMap({ analysisData }: MapboxMapProps) {
         map.addControl(new mapboxgl.NavigationControl({ showCompass: false }), "top-right");
 
         // Add property marker
-        new mapboxgl.Marker({ color: "#1EAEDB" })
+        new mapboxgl.Marker({ color: "#336666" })
           .setLngLat([geocoded.lng, geocoded.lat])
           .addTo(map);
 
@@ -117,7 +117,7 @@ export function MapboxMap({ analysisData }: MapboxMapProps) {
         type: "fill",
         source: "parcel-boundary",
         paint: {
-          "fill-color": "#1EAEDB",
+          "fill-color": "#6FA3A3",
           "fill-opacity": 0.08,
         },
       });
@@ -126,7 +126,7 @@ export function MapboxMap({ analysisData }: MapboxMapProps) {
         type: "line",
         source: "parcel-boundary",
         paint: {
-          "line-color": "#1EAEDB",
+          "line-color": "#6FA3A3",
           "line-width": 2.5,
           "line-dasharray": [2, 1],
         },
@@ -148,7 +148,7 @@ export function MapboxMap({ analysisData }: MapboxMapProps) {
         type: "fill",
         source: "structure-footprint",
         paint: {
-          "fill-color": "#4A5568",
+          "fill-color": "#1A2B2B",
           "fill-opacity": 0.35,
         },
       });
@@ -157,7 +157,7 @@ export function MapboxMap({ analysisData }: MapboxMapProps) {
         type: "line",
         source: "structure-footprint",
         paint: {
-          "line-color": "#2D3748",
+          "line-color": "#1A2B2B",
           "line-width": 1.5,
         },
       });
@@ -182,7 +182,7 @@ export function MapboxMap({ analysisData }: MapboxMapProps) {
         type: "line",
         source: "setback-lines",
         paint: {
-          "line-color": "#E53E3E",
+          "line-color": "#EF4444",
           "line-width": 1.5,
           "line-dasharray": [4, 3],
         },
@@ -204,7 +204,7 @@ export function MapboxMap({ analysisData }: MapboxMapProps) {
         type: "fill",
         source: "buildable-envelope",
         paint: {
-          "fill-color": "#38A169",
+          "fill-color": "#336666",
           "fill-opacity": 0.15,
         },
       });
@@ -213,7 +213,7 @@ export function MapboxMap({ analysisData }: MapboxMapProps) {
         type: "line",
         source: "buildable-envelope",
         paint: {
-          "line-color": "#38A169",
+          "line-color": "#336666",
           "line-width": 2,
         },
       });
@@ -238,7 +238,7 @@ export function MapboxMap({ analysisData }: MapboxMapProps) {
         type: "fill",
         source: "adu-zones",
         paint: {
-          "fill-color": "#D69E2E",
+          "fill-color": "#B99A5A",
           "fill-opacity": 0.25,
         },
       });
@@ -247,7 +247,7 @@ export function MapboxMap({ analysisData }: MapboxMapProps) {
         type: "line",
         source: "adu-zones",
         paint: {
-          "line-color": "#D69E2E",
+          "line-color": "#B99A5A",
           "line-width": 2,
           "line-dasharray": [3, 2],
         },
@@ -288,10 +288,12 @@ export function MapboxMap({ analysisData }: MapboxMapProps) {
   if (mapError || !token) {
     return (
       <div className="bg-white rounded-2xl border border-border overflow-hidden">
-        <div className="p-4 border-b border-border">
-          <div className="flex items-center gap-2">
-            <Map className="h-5 w-5 text-primary" />
-            <h3 className="font-semibold text-secondary">Property Map</h3>
+        <div className="px-6 py-5 border-b border-border">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
+              <Map className="h-5 w-5 text-primary" />
+            </div>
+            <h3 className="text-xl font-semibold text-secondary">Property Map</h3>
           </div>
         </div>
         {analysisData.staticMapUrl ? (
@@ -301,7 +303,7 @@ export function MapboxMap({ analysisData }: MapboxMapProps) {
               alt="Satellite view of property"
               className="w-full h-[300px] object-cover"
             />
-            <div className="absolute bottom-2 left-2 bg-black/60 backdrop-blur-sm text-white text-xs px-2 py-1 rounded">
+            <div className="absolute bottom-2 left-2 bg-secondary/80 backdrop-blur-sm text-white text-xs px-2 py-1 rounded-full">
               Satellite View
             </div>
           </div>
@@ -312,16 +314,16 @@ export function MapboxMap({ analysisData }: MapboxMapProps) {
             rel="noopener noreferrer"
             className="block"
           >
-            <div className="h-[300px] bg-gradient-to-br from-slate-100 to-slate-200 flex items-center justify-center">
+            <div className="h-[300px] bg-gradient-to-br from-muted to-border flex items-center justify-center">
               <div className="text-center">
-                <Map className="h-10 w-10 text-slate-400 mx-auto mb-2" />
-                <p className="text-sm text-slate-500">Click to view on Google Maps</p>
+                <Map className="h-10 w-10 text-muted-foreground mx-auto mb-2" />
+                <p className="text-sm text-muted-foreground">Click to view on Google Maps</p>
               </div>
             </div>
           </a>
         ) : (
-          <div className="h-[300px] bg-gradient-to-br from-slate-100 to-slate-200 flex items-center justify-center">
-            <p className="text-sm text-slate-400">Map unavailable</p>
+          <div className="h-[300px] bg-gradient-to-br from-muted to-border flex items-center justify-center">
+            <p className="text-sm text-muted-foreground">Map unavailable</p>
           </div>
         )}
       </div>
@@ -331,14 +333,16 @@ export function MapboxMap({ analysisData }: MapboxMapProps) {
   return (
     <div className="bg-white rounded-2xl border border-border overflow-hidden">
       {/* Header */}
-      <div className="p-4 border-b border-border">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <Map className="h-5 w-5 text-primary" />
-            <h3 className="font-semibold text-secondary">Parcel Visualization</h3>
+      <div className="px-6 py-5 border-b border-border">
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <div className="flex items-center gap-3 min-w-0">
+            <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
+              <Map className="h-5 w-5 text-primary" />
+            </div>
+            <h3 className="text-xl font-semibold text-secondary">Parcel Visualization</h3>
           </div>
           {visualization && (
-            <span className="text-[10px] bg-primary/10 text-primary px-2 py-0.5 rounded-full">
+            <span className="text-xs bg-primary/10 text-primary px-2 py-0.5 rounded-full">
               {visualization.geometryConfidence}% geometry confidence
             </span>
           )}
@@ -350,10 +354,10 @@ export function MapboxMap({ analysisData }: MapboxMapProps) {
         <div ref={mapContainerRef} className="h-[350px] w-full" />
 
         {!mapLoaded && (
-          <div className="absolute inset-0 bg-slate-100 flex items-center justify-center">
+          <div className="absolute inset-0 bg-muted flex items-center justify-center">
             <div className="text-center">
               <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-2" />
-              <p className="text-xs text-slate-500">Loading map...</p>
+              <p className="text-xs text-muted-foreground">Loading map...</p>
             </div>
           </div>
         )}
@@ -361,31 +365,31 @@ export function MapboxMap({ analysisData }: MapboxMapProps) {
 
       {/* Layer controls */}
       {visualization && mapLoaded && (
-        <div className="p-3 border-t border-border bg-slate-50/50">
+        <div className="p-3 border-t border-border bg-muted/50">
           <div className="flex items-center gap-1 mb-2">
             <Layers className="h-3.5 w-3.5 text-muted-foreground" />
-            <span className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider">Layers</span>
+            <span className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Layers</span>
           </div>
           <div className="flex flex-wrap gap-1.5">
             {[
-              { key: "parcel" as const, label: "Parcel", color: "#1EAEDB" },
-              { key: "structure" as const, label: "Structure", color: "#4A5568" },
-              { key: "setbacks" as const, label: "Setbacks", color: "#E53E3E" },
-              { key: "buildable" as const, label: "Buildable", color: "#38A169" },
-              { key: "aduZones" as const, label: "ADU Zones", color: "#D69E2E" },
+              { key: "parcel" as const, label: "Parcel", color: "#6FA3A3" },
+              { key: "structure" as const, label: "Structure", color: "#1A2B2B" },
+              { key: "setbacks" as const, label: "Setbacks", color: "#EF4444" },
+              { key: "buildable" as const, label: "Buildable", color: "#336666" },
+              { key: "aduZones" as const, label: "ADU Zones", color: "#B99A5A" },
             ].map(({ key, label, color }) => (
               <button
                 key={key}
                 onClick={() => toggleLayer(key)}
-                className={`inline-flex items-center gap-1 px-2 py-1 rounded text-[10px] font-medium transition-all ${
+                className={`inline-flex items-center gap-1 px-2 py-1 rounded text-xs font-medium transition-all ${
                   layers[key]
                     ? "bg-white border border-border shadow-sm"
-                    : "bg-slate-100 border border-transparent text-muted-foreground"
+                    : "bg-muted border border-transparent text-muted-foreground"
                 }`}
               >
                 <span
                   className="w-2 h-2 rounded-full"
-                  style={{ backgroundColor: layers[key] ? color : "#CBD5E0" }}
+                  style={{ backgroundColor: layers[key] ? color : "#E2E8E8" }}
                 />
                 {label}
                 {layers[key] ? (

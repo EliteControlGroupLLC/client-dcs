@@ -1,7 +1,7 @@
 import { PropertyScanner } from "@/components/property-scanner/property-scanner";
 
 export const metadata = {
-  title: "Build Your ADU | Property Eligibility Scanner | Distinct Construction Solutions",
+  title: "Build Your ADU | Property Eligibility Scanner | TruthCore",
   description: "Scan your San Diego property to instantly see what ADU options may fit. Get estimated feasibility, buildable area analysis, and recommended ADU paths.",
 };
 

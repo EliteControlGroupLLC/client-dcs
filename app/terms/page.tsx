@@ -3,18 +3,23 @@ import { COMPANY_INFO } from "@/lib/data/site-data";
 export default function TermsPage() {
   return (
     <div className="min-h-screen">
-      <section className="bg-secondary text-white py-20">
+      <section className="bg-secondary text-white pt-40 pb-20">
         <div className="container mx-auto px-4">
-          <h1 className="text-4xl md:text-5xl font-bold mb-4">Terms of Service</h1>
-          <p className="text-white/80">Last updated: March 2026</p>
+          <div className="max-w-3xl">
+            <span className="inline-block text-primary-light font-semibold text-sm uppercase tracking-wider mb-4">
+              LEGAL
+            </span>
+            <h1 className="text-4xl md:text-5xl font-bold mb-6">Terms of Service</h1>
+            <p className="text-xl text-white/80">Last updated: March 2026</p>
+          </div>
         </div>
       </section>
 
       <section className="py-20">
-        <div className="container mx-auto px-4 max-w-3xl prose prose-lg">
+        <div className="container mx-auto px-4 max-w-3xl">
           <h2 className="text-2xl font-bold text-secondary mb-4">Acceptance of Terms</h2>
           <p className="text-muted-foreground mb-6">
-            By accessing and using the Distinct Construction Solutions website, you accept and agree to be
+            By accessing and using the TruthCore website, operated by Distinct Construction Solutions, you accept and agree to be
             bound by these Terms of Service. If you do not agree, please do not use our website.
           </p>
 

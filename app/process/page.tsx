@@ -8,7 +8,7 @@ const stepIcons = [Pencil, DollarSign, FileText, Hammer, CheckCircle];
 export default function ProcessPage() {
   return (
     <div className="min-h-screen">
-      <section className="bg-secondary text-white py-20">
+      <section className="bg-secondary text-white pt-40 pb-20">
         <div className="container mx-auto px-4">
           <div className="max-w-3xl">
             <span className="inline-block text-primary-light font-semibold text-sm uppercase tracking-wider mb-4">
@@ -17,7 +17,7 @@ export default function ProcessPage() {
             <h1 className="text-4xl md:text-5xl font-bold mb-6">
               Simple, Transparent, Proven Process
             </h1>
-            <p className="text-xl text-white/80 mb-8">
+            <p className="text-xl text-white/80">
               We&apos;ve structured our process to help homeowners plan with confidence and move
               smoothly from idea to completed project.
             </p>
@@ -42,7 +42,7 @@ export default function ProcessPage() {
                   </div>
                   <div className="pb-8">
                     <div className="flex items-center gap-3 mb-2">
-                      <h3 className="text-xl font-bold text-secondary">{item.title}</h3>
+                      <h3 className="text-xl font-semibold text-secondary">{item.title}</h3>
                       <span className="text-xs font-semibold text-primary bg-primary/10 px-3 py-1 rounded-full">
                         {item.timeline}
                       </span>
@@ -63,13 +63,13 @@ export default function ProcessPage() {
             Take the first step toward your dream project. Our team is ready to guide you through every step.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Link href="/build-your-adu">
-              <Button size="lg" className="bg-primary hover:bg-primary-dark text-white font-semibold">
-                Build Your ADU <ArrowRight className="h-5 w-5 ml-2" />
+            <Link href="/build-your-adu" className="w-full sm:w-auto">
+              <Button size="lg" rounded="full" className="w-full sm:w-auto">
+                Build Your ADU <ArrowRight className="h-5 w-5" />
               </Button>
             </Link>
-            <Link href="/contact">
-              <Button size="lg" variant="outline" className="border-white text-white hover:bg-white/10">
+            <Link href="/contact" className="w-full sm:w-auto">
+              <Button size="lg" variant="outlineWhite" rounded="full" className="w-full sm:w-auto">
                 Schedule Consultation
               </Button>
             </Link>

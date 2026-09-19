@@ -1,6 +1,6 @@
 "use client";
 
-import { AlertTriangle } from "lucide-react";
+import { AlertTriangle, LandPlot } from "lucide-react";
 import type { StrictGeometryResult } from "@/lib/property-intelligence/strict-geometry-pipeline";
 
 // ─── Types ───
@@ -139,8 +139,13 @@ function FallbackDiagram({
 }) {
   return (
     <div className="bg-white rounded-2xl border border-border p-6">
-      <h4 className="text-sm font-semibold text-secondary mb-1">Site Layout Diagram</h4>
-      <p className="text-xs text-muted-foreground mb-4">
+      <div className="flex items-center gap-3 mb-3">
+        <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
+          <LandPlot className="h-5 w-5 text-primary" />
+        </div>
+        <h3 className="text-xl font-semibold text-secondary">Site Layout Diagram</h3>
+      </div>
+      <p className="text-sm text-muted-foreground mb-4">
         Real geometry data required
       </p>
 
@@ -155,7 +160,7 @@ function FallbackDiagram({
               {message}
             </p>
             {sourceAudit && (
-              <div className="text-[10px] text-amber-600 space-y-1">
+              <div className="text-xs text-amber-600 space-y-1">
                 {sourceAudit.parcelGISReason && (
                   <p>Parcel data: {sourceAudit.parcelGISReason}</p>
                 )}
@@ -168,7 +173,7 @@ function FallbackDiagram({
         </div>
       </div>
 
-      <p className="text-[10px] text-muted-foreground mt-3 text-center">
+      <p className="text-xs text-muted-foreground mt-3 text-center">
         Contact us for a verified site analysis with accurate measurements.
       </p>
     </div>
@@ -294,17 +299,22 @@ function RealGeometryDiagram({
 
   return (
     <div className="bg-white rounded-2xl border border-border p-6">
-      <div className="flex items-center justify-between mb-1">
-        <h4 className="text-sm font-semibold text-secondary">Site Layout Diagram</h4>
-        <span className={`text-[10px] px-2 py-0.5 rounded-full ${
-          confidence >= 80 ? "bg-green-100 text-green-700" :
+      <div className="flex flex-wrap items-center justify-between gap-3 mb-3">
+        <div className="flex items-center gap-3 min-w-0">
+          <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
+            <LandPlot className="h-5 w-5 text-primary" />
+          </div>
+          <h3 className="text-xl font-semibold text-secondary">Site Layout Diagram</h3>
+        </div>
+        <span className={`text-xs px-2 py-0.5 rounded-full whitespace-nowrap ${
+          confidence >= 80 ? "bg-primary/10 text-primary" :
           confidence >= 60 ? "bg-amber-100 text-amber-700" :
           "bg-red-100 text-red-700"
         }`}>
           {confidence}% geometry confidence
         </span>
       </div>
-      <p className="text-xs text-muted-foreground mb-4">
+      <p className="text-sm text-muted-foreground mb-4">
         {status === "geometry-verified"
           ? "Drawn to scale from the County parcel map and traced building outlines (north is up)"
           : "Partial geometry data - some elements estimated"}
@@ -409,7 +419,7 @@ function RealGeometryDiagram({
               x={buildableLabelX}
               y={buildableLabelY - 6}
               textAnchor="middle"
-              className="text-[11px] font-bold"
+              className="text-xs font-bold"
               fill="#25514F"
             >
               ADU Buildable Area
@@ -418,7 +428,7 @@ function RealGeometryDiagram({
               x={buildableLabelX}
               y={buildableLabelY + 8}
               textAnchor="middle"
-              className="text-[9px]"
+              className="text-xs"
               fill="#25514F"
             >
               After setbacks & separation
@@ -450,7 +460,7 @@ function RealGeometryDiagram({
       </svg>
 
       {metrics && (
-        <p className="mt-2 text-[10px] text-muted-foreground text-center">
+        <p className="mt-2 text-xs text-muted-foreground text-center">
           Measured yards around the home (street side = front): front {metrics.frontYardDepthFt} ft · rear{" "}
           {metrics.rearYardDepthFt} ft · sides {metrics.leftSideYardFt} ft / {metrics.rightSideYardFt} ft
         </p>
@@ -458,7 +468,7 @@ function RealGeometryDiagram({
 
       {/* Data source attribution */}
       <div className="mt-3 pt-3 border-t border-border/50">
-        <p className="text-[9px] text-muted-foreground text-center">
+        <p className="text-xs text-muted-foreground text-center">
           Parcel: {parcelSource === "regrid-parcel-api" ? "Regrid Parcel API" : parcelSource === "provided" ? "Polygon Engine" : parcelSource || "Polygon Engine"} | Building: {buildingSource === "microsoft-footprints" ? "Microsoft Building Footprints" : buildingSource === "provided" ? "Polygon Engine" : buildingSource || "Polygon Engine"}
         </p>
       </div>
@@ -509,13 +519,18 @@ function EstimatedDiagram({
 
   return (
     <div className="bg-white rounded-2xl border border-border p-6">
-      <div className="flex items-center justify-between mb-1">
-        <h4 className="text-sm font-semibold text-secondary">Site Layout Diagram</h4>
-        <span className="text-[10px] px-2 py-0.5 rounded-full bg-amber-100 text-amber-700">
+      <div className="flex flex-wrap items-center justify-between gap-3 mb-3">
+        <div className="flex items-center gap-3 min-w-0">
+          <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
+            <LandPlot className="h-5 w-5 text-primary" />
+          </div>
+          <h3 className="text-xl font-semibold text-secondary">Site Layout Diagram</h3>
+        </div>
+        <span className="text-xs px-2 py-0.5 rounded-full bg-amber-100 text-amber-700">
           Estimated
         </span>
       </div>
-      <p className="text-xs text-muted-foreground mb-4">
+      <p className="text-sm text-muted-foreground mb-4">
         Estimated property layout - dimensions are approximate
       </p>
 
@@ -607,7 +622,7 @@ function EstimatedDiagram({
               x={aduZoneX + aduZoneW / 2}
               y={aduZoneY + Math.max(aduZoneH, 20) / 2 - 4}
               textAnchor="middle"
-              className="text-[11px] font-bold"
+              className="text-xs font-bold"
               fill="#25514F"
             >
               ADU Build Zone
@@ -616,7 +631,7 @@ function EstimatedDiagram({
               x={aduZoneX + aduZoneW / 2}
               y={aduZoneY + Math.max(aduZoneH, 20) / 2 + 10}
               textAnchor="middle"
-              className="text-[9px]"
+              className="text-xs"
               fill="#25514F"
             >
               Estimated buildable area
@@ -653,7 +668,7 @@ function EstimatedDiagram({
 
       {/* Estimated data warning */}
       <div className="mt-3 pt-3 border-t border-border/50">
-        <p className="text-[9px] text-amber-600 text-center">
+        <p className="text-xs text-amber-600 text-center">
           This diagram uses estimated dimensions. Real geometry data unavailable.
         </p>
       </div>

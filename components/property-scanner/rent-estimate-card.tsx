@@ -32,20 +32,20 @@ interface RentEstimateCardProps {
 
 export function RentEstimateCard({ data }: RentEstimateCardProps) {
   return (
-    <div className="bg-white rounded-2xl border border-border p-5 hover:shadow-lg transition-shadow">
-      <div className="flex items-center justify-between mb-4">
-        <div className="flex items-center gap-2">
-          <div className="w-8 h-8 rounded-lg bg-emerald-50 flex items-center justify-center">
-            <DollarSign className="h-4 w-4 text-emerald-600" />
+    <div className="bg-white rounded-2xl border border-border p-6">
+      <div className="flex flex-wrap items-center justify-between gap-3 mb-5">
+        <div className="flex items-center gap-3 min-w-0">
+          <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
+            <DollarSign className="h-5 w-5 text-primary" />
           </div>
-          <h3 className="font-semibold text-secondary text-sm">Rent Estimates</h3>
+          <h3 className="text-xl font-semibold text-secondary">Rent Estimates</h3>
         </div>
         {data.source === "rentcast" ? (
-          <span className="text-[10px] px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-600">
+          <span className="text-xs px-2 py-0.5 rounded-full bg-primary/5 text-primary">
             RentCast market estimate
           </span>
         ) : (
-          <span className="text-[10px] px-2 py-0.5 rounded-full bg-amber-50 text-amber-700">
+          <span className="text-xs px-2 py-0.5 rounded-full bg-amber-50 text-amber-700">
             Planning estimate
           </span>
         )}
@@ -53,14 +53,14 @@ export function RentEstimateCard({ data }: RentEstimateCardProps) {
 
       <div className="space-y-3">
         {data.estimates.map((est) => (
-          <div key={est.aduType} className="bg-slate-50 rounded-xl p-3">
+          <div key={est.aduType} className="bg-muted rounded-xl p-3">
             <div className="flex items-center justify-between mb-2">
               <span className="text-xs font-semibold text-secondary capitalize">
                 {est.aduType.replace(/-/g, " ")}
               </span>
               <div className="flex items-center gap-1">
-                <TrendingUp className="h-3 w-3 text-emerald-500" />
-                <span className="text-sm font-bold text-emerald-600">
+                <TrendingUp className="h-3 w-3 text-primary" />
+                <span className="text-sm font-bold text-primary">
                   ${est.monthlyRent.toLocaleString()}/mo
                 </span>
               </div>
@@ -68,17 +68,17 @@ export function RentEstimateCard({ data }: RentEstimateCardProps) {
 
             <div className="grid grid-cols-3 gap-2">
               <div>
-                <p className="text-[10px] text-muted-foreground">Annual</p>
+                <p className="text-xs text-muted-foreground">Annual</p>
                 <p className="text-xs font-semibold text-secondary">
                   ${est.annualRent.toLocaleString()}
                 </p>
               </div>
               <div>
-                <p className="text-[10px] text-muted-foreground">Range</p>
-                <p className="text-[11px] font-medium text-secondary">{est.rentRange}</p>
+                <p className="text-xs text-muted-foreground">Range</p>
+                <p className="text-xs font-medium text-secondary">{est.rentRange}</p>
               </div>
               <div>
-                <p className="text-[10px] text-muted-foreground">$/sqft</p>
+                <p className="text-xs text-muted-foreground">$/sqft</p>
                 <p className="text-xs font-semibold text-secondary">
                   {Number.isFinite(est.pricePerSqft) ? `$${est.pricePerSqft.toFixed(2)}` : "—"}
                 </p>
@@ -90,10 +90,10 @@ export function RentEstimateCard({ data }: RentEstimateCardProps) {
 
       {data.source === "rentcast" && data.comparables && data.comparables.length > 0 && (
         <div className="mt-3 space-y-1">
-          <p className="text-[10px] font-medium text-secondary">Nearby rental comparables</p>
+          <p className="text-xs font-medium text-secondary">Nearby rental comparables</p>
           {data.comparables.slice(0, 3).map((c) => (
-            <p key={c.address} className="text-[10px] text-muted-foreground flex justify-between gap-2">
-              <span className="truncate">
+            <p key={c.address} className="text-xs text-muted-foreground flex justify-between gap-2 min-w-0">
+              <span className="truncate min-w-0">
                 {c.address}
                 {c.squareFootage ? ` · ${c.squareFootage.toLocaleString()} sq ft` : ""}
                 {c.bedrooms != null ? ` · ${c.bedrooms} bd` : ""}
@@ -106,7 +106,7 @@ export function RentEstimateCard({ data }: RentEstimateCardProps) {
       )}
 
       <div className="mt-4 pt-3 border-t border-border/50">
-        <span className="text-[10px] text-muted-foreground">
+        <span className="text-xs text-muted-foreground">
           {data.basis ??
             (data.source === "rentcast"
               ? "RentCast rent estimate for this address"

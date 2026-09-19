@@ -29,6 +29,24 @@ interface PhoneVerificationState {
   lastSentAt?: number;
 }
 
+// Same field + error styling as the site-wide lead gate (components/lead-gate).
+const inputClass = (invalid: boolean, valid = false) =>
+  `w-full h-11 px-3 rounded-lg border text-sm text-secondary placeholder:text-muted-foreground/70 focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all ${
+    invalid ? "border-red-400 bg-red-50" : valid ? "border-primary/40 bg-primary/5 pr-9" : "border-border bg-white"
+  }`;
+
+const labelClass = "block text-xs font-medium text-muted-foreground mb-1.5";
+
+function FieldError({ message }: { message?: string }) {
+  if (!message) return null;
+  return (
+    <p className="text-xs text-red-600 mt-1 flex items-center gap-1" role="alert">
+      <AlertCircle className="h-3 w-3 shrink-0" />
+      {message}
+    </p>
+  );
+}
+
 export function LeadCaptureForm({
   propertyAddress,
   scanResults,
@@ -410,8 +428,8 @@ export function LeadCaptureForm({
       <div className="bg-white rounded-2xl border-2 border-primary/30 shadow-2xl overflow-hidden">
         {/* Header */}
         <div className="bg-gradient-to-r from-secondary to-secondary-light text-white p-6 text-center">
-          <div className="inline-flex items-center justify-center w-14 h-14 bg-white/10 rounded-full mb-4">
-            <Phone className="h-7 w-7" />
+          <div className="inline-flex items-center justify-center w-12 h-12 bg-white/10 rounded-full mb-4">
+            <Phone className="h-6 w-6 text-primary-light" />
           </div>
           <h3 className="text-xl font-bold mb-2">Verify Your Phone Number</h3>
           <p className="text-sm text-white/80 max-w-md mx-auto">
@@ -422,11 +440,13 @@ export function LeadCaptureForm({
         {/* OTP Form */}
         <div className="p-6 space-y-4">
           <div>
-            <label className="block text-xs font-medium text-muted-foreground mb-1.5">
+            <label htmlFor="lcf-code" className={labelClass}>
               Verification Code
             </label>
             <input
+              id="lcf-code"
               type="text"
+              autoComplete="one-time-code"
               inputMode="numeric"
               pattern="[0-9]*"
               maxLength={6}
@@ -437,12 +457,7 @@ export function LeadCaptureForm({
                 errors.otp ? "border-red-400 bg-red-50" : "border-border"
               }`}
             />
-            {errors.otp && (
-              <p className="text-xs text-red-500 mt-1 flex items-center gap-1">
-                <AlertCircle className="h-3 w-3" />
-                {errors.otp}
-              </p>
-            )}
+            <FieldError message={errors.otp} />
           </div>
 
           {errors.form && (
@@ -483,7 +498,7 @@ export function LeadCaptureForm({
                 type="button"
                 onClick={sendOtpCode}
                 disabled={sendingOtp}
-                className="text-xs text-primary hover:underline disabled:opacity-50"
+                className="min-h-11 px-2 text-xs text-primary hover:underline disabled:opacity-50"
               >
                 {sendingOtp ? "Sending..." : "Didn't receive the code? Resend"}
               </button>
@@ -498,7 +513,7 @@ export function LeadCaptureForm({
               setOtpCode("");
               setPhoneVerification({ codeSent: false, verified: false });
             }}
-            className="w-full text-xs text-muted-foreground hover:text-foreground transition-colors"
+            className="w-full min-h-11 text-xs text-muted-foreground hover:text-secondary transition-colors"
           >
             Use a different phone number
           </button>
@@ -512,8 +527,8 @@ export function LeadCaptureForm({
     <div className="bg-white rounded-2xl border-2 border-primary/30 shadow-2xl overflow-hidden">
       {/* Header */}
       <div className="bg-gradient-to-r from-secondary to-secondary-light text-white p-6 text-center">
-        <div className="inline-flex items-center justify-center w-14 h-14 bg-white/10 rounded-full mb-4">
-          <Lock className="h-7 w-7" />
+        <div className="inline-flex items-center justify-center w-12 h-12 bg-white/10 rounded-full mb-4">
+          <Lock className="h-6 w-6 text-primary-light" />
         </div>
         <h3 className="text-xl font-bold mb-2">Unlock Your Free ADU Feasibility Report</h3>
         <p className="text-sm text-white/80 max-w-md mx-auto">
@@ -522,54 +537,53 @@ export function LeadCaptureForm({
       </div>
 
       {/* Form */}
-      <form onSubmit={handleFormSubmit} className="p-6 space-y-4">
+      <form onSubmit={handleFormSubmit} className="p-6 space-y-4" noValidate>
         <div className="grid sm:grid-cols-2 gap-4">
           <div>
-            <label className="block text-xs font-medium text-muted-foreground mb-1.5">
+            <label htmlFor="lcf-first" className={labelClass}>
               <User className="h-3 w-3 inline mr-1" />
               First Name *
             </label>
             <input
+              id="lcf-first"
               type="text"
+              autoComplete="given-name"
               value={firstName}
               onChange={(e) => setFirstName(e.target.value)}
               placeholder="John"
-              className={`w-full px-3 py-2.5 rounded-lg border text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all ${
-                errors.firstName ? "border-red-400 bg-red-50" : "border-border"
-              }`}
+              className={inputClass(!!errors.firstName)}
             />
-            {errors.firstName && (
-              <p className="text-xs text-red-500 mt-1">{errors.firstName}</p>
-            )}
+            <FieldError message={errors.firstName} />
           </div>
           <div>
-            <label className="block text-xs font-medium text-muted-foreground mb-1.5">
+            <label htmlFor="lcf-last" className={labelClass}>
               <User className="h-3 w-3 inline mr-1" />
               Last Name *
             </label>
             <input
+              id="lcf-last"
               type="text"
+              autoComplete="family-name"
               value={lastName}
               onChange={(e) => setLastName(e.target.value)}
               placeholder="Smith"
-              className={`w-full px-3 py-2.5 rounded-lg border text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all ${
-                errors.lastName ? "border-red-400 bg-red-50" : "border-border"
-              }`}
+              className={inputClass(!!errors.lastName)}
             />
-            {errors.lastName && (
-              <p className="text-xs text-red-500 mt-1">{errors.lastName}</p>
-            )}
+            <FieldError message={errors.lastName} />
           </div>
         </div>
 
         <div>
-          <label className="block text-xs font-medium text-muted-foreground mb-1.5">
+          <label htmlFor="lcf-email" className={labelClass}>
             <Mail className="h-3 w-3 inline mr-1" />
             Email Address *
           </label>
           <div className="relative">
             <input
+              id="lcf-email"
               type="email"
+              autoComplete="email"
+              inputMode="email"
               value={email}
               onChange={(e) => {
                 setEmail(e.target.value);
@@ -577,60 +591,49 @@ export function LeadCaptureForm({
                 if (emailValidation) setEmailValidation(null);
               }}
               placeholder="john@example.com"
-              className={`w-full px-3 py-2.5 rounded-lg border text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all ${
-                errors.email ? "border-red-400 bg-red-50" : 
-                emailValidation?.valid ? "border-green-400 bg-green-50" : "border-border"
-              }`}
+              className={inputClass(!!errors.email, !!emailValidation?.valid)}
             />
             {emailValidation?.valid && (
-              <CheckCircle className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-green-500" />
+              <CheckCircle className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-primary" />
             )}
           </div>
-          {errors.email && (
-            <p className="text-xs text-red-500 mt-1 flex items-center gap-1">
-              <AlertCircle className="h-3 w-3" />
-              {errors.email}
-            </p>
-          )}
+          <FieldError message={errors.email} />
         </div>
 
         <div>
-          <label className="block text-xs font-medium text-muted-foreground mb-1.5">
+          <label htmlFor="lcf-phone" className={labelClass}>
             <Phone className="h-3 w-3 inline mr-1" />
             Phone Number *
-            <span className="text-[10px] text-muted-foreground/70 ml-1">(for verification)</span>
+            <span className="font-normal text-muted-foreground/80 ml-1">(for verification)</span>
           </label>
           <input
+            id="lcf-phone"
             type="tel"
+            autoComplete="tel"
+            inputMode="tel"
             value={phone}
             onChange={(e) => setPhone(e.target.value)}
             placeholder="(619) 555-0123"
-            className={`w-full px-3 py-2.5 rounded-lg border text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all ${
-              errors.phone ? "border-red-400 bg-red-50" : "border-border"
-            }`}
+            className={inputClass(!!errors.phone)}
           />
-          {errors.phone && (
-            <p className="text-xs text-red-500 mt-1">{errors.phone}</p>
-          )}
+          <FieldError message={errors.phone} />
         </div>
 
         <div>
-          <label className="block text-xs font-medium text-muted-foreground mb-1.5">
+          <label htmlFor="lcf-address" className={labelClass}>
             <MapPin className="h-3 w-3 inline mr-1" />
             Property Address *
           </label>
           <input
+            id="lcf-address"
             type="text"
+            autoComplete="street-address"
             value={address}
             onChange={(e) => setAddress(e.target.value)}
             placeholder="123 Main St, San Diego, CA"
-            className={`w-full px-3 py-2.5 rounded-lg border text-sm bg-slate-50 focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all ${
-              errors.address ? "border-red-400 bg-red-50" : "border-border"
-            }`}
+            className={inputClass(!!errors.address)}
           />
-          {errors.address && (
-            <p className="text-xs text-red-500 mt-1">{errors.address}</p>
-          )}
+          <FieldError message={errors.address} />
         </div>
 
         {errors.form && (
@@ -670,19 +673,19 @@ export function LeadCaptureForm({
         </Button>
 
         {/* Trust indicators */}
-        <div className="flex flex-wrap items-center justify-center gap-4 pt-2">
-          <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+        <div className="flex flex-wrap items-center justify-center gap-x-4 gap-y-2 pt-1 text-xs text-muted-foreground">
+          <span className="flex items-center gap-1.5">
             <Shield className="h-3.5 w-3.5 text-primary" />
-            <span>Secure verification</span>
-          </div>
-          <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+            Secure verification
+          </span>
+          <span className="flex items-center gap-1.5">
             <CheckCircle className="h-3.5 w-3.5 text-primary" />
-            <span>No spam, ever</span>
-          </div>
-          <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+            No spam, ever
+          </span>
+          <span className="flex items-center gap-1.5">
             <Lock className="h-3.5 w-3.5 text-primary" />
-            <span>Data protected</span>
-          </div>
+            Your info stays with TruthCore
+          </span>
         </div>
       </form>
     </div>

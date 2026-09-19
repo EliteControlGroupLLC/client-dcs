@@ -39,10 +39,10 @@ export function DataSourcesBadge({ data }: DataSourcesBadgeProps) {
         {sources.map((source) => (
           <span
             key={source.key}
-            className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-[10px] font-medium ${
+            className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium ${
               source.active
-                ? "bg-emerald-50 text-emerald-700 border border-emerald-200"
-                : "bg-slate-50 text-slate-400 border border-slate-200"
+                ? "bg-primary/5 text-primary border border-primary/20"
+                : "bg-muted text-muted-foreground border border-border"
             }`}
           >
             {source.active ? (

@@ -28,7 +28,7 @@ const designServices = [
 export default function DesignPage() {
   return (
     <div className="min-h-screen">
-      <section className="bg-secondary text-white py-20">
+      <section className="bg-secondary text-white pt-40 pb-20">
         <div className="container mx-auto px-4">
           <div className="max-w-3xl">
             <span className="inline-block text-primary-light font-semibold text-sm uppercase tracking-wider mb-4">
@@ -42,8 +42,8 @@ export default function DesignPage() {
               meet your needs, and stay within your budget.
             </p>
             <Link href="/build-your-adu">
-              <Button size="lg" className="bg-primary hover:bg-primary-dark text-white font-semibold">
-                Start Designing <ArrowRight className="h-5 w-5 ml-2" />
+              <Button size="lg" rounded="full">
+                Start Designing <ArrowRight className="h-5 w-5" />
               </Button>
             </Link>
           </div>
@@ -60,15 +60,15 @@ export default function DesignPage() {
               From concept to construction-ready plans, we handle every aspect of the design process.
             </p>
           </div>
-          <div className="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
+          <div className="grid md:grid-cols-2 gap-6 max-w-4xl mx-auto">
             {designServices.map((service) => {
               const Icon = service.icon;
               return (
-                <div key={service.title} className="bg-white rounded-2xl p-8 border border-gray-100 shadow-sm hover:shadow-lg transition-all">
+                <div key={service.title} className="h-full bg-white rounded-2xl p-8 border border-border shadow-sm hover:shadow-lg transition-shadow">
                   <div className="w-14 h-14 rounded-xl bg-primary/10 flex items-center justify-center mb-6">
                     <Icon className="h-7 w-7 text-primary" />
                   </div>
-                  <h3 className="text-xl font-bold text-secondary mb-2">{service.title}</h3>
+                  <h3 className="text-xl font-semibold text-secondary mb-2">{service.title}</h3>
                   <p className="text-muted-foreground">{service.description}</p>
                 </div>
               );
@@ -84,8 +84,8 @@ export default function DesignPage() {
             Schedule a free design consultation and let&apos;s bring your vision to life.
           </p>
           <Link href="/contact">
-            <Button size="lg" className="bg-primary hover:bg-primary-dark text-white font-semibold">
-              Schedule Consultation <ArrowRight className="h-5 w-5 ml-2" />
+            <Button size="lg" rounded="full">
+              Schedule Consultation <ArrowRight className="h-5 w-5" />
             </Button>
           </Link>
         </div>

@@ -79,22 +79,22 @@ export function FloorPlanDetailModal({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-5xl max-h-[90vh] overflow-y-auto p-0">
-        <DialogHeader className="p-6 pb-0">
+      <DialogContent className="w-[calc(100%-2rem)] max-w-5xl max-h-[90vh] overflow-y-auto overflow-x-hidden p-0 rounded-2xl">
+        <DialogHeader className="min-w-0 p-6 pb-0 text-left">
           <div className="flex items-start justify-between">
             <div>
-              <DialogTitle className="text-2xl font-bold text-secondary mb-2">
+              <DialogTitle className="text-2xl font-bold text-secondary mb-3 pr-8">
                 {plan.name}
               </DialogTitle>
               <div className="flex flex-wrap gap-2">
-                <Badge variant="outline" className="text-sm">
+                <Badge variant="outline" className="text-sm text-secondary">
                   {plan.style}
                 </Badge>
-                <Badge variant="outline" className="text-sm">
+                <Badge variant="outline" className="text-sm text-secondary">
                   {plan.type}
                 </Badge>
                 {plan.popular && (
-                  <Badge className="bg-primary text-secondary text-sm">
+                  <Badge className="bg-primary text-white text-sm">
                     Popular
                   </Badge>
                 )}
@@ -103,15 +103,15 @@ export function FloorPlanDetailModal({
           </div>
         </DialogHeader>
 
-        <div className="p-6">
+        <div className="min-w-0 p-6">
           {/* Quick Stats */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-            <div className="bg-muted rounded-lg p-4 text-center">
+            <div className="bg-muted rounded-2xl p-4 text-center">
               <Square className="h-5 w-5 mx-auto mb-1 text-primary" />
               <p className="text-lg font-bold text-secondary">{plan.sqFt.toLocaleString()}</p>
               <p className="text-xs text-muted-foreground">Square Feet</p>
             </div>
-            <div className="bg-muted rounded-lg p-4 text-center">
+            <div className="bg-muted rounded-2xl p-4 text-center">
               <Bed className="h-5 w-5 mx-auto mb-1 text-primary" />
               <p className="text-lg font-bold text-secondary">
                 {(selectedVariation?.bedrooms ?? plan.bedrooms) === 0 ? "Studio" : selectedVariation?.bedrooms ?? plan.bedrooms}
@@ -120,27 +120,27 @@ export function FloorPlanDetailModal({
                 {(selectedVariation?.bedrooms ?? plan.bedrooms) === 0 ? "Bedroom count" : `Bedroom${(selectedVariation?.bedrooms ?? plan.bedrooms) > 1 ? "s" : ""}`}
               </p>
             </div>
-            <div className="bg-muted rounded-lg p-4 text-center">
+            <div className="bg-muted rounded-2xl p-4 text-center">
               <Bath className="h-5 w-5 mx-auto mb-1 text-primary" />
               <p className="text-lg font-bold text-secondary">{selectedVariation?.bathrooms ?? plan.bathrooms}</p>
               <p className="text-xs text-muted-foreground">
                 Bathroom{(selectedVariation?.bathrooms ?? plan.bathrooms) > 1 ? "s" : ""}
               </p>
             </div>
-            <div className="bg-muted rounded-lg p-4 text-center">
+            <div className="bg-muted rounded-2xl p-4 text-center">
               <DollarSign className="h-5 w-5 mx-auto mb-1 text-primary" />
-              <p className="text-lg font-bold text-secondary">
-                ${selectedVariation.priceLow.toLocaleString()}-${selectedVariation.priceHigh.toLocaleString()}
+              <p className="text-base md:text-lg font-bold text-secondary">
+                ${selectedVariation.priceLow.toLocaleString()}-<wbr />${selectedVariation.priceHigh.toLocaleString()}
               </p>
               <p className="text-xs text-muted-foreground">Price Range</p>
             </div>
           </div>
 
           {/* Tab Navigation */}
-          <div className="flex border-b mb-6">
+          <div className="grid grid-cols-3 sm:flex border-b border-border mb-6">
             <button
               onClick={() => setActiveTab("layout")}
-              className={`px-4 py-2 font-medium text-sm border-b-2 -mb-px transition ${
+              className={`px-2 sm:px-4 py-2 min-h-11 leading-tight font-medium text-sm border-b-2 -mb-px transition ${
                 activeTab === "layout"
                   ? "border-primary text-primary"
                   : "border-transparent text-muted-foreground hover:text-secondary"
@@ -150,7 +150,7 @@ export function FloorPlanDetailModal({
             </button>
             <button
               onClick={() => setActiveTab("exterior")}
-              className={`px-4 py-2 font-medium text-sm border-b-2 -mb-px transition ${
+              className={`px-2 sm:px-4 py-2 min-h-11 leading-tight font-medium text-sm border-b-2 -mb-px transition ${
                 activeTab === "exterior"
                   ? "border-primary text-primary"
                   : "border-transparent text-muted-foreground hover:text-secondary"
@@ -160,7 +160,7 @@ export function FloorPlanDetailModal({
             </button>
             <button
               onClick={() => setActiveTab("customize")}
-              className={`px-4 py-2 font-medium text-sm border-b-2 -mb-px transition ${
+              className={`px-2 sm:px-4 py-2 min-h-11 leading-tight font-medium text-sm border-b-2 -mb-px transition ${
                 activeTab === "customize"
                   ? "border-primary text-primary"
                   : "border-transparent text-muted-foreground hover:text-secondary"
@@ -171,7 +171,7 @@ export function FloorPlanDetailModal({
           </div>
 
           {/* Tab Content */}
-          <div className="grid md:grid-cols-2 gap-6">
+          <div className="grid md:grid-cols-2 gap-6 [&>*]:min-w-0">
             {/* Visual */}
             <div>
               {activeTab === "layout" ? (
@@ -203,20 +203,20 @@ export function FloorPlanDetailModal({
                             <p className="font-semibold text-secondary">{variation.label}</p>
                             <p className="mt-1 text-sm text-muted-foreground">{variation.description}</p>
                           </div>
-                          {active ? <Badge className="bg-primary text-secondary">Selected</Badge> : null}
+                          {active ? <Badge className="bg-primary text-white">Selected</Badge> : null}
                         </div>
                         <div className="mt-3 flex flex-wrap gap-2 text-xs text-muted-foreground">
-                          <span className="rounded-full bg-muted px-3 py-1">{variation.bedrooms === 0 ? "Studio" : `${variation.bedrooms} bed`}</span>
-                          <span className="rounded-full bg-muted px-3 py-1">{variation.bathrooms} bath</span>
-                          <span className="rounded-full bg-muted px-3 py-1">{variation.stories} {variation.stories === 1 ? "story" : "stories"}</span>
-                          <span className="rounded-full bg-muted px-3 py-1">${variation.priceLow.toLocaleString()}-${variation.priceHigh.toLocaleString()}</span>
+                          <span className="rounded-full bg-secondary/5 px-3 py-1">{variation.bedrooms === 0 ? "Studio" : `${variation.bedrooms} bed`}</span>
+                          <span className="rounded-full bg-secondary/5 px-3 py-1">{variation.bathrooms} bath</span>
+                          <span className="rounded-full bg-secondary/5 px-3 py-1">{variation.stories} {variation.stories === 1 ? "story" : "stories"}</span>
+                          <span className="rounded-full bg-secondary/5 px-3 py-1">${variation.priceLow.toLocaleString()}-${variation.priceHigh.toLocaleString()}</span>
                         </div>
                       </button>
                     );
                   })}
                 </div>
               ) : (
-                <div className="relative aspect-[4/3] rounded-lg overflow-hidden border">
+                <div className="relative aspect-[4/3] rounded-2xl overflow-hidden border border-border">
                   <Image
                     src={plan.exteriorImage}
                     alt={`${plan.name} exterior concept`}
@@ -235,8 +235,8 @@ export function FloorPlanDetailModal({
                 {plan.description}
               </p>
 
-              <div className="mb-6 rounded-2xl border bg-muted/40 p-4">
-                <p className="text-xs font-semibold uppercase tracking-[0.2em] text-muted-foreground mb-2">
+              <div className="mb-6 rounded-2xl border border-border bg-muted/40 p-4">
+                <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-2">
                   Practical dimensions
                 </p>
                 <p className="font-semibold text-secondary">{plan.dimensions.label}</p>
@@ -248,39 +248,39 @@ export function FloorPlanDetailModal({
               <h3 className="font-semibold text-secondary mb-3">Features Included</h3>
               <ul className="space-y-2 mb-6">
                 {plan.features.map((feature, index) => (
-                  <li key={index} className="flex items-center gap-2 text-sm">
-                    <Check className="h-4 w-4 text-green-600 shrink-0" />
+                  <li key={index} className="flex items-center gap-2 text-sm text-secondary">
+                    <Check className="h-4 w-4 text-primary shrink-0" />
                     <span>{feature}</span>
                   </li>
                 ))}
               </ul>
 
               {/* Rental Estimate */}
-              <div className="bg-green-50 border border-green-200 rounded-lg p-4 mb-6">
-                <h4 className="font-semibold text-green-800 mb-1 flex items-center gap-2">
-                  <Home className="h-4 w-4" />
+              <div className="bg-primary/5 border border-primary/20 rounded-2xl p-4 mb-6">
+                <h4 className="font-semibold text-secondary mb-1 flex items-center gap-2">
+                  <Home className="h-4 w-4 text-primary" />
                   Estimated Monthly Rent
                 </h4>
-                <p className="text-2xl font-bold text-green-700">
+                <p className="text-2xl font-bold text-primary">
                   ${selectedRent.low.toLocaleString()} - ${selectedRent.high.toLocaleString()}
                 </p>
-                <p className="text-xs text-green-600 mt-1">
-                  Based on the selected plan configuration and current DCS planning assumptions
+                <p className="text-xs text-muted-foreground mt-1">
+                  Based on the selected plan configuration and current TruthCore planning assumptions
                 </p>
               </div>
 
               {/* CTA Buttons */}
-              <div className="flex gap-3">
+              <div className="flex flex-col sm:flex-row gap-3">
                 <Link
                   href={`/build-your-adu?plan=${plan.id}&bedrooms=${selectedVariation.bedrooms}&bathrooms=${selectedVariation.bathrooms}&stories=${selectedVariation.stories}`}
                   className="flex-1"
                 >
-                  <Button className="w-full bg-primary hover:bg-primary-dark text-white">
+                  <Button rounded="full" className="w-full">
                     Use This Configuration
                   </Button>
                 </Link>
                 <Link href="/contact" className="flex-1">
-                  <Button variant="outline" className="w-full">
+                  <Button variant="outline" rounded="full" className="w-full">
                     Talk to an Expert
                   </Button>
                 </Link>
@@ -290,9 +290,10 @@ export function FloorPlanDetailModal({
 
           {/* Navigation */}
           {(hasPrevious || hasNext) && (
-            <div className="flex justify-between mt-8 pt-6 border-t">
+            <div className="flex justify-between gap-3 mt-8 pt-6 border-t border-border">
               <Button
                 variant="outline"
+                rounded="full"
                 onClick={onPrevious}
                 disabled={!hasPrevious}
                 className="flex items-center gap-2"
@@ -302,6 +303,7 @@ export function FloorPlanDetailModal({
               </Button>
               <Button
                 variant="outline"
+                rounded="full"
                 onClick={onNext}
                 disabled={!hasNext}
                 className="flex items-center gap-2"

@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { ArrowRight, DollarSign, Home, Shield, Calculator, CheckCircle } from "lucide-react";
+import { ArrowRight, DollarSign, Home, Shield, Calculator } from "lucide-react";
 
 const options = [
   {
@@ -29,7 +29,7 @@ const options = [
 export default function FinancingPage() {
   return (
     <div className="min-h-screen">
-      <section className="bg-secondary text-white py-20">
+      <section className="bg-secondary text-white pt-40 pb-20">
         <div className="container mx-auto px-4">
           <div className="max-w-3xl">
             <span className="inline-block text-primary-light font-semibold text-sm uppercase tracking-wider mb-4">
@@ -38,7 +38,7 @@ export default function FinancingPage() {
             <h1 className="text-4xl md:text-5xl font-bold mb-6">
               Flexible Financing Options
             </h1>
-            <p className="text-xl text-white/80 mb-8">
+            <p className="text-xl text-white/80">
               We work with trusted lenders to help you find the right financing for your project.
               Multiple options available to fit your budget and goals.
             </p>
@@ -54,16 +54,16 @@ export default function FinancingPage() {
               We&apos;ll help you explore the best financing path for your project during our consultation.
             </p>
           </div>
-          <div className="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
+          <div className="grid md:grid-cols-2 gap-6 max-w-4xl mx-auto">
             {options.map((option) => {
               const Icon = option.icon;
               return (
-                <Card key={option.title} className="hover:shadow-lg transition-shadow">
+                <Card key={option.title} className="h-full hover:shadow-lg transition-shadow">
                   <CardContent className="p-8">
                     <div className="w-14 h-14 rounded-xl bg-primary/10 flex items-center justify-center mb-6">
                       <Icon className="h-7 w-7 text-primary" />
                     </div>
-                    <h3 className="text-xl font-bold text-secondary mb-3">{option.title}</h3>
+                    <h3 className="text-xl font-semibold text-secondary mb-2">{option.title}</h3>
                     <p className="text-muted-foreground">{option.description}</p>
                   </CardContent>
                 </Card>
@@ -76,10 +76,10 @@ export default function FinancingPage() {
       <section className="py-20 bg-muted">
         <div className="container mx-auto px-4">
           <div className="max-w-3xl mx-auto text-center">
-            <h2 className="text-3xl md:text-4xl font-bold text-secondary mb-4">
+            <h2 className="text-3xl md:text-4xl font-bold text-secondary mb-12">
               How It Works
             </h2>
-            <div className="space-y-6 text-left mt-8">
+            <div className="space-y-6 text-left">
               {[
                 "Schedule a free consultation to discuss your project scope and budget.",
                 "We provide a detailed project estimate with transparent pricing.",
@@ -105,8 +105,8 @@ export default function FinancingPage() {
             Let&apos;s discuss your project and find the best financing solution for you.
           </p>
           <Link href="/contact">
-            <Button size="lg" className="bg-primary hover:bg-primary-dark text-white font-semibold">
-              Schedule Consultation <ArrowRight className="h-5 w-5 ml-2" />
+            <Button size="lg" rounded="full">
+              Schedule Consultation <ArrowRight className="h-5 w-5" />
             </Button>
           </Link>
         </div>

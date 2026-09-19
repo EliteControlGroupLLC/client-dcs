@@ -4,7 +4,6 @@ import { useState, useMemo } from "react";
 import Image from "next/image";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { 
   Search, 
   Grid3x3, 
@@ -15,6 +14,7 @@ import {
   Eye,
   DollarSign,
   Layers3,
+  ArrowRight,
 } from "lucide-react";
 import Link from "next/link";
 import { FLOOR_PLANS_SORTED } from "@/lib/data/site-data";
@@ -24,6 +24,10 @@ import { FloorPlanDetailModal } from "@/components/floor-plans/floor-plan-detail
 type ViewMode = "grid" | "list";
 type SortOption = "size-asc" | "size-desc" | "price-asc" | "price-desc";
 type ModalView = "layout" | "customize";
+
+// Matches the lead-gate field style (h-11, rounded-lg, border, text-sm).
+const fieldClass =
+  "w-full h-11 px-3 rounded-lg border border-border bg-white text-sm text-secondary placeholder:text-muted-foreground/70 focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all";
 
 const styles = ["All Styles", ...Array.from(new Set(FLOOR_PLANS_SORTED.map((plan) => plan.style)))];
 const types = ["All Types", ...Array.from(new Set(FLOOR_PLANS_SORTED.map((plan) => plan.type)))];
@@ -126,244 +130,250 @@ export default function FloorPlansPage() {
   };
 
   return (
-    <div className="min-h-screen bg-muted pt-28 pb-12">
-      <div className="container mx-auto px-4">
-        {/* Header */}
-        <div className="text-center mb-12">
-          <h1 className="text-4xl md:text-5xl font-bold text-secondary mb-4">
-            ADU Floor Plans Library
-          </h1>
-          <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-            Browse our curated collection of ADU designs with real floor plan layouts. Each plan can be customized to fit your property and lifestyle.
-          </p>
-        </div>
-
-        {/* Filters */}
-        <div className="bg-white rounded-xl p-6 shadow-sm mb-8">
-          <div className="flex flex-col lg:flex-row gap-4 items-center">
-            {/* Search */}
-            <div className="relative flex-1 w-full">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-              <Input
-                placeholder="Search floor plans..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-10"
-              />
-            </div>
-
-            {/* Style Filter */}
-            <select
-              value={selectedStyle}
-              onChange={(e) => setSelectedStyle(e.target.value)}
-              className="h-10 px-4 rounded-lg border border-input bg-background text-sm"
-            >
-              {styles.map(style => (
-                <option key={style} value={style}>{style}</option>
-              ))}
-            </select>
-
-            {/* Type Filter */}
-            <select
-              value={selectedType}
-              onChange={(e) => setSelectedType(e.target.value)}
-              className="h-10 px-4 rounded-lg border border-input bg-background text-sm"
-            >
-              {types.map(type => (
-                <option key={type} value={type}>{type}</option>
-              ))}
-            </select>
-
-            {/* Bedrooms Filter */}
-            <select
-              value={selectedBedrooms}
-              onChange={(e) => setSelectedBedrooms(e.target.value)}
-              className="h-10 px-4 rounded-lg border border-input bg-background text-sm"
-            >
-              {bedroomOptions.map(opt => (
-                <option key={opt} value={opt}>{opt === "Any" ? "Any Beds" : opt === "Studio" ? "Studio" : `${opt} Bed`}</option>
-              ))}
-            </select>
-
-            {/* Sort */}
-            <select
-              value={sortBy}
-              onChange={(e) => setSortBy(e.target.value as SortOption)}
-              className="h-10 px-4 rounded-lg border border-input bg-background text-sm"
-            >
-              <option value="size-asc">Size: Small to Large</option>
-              <option value="size-desc">Size: Large to Small</option>
-              <option value="price-asc">Price: Low to High</option>
-              <option value="price-desc">Price: High to Low</option>
-            </select>
-
-            {/* View Toggle */}
-            <div className="flex border rounded-lg overflow-hidden">
-              <button
-                onClick={() => setViewMode("grid")}
-                className={`p-2 ${viewMode === "grid" ? "bg-primary text-white" : "bg-white"}`}
-              >
-                <Grid3x3 className="h-5 w-5" />
-              </button>
-              <button
-                onClick={() => setViewMode("list")}
-                className={`p-2 ${viewMode === "list" ? "bg-primary text-white" : "bg-white"}`}
-              >
-                <List className="h-5 w-5" />
-              </button>
-            </div>
+    <div className="min-h-screen bg-muted">
+      <section className="pt-40 pb-20">
+        <div className="container mx-auto px-4">
+          {/* Header */}
+          <div className="text-center mb-12">
+            <span className="inline-block text-primary font-semibold text-sm uppercase tracking-wider mb-4">
+              FLOOR PLANS
+            </span>
+            <h1 className="text-4xl md:text-5xl font-bold text-secondary mb-4">
+              ADU Floor Plans Library
+            </h1>
+            <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
+              Browse our curated collection of ADU designs with real floor plan layouts. Each plan can be customized to fit your property and lifestyle.
+            </p>
           </div>
-        </div>
 
-        {/* Results Count */}
-        <div className="flex items-center justify-between mb-6">
-          <p className="text-muted-foreground">
-            Showing <span className="font-semibold text-secondary">{filteredPlans.length}</span> floor plans
-          </p>
-          <p className="text-sm text-muted-foreground">
-            Canonical pricing and rent assumptions sync to calculators and recommendations
-          </p>
-        </div>
-
-        {/* Floor Plans Grid/List */}
-        <div className={viewMode === "grid" 
-          ? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
-          : "flex flex-col gap-4"
-        }>
-          {filteredPlans.map((plan, index) => (
-            <Card key={plan.id} className={`overflow-hidden hover:shadow-lg transition-shadow ${viewMode === "list" ? "flex flex-row" : ""}`}>
-              {/* Floor Plan Preview */}
-              <div className={`relative ${viewMode === "list" ? "w-72 shrink-0" : ""}`}>
-                {/* Exterior Image */}
-                <div className={`relative ${viewMode === "list" ? "h-full" : "aspect-[4/3]"}`}>
-                  <Image
-                    src={plan.exteriorImage}
-                    alt={`${plan.name} exterior`}
-                    fill
-                    className="object-cover"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
-                  
-                  {/* Overlay Info */}
-                  <div className="absolute bottom-0 left-0 right-0 p-4">
-                    <div className="flex items-center gap-2 text-white text-sm">
-                      <Square className="h-4 w-4" />
-                      <span>{plan.sqFt.toLocaleString()} sq ft</span>
-                    </div>
-                  </div>
-                </div>
-
-                {plan.popular && (
-                  <div className="absolute top-2 left-2 bg-primary text-white text-xs font-medium px-2 py-1 rounded">
-                    Popular
-                  </div>
-                )}
+          {/* Filters */}
+          <div className="bg-white rounded-2xl border border-border p-6 shadow-sm mb-8">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:flex lg:flex-row gap-4 lg:items-center">
+              {/* Search */}
+              <div className="relative sm:col-span-2 lg:flex-1">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" aria-hidden />
+                <input
+                  type="search"
+                  aria-label="Search floor plans"
+                  placeholder="Search floor plans..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className={`${fieldClass} pl-10`}
+                />
               </div>
 
-              <CardContent className={`p-4 ${viewMode === "list" ? "flex-1 flex flex-col justify-between" : ""}`}>
-                <div>
-                  <h3 className="font-semibold text-secondary text-lg mb-2">{plan.name}</h3>
+              {/* Style Filter */}
+              <select
+                aria-label="Filter by style"
+                value={selectedStyle}
+                onChange={(e) => setSelectedStyle(e.target.value)}
+                className={`${fieldClass} lg:w-auto`}
+              >
+                {styles.map(style => (
+                  <option key={style} value={style}>{style}</option>
+                ))}
+              </select>
+
+              {/* Type Filter */}
+              <select
+                aria-label="Filter by type"
+                value={selectedType}
+                onChange={(e) => setSelectedType(e.target.value)}
+                className={`${fieldClass} lg:w-auto`}
+              >
+                {types.map(type => (
+                  <option key={type} value={type}>{type}</option>
+                ))}
+              </select>
+
+              {/* Bedrooms Filter */}
+              <select
+                aria-label="Filter by bedrooms"
+                value={selectedBedrooms}
+                onChange={(e) => setSelectedBedrooms(e.target.value)}
+                className={`${fieldClass} lg:w-auto`}
+              >
+                {bedroomOptions.map(opt => (
+                  <option key={opt} value={opt}>{opt === "Any" ? "Any Beds" : opt === "Studio" ? "Studio" : `${opt} Bed`}</option>
+                ))}
+              </select>
+
+              {/* Sort */}
+              <select
+                aria-label="Sort floor plans"
+                value={sortBy}
+                onChange={(e) => setSortBy(e.target.value as SortOption)}
+                className={`${fieldClass} lg:w-auto`}
+              >
+                <option value="size-asc">Size: Small to Large</option>
+                <option value="size-desc">Size: Large to Small</option>
+                <option value="price-asc">Price: Low to High</option>
+                <option value="price-desc">Price: High to Low</option>
+              </select>
+
+              {/* View Toggle */}
+              <div className="flex w-fit rounded-lg border border-border overflow-hidden sm:col-span-2 lg:col-span-1">
+                <button
+                  type="button"
+                  aria-label="Grid view"
+                  aria-pressed={viewMode === "grid"}
+                  onClick={() => setViewMode("grid")}
+                  className={`h-11 w-11 flex items-center justify-center transition-colors ${viewMode === "grid" ? "bg-primary text-white" : "bg-white text-secondary hover:bg-muted"}`}
+                >
+                  <Grid3x3 className="h-5 w-5" />
+                </button>
+                <button
+                  type="button"
+                  aria-label="List view"
+                  aria-pressed={viewMode === "list"}
+                  onClick={() => setViewMode("list")}
+                  className={`h-11 w-11 flex items-center justify-center transition-colors ${viewMode === "list" ? "bg-primary text-white" : "bg-white text-secondary hover:bg-muted"}`}
+                >
+                  <List className="h-5 w-5" />
+                </button>
+              </div>
+            </div>
+          </div>
+
+          {/* Results Count */}
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1 mb-6">
+            <p className="text-muted-foreground">
+              Showing <span className="font-semibold text-secondary">{filteredPlans.length}</span> floor plans
+            </p>
+            <p className="text-sm text-muted-foreground">
+              Canonical pricing and rent assumptions sync to calculators and recommendations
+            </p>
+          </div>
+
+          {/* Floor Plans Grid/List */}
+          <div className={viewMode === "grid" 
+            ? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
+            : "flex flex-col gap-6"
+          }>
+            {filteredPlans.map((plan, index) => (
+              <Card key={plan.id} className={`h-full overflow-hidden hover:shadow-lg transition-shadow flex ${viewMode === "list" ? "flex-col md:flex-row" : "flex-col"}`}>
+                {/* Floor Plan Preview */}
+                <div className={`relative ${viewMode === "list" ? "md:w-72 shrink-0" : ""}`}>
+                  {/* Exterior Image */}
+                  <div className={`relative ${viewMode === "list" ? "aspect-[4/3] md:aspect-auto md:h-full" : "aspect-[4/3]"}`}>
+                    <Image
+                      src={plan.exteriorImage}
+                      alt={`${plan.name} exterior`}
+                      fill
+                      sizes="(min-width: 1024px) 33vw, (min-width: 768px) 50vw, 100vw"
+                      className="object-cover"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
                   
-                  {/* Mini Floor Plan Layout */}
-                  {viewMode === "grid" && (
-                    <div className="mb-3 bg-muted/50 rounded-lg p-2">
-                      <FloorPlanLayout
-                        planId={plan.id}
-                        sqFt={plan.sqFt}
-                        bedrooms={plan.bedrooms}
-                        bathrooms={plan.bathrooms}
-                        showLabels={false}
-                        showDimensions={false}
-                        className="border-0 bg-transparent"
-                      />
+                    {/* Overlay Info */}
+                    <div className="absolute bottom-0 left-0 right-0 p-4">
+                      <div className="flex items-center gap-2 text-white text-sm">
+                        <Square className="h-4 w-4" />
+                        <span>{plan.sqFt.toLocaleString()} sq ft</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {plan.popular && (
+                    <div className="absolute top-3 left-3 bg-primary text-white text-xs font-semibold px-3 py-1 rounded-full">
+                      Popular
                     </div>
                   )}
-
-                  <div className="flex flex-wrap items-center gap-4 text-sm text-muted-foreground mb-3">
-                    <span className="flex items-center gap-1">
-                      <Bed className="h-4 w-4" />
-                      {formatBedroomLabel(plan.bedrooms, plan.maxBedrooms)}
-                    </span>
-                    <span className="flex items-center gap-1">
-                      <Bath className="h-4 w-4" />
-                      {formatBathroomLabel(plan.bathrooms, plan.maxBathrooms)}
-                    </span>
-                    <span className="flex items-center gap-1">
-                      <DollarSign className="h-4 w-4" />
-                      ${plan.rentEstimate.low.toLocaleString()}-${plan.rentEstimate.high.toLocaleString()}/mo
-                    </span>
-                    <span className="flex items-center gap-1">
-                      <Layers3 className="h-4 w-4" />
-                      {plan.dimensions.label}
-                    </span>
-                  </div>
-                  <div className="flex flex-wrap gap-1 mb-3">
-                    <span className="text-xs bg-muted px-2 py-1 rounded">{plan.style}</span>
-                    <span className="text-xs bg-muted px-2 py-1 rounded">{plan.type}</span>
-                  </div>
-                  <p className="text-sm text-muted-foreground mb-3">{plan.summary}</p>
-                  <p className="font-semibold text-primary">{plan.priceRange}</p>
                 </div>
 
-                {viewMode === "list" && (
-                  <div className="flex gap-2 mt-4">
-                    <Button 
-                      variant="outline" 
-                      size="sm"
-                      onClick={() => handleOpenPlan(index, "layout")}
-                    >
-                      <Eye className="h-4 w-4 mr-1" />
-                      View Details
-                    </Button>
-                    <Button size="sm" className="bg-primary hover:bg-primary-dark text-white" onClick={() => handleOpenPlan(index, "customize")}>
-                        Customize
-                      </Button>
-                  </div>
-                )}
+                <CardContent className="p-6 flex-1 flex flex-col">
+                  <div className="flex-1">
+                    <h3 className="text-xl font-semibold text-secondary mb-3">{plan.name}</h3>
+                  
+                    {/* Mini Floor Plan Layout */}
+                    {viewMode === "grid" && (
+                      <div className="mb-4 bg-muted/50 rounded-lg p-2">
+                        <FloorPlanLayout
+                          planId={plan.id}
+                          sqFt={plan.sqFt}
+                          bedrooms={plan.bedrooms}
+                          bathrooms={plan.bathrooms}
+                          showLabels={false}
+                          showDimensions={false}
+                          className="border-0 bg-transparent"
+                        />
+                      </div>
+                    )}
 
-                {viewMode === "grid" && (
-                  <div className="flex gap-2 mt-4">
-                    <Button 
-                      variant="outline" 
-                      size="sm" 
-                      className="flex-1"
+                    <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-sm text-muted-foreground mb-3">
+                      <span className="flex items-center gap-1">
+                        <Bed className="h-4 w-4" />
+                        {formatBedroomLabel(plan.bedrooms, plan.maxBedrooms)}
+                      </span>
+                      <span className="flex items-center gap-1">
+                        <Bath className="h-4 w-4" />
+                        {formatBathroomLabel(plan.bathrooms, plan.maxBathrooms)}
+                      </span>
+                      <span className="flex items-center gap-1">
+                        <DollarSign className="h-4 w-4" />
+                        ${plan.rentEstimate.low.toLocaleString()}-${plan.rentEstimate.high.toLocaleString()}/mo
+                      </span>
+                      <span className="flex items-center gap-1">
+                        <Layers3 className="h-4 w-4" />
+                        {plan.dimensions.label}
+                      </span>
+                    </div>
+                    <div className="flex flex-wrap gap-2 mb-3">
+                      <span className="text-xs font-medium text-secondary bg-muted px-3 py-1 rounded-full">{plan.style}</span>
+                      <span className="text-xs font-medium text-secondary bg-muted px-3 py-1 rounded-full">{plan.type}</span>
+                    </div>
+                    <p className="text-sm text-muted-foreground mb-3">{plan.summary}</p>
+                    <p className="font-semibold text-primary">{plan.priceRange}</p>
+                  </div>
+
+                  <div className={`flex gap-3 mt-6 ${viewMode === "list" ? "flex-col sm:flex-row" : ""}`}>
+                    <Button
+                      variant="outline"
+                      rounded="full"
+                      className={viewMode === "grid" ? "flex-1" : ""}
                       onClick={() => handleOpenPlan(index, "layout")}
                     >
-                      <Eye className="h-4 w-4 mr-1" />
-                      Details
+                      <Eye className="h-4 w-4" />
+                      {viewMode === "grid" ? "Details" : "View Details"}
                     </Button>
-                    <Button size="sm" className="flex-1 bg-primary hover:bg-primary-dark text-white" onClick={() => handleOpenPlan(index, "customize")}>
-                        Customize
-                      </Button>
+                    <Button
+                      rounded="full"
+                      className={viewMode === "grid" ? "flex-1" : ""}
+                      onClick={() => handleOpenPlan(index, "customize")}
+                    >
+                      Customize
+                    </Button>
                   </div>
-                )}
-              </CardContent>
-            </Card>
-          ))}
+                </CardContent>
+              </Card>
+            ))}
+          </div>
         </div>
+      </section>
 
-        {/* CTA Section */}
-        <div className="mt-16 bg-secondary rounded-2xl p-8 md:p-12 text-center text-white">
-          <h2 className="text-2xl md:text-3xl font-bold mb-4">
+      {/* CTA Section */}
+      <section className="py-20 bg-secondary text-white">
+        <div className="container mx-auto px-4 text-center">
+          <h2 className="text-3xl md:text-4xl font-bold mb-4">
             Don&apos;t See What You&apos;re Looking For?
           </h2>
-          <p className="text-lg text-white/80 mb-6 max-w-2xl mx-auto">
+          <p className="text-lg text-white/80 mb-8 max-w-2xl mx-auto">
             We can design a custom ADU floor plan that perfectly fits your property and needs. Our architects will work with you to create your ideal space.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link href="/build-your-adu">
-              <Button size="lg" className="bg-primary hover:bg-primary-dark text-white font-semibold">
-                Design Custom ADU
+              <Button size="lg" rounded="full" className="w-full sm:w-auto font-semibold">
+                Design Custom ADU <ArrowRight className="h-5 w-5" />
               </Button>
             </Link>
             <Link href="/contact">
-              <Button size="lg" variant="outline" className="border-white text-white hover:bg-white/10">
+              <Button size="lg" rounded="full" variant="outlineWhite" className="w-full sm:w-auto">
                 Talk to an Expert
               </Button>
             </Link>
           </div>
         </div>
-      </div>
+      </section>
 
       {/* Detail Modal */}
       <FloorPlanDetailModal

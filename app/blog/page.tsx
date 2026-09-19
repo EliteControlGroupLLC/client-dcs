@@ -51,7 +51,7 @@ const posts = [
 export default function BlogPage() {
   return (
     <div className="min-h-screen">
-      <section className="bg-secondary text-white py-20">
+      <section className="bg-secondary text-white pt-40 pb-20">
         <div className="container mx-auto px-4">
           <div className="max-w-3xl">
             <span className="inline-block text-primary-light font-semibold text-sm uppercase tracking-wider mb-4">
@@ -69,11 +69,11 @@ export default function BlogPage() {
 
       <section className="py-20">
         <div className="container mx-auto px-4">
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
             {posts.map((post) => (
-              <Card key={post.title} className="overflow-hidden hover:shadow-lg transition-shadow">
-                <div className="h-48 bg-gradient-to-br from-primary/10 to-secondary/10" />
-                <CardContent className="p-6">
+              <Card key={post.title} className="flex h-full flex-col overflow-hidden hover:shadow-lg transition-shadow">
+                <div className="h-48 shrink-0 bg-gradient-to-br from-primary/10 to-secondary/10" />
+                <CardContent className="flex flex-1 flex-col p-6">
                   <div className="flex items-center gap-3 mb-3">
                     <span className="text-xs font-semibold text-primary bg-primary/10 px-2 py-1 rounded-full">
                       {post.category}
@@ -83,9 +83,9 @@ export default function BlogPage() {
                       {post.readTime}
                     </span>
                   </div>
-                  <h3 className="text-lg font-bold text-secondary mb-2">{post.title}</h3>
+                  <h3 className="text-xl font-semibold text-secondary mb-2">{post.title}</h3>
                   <p className="text-sm text-muted-foreground mb-4">{post.excerpt}</p>
-                  <span className="text-sm text-primary font-medium">{post.date}</span>
+                  <span className="mt-auto text-sm text-primary font-medium">{post.date}</span>
                 </CardContent>
               </Card>
             ))}
@@ -102,8 +102,8 @@ export default function BlogPage() {
             Can&apos;t find what you&apos;re looking for? Our team is happy to help.
           </p>
           <Link href="/contact">
-            <Button size="lg" className="bg-primary hover:bg-primary-dark text-white font-semibold">
-              Contact Us <ArrowRight className="h-5 w-5 ml-2" />
+            <Button size="lg" rounded="full">
+              Contact Us <ArrowRight className="h-5 w-5" />
             </Button>
           </Link>
         </div>

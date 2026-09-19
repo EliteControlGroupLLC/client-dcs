@@ -3,17 +3,23 @@
 import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { 
   Phone, 
   Mail, 
   MapPin, 
   Clock,
   Send,
-  CheckCircle
+  CheckCircle,
+  AlertCircle,
 } from "lucide-react";
 import { trackContactFormSubmitted } from "@/lib/analytics";
 import { COMPANY_INFO } from "@/lib/data/site-data";
+
+// Same field treatment as the lead-gate form (components/lead-gate/lead-gate.tsx)
+// so every form on the site reads identically.
+const fieldClass =
+  "w-full h-11 px-3 rounded-lg border border-border bg-white text-sm text-secondary placeholder:text-muted-foreground/70 focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all";
+const labelClass = "block text-xs font-medium text-muted-foreground mb-1.5";
 
 const serviceTypes = [
   "ADU / Accessory Dwelling Unit",
@@ -62,7 +68,7 @@ export default function ContactPage() {
 
   if (submitted) {
     return (
-      <div className="min-h-screen bg-muted pt-28 pb-20">
+      <div className="min-h-screen bg-muted pt-40 pb-20">
         <div className="container mx-auto px-4">
           <Card className="max-w-lg mx-auto text-center p-12">
             <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-6">
@@ -74,7 +80,7 @@ export default function ContactPage() {
             <p className="text-muted-foreground mb-6">
               We&apos;ve received your message and will get back to you within 24 hours.
             </p>
-            <Button onClick={() => setSubmitted(false)} variant="outline">
+            <Button onClick={() => setSubmitted(false)} variant="outline" rounded="full">
               Send Another Message
             </Button>
           </Card>
@@ -84,10 +90,13 @@ export default function ContactPage() {
   }
 
   return (
-    <div className="min-h-screen bg-muted pt-28 pb-12">
+    <div className="min-h-screen bg-muted pt-40 pb-20">
       <div className="container mx-auto px-4">
         {/* Header */}
         <div className="text-center mb-12">
+          <span className="inline-block text-primary font-semibold text-sm uppercase tracking-wider mb-4">
+            CONTACT
+          </span>
           <h1 className="text-4xl md:text-5xl font-bold text-secondary mb-4">
             Contact Us
           </h1>
@@ -96,7 +105,7 @@ export default function ContactPage() {
           </p>
         </div>
 
-        <div className="grid lg:grid-cols-3 gap-8 max-w-6xl mx-auto">
+        <div className="grid lg:grid-cols-3 gap-6 max-w-6xl mx-auto">
           {/* Contact Info */}
           <div className="space-y-6">
             <Card>
@@ -107,8 +116,8 @@ export default function ContactPage() {
                   </div>
                   <div>
                     <h3 className="font-semibold text-secondary">Phone</h3>
-                    <p className="text-muted-foreground">{COMPANY_INFO.phone}</p>
-                    <p className="text-sm text-muted-foreground">Monday-Friday 8:00 AM-4:30 PM</p>
+                    <a href={`tel:${COMPANY_INFO.phoneHref}`} className="block text-muted-foreground hover:text-primary transition-colors">{COMPANY_INFO.phone}</a>
+                    <p className="text-sm text-muted-foreground">Monday - Friday, 8:00 AM - 4:30 PM</p>
                   </div>
                 </div>
               </CardContent>
@@ -120,9 +129,9 @@ export default function ContactPage() {
                   <div className="w-10 h-10 bg-primary/10 rounded-lg flex items-center justify-center shrink-0">
                     <Mail className="h-5 w-5 text-primary" />
                   </div>
-                  <div>
+                  <div className="min-w-0">
                     <h3 className="font-semibold text-secondary">Email</h3>
-                    <p className="text-muted-foreground">{COMPANY_INFO.email}</p>
+                    <a href={`mailto:${COMPANY_INFO.email}`} className="block break-all text-muted-foreground hover:text-primary transition-colors">{COMPANY_INFO.email}</a>
                     <p className="text-sm text-muted-foreground">We reply within 24 hours</p>
                   </div>
                 </div>
@@ -167,53 +176,63 @@ export default function ContactPage() {
               <CardTitle className="text-2xl">Send Us a Message</CardTitle>
             </CardHeader>
             <CardContent>
-              <form onSubmit={handleSubmit} className="space-y-6">
+              <form onSubmit={handleSubmit} className="space-y-4">
                 <div className="grid md:grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-sm font-medium text-secondary mb-2">
+                    <label htmlFor="contact-name" className={labelClass}>
                       Full Name *
                     </label>
-                    <Input
+                    <input
+                      id="contact-name"
                       required
+                      autoComplete="name"
                       value={formData.name}
                       onChange={(e) => setFormData({...formData, name: e.target.value})}
                       placeholder="John Smith"
+                      className={fieldClass}
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-secondary mb-2">
+                    <label htmlFor="contact-email" className={labelClass}>
                       Email *
                     </label>
-                    <Input
+                    <input
+                      id="contact-email"
                       type="email"
                       required
+                      autoComplete="email"
                       value={formData.email}
                       onChange={(e) => setFormData({...formData, email: e.target.value})}
                       placeholder="john@example.com"
+                      className={fieldClass}
                     />
                   </div>
                 </div>
 
                 <div className="grid md:grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-sm font-medium text-secondary mb-2">
+                    <label htmlFor="contact-phone" className={labelClass}>
                       Phone Number
                     </label>
-                    <Input
+                    <input
+                      id="contact-phone"
                       type="tel"
+                      autoComplete="tel"
                       value={formData.phone}
                       onChange={(e) => setFormData({...formData, phone: e.target.value})}
                       placeholder="(619) 555-0123"
+                      className={fieldClass}
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-secondary mb-2">
+                    <label htmlFor="contact-service" className={labelClass}>
                       Service Interested In
                     </label>
                     <select
+                      id="contact-service"
                       value={formData.service}
                       onChange={(e) => setFormData({...formData, service: e.target.value})}
-                      className="w-full h-10 px-3 rounded-lg border border-input bg-background text-sm"
+                      className={`${fieldClass} ${formData.service ? "" : "!text-muted-foreground/70"}`}
                     >
                       <option value="">Select a service...</option>
                       {serviceTypes.map((service) => (
@@ -224,32 +243,37 @@ export default function ContactPage() {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-secondary mb-2">
+                  <label htmlFor="contact-message" className={labelClass}>
                     Message *
                   </label>
                   <textarea
+                    id="contact-message"
                     required
                     rows={5}
                     value={formData.message}
                     onChange={(e) => setFormData({...formData, message: e.target.value})}
                     placeholder="Tell us about your project..."
-                    className="w-full px-3 py-2 rounded-lg border border-input bg-background text-sm resize-none"
+                    className={`${fieldClass} h-auto py-2.5 resize-none`}
                   />
                 </div>
 
                 {submitError && (
-                  <div className="rounded-lg border border-destructive/20 bg-destructive/5 px-4 py-3 text-sm text-destructive">
-                    {submitError}
+                  <div className="bg-red-50 border border-red-200 rounded-lg p-3" role="alert">
+                    <p className="text-sm text-red-600 flex items-center gap-2">
+                      <AlertCircle className="h-4 w-4 shrink-0" />
+                      {submitError}
+                    </p>
                   </div>
                 )}
 
-                <Button type="submit" size="lg" className="w-full bg-primary hover:bg-primary-dark text-white font-semibold" disabled={isSubmitting}>
-                  <Send className="h-4 w-4 mr-2" />
+                <Button type="submit" size="lg" rounded="full" className="w-full" disabled={isSubmitting}>
+                  <Send className="h-4 w-4" />
                   {isSubmitting ? "Sending..." : "Send Message"}
                 </Button>
 
                 <p className="text-xs text-center text-muted-foreground">
-                  By submitting this form, you agree to our privacy policy. We&apos;ll never share your information.
+                  By submitting this form, you agree to our{" "}
+                  <a href="/privacy" className="underline underline-offset-2 hover:text-secondary">privacy policy</a>. We&apos;ll never share your information.
                 </p>
               </form>
             </CardContent>

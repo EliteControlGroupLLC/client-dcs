@@ -36,11 +36,11 @@ export function BuildableAreaCard({ data }: BuildableAreaCardProps) {
 
   return (
     <div className="bg-white rounded-2xl border border-border p-6 animate-slide-up" style={{ animationDelay: "0.1s" }}>
-      <div className="flex items-center gap-2 mb-5">
-        <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center">
-          <Ruler className="h-4 w-4 text-primary" />
+      <div className="flex items-center gap-3 mb-5">
+        <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
+          <Ruler className="h-5 w-5 text-primary" />
         </div>
-        <h3 className="text-lg font-bold text-secondary">Buildable Area Analysis</h3>
+        <h3 className="text-xl font-semibold text-secondary">Buildable Area Analysis</h3>
       </div>
 
       <div className="space-y-4 mb-6">
@@ -49,15 +49,15 @@ export function BuildableAreaCard({ data }: BuildableAreaCardProps) {
           return (
             <div
               key={item.label}
-              className={`flex items-center justify-between py-3 px-4 rounded-xl ${
-                item.highlight ? "bg-primary/5 border border-primary/20" : "bg-muted/50"
+              className={`flex items-center justify-between gap-3 py-3 px-4 rounded-xl ${
+                item.highlight ? "bg-primary/5 border border-primary/20" : "bg-muted/50 border border-transparent"
               }`}
             >
               <div className="flex items-center gap-3">
                 <Icon className={`h-4 w-4 ${item.highlight ? "text-primary" : "text-muted-foreground"}`} />
                 <span className="text-sm text-secondary">{item.label}</span>
               </div>
-              <span className={`text-sm font-bold ${item.highlight ? "text-primary" : "text-secondary"}`}>
+              <span className={`text-sm font-bold whitespace-nowrap ${item.highlight ? "text-primary" : "text-secondary"}`}>
                 {item.value}
               </span>
             </div>
@@ -72,7 +72,7 @@ export function BuildableAreaCard({ data }: BuildableAreaCardProps) {
           {/^(not|site review|two-story detached adus aren)/i.test(data.oneStoryPotential) ? (
             <XCircle className="h-4 w-4 text-muted-foreground mt-0.5 flex-shrink-0" />
           ) : (
-            <CheckCircle2 className="h-4 w-4 text-success mt-0.5 flex-shrink-0" />
+            <CheckCircle2 className="h-4 w-4 text-primary mt-0.5 flex-shrink-0" />
           )}
           <div>
             <p className="text-xs text-muted-foreground">1-Story ADU</p>
@@ -83,7 +83,7 @@ export function BuildableAreaCard({ data }: BuildableAreaCardProps) {
           {/^(not|site review|two-story detached adus aren)/i.test(data.twoStoryPotential) ? (
             <XCircle className="h-4 w-4 text-destructive mt-0.5 flex-shrink-0" />
           ) : (
-            <CheckCircle2 className="h-4 w-4 text-success mt-0.5 flex-shrink-0" />
+            <CheckCircle2 className="h-4 w-4 text-primary mt-0.5 flex-shrink-0" />
           )}
           <div>
             <p className="text-xs text-muted-foreground">2-Story ADU</p>

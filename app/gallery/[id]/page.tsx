@@ -16,11 +16,14 @@ export default async function ProjectPage({ params }: { params: Promise<{ id: st
 
   if (!project) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center">
-          <h1 className="text-4xl font-bold text-secondary mb-4">Project Not Found</h1>
+      <div className="min-h-screen flex items-center justify-center bg-muted pt-40 pb-20">
+        <div className="container mx-auto px-4 text-center">
+          <h1 className="text-4xl md:text-5xl font-bold text-secondary mb-4">Project Not Found</h1>
+          <p className="text-xl text-muted-foreground mb-8">We couldn&apos;t find that project.</p>
           <Link href="/gallery">
-            <Button>Back to Gallery</Button>
+            <Button size="lg" rounded="full">
+              <ArrowLeft className="h-5 w-5" /> Back to Gallery
+            </Button>
           </Link>
         </div>
       </div>
@@ -41,19 +44,20 @@ export default async function ProjectPage({ params }: { params: Promise<{ id: st
           fill
           className="object-cover"
           priority
+          sizes="100vw"
         />
-        <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent" />
-        <div className="absolute bottom-0 left-0 right-0 p-8">
-          <div className="container mx-auto">
+        <div className="absolute inset-0 bg-gradient-to-t from-secondary/90 via-secondary/40 to-secondary/20" />
+        <div className="absolute bottom-0 left-0 right-0 pb-12">
+          <div className="container mx-auto px-4">
             <Link href="/gallery" className="inline-flex items-center gap-2 text-white/80 hover:text-white mb-4 transition-colors">
               <ArrowLeft className="h-4 w-4" />
               Back to Gallery
             </Link>
-            <span className="block text-xs font-semibold text-primary bg-white/10 backdrop-blur-sm w-fit px-3 py-1.5 rounded-full mb-3 border border-white/10">
+            <span className="block w-fit rounded-full bg-secondary/60 px-3 py-1 text-xs font-semibold uppercase tracking-wider text-white backdrop-blur-sm mb-4">
               {project.type}
             </span>
-            <h1 className="text-3xl md:text-5xl font-bold text-white mb-2">{project.title}</h1>
-            <div className="flex items-center gap-4 text-white/80">
+            <h1 className="text-4xl md:text-5xl font-bold text-white mb-4">{project.title}</h1>
+            <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-white/80">
               <span className="flex items-center gap-1.5">
                 <MapPin className="h-4 w-4" />
                 {project.location}
@@ -68,7 +72,7 @@ export default async function ProjectPage({ params }: { params: Promise<{ id: st
       </section>
 
       {/* Project Details */}
-      <section className="py-16">
+      <section className="py-20">
         <div className="container mx-auto px-4 max-w-3xl">
           {project.imageStatus === "pending-replacement" && project.imageNote && (
             <div className="mb-8 rounded-2xl border border-primary/20 bg-primary/5 p-5">
@@ -76,19 +80,19 @@ export default async function ProjectPage({ params }: { params: Promise<{ id: st
               <p className="mt-1 text-sm text-muted-foreground">{project.imageNote}</p>
             </div>
           )}
-          <h2 className="text-2xl font-bold text-secondary mb-4">About This Project</h2>
+          <h2 className="text-3xl md:text-4xl font-bold text-secondary mb-4">About This Project</h2>
           <p className="text-lg text-muted-foreground leading-relaxed mb-8">
             {project.description}
           </p>
 
           <div className="flex flex-col sm:flex-row gap-4">
             <Link href="/contact">
-              <Button size="lg" className="bg-primary hover:bg-primary-dark text-white font-semibold">
-                Start a Similar Project <ArrowRight className="h-5 w-5 ml-2" />
+              <Button size="lg" rounded="full" className="w-full sm:w-auto font-semibold">
+                Start a Similar Project <ArrowRight className="h-5 w-5" />
               </Button>
             </Link>
             <Link href="/build-your-adu">
-              <Button size="lg" variant="outline">
+              <Button size="lg" rounded="full" variant="outline" className="w-full sm:w-auto">
                 Design Your ADU
               </Button>
             </Link>
@@ -97,19 +101,19 @@ export default async function ProjectPage({ params }: { params: Promise<{ id: st
       </section>
 
       {/* Navigation */}
-      <section className="py-8 border-t">
+      <section className="py-8 border-t border-border">
         <div className="container mx-auto px-4">
-          <div className="flex justify-between items-center">
+          <div className="flex justify-between items-center gap-6">
             {prevProject ? (
-              <Link href={`/gallery/${prevProject.id}`} className="flex items-center gap-2 text-muted-foreground hover:text-secondary transition-colors">
-                <ArrowLeft className="h-4 w-4" />
+              <Link href={`/gallery/${prevProject.id}`} className="flex items-center gap-2 min-h-11 text-muted-foreground hover:text-secondary transition-colors">
+                <ArrowLeft className="h-4 w-4 shrink-0" />
                 <span className="text-sm">{prevProject.title}</span>
               </Link>
             ) : <div />}
             {nextProject ? (
-              <Link href={`/gallery/${nextProject.id}`} className="flex items-center gap-2 text-muted-foreground hover:text-secondary transition-colors">
+              <Link href={`/gallery/${nextProject.id}`} className="flex items-center gap-2 min-h-11 text-right ml-auto text-muted-foreground hover:text-secondary transition-colors">
                 <span className="text-sm">{nextProject.title}</span>
-                <ArrowRight className="h-4 w-4" />
+                <ArrowRight className="h-4 w-4 shrink-0" />
               </Link>
             ) : <div />}
           </div>

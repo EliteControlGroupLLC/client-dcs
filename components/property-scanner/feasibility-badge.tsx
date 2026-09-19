@@ -10,15 +10,15 @@ interface FeasibilityBadgeProps {
 const config: Record<FeasibilityLevel, { icon: typeof CheckCircle2; bg: string; text: string; border: string }> = {
   Likely: {
     icon: CheckCircle2,
-    bg: "bg-emerald-50",
-    text: "text-emerald-700",
-    border: "border-emerald-200",
+    bg: "bg-primary/5",
+    text: "text-primary",
+    border: "border-primary/20",
   },
   Possible: {
     icon: AlertCircle,
-    bg: "bg-blue-50",
-    text: "text-blue-700",
-    border: "border-blue-200",
+    bg: "bg-primary-light/10",
+    text: "text-secondary-light",
+    border: "border-primary-light/40",
   },
   Limited: {
     icon: MinusCircle,

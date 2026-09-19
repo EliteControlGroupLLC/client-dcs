@@ -1,18 +1,22 @@
-import Link from "next/link";
 import { COMPANY_INFO } from "@/lib/data/site-data";
 
 export default function PrivacyPage() {
   return (
     <div className="min-h-screen">
-      <section className="bg-secondary text-white py-20">
+      <section className="bg-secondary text-white pt-40 pb-20">
         <div className="container mx-auto px-4">
-          <h1 className="text-4xl md:text-5xl font-bold mb-4">Privacy Policy</h1>
-          <p className="text-white/80">Last updated: March 2026</p>
+          <div className="max-w-3xl">
+            <span className="inline-block text-primary-light font-semibold text-sm uppercase tracking-wider mb-4">
+              LEGAL
+            </span>
+            <h1 className="text-4xl md:text-5xl font-bold mb-6">Privacy Policy</h1>
+            <p className="text-xl text-white/80">Last updated: March 2026</p>
+          </div>
         </div>
       </section>
 
       <section className="py-20">
-        <div className="container mx-auto px-4 max-w-3xl prose prose-lg">
+        <div className="container mx-auto px-4 max-w-3xl">
           <h2 className="text-2xl font-bold text-secondary mb-4">Information We Collect</h2>
           <p className="text-muted-foreground mb-6">
             When you use our website or contact us, we may collect personal information such as your name,
@@ -51,7 +55,7 @@ export default function PrivacyPage() {
           <h2 className="text-2xl font-bold text-secondary mb-4">Contact Us</h2>
           <p className="text-muted-foreground mb-6">
             If you have questions about this Privacy Policy, please contact us at:<br />
-            {COMPANY_INFO.name}<br />
+            TruthCore, a DBA of {COMPANY_INFO.name}<br />
             {COMPANY_INFO.office}<br />
             <a href={`mailto:${COMPANY_INFO.email}`} className="text-primary hover:underline">
               {COMPANY_INFO.email}

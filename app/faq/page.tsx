@@ -66,9 +66,11 @@ const faqs = [
 function FAQItem({ question, answer }: { question: string; answer: string }) {
   const [open, setOpen] = useState(false);
   return (
-    <div className="border-b border-gray-200">
+    <div className="border-b border-border">
       <button
+        type="button"
         onClick={() => setOpen(!open)}
+        aria-expanded={open}
         className="w-full flex items-center justify-between py-5 text-left"
       >
         <span className="text-lg font-medium text-secondary pr-4">{question}</span>
@@ -86,7 +88,7 @@ function FAQItem({ question, answer }: { question: string; answer: string }) {
 export default function FAQPage() {
   return (
     <div className="min-h-screen">
-      <section className="bg-secondary text-white py-20">
+      <section className="bg-secondary text-white pt-40 pb-20">
         <div className="container mx-auto px-4">
           <div className="max-w-3xl">
             <span className="inline-block text-primary-light font-semibold text-sm uppercase tracking-wider mb-4">
@@ -124,8 +126,8 @@ export default function FAQPage() {
             Our team is happy to answer any questions about your project.
           </p>
           <Link href="/contact">
-            <Button size="lg" className="bg-primary hover:bg-primary-dark text-white font-semibold">
-              Contact Us <ArrowRight className="h-5 w-5 ml-2" />
+            <Button size="lg" rounded="full">
+              Contact Us <ArrowRight className="h-5 w-5" />
             </Button>
           </Link>
         </div>

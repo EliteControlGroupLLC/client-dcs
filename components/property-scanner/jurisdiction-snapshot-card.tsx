@@ -23,16 +23,16 @@ export function JurisdictionSnapshotCard({ data }: JurisdictionSnapshotCardProps
 
   return (
     <div className="bg-white rounded-2xl border border-border p-6 animate-slide-up">
-      <div className="flex items-center justify-between mb-4">
-        <div className="flex items-center gap-2">
-          <div className="w-8 h-8 rounded-lg bg-blue-50 flex items-center justify-center">
-            <Building className="h-4 w-4 text-blue-600" />
+      <div className="flex flex-wrap items-center justify-between gap-3 mb-5">
+        <div className="flex items-center gap-3 min-w-0">
+          <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
+            <Building className="h-5 w-5 text-primary" />
           </div>
-          <h3 className="text-lg font-bold text-secondary">Jurisdiction</h3>
+          <h3 className="text-xl font-semibold text-secondary">Jurisdiction</h3>
         </div>
         <div className={`flex items-center gap-1.5 text-xs px-2.5 py-1 rounded-full ${
           isHighConfidence
-            ? "bg-emerald-50 text-emerald-700"
+            ? "bg-primary/5 text-primary"
             : "bg-amber-50 text-amber-700"
         }`}>
           {isHighConfidence ? (
@@ -75,7 +75,7 @@ export function JurisdictionSnapshotCard({ data }: JurisdictionSnapshotCardProps
 
       {data.sourceUrls.length > 0 && (
         <div className="mt-4 pt-3 border-t border-border/50">
-          <p className="text-[10px] text-muted-foreground mb-1.5">Source References</p>
+          <p className="text-xs text-muted-foreground mb-1.5">Source References</p>
           <div className="flex flex-wrap gap-2">
             {data.sourceUrls.slice(0, 2).map((url, i) => (
               <a
@@ -83,9 +83,9 @@ export function JurisdictionSnapshotCard({ data }: JurisdictionSnapshotCardProps
                 href={url}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center gap-1 text-[10px] text-blue-600 hover:text-blue-800 transition-colors"
+                className="inline-flex items-center gap-1 text-xs text-primary hover:text-primary-dark hover:underline transition-colors"
               >
-                <ExternalLink className="h-2.5 w-2.5" />
+                <ExternalLink className="h-3 w-3" />
                 {(() => {
                   try {
                     return new URL(url).hostname.replace(/^www\./, "");

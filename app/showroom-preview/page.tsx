@@ -32,7 +32,7 @@ const categories = [
 export default function ShowroomPreviewPage() {
   return (
     <div className="min-h-screen">
-      <section className="bg-secondary text-white py-20">
+      <section className="bg-secondary text-white pt-40 pb-20">
         <div className="container mx-auto px-4">
           <div className="max-w-3xl">
             <span className="inline-block text-primary-light font-semibold text-sm uppercase tracking-wider mb-4">
@@ -41,7 +41,7 @@ export default function ShowroomPreviewPage() {
             <h1 className="text-4xl md:text-5xl font-bold mb-6">
               Explore Materials, Finishes & Design Options
             </h1>
-            <p className="text-xl text-white/80 mb-8">
+            <p className="text-xl text-white/80">
               Browse our curated selection of materials, finishes, fixtures, and design options.
               Visualize your project before construction begins.
             </p>
@@ -60,20 +60,20 @@ export default function ShowroomPreviewPage() {
             </p>
           </div>
 
-          <div className="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
+          <div className="grid md:grid-cols-2 gap-6 max-w-4xl mx-auto">
             {categories.map((cat) => {
               const Icon = cat.icon;
               return (
                 <div
                   key={cat.title}
-                  className="group bg-white rounded-2xl p-8 border border-gray-100 shadow-sm hover:shadow-lg hover:border-primary/20 transition-all duration-300"
+                  className="group flex h-full flex-col bg-white rounded-2xl p-8 border border-border shadow-sm hover:shadow-lg hover:border-primary/20 transition-all duration-300"
                 >
                   <div className="w-14 h-14 rounded-xl bg-primary/10 flex items-center justify-center mb-6 group-hover:bg-primary/20 transition-colors">
                     <Icon className="h-7 w-7 text-primary" />
                   </div>
-                  <h3 className="text-xl font-bold text-secondary mb-2">{cat.title}</h3>
+                  <h3 className="text-xl font-semibold text-secondary mb-2">{cat.title}</h3>
                   <p className="text-muted-foreground mb-4">{cat.description}</p>
-                  <span className="text-sm font-medium text-primary">{cat.count}</span>
+                  <span className="mt-auto text-sm font-medium text-primary">{cat.count}</span>
                 </div>
               );
             })}
@@ -91,14 +91,14 @@ export default function ShowroomPreviewPage() {
             that match your vision and budget.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Link href="/build-your-adu">
-              <Button size="lg" className="bg-primary hover:bg-primary-dark text-white font-semibold">
+            <Link href="/build-your-adu" className="w-full sm:w-auto">
+              <Button size="lg" rounded="full" className="w-full sm:w-auto">
                 Build Your ADU
-                <ArrowRight className="h-5 w-5 ml-2" />
+                <ArrowRight className="h-5 w-5" />
               </Button>
             </Link>
-            <Link href="/contact">
-              <Button size="lg" variant="outline" className="border-white text-white hover:bg-white/10">
+            <Link href="/contact" className="w-full sm:w-auto">
+              <Button size="lg" variant="outlineWhite" rounded="full" className="w-full sm:w-auto">
                 Schedule a Consultation
               </Button>
             </Link>

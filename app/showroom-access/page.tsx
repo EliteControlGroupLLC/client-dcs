@@ -8,9 +8,9 @@ import { safeShowroomNext } from "@/lib/showroom-access";
 import { ShowroomRedirect } from "./showroom-redirect";
 
 export const metadata: Metadata = {
-  title: "Shop the Showroom — Unlock up to 30% off | Distinct Construction Solutions",
+  title: "Shop the Showroom — Unlock up to 30% off | TruthCore",
   description:
-    "Shop cabinetry, countertops, flooring, fixtures and finishes in the Distinct Construction Solutions showroom. Unlock up to 30% off.",
+    "Shop cabinetry, countertops, flooring, fixtures and finishes in the TruthCore showroom. Unlock up to 30% off.",
   alternates: { canonical: "/showroom-access" },
 };
 
@@ -38,11 +38,11 @@ export default async function ShowroomAccessPage({
 
   return (
     <div className="min-h-screen">
-      <section className="bg-secondary text-white py-16 md:py-20">
+      <section className="bg-secondary text-white pt-40 pb-20">
         <div className="container mx-auto px-4">
           <div className="max-w-3xl">
             <span className="inline-block text-primary-light font-semibold text-sm uppercase tracking-wider mb-4">
-              DCS SHOWROOM
+              TRUTHCORE SHOWROOM
             </span>
             <h1 className="text-4xl md:text-5xl font-bold mb-6">Shop the Showroom</h1>
             <div className="mb-6">
@@ -56,10 +56,10 @@ export default async function ShowroomAccessPage({
               and unlock up to 30% off your selections when you register below.
             </p>
           </div>
-          <div className="mt-10 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="mt-12 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
             {highlights.map(({ icon: Icon, title, text }) => (
-              <div key={title} className="rounded-xl bg-white/5 border border-white/10 p-4">
-                <Icon className="h-5 w-5 text-primary mb-2" />
+              <div key={title} className="h-full rounded-2xl bg-white/5 border border-white/10 p-6">
+                <Icon className="h-5 w-5 text-primary-light mb-3" />
                 <p className="font-semibold">{title}</p>
                 <p className="text-sm text-white/70">{text}</p>
               </div>

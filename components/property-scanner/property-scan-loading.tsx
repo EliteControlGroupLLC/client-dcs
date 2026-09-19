@@ -101,7 +101,7 @@ export function PropertyScanLoading({ address, onComplete }: PropertyScanLoading
             >
               <StepIcon
                 className={`h-5 w-5 flex-shrink-0 ${
-                  isActive ? "text-primary" : isComplete ? "text-success" : "text-muted-foreground"
+                  isActive ? "text-primary" : isComplete ? "text-primary" : "text-muted-foreground"
                 }`}
               />
               <span
@@ -112,7 +112,7 @@ export function PropertyScanLoading({ address, onComplete }: PropertyScanLoading
                 {step.label}
               </span>
               {isComplete && (
-                <CheckCircle2 className="h-4 w-4 text-success ml-auto" />
+                <CheckCircle2 className="h-4 w-4 text-primary ml-auto" />
               )}
             </div>
           );
