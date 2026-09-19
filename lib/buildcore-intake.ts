@@ -10,12 +10,32 @@ export type BuildCoreServiceLine =
   | "adu"
   | "custom-home"
   | "remodel"
+  | "fencing"
   | "roofing"
+  | "concrete"
+  | "windows"
   | "general-construction";
+
+export const BUILDCORE_SERVICE_LINES: readonly BuildCoreServiceLine[] = [
+  "adu",
+  "custom-home",
+  "remodel",
+  "fencing",
+  "roofing",
+  "concrete",
+  "windows",
+  "general-construction",
+];
+
+export type BuildCoreLeadSource =
+  | "adu-builder"
+  | "website-contact"
+  | "website-tool"
+  | "website-showroom";
 
 export interface BuildCoreLeadInput {
   serviceLine?: BuildCoreServiceLine;
-  source?: "adu-builder" | "website-contact";
+  source?: BuildCoreLeadSource;
   firstName: string;
   lastName: string;
   email: string;

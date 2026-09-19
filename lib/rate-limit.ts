@@ -119,4 +119,8 @@ export const RATE_LIMITS = {
   phoneVerify: { maxRequests: 5, windowSeconds: 5 * 60 },
   // Address autocomplete (one call per debounced keystroke) — 60 per min per IP
   addressSuggest: { maxRequests: 60, windowSeconds: 60 },
+  // Lead gate form submission (new visitor) — 5 per 15 min per IP
+  leadGateSubmit: { maxRequests: 5, windowSeconds: 15 * 60 },
+  // Lead gate interest registration with an existing pass — 30 per 15 min per IP
+  leadGateRegister: { maxRequests: 30, windowSeconds: 15 * 60 },
 } as const;

@@ -81,6 +81,11 @@ interface AddressAutocompleteInputProps {
   onChange: (value: string) => void;
   onSelect: (address: string) => void;
   placeholder?: string;
+  /** Form-field sizing (matches other inputs in a form) instead of the large hero search box. */
+  compact?: boolean;
+  /** Show error styling (compact mode). */
+  invalid?: boolean;
+  id?: string;
 }
 
 export function AddressAutocompleteInput({
@@ -88,6 +93,9 @@ export function AddressAutocompleteInput({
   onChange,
   onSelect,
   placeholder = "Enter your property address",
+  compact = false,
+  invalid = false,
+  id,
 }: AddressAutocompleteInputProps) {
   const [suggestions, setSuggestions] = useState<string[]>([]);
   const [isOpen, setIsOpen] = useState(false);
@@ -230,7 +238,11 @@ export function AddressAutocompleteInput({
   return (
     <div ref={wrapperRef} className="relative w-full">
       <div className="relative group">
-        <MapPin className="absolute left-5 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground group-focus-within:text-primary transition-colors" />
+        <MapPin
+          className={`absolute top-1/2 -translate-y-1/2 text-muted-foreground group-focus-within:text-primary transition-colors ${
+            compact ? "left-3 h-4 w-4" : "left-5 h-5 w-5"
+          }`}
+        />
         <input
           ref={inputRef}
           type="text"
@@ -239,14 +251,22 @@ export function AddressAutocompleteInput({
           onKeyDown={handleKeyDown}
           onFocus={() => suggestions.length > 0 && setIsOpen(true)}
           placeholder={placeholder}
-          className="w-full h-16 pl-14 pr-14 rounded-2xl border-2 border-border bg-white text-lg font-medium text-secondary placeholder:text-muted-foreground/60 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all shadow-sm hover:shadow-md"
+          id={id}
+          aria-invalid={invalid || undefined}
+          className={
+            compact
+              ? `w-full h-11 pl-9 pr-9 rounded-lg border bg-white text-sm text-secondary placeholder:text-muted-foreground/70 focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all ${
+                  invalid ? "border-red-400 bg-red-50" : "border-border"
+                }`
+              : "w-full h-16 pl-14 pr-14 rounded-2xl border-2 border-border bg-white text-lg font-medium text-secondary placeholder:text-muted-foreground/60 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all shadow-sm hover:shadow-md"
+          }
           autoComplete="off"
         />
-        <div className="absolute right-5 top-1/2 -translate-y-1/2">
+        <div className={`absolute top-1/2 -translate-y-1/2 ${compact ? "right-3" : "right-5"}`}>
           {isSearching ? (
-            <Loader2 className="h-5 w-5 text-primary animate-spin" />
+            <Loader2 className={`${compact ? "h-4 w-4" : "h-5 w-5"} text-primary animate-spin`} />
           ) : (
-            <Search className="h-5 w-5 text-muted-foreground" />
+            <Search className={`${compact ? "h-4 w-4" : "h-5 w-5"} text-muted-foreground`} />
           )}
         </div>
       </div>
@@ -256,6 +276,7 @@ export function AddressAutocompleteInput({
         <div className="absolute z-50 w-full mt-2 bg-white rounded-xl shadow-xl border border-border overflow-hidden animate-fade-in">
           {suggestions.map((suggestion, index) => (
             <button
+              type="button"
               key={suggestion}
               onClick={() => handleSelect(suggestion)}
               onMouseEnter={() => setHighlightedIndex(index)}

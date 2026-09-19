@@ -4,6 +4,8 @@ import { useState } from "react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { LeadGate } from "@/components/lead-gate/lead-gate";
+import { LEAD_GATE_INTERESTS } from "@/lib/lead-gate-interests";
 import { ArrowRight, ArrowLeftRight, Check } from "lucide-react";
 import { estimateAduPriceRange, formatPriceRange, getRentEstimate } from "@/lib/data/site-data";
 
@@ -104,103 +106,110 @@ export default function CompareADUSizesPage() {
         </div>
       </section>
 
-      <section className="py-20">
-        <div className="container mx-auto px-4 max-w-4xl">
-          {/* Selectors */}
-          <div className="grid grid-cols-[1fr_auto_1fr] gap-4 items-center mb-12">
-            <div>
-              <label className="block text-sm font-semibold text-secondary mb-2">Option A</label>
-              <select
-                value={leftIndex}
-                onChange={(e) => setLeftIndex(Number(e.target.value))}
-                className="w-full px-4 py-3 rounded-lg border border-gray-200 text-secondary font-medium bg-white"
-              >
-                {aduOptions.map((opt, i) => (
-                  <option key={opt.sqFt} value={i}>{opt.label}</option>
-                ))}
-              </select>
-            </div>
-            <div className="flex items-end pb-2">
-              <ArrowLeftRight className="h-6 w-6 text-primary" />
-            </div>
-            <div>
-              <label className="block text-sm font-semibold text-secondary mb-2">Option B</label>
-              <select
-                value={rightIndex}
-                onChange={(e) => setRightIndex(Number(e.target.value))}
-                className="w-full px-4 py-3 rounded-lg border border-gray-200 text-secondary font-medium bg-white"
-              >
-                {aduOptions.map((opt, i) => (
-                  <option key={opt.sqFt} value={i}>{opt.label}</option>
-                ))}
-              </select>
-            </div>
-          </div>
-
-          {/* Comparison Table */}
-          <div className="bg-white rounded-2xl border overflow-hidden">
-            {/* Header */}
-            <div className="grid grid-cols-3 bg-secondary text-white">
-              <div className="p-4 text-sm font-semibold">Category</div>
-              <div className="p-4 text-center border-l border-white/10">
-                <span className="text-primary font-bold text-lg">{left.label}</span>
+      <LeadGate
+        interest={LEAD_GATE_INTERESTS.compareAduSizes}
+        headline="Unlock the ADU size comparison"
+        subhead="Compare ADU sizes side by side — cost, rent and return for each option."
+        ctaLabel="Unlock the Comparison"
+      >
+        <section className="py-20">
+          <div className="container mx-auto px-4 max-w-4xl">
+            {/* Selectors */}
+            <div className="grid grid-cols-[1fr_auto_1fr] gap-4 items-center mb-12">
+              <div>
+                <label className="block text-sm font-semibold text-secondary mb-2">Option A</label>
+                <select
+                  value={leftIndex}
+                  onChange={(e) => setLeftIndex(Number(e.target.value))}
+                  className="w-full px-4 py-3 rounded-lg border border-gray-200 text-secondary font-medium bg-white"
+                >
+                  {aduOptions.map((opt, i) => (
+                    <option key={opt.sqFt} value={i}>{opt.label}</option>
+                  ))}
+                </select>
               </div>
-              <div className="p-4 text-center border-l border-white/10">
-                <span className="text-primary font-bold text-lg">{right.label}</span>
+              <div className="flex items-end pb-2">
+                <ArrowLeftRight className="h-6 w-6 text-primary" />
+              </div>
+              <div>
+                <label className="block text-sm font-semibold text-secondary mb-2">Option B</label>
+                <select
+                  value={rightIndex}
+                  onChange={(e) => setRightIndex(Number(e.target.value))}
+                  className="w-full px-4 py-3 rounded-lg border border-gray-200 text-secondary font-medium bg-white"
+                >
+                  {aduOptions.map((opt, i) => (
+                    <option key={opt.sqFt} value={i}>{opt.label}</option>
+                  ))}
+                </select>
               </div>
             </div>
 
-            {/* Rows */}
-            {fields.map((field, i) => (
-              <div key={field.key} className={`grid grid-cols-3 ${i % 2 === 0 ? "bg-gray-50" : "bg-white"}`}>
-                <div className="p-4 text-sm font-semibold text-secondary border-t">{field.label}</div>
-                <div className="p-4 text-sm text-muted-foreground border-t border-l text-center">
-                  {left[field.key]}
+            {/* Comparison Table */}
+            <div className="bg-white rounded-2xl border overflow-hidden">
+              {/* Header */}
+              <div className="grid grid-cols-3 bg-secondary text-white">
+                <div className="p-4 text-sm font-semibold">Category</div>
+                <div className="p-4 text-center border-l border-white/10">
+                  <span className="text-primary font-bold text-lg">{left.label}</span>
                 </div>
-                <div className="p-4 text-sm text-muted-foreground border-t border-l text-center">
-                  {right[field.key]}
+                <div className="p-4 text-center border-l border-white/10">
+                  <span className="text-primary font-bold text-lg">{right.label}</span>
                 </div>
               </div>
-            ))}
-          </div>
 
-          {/* Summary Cards */}
-          <div className="grid md:grid-cols-2 gap-6 mt-12">
-            <Card className="border-primary/20">
-              <CardContent className="p-6">
-                <h3 className="font-bold text-secondary text-lg mb-3">{left.label} ADU</h3>
-                <ul className="space-y-2 mb-4">
-                  <li className="flex items-start gap-2 text-sm text-muted-foreground">
-                    <Check className="h-4 w-4 text-primary mt-0.5 shrink-0" />
-                    {left.bestFor}
-                  </li>
-                </ul>
-                <Link href="/build-your-adu">
-                  <Button className="w-full bg-primary hover:bg-primary-dark text-secondary font-semibold">
-                    Build a {left.label} ADU <ArrowRight className="h-4 w-4 ml-2" />
-                  </Button>
-                </Link>
-              </CardContent>
-            </Card>
-            <Card className="border-primary/20">
-              <CardContent className="p-6">
-                <h3 className="font-bold text-secondary text-lg mb-3">{right.label} ADU</h3>
-                <ul className="space-y-2 mb-4">
-                  <li className="flex items-start gap-2 text-sm text-muted-foreground">
-                    <Check className="h-4 w-4 text-primary mt-0.5 shrink-0" />
-                    {right.bestFor}
-                  </li>
-                </ul>
-                <Link href="/build-your-adu">
-                  <Button className="w-full bg-primary hover:bg-primary-dark text-secondary font-semibold">
-                    Build a {right.label} ADU <ArrowRight className="h-4 w-4 ml-2" />
-                  </Button>
-                </Link>
-              </CardContent>
-            </Card>
+              {/* Rows */}
+              {fields.map((field, i) => (
+                <div key={field.key} className={`grid grid-cols-3 ${i % 2 === 0 ? "bg-gray-50" : "bg-white"}`}>
+                  <div className="p-4 text-sm font-semibold text-secondary border-t">{field.label}</div>
+                  <div className="p-4 text-sm text-muted-foreground border-t border-l text-center">
+                    {left[field.key]}
+                  </div>
+                  <div className="p-4 text-sm text-muted-foreground border-t border-l text-center">
+                    {right[field.key]}
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {/* Summary Cards */}
+            <div className="grid md:grid-cols-2 gap-6 mt-12">
+              <Card className="border-primary/20">
+                <CardContent className="p-6">
+                  <h3 className="font-bold text-secondary text-lg mb-3">{left.label} ADU</h3>
+                  <ul className="space-y-2 mb-4">
+                    <li className="flex items-start gap-2 text-sm text-muted-foreground">
+                      <Check className="h-4 w-4 text-primary mt-0.5 shrink-0" />
+                      {left.bestFor}
+                    </li>
+                  </ul>
+                  <Link href="/build-your-adu">
+                    <Button className="w-full bg-primary hover:bg-primary-dark text-secondary font-semibold">
+                      Build a {left.label} ADU <ArrowRight className="h-4 w-4 ml-2" />
+                    </Button>
+                  </Link>
+                </CardContent>
+              </Card>
+              <Card className="border-primary/20">
+                <CardContent className="p-6">
+                  <h3 className="font-bold text-secondary text-lg mb-3">{right.label} ADU</h3>
+                  <ul className="space-y-2 mb-4">
+                    <li className="flex items-start gap-2 text-sm text-muted-foreground">
+                      <Check className="h-4 w-4 text-primary mt-0.5 shrink-0" />
+                      {right.bestFor}
+                    </li>
+                  </ul>
+                  <Link href="/build-your-adu">
+                    <Button className="w-full bg-primary hover:bg-primary-dark text-secondary font-semibold">
+                      Build a {right.label} ADU <ArrowRight className="h-4 w-4 ml-2" />
+                    </Button>
+                  </Link>
+                </CardContent>
+              </Card>
+            </div>
           </div>
-        </div>
-      </section>
+        </section>
+      </LeadGate>
 
       <section className="py-20 bg-muted">
         <div className="container mx-auto px-4 text-center">
