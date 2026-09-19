@@ -2,6 +2,7 @@
 
 import { useState, useRef, useEffect, useCallback } from "react";
 import { MapPin, Search, Loader2 } from "lucide-react";
+import { fieldClass } from "@/components/ui/form";
 
 // Minimal type declarations for the new Google Places API (AutocompleteSuggestion)
 declare global {
@@ -30,9 +31,8 @@ interface GoogleAutocompleteRequest {
   sessionToken?: GoogleSessionToken;
 }
 
-interface GoogleSessionToken {
-  // Opaque token type
-}
+// Opaque token type
+type GoogleSessionToken = object;
 
 interface GoogleAutocompleteSuggestion {
   placePrediction?: {
@@ -281,10 +281,8 @@ export function AddressAutocompleteInput({
           aria-invalid={invalid || undefined}
           className={
             compact
-              ? `w-full h-11 pl-9 pr-9 rounded-lg border bg-white text-sm text-secondary placeholder:text-muted-foreground/70 focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all ${
-                  invalid ? "border-red-400 bg-red-50" : "border-border"
-                }`
-              : "w-full h-16 pl-14 pr-14 rounded-2xl border-2 border-border bg-white text-lg font-medium text-secondary placeholder:text-muted-foreground/60 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all shadow-sm hover:shadow-md"
+              ? fieldClass({ invalid }, "pl-9 pr-9")
+              : "w-full h-16 pl-14 pr-14 rounded-lg border-2 border-border bg-white text-lg font-medium text-secondary placeholder:text-muted-foreground/70 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all shadow-sm hover:shadow-md"
           }
           autoComplete="off"
         />
@@ -299,7 +297,7 @@ export function AddressAutocompleteInput({
 
       {/* Suggestions dropdown */}
       {isOpen && suggestions.length > 0 && (
-        <div className="absolute z-50 w-full mt-2 bg-white rounded-xl shadow-xl border border-border overflow-hidden animate-fade-in">
+        <div className="absolute z-50 w-full mt-2 bg-white rounded-lg shadow-xl border border-border overflow-hidden animate-fade-in">
           {suggestions.map((suggestion, index) => (
             <button
               type="button"

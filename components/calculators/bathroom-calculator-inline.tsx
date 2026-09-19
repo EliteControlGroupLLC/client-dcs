@@ -5,7 +5,7 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { ArrowRight, Bath } from "lucide-react";
-import { optionClass } from "@/components/calculators/calculator-ui";
+import { optionClass, ResultIcon, resultCardClass } from "@/components/calculators/calculator-ui";
 import { LeadGate } from "@/components/lead-gate/lead-gate";
 import { LEAD_GATE_INTERESTS } from "@/lib/lead-gate-interests";
 
@@ -52,7 +52,11 @@ const addOns = [
   { label: "Plumbing Relocation", cost: 3500 },
 ];
 
-export function BathroomCalculatorInline() {
+/**
+ * Rendered on the service page (muted band with its own heading) and, with
+ * `standalone`, as the body of the /tools page (the page hero carries the title).
+ */
+export function BathroomCalculatorInline({ standalone = false }: { standalone?: boolean }) {
   const [sizeIndex, setSizeIndex] = useState(2);
   const [finishIndex, setFinishIndex] = useState(0);
   const [selectedAddOns, setSelectedAddOns] = useState<number[]>([]);
@@ -73,17 +77,20 @@ export function BathroomCalculatorInline() {
   return (
     <div id="calculator">
       <LeadGate
+        className={standalone ? undefined : "bg-muted"}
         interest={LEAD_GATE_INTERESTS.bathroomCalculator}
         headline="Unlock your bathroom remodel estimate"
         subhead="See your bathroom remodel price range based on size, finish level and upgrades."
         ctaLabel="Unlock My Bathroom Estimate"
       >
-        <section className="py-20 bg-muted">
+        <section className={standalone ? "py-20" : "py-20 bg-muted"}>
           <div className="container mx-auto px-4 max-w-5xl">
-            <div className="text-center mb-12">
-              <h2 className="text-3xl md:text-4xl font-bold text-secondary mb-4">Bathroom Remodel Estimator</h2>
-              <p className="text-lg text-muted-foreground">Estimate your bathroom renovation cost. Starting at $18,000 for a standard 5x10 bathroom.</p>
-            </div>
+            {!standalone && (
+              <div className="text-center mb-12">
+                <h2 className="text-3xl md:text-4xl font-bold text-secondary mb-4">Bathroom Remodel Estimator</h2>
+                <p className="text-lg text-muted-foreground">Estimate your bathroom renovation cost. Starting at $18,000 for a standard 5x10 bathroom.</p>
+              </div>
+            )}
             <div className="grid md:grid-cols-2 gap-8 [&>*]:min-w-0">
               <div className="space-y-8">
                 <div>
@@ -132,28 +139,28 @@ export function BathroomCalculatorInline() {
                           className="w-4 h-4 accent-primary"
                         />
                         <span className="text-sm text-secondary">{a.label}</span>
-                        <span className="text-sm text-muted-foreground ml-auto">Starting at ${a.cost.toLocaleString()}</span>
+                        <span className="text-sm text-muted-foreground ml-auto">+${a.cost.toLocaleString()}</span>
                       </label>
                     ))}
                   </div>
                 </div>
               </div>
 
-              <Card className="bg-secondary text-white border-secondary min-w-0">
+              <Card className={resultCardClass}>
                 <CardContent className="p-6 md:p-8 flex flex-col justify-center h-full">
                   <div className="text-center">
-                    <Bath className="h-12 w-12 text-primary-light mx-auto mb-4" />
-                    <p className="text-white/70 text-sm mb-2">Estimated Bathroom Remodel</p>
-                    <p className="text-3xl md:text-4xl font-bold text-primary-light mb-1 text-balance">
+                    <ResultIcon icon={Bath} />
+                    <p className="text-white/75 text-sm mb-2">Estimated Bathroom Remodel</p>
+                    <p className="text-3xl md:text-4xl font-bold text-accent mb-1 text-balance">
                       ${totalLow.toLocaleString()}&nbsp;&ndash; ${totalHigh.toLocaleString()}
                     </p>
-                    <p className="text-white/60 text-sm mb-6">
+                    <p className="text-white/75 text-sm mb-6">
                       {size.label} &bull; {finish.label} Finish
                     </p>
 
                     <div className="border-t border-white/10 pt-6 space-y-3 text-left mb-6">
-                      <p className="text-white/70 text-sm font-semibold">Base scope includes:</p>
-                      <ul className="text-white/60 text-sm space-y-1">
+                      <p className="text-white text-sm font-semibold">Base scope includes:</p>
+                      <ul className="text-white/80 text-sm space-y-1">
                         <li>&bull; Shower retile with tub or shower pan</li>
                         <li>&bull; Vanity &amp; mirror</li>
                         <li>&bull; Lighting upgrades</li>
@@ -163,15 +170,15 @@ export function BathroomCalculatorInline() {
                       </ul>
                     </div>
 
-                    <p className="text-xs text-white/60 mb-6">
+                    <p className="text-xs text-white/70 mb-6">
                       * Estimate only. Final pricing depends on material selections, plumbing conditions, and design scope.
                     </p>
 
-                    <Link href="/contact">
-                      <Button size="lg" rounded="full" className="w-full">
+                    <Button asChild size="lg" rounded="full" className="w-full">
+                      <Link href="/contact">
                         Request Exact Pricing <ArrowRight className="h-5 w-5 ml-2" />
-                      </Button>
-                    </Link>
+                      </Link>
+                    </Button>
                   </div>
                 </CardContent>
               </Card>

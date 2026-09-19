@@ -87,7 +87,7 @@ export function AduRulesSnapshotCard({ data, jurisdictionName }: AduRulesSnapsho
               <Icon className="h-3.5 w-3.5 text-muted-foreground mt-0.5 flex-shrink-0" />
               <div>
                 <p className="text-xs text-muted-foreground leading-tight">{rule.label}</p>
-                <p className="text-xs font-semibold text-secondary">{rule.value}</p>
+                <p className="text-sm font-semibold text-secondary">{rule.value}</p>
               </div>
             </div>
           );

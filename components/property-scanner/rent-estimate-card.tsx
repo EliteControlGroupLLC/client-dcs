@@ -41,11 +41,11 @@ export function RentEstimateCard({ data }: RentEstimateCardProps) {
           <h3 className="text-xl font-semibold text-secondary">Rent Estimates</h3>
         </div>
         {data.source === "rentcast" ? (
-          <span className="text-xs px-2 py-0.5 rounded-full bg-primary/5 text-primary">
+          <span className="inline-flex items-center gap-1.5 text-xs font-medium px-2.5 py-1 rounded-full whitespace-nowrap bg-primary/5 text-primary">
             RentCast market estimate
           </span>
         ) : (
-          <span className="text-xs px-2 py-0.5 rounded-full bg-amber-50 text-amber-700">
+          <span className="inline-flex items-center gap-1.5 text-xs font-medium px-2.5 py-1 rounded-full whitespace-nowrap bg-amber-50 text-amber-700">
             Planning estimate
           </span>
         )}
@@ -75,7 +75,7 @@ export function RentEstimateCard({ data }: RentEstimateCardProps) {
               </div>
               <div>
                 <p className="text-xs text-muted-foreground">Range</p>
-                <p className="text-xs font-medium text-secondary">{est.rentRange}</p>
+                <p className="text-xs font-semibold text-secondary">{est.rentRange.replace(" - ", "\u00A0– ")}</p>
               </div>
               <div>
                 <p className="text-xs text-muted-foreground">$/sqft</p>

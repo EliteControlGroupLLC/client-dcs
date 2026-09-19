@@ -4,7 +4,7 @@ import { useMemo, useState } from "react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { optionClass } from "@/components/calculators/calculator-ui";
+import { optionClass, ResultIcon, resultCardClass } from "@/components/calculators/calculator-ui";
 import { LeadGate } from "@/components/lead-gate/lead-gate";
 import { LEAD_GATE_INTERESTS } from "@/lib/lead-gate-interests";
 import { ArrowRight, Calculator } from "lucide-react";
@@ -58,10 +58,10 @@ export default function ADUCalculatorPage() {
 
   return (
     <div className="min-h-screen">
-      <section className="bg-secondary text-white pt-40 pb-20">
+      <section className="bg-secondary bg-[radial-gradient(ellipse_at_top,rgba(51,102,102,0.35),transparent_60%)] text-white pt-40 pb-20">
         <div className="container mx-auto px-4">
           <div className="max-w-3xl">
-            <span className="inline-block text-primary-light font-semibold text-sm uppercase tracking-wider mb-4">
+            <span className="inline-block text-accent font-semibold text-sm uppercase tracking-wider mb-4">
               COST CALCULATOR
             </span>
             <h1 className="text-4xl md:text-5xl font-bold mb-6 text-balance">
@@ -113,7 +113,7 @@ export default function ADUCalculatorPage() {
                     value={adjustedSize}
                     onChange={(e) => setSize(Number(e.target.value))}
                     disabled={selected.type === "garage-conversion" || selected.type === "attached" || selected.type === "two-story"}
-                    className="w-full accent-primary"
+                    className="w-full h-11 -my-3.5 accent-primary cursor-pointer"
                   />
                   <div className="flex justify-between text-xs text-muted-foreground mt-1">
                     <span>400 sq ft</span>
@@ -138,34 +138,34 @@ export default function ADUCalculatorPage() {
               </div>
 
               {/* Result */}
-              <Card className="bg-secondary text-white border-secondary min-w-0">
+              <Card className={resultCardClass}>
                 <CardContent className="p-6 md:p-8 flex flex-col justify-center h-full">
                   <div className="text-center">
-                    <Calculator className="h-12 w-12 text-primary-light mx-auto mb-4" />
-                    <p className="text-white/70 text-sm mb-2">Estimated Project Cost</p>
-                    <p className="text-3xl md:text-4xl font-bold text-primary-light mb-1 text-balance">
+                    <ResultIcon icon={Calculator} />
+                    <p className="text-white/75 text-sm mb-2">Estimated Project Cost</p>
+                    <p className="text-3xl md:text-4xl font-bold text-accent mb-1 text-balance">
                       ${estimateLow.toLocaleString()}&nbsp;&ndash; ${estimateHigh.toLocaleString()}
                     </p>
-                    <p className="text-white/60 text-sm mb-6">
+                    <p className="text-white/75 text-sm mb-6">
                       {selected.label} &bull; {adjustedSize} sq ft &bull; {finishLevel.label}
                     </p>
 
                     <div className="border-t border-white/10 pt-6 mb-6">
-                      <p className="text-white/70 text-sm mb-1">Estimated Monthly Rental Income</p>
+                      <p className="text-white/75 text-sm mb-1">Estimated Monthly Rental Income</p>
                       <p className="text-2xl font-bold text-white">
                         ${rentEstimate.low.toLocaleString()}&nbsp;&ndash; ${rentEstimate.high.toLocaleString()}/mo
                       </p>
                     </div>
 
-                    <p className="text-xs text-white/60 mb-6">
+                    <p className="text-xs text-white/70 mb-6">
                       * This is an estimate only. Actual costs may vary based on site conditions, design, and permits. Schedule a consultation for an accurate quote.
                     </p>
 
-                    <Link href="/contact">
-                      <Button size="lg" rounded="full" className="w-full">
+                    <Button asChild size="lg" rounded="full" className="w-full">
+                      <Link href="/contact">
                         Get Accurate Quote <ArrowRight className="h-5 w-5 ml-2" />
-                      </Button>
-                    </Link>
+                      </Link>
+                    </Button>
                   </div>
                 </CardContent>
               </Card>
@@ -174,25 +174,25 @@ export default function ADUCalculatorPage() {
         </section>
       </LeadGate>
 
-      <section className="py-20 bg-muted">
+      <section className="py-20 bg-secondary bg-[radial-gradient(ellipse_at_top,rgba(51,102,102,0.35),transparent_60%)] text-white">
         <div className="container mx-auto px-4 text-center">
-          <h2 className="text-3xl md:text-4xl font-bold text-secondary mb-4">
+          <h2 className="text-3xl md:text-4xl font-bold mb-4">
             Want a Detailed Estimate?
           </h2>
-          <p className="text-lg text-muted-foreground mb-8 max-w-2xl mx-auto">
+          <p className="text-lg text-white/80 mb-8 max-w-2xl mx-auto">
             Our team can provide a detailed, fixed-price quote based on your specific property and project goals.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Link href="/build-your-adu">
-              <Button size="lg" rounded="full">
+            <Button asChild size="lg" rounded="full">
+              <Link href="/build-your-adu">
                 Design Your ADU <ArrowRight className="h-5 w-5 ml-2" />
-              </Button>
-            </Link>
-            <Link href="/contact">
-              <Button size="lg" variant="outline" rounded="full">
+              </Link>
+            </Button>
+            <Button asChild size="lg" variant="outlineWhite" rounded="full">
+              <Link href="/contact">
                 Free Consultation
-              </Button>
-            </Link>
+              </Link>
+            </Button>
           </div>
         </div>
       </section>

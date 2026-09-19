@@ -44,9 +44,9 @@ const categoryLabels: Record<string, string> = {
 const severityColors: Record<string, { bg: string; text: string; dot: string }> = {
   none: { bg: "bg-primary/5", text: "text-primary", dot: "bg-primary" },
   low: { bg: "bg-primary/5", text: "text-primary", dot: "bg-primary" },
-  moderate: { bg: "bg-amber-50", text: "text-amber-700", dot: "bg-amber-400" },
-  high: { bg: "bg-orange-50", text: "text-orange-700", dot: "bg-orange-400" },
-  "very-high": { bg: "bg-red-50", text: "text-red-700", dot: "bg-red-400" },
+  moderate: { bg: "bg-amber-50", text: "text-amber-700", dot: "bg-amber-500" },
+  high: { bg: "bg-orange-50", text: "text-orange-700", dot: "bg-orange-500" },
+  "very-high": { bg: "bg-red-50", text: "text-red-700", dot: "bg-red-500" },
 };
 
 const severityLabels: Record<string, string> = {
@@ -57,10 +57,10 @@ const severityLabels: Record<string, string> = {
   "very-high": "Very High",
 };
 
-const riskLevelStyles: Record<string, { bg: string; text: string; border: string }> = {
-  Low: { bg: "bg-primary/5", text: "text-primary", border: "border-primary/20" },
-  Moderate: { bg: "bg-amber-50", text: "text-amber-700", border: "border-amber-200" },
-  High: { bg: "bg-red-50", text: "text-red-700", border: "border-red-200" },
+const riskLevelStyles: Record<string, { bg: string; text: string }> = {
+  Low: { bg: "bg-primary/5", text: "text-primary" },
+  Moderate: { bg: "bg-amber-50", text: "text-amber-700" },
+  High: { bg: "bg-red-50", text: "text-red-700" },
 };
 
 export function SiteConstraintsCard({ data }: SiteConstraintsCardProps) {
@@ -84,11 +84,9 @@ export function SiteConstraintsCard({ data }: SiteConstraintsCardProps) {
         </div>
 
         {/* Overall Risk Badge */}
-        <div className={`px-3 py-1.5 rounded-full border whitespace-nowrap ${riskStyle.bg} ${riskStyle.border}`}>
-          <span className={`text-xs font-semibold ${riskStyle.text}`}>
-            {data.overallRiskLevel} Risk
-          </span>
-        </div>
+        <span className={`inline-flex items-center gap-1.5 text-xs font-medium px-2.5 py-1 rounded-full whitespace-nowrap ${riskStyle.bg} ${riskStyle.text}`}>
+          {data.overallRiskLevel} Risk
+        </span>
       </div>
 
       {/* Constraint Grid */}
@@ -120,7 +118,7 @@ export function SiteConstraintsCard({ data }: SiteConstraintsCardProps) {
                   )}
                 </div>
               </div>
-              <div className={`flex items-center gap-1.5 px-2 py-0.5 rounded-full shrink-0 ${colors.bg}`}>
+              <div className={`flex items-center gap-1.5 px-2.5 py-1 rounded-full shrink-0 ${colors.bg}`}>
                 <div className={`w-1.5 h-1.5 rounded-full ${colors.dot}`} />
                 <span className={`text-xs font-medium ${colors.text}`}>
                   {severityLabel}
@@ -133,7 +131,7 @@ export function SiteConstraintsCard({ data }: SiteConstraintsCardProps) {
 
       {/* Impact Summary */}
       {(data.costAdjustmentPercent > 0 || data.timelineAdjustmentMonths > 0) && (
-        <div className="bg-amber-50/50 border border-amber-100 rounded-lg px-3 py-2 mb-3">
+        <div className="bg-amber-50 border border-amber-200 rounded-lg px-3 py-2 mb-3">
           <p className="text-xs font-medium text-amber-800 mb-1">Estimated Impact (planning estimate)</p>
           <div className="flex gap-4">
             {data.costAdjustmentPercent > 0 && (

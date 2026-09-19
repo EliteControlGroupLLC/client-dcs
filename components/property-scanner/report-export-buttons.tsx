@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import type { PropertyAnalysisResult } from "@/lib/property-intelligence";
 import { displayFieldValue } from "@/lib/property-intelligence/types";
 import { COMPANY_INFO } from "@/lib/data/site-data";
+import { logoSvgMarkup } from "@/components/layout/logo";
 
 /** Escape text interpolated into the print document's HTML. */
 function esc(v: unknown): string {
@@ -75,11 +76,11 @@ export function ReportExportButtons({ analysisData }: ReportExportButtonsProps) 
           </div>
         </div>
         <div className="flex flex-col sm:flex-row gap-3">
-          <Button variant="outline" rounded="full" onClick={handlePrint}>
+          <Button variant="outline" size="lg" rounded="full" onClick={handlePrint}>
             <Printer className="h-4 w-4" />
             Print Report
           </Button>
-          <Button rounded="full" onClick={handleDownloadPDF} disabled={downloading}>
+          <Button size="lg" rounded="full" onClick={handleDownloadPDF} disabled={downloading}>
             {downloading ? (
               <>
                 <Loader2 className="h-4 w-4 animate-spin" />
@@ -119,7 +120,6 @@ function generateReportHtml(data: PropertyAnalysisResult): string {
     month: "long",
     day: "numeric",
   });
-  const origin = typeof window !== "undefined" ? window.location.origin : "";
 
   return `
 <!DOCTYPE html>
@@ -149,7 +149,6 @@ function generateReportHtml(data: PropertyAnalysisResult): string {
       margin: 0 auto;
       padding: 0.75in;
       position: relative;
-      min-height: 11in;
     }
 
     .watermark {
@@ -181,11 +180,6 @@ function generateReportHtml(data: PropertyAnalysisResult): string {
       gap: 6px;
     }
 
-    .logo img {
-      height: 26px;
-      width: auto;
-      display: block;
-    }
 
     .logo-sub {
       font-size: 8pt;
@@ -232,6 +226,8 @@ function generateReportHtml(data: PropertyAnalysisResult): string {
 
     .section {
       margin-bottom: 25px;
+      break-inside: avoid;
+      page-break-inside: avoid;
     }
 
     .section-title {
@@ -292,11 +288,20 @@ function generateReportHtml(data: PropertyAnalysisResult): string {
       gap: 20px;
     }
 
+    /* Side-by-side sections share one height */
+    .two-col .section {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .two-col .section-content {
+      flex: 1;
+    }
+
+    /* In the document flow (not absolutely positioned) so it can never
+       overlap the disclaimer when the report runs past one page. */
     .footer {
-      position: absolute;
-      bottom: 0.5in;
-      left: 0.75in;
-      right: 0.75in;
+      margin-top: 30px;
       border-top: 1px solid ${PRINT.border};
       padding-top: 15px;
       font-size: 8pt;
@@ -312,6 +317,8 @@ function generateReportHtml(data: PropertyAnalysisResult): string {
     }
 
     .disclaimer {
+      break-inside: avoid;
+      page-break-inside: avoid;
       margin-top: 30px;
       padding: 15px;
       background: ${PRINT.muted};
@@ -343,7 +350,7 @@ function generateReportHtml(data: PropertyAnalysisResult): string {
   <div class="page">
     <header class="header">
       <div class="logo">
-        <img src="${origin}/images/truthcore-logo.png" alt="TruthCore">
+        ${logoSvgMarkup("color", 28)}
         <div class="logo-sub">TruthCore is a DBA of ${esc(COMPANY_INFO.name)}</div>
       </div>
       <div class="report-info">
@@ -464,8 +471,8 @@ function generateReportHtml(data: PropertyAnalysisResult): string {
     ` : ""}
     
     <div class="disclaimer">
-      <strong>Disclaimer:</strong> ${data.disclaimer}
-      ${data.financialDisclaimer ? `<br><br>${data.financialDisclaimer}` : ""}
+      <strong>Disclaimer:</strong> ${esc(data.disclaimer)}
+      ${data.financialDisclaimer ? `<br><br>${esc(data.financialDisclaimer)}` : ""}
     </div>
     
     <footer class="footer">

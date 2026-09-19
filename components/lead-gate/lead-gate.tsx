@@ -8,7 +8,6 @@
 
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import {
-  AlertCircle,
   ArrowLeft,
   CheckCircle,
   Loader2,
@@ -21,6 +20,8 @@ import {
   User,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { FieldError, FormAlert, Label, fieldClass } from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
 import { AddressAutocompleteInput } from "@/components/property-scanner/address-autocomplete-input";
 import type { LeadGateInterest } from "@/lib/lead-gate-interests";
 import { isValidPhoneFormat, usePhoneVerification } from "./use-phone-verification";
@@ -42,6 +43,9 @@ export interface LeadGateProps {
   details?: unknown;
   /** Called once the gate opens (new submit or existing pass) */
   onUnlocked?: () => void;
+  /** Extra classes for the locked/checking <section> (e.g. "bg-muted" so the
+   *  gate sits on the same band color as the tool it unlocks) */
+  className?: string;
   children: ReactNode;
 }
 
@@ -58,24 +62,9 @@ const registeredThisLoad = new Set<string>();
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-const inputClass = (invalid: boolean) =>
-  `w-full h-11 px-3 rounded-lg border bg-white text-sm text-secondary placeholder:text-muted-foreground/70 focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all ${
-    invalid ? "border-red-400 bg-red-50" : "border-border"
-  }`;
-
-function FieldError({ message }: { message?: string }) {
-  if (!message) return null;
+function GateSkeleton({ className = "" }: { className?: string }) {
   return (
-    <p className="text-xs text-red-600 mt-1 flex items-center gap-1" role="alert">
-      <AlertCircle className="h-3 w-3 shrink-0" />
-      {message}
-    </p>
-  );
-}
-
-function GateSkeleton() {
-  return (
-    <section className="py-20" data-lead-gate="checking" aria-busy="true">
+    <section className={`py-20 ${className}`} data-lead-gate="checking" aria-busy="true">
       <div className="container mx-auto px-4 max-w-5xl">
         <div className="rounded-2xl border border-border bg-white shadow-sm p-6 md:p-8 animate-pulse">
           <div className="h-5 w-40 rounded bg-muted mb-4" />
@@ -101,6 +90,7 @@ export function LeadGate({
   ctaLabel = "Unlock Now",
   details,
   onUnlocked,
+  className = "",
   children,
 }: LeadGateProps) {
   const [status, setStatus] = useState<GateStatus>("checking");
@@ -267,23 +257,23 @@ export function LeadGate({
     setErrors(sent.ok ? {} : { code: sent.error });
   };
 
-  if (status === "checking") return <GateSkeleton />;
+  if (status === "checking") return <GateSkeleton className={className} />;
   if (status === "unlocked") return <>{children}</>;
 
   const busyDetails = checkingEmail || sending || submitting;
 
   return (
-    <section className="py-20" data-lead-gate="locked">
+    <section className={`py-20 ${className}`} data-lead-gate="locked">
       <div className="container mx-auto px-4 max-w-5xl">
         <div className="rounded-2xl border-2 border-primary/30 bg-white shadow-2xl overflow-hidden grid lg:grid-cols-5">
           {/* Value panel */}
           <div className="lg:col-span-2 bg-gradient-to-br from-secondary to-secondary-light text-white p-6 md:p-8">
-            <div className="inline-flex items-center justify-center w-12 h-12 bg-white/10 rounded-full mb-5">
-              <Lock className="h-6 w-6 text-primary-light" />
+            <div className="inline-flex items-center justify-center w-12 h-12 bg-primary border-2 border-accent/60 rounded-full mb-5">
+              <Lock className="h-6 w-6 text-white" />
             </div>
             {offerBadge && (
               <div className="mb-4">
-                <span className="inline-flex items-center gap-2 rounded-full bg-primary px-4 py-1.5 text-sm font-bold text-white shadow-lg shadow-primary/30">
+                <span className="inline-flex items-center gap-2 rounded-full border border-accent/60 bg-accent/10 px-4 py-1.5 text-sm font-bold text-accent-light">
                   <Sparkles className="h-4 w-4" />
                   {offerBadge}
                 </span>
@@ -293,13 +283,13 @@ export function LeadGate({
             {subhead && <p className="text-sm md:text-base text-white/80 mb-6">{subhead}</p>}
             <ul className="space-y-3">
               {bullets.map((b) => (
-                <li key={b} className="flex items-start gap-2.5 text-sm text-white/90">
-                  <CheckCircle className="h-4 w-4 text-primary-light mt-0.5 shrink-0" />
+                <li key={b} className="flex items-start gap-2.5 text-sm text-white/80">
+                  <CheckCircle className="h-4 w-4 text-accent mt-0.5 shrink-0" />
                   <span>{b}</span>
                 </li>
               ))}
             </ul>
-            <p className="mt-6 text-xs text-white/60">Takes about 60 seconds. We&apos;ll text you a one-time code.</p>
+            <p className="mt-6 text-xs text-white/70">Takes about 60 seconds. We&apos;ll text you a one-time code.</p>
           </div>
 
           {/* Form panel */}
@@ -312,45 +302,42 @@ export function LeadGate({
                 </div>
                 <div className="grid sm:grid-cols-2 gap-4">
                   <div>
-                    <label htmlFor="lg-first" className="block text-xs font-medium text-muted-foreground mb-1.5">
-                      <User className="h-3 w-3 inline mr-1" />
+                    <Label htmlFor="lg-first" icon={User}>
                       First Name *
-                    </label>
-                    <input
+                    </Label>
+                    <Input
                       id="lg-first"
                       type="text"
                       autoComplete="given-name"
                       value={firstName}
                       onChange={(e) => setFirstName(e.target.value)}
                       placeholder="John"
-                      className={inputClass(!!errors.firstName)}
+                      invalid={!!errors.firstName}
                     />
                     <FieldError message={errors.firstName} />
                   </div>
                   <div>
-                    <label htmlFor="lg-last" className="block text-xs font-medium text-muted-foreground mb-1.5">
-                      <User className="h-3 w-3 inline mr-1" />
+                    <Label htmlFor="lg-last" icon={User}>
                       Last Name *
-                    </label>
-                    <input
+                    </Label>
+                    <Input
                       id="lg-last"
                       type="text"
                       autoComplete="family-name"
                       value={lastName}
                       onChange={(e) => setLastName(e.target.value)}
                       placeholder="Smith"
-                      className={inputClass(!!errors.lastName)}
+                      invalid={!!errors.lastName}
                     />
                     <FieldError message={errors.lastName} />
                   </div>
                 </div>
                 <div className="grid sm:grid-cols-2 gap-4">
                   <div>
-                    <label htmlFor="lg-email" className="block text-xs font-medium text-muted-foreground mb-1.5">
-                      <Mail className="h-3 w-3 inline mr-1" />
+                    <Label htmlFor="lg-email" icon={Mail}>
                       Email *
-                    </label>
-                    <input
+                    </Label>
+                    <Input
                       id="lg-email"
                       type="email"
                       autoComplete="email"
@@ -358,16 +345,15 @@ export function LeadGate({
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
                       placeholder="john@example.com"
-                      className={inputClass(!!errors.email)}
+                      invalid={!!errors.email}
                     />
                     <FieldError message={errors.email} />
                   </div>
                   <div>
-                    <label htmlFor="lg-phone" className="block text-xs font-medium text-muted-foreground mb-1.5">
-                      <Phone className="h-3 w-3 inline mr-1" />
+                    <Label htmlFor="lg-phone" icon={Phone}>
                       Mobile Phone *
-                    </label>
-                    <input
+                    </Label>
+                    <Input
                       id="lg-phone"
                       type="tel"
                       autoComplete="tel"
@@ -375,16 +361,15 @@ export function LeadGate({
                       value={phone}
                       onChange={(e) => setPhone(e.target.value)}
                       placeholder="(619) 555-0123"
-                      className={inputClass(!!errors.phone)}
+                      invalid={!!errors.phone}
                     />
                     <FieldError message={errors.phone} />
                   </div>
                 </div>
                 <div>
-                  <label htmlFor="lg-address" className="block text-xs font-medium text-muted-foreground mb-1.5">
-                    <MapPin className="h-3 w-3 inline mr-1" />
+                  <Label htmlFor="lg-address" icon={MapPin}>
                     Property Address *
-                  </label>
+                  </Label>
                   <AddressAutocompleteInput
                     id="lg-address"
                     compact
@@ -397,11 +382,7 @@ export function LeadGate({
                   <FieldError message={errors.address} />
                 </div>
 
-                {errors.form && (
-                  <div className="bg-red-50 border border-red-200 rounded-lg p-3">
-                    <p className="text-sm text-red-600">{errors.form}</p>
-                  </div>
-                )}
+                <FormAlert>{errors.form}</FormAlert>
 
                 <Button type="submit" size="lg" rounded="full" className="w-full" disabled={busyDetails}>
                   {busyDetails ? (
@@ -442,9 +423,7 @@ export function LeadGate({
                   </p>
                 </div>
                 <div>
-                  <label htmlFor="lg-code" className="block text-xs font-medium text-muted-foreground mb-1.5">
-                    Verification Code
-                  </label>
+                  <Label htmlFor="lg-code">Verification Code</Label>
                   <input
                     id="lg-code"
                     type="text"
@@ -456,18 +435,12 @@ export function LeadGate({
                     value={code}
                     onChange={(e) => setCode(e.target.value.replace(/\D/g, ""))}
                     placeholder="6-digit code"
-                    className={`w-full px-4 py-3 rounded-lg border text-lg text-center tracking-widest font-mono focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all ${
-                      errors.code ? "border-red-400 bg-red-50" : "border-border"
-                    }`}
+                    className={fieldClass({ invalid: !!errors.code }, "h-12 text-lg text-center tracking-widest tabular-nums")}
                   />
                   <FieldError message={errors.code} />
                 </div>
 
-                {errors.form && (
-                  <div className="bg-red-50 border border-red-200 rounded-lg p-3">
-                    <p className="text-sm text-red-600">{errors.form}</p>
-                  </div>
-                )}
+                <FormAlert>{errors.form}</FormAlert>
 
                 <Button
                   type="submit"
@@ -497,19 +470,19 @@ export function LeadGate({
                       setCode("");
                       setErrors({});
                     }}
-                    className="inline-flex items-center gap-1 text-muted-foreground hover:text-secondary transition-colors"
+                    className="inline-flex items-center gap-1 min-h-11 text-muted-foreground hover:text-secondary transition-colors"
                   >
                     <ArrowLeft className="h-3 w-3" />
                     Use a different number
                   </button>
                   {resendCooldown > 0 ? (
-                    <span className="text-muted-foreground">Resend code in {resendCooldown}s</span>
+                    <span className="inline-flex items-center min-h-11 text-muted-foreground">Resend code in {resendCooldown}s</span>
                   ) : (
                     <button
                       type="button"
                       onClick={handleResend}
                       disabled={sending}
-                      className="text-primary-dark font-medium hover:underline disabled:opacity-50"
+                      className="inline-flex items-center min-h-11 text-primary-dark font-medium hover:underline disabled:opacity-50"
                     >
                       {sending ? "Sending…" : "Didn't get it? Resend code"}
                     </button>

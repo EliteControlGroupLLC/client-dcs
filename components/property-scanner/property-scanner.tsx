@@ -269,16 +269,13 @@ export function PropertyScanner() {
     <div className="min-h-screen bg-muted">
       {/* Hero header — same dark interior hero as the rest of the site
           (pt-40 clears the fixed 81px header with 80px of breathing room). */}
-      <section className="bg-secondary text-white pt-40 pb-20 relative overflow-hidden">
-        <div className="absolute top-10 right-10 w-72 h-72 bg-primary/10 rounded-full blur-3xl" />
-        <div className="absolute bottom-0 left-0 w-96 h-96 bg-primary/5 rounded-full blur-3xl" />
-
-        <div className="relative container mx-auto px-4 max-w-4xl text-center">
-          <span className="inline-block text-primary-light font-semibold text-sm uppercase tracking-wider mb-4">
+      <section className="bg-secondary bg-[radial-gradient(ellipse_at_top,rgba(51,102,102,0.35),transparent_60%)] text-white pt-40 pb-20">
+        <div className="container mx-auto px-4 max-w-4xl text-center">
+          <span className="inline-block text-accent font-semibold text-sm uppercase tracking-wider mb-4">
             San Diego ADU Eligibility Scanner
           </span>
 
-          <h1 className="text-4xl md:text-5xl font-bold mb-6">
+          <h1 className="text-4xl md:text-5xl font-bold mb-6 text-balance">
             Build Your Dream Home or ADU with Confidence
           </h1>
           <p className="text-xl text-white/80 max-w-2xl mx-auto mb-10">
@@ -311,7 +308,7 @@ export function PropertyScanner() {
                   {resolving ? "Finding your property..." : "Scan My Property"}
                 </Button>
               </div>
-              <p className="text-sm text-white/60 mt-4">
+              <p className="text-sm text-white/75 mt-4">
                 Addresses in San Diego County only. Results are preliminary estimates.
               </p>
             </div>
@@ -319,13 +316,13 @@ export function PropertyScanner() {
 
           {(phase === "scanning" || phase === "results") && (
             <div className="animate-fade-in">
-              <div className="inline-flex flex-col sm:flex-row items-center gap-1 sm:gap-3 max-w-full bg-white/10 backdrop-blur-sm rounded-2xl sm:rounded-full px-5 py-3">
+              <div className="inline-flex flex-col sm:flex-row items-center gap-1 sm:gap-3 max-w-full bg-secondary-light border border-white/10 shadow-lg shadow-black/20 rounded-2xl sm:rounded-full px-5 py-3">
                 <span className="text-sm text-white/80">{selectedAddress}</span>
                 {phase === "results" && (
                   <button
                     type="button"
                     onClick={handleRescan}
-                    className="text-sm font-medium text-primary-light hover:text-white underline underline-offset-4 whitespace-nowrap"
+                    className="inline-flex items-center min-h-11 -my-3 text-sm font-medium text-accent hover:text-accent-light underline underline-offset-4 whitespace-nowrap"
                   >
                     Scan different address
                   </button>
@@ -337,10 +334,10 @@ export function PropertyScanner() {
       </section>
 
       {/* Content area */}
-      <div className="container mx-auto px-4 max-w-7xl -mt-8 pb-20">
+      <div className="relative z-10 container mx-auto px-4 max-w-7xl -mt-8 pb-20">
         {/* Scanning phase */}
         {phase === "scanning" && (
-          <div className="bg-white rounded-2xl shadow-xl border border-border p-6 md:p-12">
+          <div className="bg-white rounded-2xl shadow-xl border border-border p-6 sm:p-8">
             <PropertyScanLoading
               address={selectedAddress}
               onComplete={handleScanComplete}
@@ -354,7 +351,7 @@ export function PropertyScanner() {
             role="alert"
             data-testid="scan-lookup-issue"
             data-issue-code={issue.code}
-            className="bg-white rounded-2xl shadow-xl border border-border p-6 md:p-10 max-w-3xl mx-auto animate-fade-in"
+            className="bg-white rounded-2xl shadow-xl border border-border p-6 sm:p-8 max-w-3xl mx-auto animate-fade-in"
           >
             <div className="flex items-start gap-4">
               <div className="w-12 h-12 rounded-full bg-primary/10 text-primary flex items-center justify-center flex-shrink-0">
@@ -373,7 +370,7 @@ export function PropertyScanner() {
                 <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-2">
                   {issue.candidates.length === 1 ? "Did you mean" : "Choose your property"}
                 </p>
-                <div className="rounded-xl border border-border overflow-hidden">
+                <div className="rounded-lg border border-border overflow-hidden">
                   {issue.candidates.map((candidate, index) => (
                     <button
                       type="button"
@@ -576,7 +573,7 @@ export function PropertyScanner() {
                     <div className="mt-auto pt-4 border-t border-border">
                       <div className="text-lg font-bold text-primary">{plan.priceRange}</div>
                       <div className="text-sm text-muted-foreground mt-1">
-                        Est. rent ${plan.rentEstimate.low.toLocaleString()}–$
+                        Est. rent ${plan.rentEstimate.low.toLocaleString()}&nbsp;– $
                         {plan.rentEstimate.high.toLocaleString()}/mo
                       </div>
                     </div>
@@ -602,7 +599,8 @@ export function PropertyScanner() {
 
         {/* Address phase - show info cards below */}
         {phase === "address" && (
-          <div className="mt-12">
+          // mt-28 offsets the container's -mt-8 overlap → the standard 80px (py-20) section gap
+          <div className="mt-28">
             {/* Trust indicators */}
             <div className="grid sm:grid-cols-3 gap-6 mb-12">
               {[
@@ -630,7 +628,7 @@ export function PropertyScanner() {
                     <item.icon className="h-5 w-5" />
                   </div>
                   <h3 className="text-xl font-semibold text-secondary mb-2">{item.title}</h3>
-                  <p className="text-sm text-muted-foreground">{item.description}</p>
+                  <p className="text-sm text-muted-foreground text-pretty">{item.description}</p>
                 </div>
               ))}
             </div>

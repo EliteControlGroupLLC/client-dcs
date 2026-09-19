@@ -1,8 +1,14 @@
+import type { Metadata } from "next";
 import { Card, CardContent } from "@/components/ui/card";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { ArrowRight, Shield, CheckCircle, Ruler, Award, Layers } from "lucide-react";
 import { ConcreteCalculatorInline } from "@/components/calculators/concrete-calculator-inline";
+import { RETAINING_WALL_BASE_PRICE_PER_LF, formatRate } from "@/components/calculators/pricing";
+
+export const metadata: Metadata = {
+  title: "Concrete Services",
+};
 
 const concreteServices = [
   {
@@ -18,7 +24,7 @@ const concreteServices = [
   {
     title: "Retaining Walls",
     description: "Engineered retaining walls for hillside properties, terracing, and landscape support. Block or poured concrete.",
-    price: "Starting at $200/linear ft",
+    price: `Starting at ${formatRate(RETAINING_WALL_BASE_PRICE_PER_LF)}/linear ft`,
   },
   {
     title: "Foundations & Slabs",
@@ -64,10 +70,10 @@ const includes = [
 export default function ConcretePage() {
   return (
     <div className="min-h-screen">
-      <section className="bg-secondary text-white pt-40 pb-20">
+      <section className="bg-secondary bg-[radial-gradient(ellipse_at_top,rgba(51,102,102,0.35),transparent_60%)] text-white pt-40 pb-20">
         <div className="container mx-auto px-4">
           <div className="max-w-3xl">
-            <span className="inline-block text-primary-light font-semibold text-sm uppercase tracking-wider mb-4">
+            <span className="inline-block text-accent font-semibold text-sm uppercase tracking-wider mb-4">
               CONCRETE SERVICES
             </span>
             <h1 className="text-4xl md:text-5xl font-bold mb-6 text-balance">
@@ -77,7 +83,7 @@ export default function ConcretePage() {
               Driveways, patios, retaining walls, and foundations — built to last with quality materials
               and expert craftsmanship. Serving San Diego homeowners with transparent pricing.
             </p>
-            <p className="text-2xl font-bold text-primary-light">Starting at $17.50/sq ft</p>
+            <p className="text-2xl font-bold text-accent">Starting at $17.50/sq ft</p>
           </div>
         </div>
       </section>
@@ -148,17 +154,17 @@ export default function ConcretePage() {
         </div>
       </section>
 
-      <section className="py-20 bg-secondary text-white">
+      <section className="py-20 bg-secondary bg-[radial-gradient(ellipse_at_top,rgba(51,102,102,0.35),transparent_60%)] text-white">
         <div className="container mx-auto px-4 text-center">
           <h2 className="text-3xl md:text-4xl font-bold mb-4">Ready to Start Your Concrete Project?</h2>
           <p className="text-lg text-white/80 mb-8 max-w-2xl mx-auto">
             From driveways and patios to retaining walls and foundations, get a free, no-obligation quote.
           </p>
-          <Link href="/contact">
-            <Button size="lg" rounded="full">
+          <Button asChild size="lg" rounded="full">
+            <Link href="/contact">
               Schedule On-Site Consultation <ArrowRight className="h-5 w-5 ml-2" />
-            </Button>
-          </Link>
+            </Link>
+          </Button>
         </div>
       </section>
     </div>

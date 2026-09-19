@@ -1,7 +1,12 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { ArrowRight, CheckCircle } from "lucide-react";
 import { BathroomCalculatorInline } from "@/components/calculators/bathroom-calculator-inline";
+
+export const metadata: Metadata = {
+  title: "Bathroom Remodeling",
+};
 
 const features = [
   "Custom tile work (floor, shower, backsplash)",
@@ -17,10 +22,10 @@ const features = [
 export default function BathroomPage() {
   return (
     <div className="min-h-screen">
-      <section className="bg-secondary text-white pt-40 pb-20">
+      <section className="bg-secondary bg-[radial-gradient(ellipse_at_top,rgba(51,102,102,0.35),transparent_60%)] text-white pt-40 pb-20">
         <div className="container mx-auto px-4">
           <div className="max-w-3xl">
-            <span className="inline-block text-primary-light font-semibold text-sm uppercase tracking-wider mb-4">
+            <span className="inline-block text-accent font-semibold text-sm uppercase tracking-wider mb-4">
               BATHROOM RENOVATION
             </span>
             <h1 className="text-4xl md:text-5xl font-bold mb-6 text-balance">
@@ -30,7 +35,7 @@ export default function BathroomPage() {
               Modern bathroom renovations with premium materials, expert craftsmanship, and transparent pricing.
               From simple updates to full renovations.
             </p>
-            <p className="text-2xl font-bold text-primary-light">$12,000 – $60,000+</p>
+            <p className="text-2xl font-bold text-accent">$12,000 – $60,000+</p>
           </div>
         </div>
       </section>
@@ -55,17 +60,17 @@ export default function BathroomPage() {
         </div>
       </section>
 
-      <section className="py-20 bg-secondary text-white">
+      <section className="py-20 bg-secondary bg-[radial-gradient(ellipse_at_top,rgba(51,102,102,0.35),transparent_60%)] text-white">
         <div className="container mx-auto px-4 text-center">
           <h2 className="text-3xl md:text-4xl font-bold mb-4">Ready for Your Bathroom Transformation?</h2>
           <p className="text-lg text-white/80 mb-8 max-w-2xl mx-auto">
             Schedule a free consultation and let&apos;s create the bathroom you deserve.
           </p>
-          <Link href="/contact">
-            <Button size="lg" rounded="full">
+          <Button asChild size="lg" rounded="full">
+            <Link href="/contact">
               Schedule On-Site Consultation <ArrowRight className="h-5 w-5 ml-2" />
-            </Button>
-          </Link>
+            </Link>
+          </Button>
         </div>
       </section>
     </div>

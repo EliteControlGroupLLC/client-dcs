@@ -32,11 +32,11 @@ export function RentScenariosCard({ scenarios }: RentScenariosCardProps) {
           </div>
         </div>
         {market ? (
-          <span className="text-xs px-2 py-0.5 rounded-full bg-primary/5 text-primary">
+          <span className="inline-flex items-center gap-1.5 text-xs font-medium px-2.5 py-1 rounded-full whitespace-nowrap bg-primary/5 text-primary">
             RentCast market estimate
           </span>
         ) : (
-          <span className="text-xs px-2 py-0.5 rounded-full bg-amber-50 text-amber-700">
+          <span className="inline-flex items-center gap-1.5 text-xs font-medium px-2.5 py-1 rounded-full whitespace-nowrap bg-amber-50 text-amber-700">
             Planning estimate
           </span>
         )}
@@ -51,10 +51,10 @@ export function RentScenariosCard({ scenarios }: RentScenariosCardProps) {
 
             <div className="grid grid-cols-3 gap-2">
               {/* Conservative */}
-              <div className="bg-white rounded-lg p-2 border border-amber-100">
+              <div className="bg-white rounded-lg p-2 border border-amber-200">
                 <div className="flex items-center gap-1 mb-1">
-                  <TrendingDown className="h-3 w-3 text-amber-500" />
-                  <span className="text-xs font-medium text-amber-600">Conservative</span>
+                  <TrendingDown className="h-3 w-3 text-amber-600" />
+                  <span className="text-xs font-medium text-amber-700">Conservative</span>
                 </div>
                 <p className="text-sm font-bold text-secondary">
                   ${scenario.conservative.monthlyRent.toLocaleString()}
@@ -89,7 +89,7 @@ export function RentScenariosCard({ scenarios }: RentScenariosCardProps) {
 
             {/* Annual summary */}
             <div className="mt-2 pt-2 border-t border-border/50 flex justify-between text-xs text-muted-foreground">
-              <span>Annual range: ${scenario.conservative.annualRent.toLocaleString()} - ${scenario.premium.annualRent.toLocaleString()}</span>
+              <span>Annual range: ${scenario.conservative.annualRent.toLocaleString()}&nbsp;– ${scenario.premium.annualRent.toLocaleString()}</span>
             </div>
           </div>
         ))}

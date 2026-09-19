@@ -288,7 +288,7 @@ export function MapboxMap({ analysisData }: MapboxMapProps) {
   if (mapError || !token) {
     return (
       <div className="bg-white rounded-2xl border border-border overflow-hidden">
-        <div className="px-6 py-5 border-b border-border">
+        <div className="p-6 border-b border-border">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
               <Map className="h-5 w-5 text-primary" />
@@ -333,7 +333,7 @@ export function MapboxMap({ analysisData }: MapboxMapProps) {
   return (
     <div className="bg-white rounded-2xl border border-border overflow-hidden">
       {/* Header */}
-      <div className="px-6 py-5 border-b border-border">
+      <div className="p-6 border-b border-border">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div className="flex items-center gap-3 min-w-0">
             <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
@@ -342,7 +342,7 @@ export function MapboxMap({ analysisData }: MapboxMapProps) {
             <h3 className="text-xl font-semibold text-secondary">Parcel Visualization</h3>
           </div>
           {visualization && (
-            <span className="text-xs bg-primary/10 text-primary px-2 py-0.5 rounded-full">
+            <span className="inline-flex items-center gap-1.5 text-xs font-medium px-2.5 py-1 rounded-full whitespace-nowrap bg-primary/5 text-primary">
               {visualization.geometryConfidence}% geometry confidence
             </span>
           )}
@@ -381,7 +381,7 @@ export function MapboxMap({ analysisData }: MapboxMapProps) {
               <button
                 key={key}
                 onClick={() => toggleLayer(key)}
-                className={`inline-flex items-center gap-1 px-2 py-1 rounded text-xs font-medium transition-all ${
+                className={`relative inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium transition-all before:absolute before:-inset-y-[10px] before:inset-x-0 before:content-[''] ${
                   layers[key]
                     ? "bg-white border border-border shadow-sm"
                     : "bg-muted border border-transparent text-muted-foreground"

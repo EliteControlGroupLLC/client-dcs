@@ -66,7 +66,7 @@ export function ConfidenceScoreCard({
           </div>
           <h3 className="text-xl font-semibold text-secondary">Analysis Confidence</h3>
         </div>
-        <div className={`flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1 rounded-full whitespace-nowrap ${config.bg} ${config.color}`}>
+        <div className={`inline-flex items-center gap-1.5 text-xs font-medium px-2.5 py-1 rounded-full whitespace-nowrap ${config.bg} ${config.color}`}>
           {score}/100
         </div>
       </div>
@@ -110,6 +110,7 @@ export function ConfidenceScoreCard({
 
       {/* Expandable signals */}
       <button
+        type="button"
         onClick={() => setShowDetails(!showDetails)}
         className="w-full flex items-center justify-between min-h-11 py-2 text-sm text-muted-foreground hover:text-secondary transition-colors"
       >
@@ -138,11 +139,11 @@ export function ConfidenceScoreCard({
           )}
           {signals.negative.length > 0 && (
             <div>
-              <p className="text-xs font-medium text-red-600 mb-1">Negative Signals</p>
+              <p className="text-xs font-medium text-red-700 mb-1">Negative Signals</p>
               <div className="space-y-1">
                 {signals.negative.map((signal, i) => (
                   <div key={i} className="flex items-center gap-1.5 text-xs text-red-700">
-                    <span className="w-1.5 h-1.5 rounded-full bg-red-400 flex-shrink-0" />
+                    <span className="w-1.5 h-1.5 rounded-full bg-red-500 flex-shrink-0" />
                     {signal}
                   </div>
                 ))}

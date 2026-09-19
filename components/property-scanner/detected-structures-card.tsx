@@ -57,7 +57,7 @@ export function DetectedStructuresCard({ structures }: DetectedStructuresCardPro
                 <span className={`text-xs px-1.5 py-0.5 rounded-full ${
                   structure.confidence >= 75
                     ? "bg-primary/5 text-primary"
-                    : "bg-amber-50 text-amber-600"
+                    : "bg-amber-50 text-amber-700"
                 }`}>
                   {structure.confidence}%
                 </span>

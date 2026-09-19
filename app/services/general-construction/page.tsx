@@ -1,7 +1,12 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { ArrowRight, CheckCircle, Users, Award, HardHat, ClipboardCheck } from "lucide-react";
+
+export const metadata: Metadata = {
+  title: "General Construction",
+};
 
 const serviceCategories = [
   {
@@ -68,10 +73,10 @@ const includes = [
 export default function GeneralConstructionPage() {
   return (
     <div className="min-h-screen">
-      <section className="bg-secondary text-white pt-40 pb-20">
+      <section className="bg-secondary bg-[radial-gradient(ellipse_at_top,rgba(51,102,102,0.35),transparent_60%)] text-white pt-40 pb-20">
         <div className="container mx-auto px-4">
           <div className="max-w-3xl">
-            <span className="inline-block text-primary-light font-semibold text-sm uppercase tracking-wider mb-4">
+            <span className="inline-block text-accent font-semibold text-sm uppercase tracking-wider mb-4">
               GENERAL CONSTRUCTION
             </span>
             <h1 className="text-4xl md:text-5xl font-bold mb-6 text-balance">
@@ -81,12 +86,12 @@ export default function GeneralConstructionPage() {
               Full-service residential construction for San Diego homeowners. Room additions, structural work,
               system upgrades, and general repairs — all handled by licensed professionals under one roof.
             </p>
-            <p className="text-2xl font-bold text-primary-light mb-8">Projects Starting at $800</p>
-            <Link href="/contact">
-              <Button size="lg" rounded="full">
+            <p className="text-2xl font-bold text-accent mb-8">Projects Starting at $800</p>
+            <Button asChild size="lg" rounded="full">
+              <Link href="/contact">
                 Schedule On-Site Consultation <ArrowRight className="h-5 w-5 ml-2" />
-              </Button>
-            </Link>
+              </Link>
+            </Button>
           </div>
         </div>
       </section>
@@ -156,17 +161,17 @@ export default function GeneralConstructionPage() {
         </div>
       </section>
 
-      <section className="py-20 bg-secondary text-white">
+      <section className="py-20 bg-secondary bg-[radial-gradient(ellipse_at_top,rgba(51,102,102,0.35),transparent_60%)] text-white">
         <div className="container mx-auto px-4 text-center">
           <h2 className="text-3xl md:text-4xl font-bold mb-4">Have a Project in Mind?</h2>
           <p className="text-lg text-white/80 mb-8 max-w-2xl mx-auto">
             Tell us about your project and get a free, detailed estimate. No obligation, no pressure.
           </p>
-          <Link href="/contact">
-            <Button size="lg" rounded="full">
+          <Button asChild size="lg" rounded="full">
+            <Link href="/contact">
               Schedule On-Site Consultation <ArrowRight className="h-5 w-5 ml-2" />
-            </Button>
-          </Link>
+            </Link>
+          </Button>
         </div>
       </section>
     </div>

@@ -13,8 +13,8 @@ function ConfidenceBadge({ confidence }: { confidence: number }) {
     confidence >= 80
       ? "bg-primary/10 text-primary"
       : confidence >= 60
-        ? "bg-yellow-100 text-yellow-800"
-        : "bg-red-100 text-red-800";
+        ? "bg-amber-50 text-amber-700"
+        : "bg-red-50 text-red-700";
   return (
     <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${color}`}>
       {confidence}%
@@ -27,8 +27,8 @@ function MethodBadge({ method }: { method: string }) {
     method === "polygon-verified"
       ? "bg-primary/10 text-primary"
       : method === "polygon-estimated"
-        ? "bg-yellow-100 text-yellow-800"
-        : "bg-red-100 text-red-800";
+        ? "bg-amber-50 text-amber-700"
+        : "bg-red-50 text-red-700";
   return (
     <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${color}`}>
       {method}
@@ -123,7 +123,7 @@ export function ShowSourcesPanel({ analysisData }: ShowSourcesPanelProps) {
                 {finalBuildability.warnings.length > 0 && (
                   <div className="mt-2 space-y-1">
                     {finalBuildability.warnings.map((w, i) => (
-                      <div key={i} className="flex items-start gap-1 text-xs text-amber-600">
+                      <div key={i} className="flex items-start gap-1 text-xs text-amber-700">
                         <AlertTriangle className="h-3 w-3 mt-0.5 flex-shrink-0" />
                         {w}
                       </div>
@@ -163,7 +163,7 @@ export function ShowSourcesPanel({ analysisData }: ShowSourcesPanelProps) {
                       <div className="grid grid-cols-2 gap-1 text-xs">
                         {Object.entries(dataSources).map(([name, available]) => (
                           <div key={name} className="flex items-center gap-1">
-                            <span className={`w-2 h-2 rounded-full ${available ? "bg-primary" : "bg-red-400"}`} />
+                            <span className={`w-2 h-2 rounded-full ${available ? "bg-primary" : "bg-red-500"}`} />
                             {name}: {available ? "Connected" : "Unavailable"}
                           </div>
                         ))}

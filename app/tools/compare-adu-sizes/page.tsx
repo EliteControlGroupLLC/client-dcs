@@ -93,10 +93,10 @@ export default function CompareADUSizesPage() {
 
   return (
     <div className="min-h-screen">
-      <section className="bg-secondary text-white pt-40 pb-20">
+      <section className="bg-secondary bg-[radial-gradient(ellipse_at_top,rgba(51,102,102,0.35),transparent_60%)] text-white pt-40 pb-20">
         <div className="container mx-auto px-4">
           <div className="max-w-3xl">
-            <span className="inline-block text-primary-light font-semibold text-sm uppercase tracking-wider mb-4">
+            <span className="inline-block text-accent font-semibold text-sm uppercase tracking-wider mb-4">
               COMPARE ADU SIZES
             </span>
             <h1 className="text-4xl md:text-5xl font-bold mb-6 text-balance">
@@ -155,10 +155,10 @@ export default function CompareADUSizesPage() {
               <div className="grid grid-cols-3 bg-secondary text-white">
                 <div className="p-4 text-sm font-semibold">Category</div>
                 <div className="p-4 text-center border-l border-white/10">
-                  <span className="text-primary-light font-bold text-lg">{left.label}</span>
+                  <span className="text-accent font-bold text-lg">{left.label}</span>
                 </div>
                 <div className="p-4 text-center border-l border-white/10">
-                  <span className="text-primary-light font-bold text-lg">{right.label}</span>
+                  <span className="text-accent font-bold text-lg">{right.label}</span>
                 </div>
               </div>
 
@@ -187,11 +187,11 @@ export default function CompareADUSizesPage() {
                       {left.bestFor}
                     </li>
                   </ul>
-                  <Link href="/build-your-adu" className="mt-auto">
-                    <Button rounded="full" className="w-full">
+                  <Button asChild rounded="full" className="mt-auto w-full">
+                    <Link href="/build-your-adu">
                       Build a {left.label} ADU <ArrowRight className="h-4 w-4 ml-2" />
-                    </Button>
-                  </Link>
+                    </Link>
+                  </Button>
                 </CardContent>
               </Card>
               <Card className="h-full flex flex-col">
@@ -203,11 +203,11 @@ export default function CompareADUSizesPage() {
                       {right.bestFor}
                     </li>
                   </ul>
-                  <Link href="/build-your-adu" className="mt-auto">
-                    <Button rounded="full" className="w-full">
+                  <Button asChild rounded="full" className="mt-auto w-full">
+                    <Link href="/build-your-adu">
                       Build a {right.label} ADU <ArrowRight className="h-4 w-4 ml-2" />
-                    </Button>
-                  </Link>
+                    </Link>
+                  </Button>
                 </CardContent>
               </Card>
             </div>
@@ -215,19 +215,19 @@ export default function CompareADUSizesPage() {
         </section>
       </LeadGate>
 
-      <section className="py-20 bg-muted">
+      <section className="py-20 bg-secondary bg-[radial-gradient(ellipse_at_top,rgba(51,102,102,0.35),transparent_60%)] text-white">
         <div className="container mx-auto px-4 text-center">
-          <h2 className="text-3xl md:text-4xl font-bold text-secondary mb-4">
+          <h2 className="text-3xl md:text-4xl font-bold mb-4">
             Still Not Sure? Let Us Help.
           </h2>
-          <p className="text-lg text-muted-foreground mb-8 max-w-2xl mx-auto">
+          <p className="text-lg text-white/80 mb-8 max-w-2xl mx-auto">
             Our team can evaluate your property and recommend the best ADU size and type for your goals.
           </p>
-          <Link href="/contact">
-            <Button size="lg" rounded="full">
+          <Button asChild size="lg" rounded="full">
+            <Link href="/contact">
               Schedule Free Consultation <ArrowRight className="h-5 w-5 ml-2" />
-            </Button>
-          </Link>
+            </Link>
+          </Button>
         </div>
       </section>
     </div>

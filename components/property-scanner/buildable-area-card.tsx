@@ -81,7 +81,7 @@ export function BuildableAreaCard({ data }: BuildableAreaCardProps) {
         </div>
         <div className="flex items-start gap-3 py-2">
           {/^(not|site review|two-story detached adus aren)/i.test(data.twoStoryPotential) ? (
-            <XCircle className="h-4 w-4 text-destructive mt-0.5 flex-shrink-0" />
+            <XCircle className="h-4 w-4 text-muted-foreground mt-0.5 flex-shrink-0" />
           ) : (
             <CheckCircle2 className="h-4 w-4 text-primary mt-0.5 flex-shrink-0" />
           )}

@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import type { PropertyAnalysisResult } from "@/lib/property-intelligence";
 import { displayFieldValue } from "@/lib/property-intelligence/types";
 import { COMPANY_INFO } from "@/lib/data/site-data";
+import { logoSvgMarkup } from "@/components/layout/logo";
 import { ShowSourcesPanel } from "./show-sources-panel";
 
 interface PropertyReportModalProps {
@@ -75,7 +76,7 @@ export function PropertyReportModal({
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
       {/* Backdrop */}
-      <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={onClose} />
+      <div className="absolute inset-0 bg-secondary/60 backdrop-blur-sm" onClick={onClose} />
 
       {/* Modal */}
       <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[85vh] overflow-hidden animate-fade-in">
@@ -91,10 +92,12 @@ export function PropertyReportModal({
             </div>
           </div>
           <button
+            type="button"
             onClick={onClose}
-            className="w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center transition-colors"
+            aria-label="Close report"
+            className="w-11 h-11 shrink-0 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center transition-colors"
           >
-            <X className="h-4 w-4" />
+            <X className="h-5 w-5" />
           </button>
         </div>
 
@@ -223,7 +226,7 @@ export function PropertyReportModal({
               <ReportRow label="Score" value={`${analysisData.confidenceScore}%`} />
               <ReportRow label="Band" value={analysisData.confidenceBand || "\u2014"} />
               {analysisData.manualReviewRequired && (
-                <p className="text-xs text-amber-600 mt-1">Manual review recommended</p>
+                <p className="text-xs text-amber-700 mt-1">Manual review recommended</p>
               )}
             </ReportSection>
           )}
@@ -382,12 +385,6 @@ function generateReportHtml(data: PropertyAnalysisResult): string {
     .logo {
       display: flex;
       flex-direction: column;
-    }
-    
-    .logo img {
-      height: 26px;
-      width: auto;
-      display: block;
     }
     
     .logo-sub {
@@ -557,7 +554,7 @@ function generateReportHtml(data: PropertyAnalysisResult): string {
   <div class="page">
     <header class="header">
       <div class="logo">
-        <img src="${typeof window !== "undefined" ? window.location.origin : ""}/images/truthcore-logo.png" alt="TruthCore">
+        ${logoSvgMarkup("color", 28)}
         <div class="logo-sub">TruthCore is a DBA of ${COMPANY_INFO.name}</div>
       </div>
       <div class="report-info">

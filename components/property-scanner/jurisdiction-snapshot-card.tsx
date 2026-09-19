@@ -30,7 +30,7 @@ export function JurisdictionSnapshotCard({ data }: JurisdictionSnapshotCardProps
           </div>
           <h3 className="text-xl font-semibold text-secondary">Jurisdiction</h3>
         </div>
-        <div className={`flex items-center gap-1.5 text-xs px-2.5 py-1 rounded-full ${
+        <div className={`inline-flex items-center gap-1.5 text-xs font-medium px-2.5 py-1 rounded-full whitespace-nowrap ${
           isHighConfidence
             ? "bg-primary/5 text-primary"
             : "bg-amber-50 text-amber-700"
@@ -83,7 +83,7 @@ export function JurisdictionSnapshotCard({ data }: JurisdictionSnapshotCardProps
                 href={url}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center gap-1 text-xs text-primary hover:text-primary-dark hover:underline transition-colors"
+                className="inline-flex items-center gap-1 py-3.5 -my-3.5 text-xs text-primary hover:text-primary-dark hover:underline transition-colors"
               >
                 <ExternalLink className="h-3 w-3" />
                 {(() => {

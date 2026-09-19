@@ -13,25 +13,25 @@ export function NextStepCTA() {
         </p>
 
         <div className="flex flex-col sm:flex-row sm:flex-wrap items-stretch sm:items-center justify-center gap-3 sm:gap-4">
-          <Link href="/contact" className="w-full sm:w-auto">
-            <Button size="lg" rounded="full" className="group w-full sm:w-auto">
+          <Button asChild size="lg" rounded="full" className="group w-full sm:w-auto">
+            <Link href="/contact">
               <Calendar className="h-5 w-5" />
               Book Free Property Review
               <ArrowRight className="h-5 w-5 group-hover:translate-x-1 transition-transform" />
-            </Button>
-          </Link>
-          <Link href="/services/adu-solutions" className="w-full sm:w-auto">
-            <Button variant="outline" size="lg" rounded="full" className="w-full sm:w-auto">
+            </Link>
+          </Button>
+          <Button asChild variant="outline" size="lg" rounded="full" className="w-full sm:w-auto">
+            <Link href="/services/adu-solutions">
               <Layout className="h-5 w-5" />
               See ADU Options
-            </Button>
-          </Link>
-          <Link href="/adu-calculator" className="w-full sm:w-auto">
-            <Button variant="ghost" size="lg" rounded="full" className="w-full sm:w-auto">
+            </Link>
+          </Button>
+          <Button asChild variant="ghost" size="lg" rounded="full" className="w-full sm:w-auto">
+            <Link href="/adu-calculator">
               <BarChart3 className="h-5 w-5" />
               Compare Sizes &amp; Prices
-            </Button>
-          </Link>
+            </Link>
+          </Button>
         </div>
       </div>
 

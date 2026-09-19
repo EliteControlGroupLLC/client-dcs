@@ -5,7 +5,8 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { ArrowRight, ChefHat } from "lucide-react";
-import { optionClass } from "@/components/calculators/calculator-ui";
+import { optionClass, ResultIcon, resultCardClass } from "@/components/calculators/calculator-ui";
+import { KITCHEN_ADD_ONS } from "@/components/calculators/pricing";
 import { LeadGate } from "@/components/lead-gate/lead-gate";
 import { LEAD_GATE_INTERESTS } from "@/lib/lead-gate-interests";
 
@@ -43,14 +44,13 @@ const finishLevels = [
   },
 ];
 
-const addOns = [
-  { label: "Island Addition", cost: 5000 },
-  { label: "Open Floor Plan Conversion", cost: 8000 },
-  { label: "New Lighting Design", cost: 3000 },
-  { label: "Plumbing Relocation", cost: 4000 },
-];
+const addOns = KITCHEN_ADD_ONS;
 
-export function KitchenCalculatorInline() {
+/**
+ * Rendered on the service page (muted band with its own heading) and, with
+ * `standalone`, as the body of the /tools page (the page hero carries the title).
+ */
+export function KitchenCalculatorInline({ standalone = false }: { standalone?: boolean }) {
   const [sizeIndex, setSizeIndex] = useState(1);
   const [finishIndex, setFinishIndex] = useState(0);
   const [selectedAddOns, setSelectedAddOns] = useState<number[]>([]);
@@ -71,17 +71,20 @@ export function KitchenCalculatorInline() {
   return (
     <div id="calculator">
       <LeadGate
+        className={standalone ? undefined : "bg-muted"}
         interest={LEAD_GATE_INTERESTS.kitchenCalculator}
         headline="Unlock your kitchen remodel estimate"
         subhead="See your kitchen remodel price range based on size, finish level and upgrades."
         ctaLabel="Unlock My Kitchen Estimate"
       >
-        <section className="py-20 bg-muted">
+        <section className={standalone ? "py-20" : "py-20 bg-muted"}>
           <div className="container mx-auto px-4 max-w-5xl">
-            <div className="text-center mb-12">
-              <h2 className="text-3xl md:text-4xl font-bold text-secondary mb-4">Kitchen Remodel Estimator</h2>
-              <p className="text-lg text-muted-foreground">Estimate your kitchen remodel cost based on size, finish level, and upgrades.</p>
-            </div>
+            {!standalone && (
+              <div className="text-center mb-12">
+                <h2 className="text-3xl md:text-4xl font-bold text-secondary mb-4">Kitchen Remodel Estimator</h2>
+                <p className="text-lg text-muted-foreground">Estimate your kitchen remodel cost based on size, finish level, and upgrades.</p>
+              </div>
+            )}
             <div className="grid md:grid-cols-2 gap-8 [&>*]:min-w-0">
               <div className="space-y-8">
                 <div>
@@ -130,28 +133,28 @@ export function KitchenCalculatorInline() {
                           className="w-4 h-4 accent-primary"
                         />
                         <span className="text-sm text-secondary">{a.label}</span>
-                        <span className="text-sm text-muted-foreground ml-auto">Starting at ${a.cost.toLocaleString()}</span>
+                        <span className="text-sm text-muted-foreground ml-auto">+${a.cost.toLocaleString()}</span>
                       </label>
                     ))}
                   </div>
                 </div>
               </div>
 
-              <Card className="bg-secondary text-white border-secondary min-w-0">
+              <Card className={resultCardClass}>
                 <CardContent className="p-6 md:p-8 flex flex-col justify-center h-full">
                   <div className="text-center">
-                    <ChefHat className="h-12 w-12 text-primary-light mx-auto mb-4" />
-                    <p className="text-white/70 text-sm mb-2">Estimated Kitchen Remodel</p>
-                    <p className="text-3xl md:text-4xl font-bold text-primary-light mb-1 text-balance">
+                    <ResultIcon icon={ChefHat} />
+                    <p className="text-white/75 text-sm mb-2">Estimated Kitchen Remodel</p>
+                    <p className="text-3xl md:text-4xl font-bold text-accent mb-1 text-balance">
                       ${totalLow.toLocaleString()}&nbsp;&ndash; ${totalHigh.toLocaleString()}
                     </p>
-                    <p className="text-white/60 text-sm mb-6">
+                    <p className="text-white/75 text-sm mb-6">
                       {size.label} &bull; {finish.label} Finish
                     </p>
 
                     <div className="border-t border-white/10 pt-6 space-y-3 text-left mb-6">
-                      <p className="text-white/70 text-sm font-semibold">Base scope includes:</p>
-                      <ul className="text-white/60 text-sm space-y-1">
+                      <p className="text-white text-sm font-semibold">Base scope includes:</p>
+                      <ul className="text-white/80 text-sm space-y-1">
                         <li>&bull; Demolition &amp; removal</li>
                         <li>&bull; New cabinets &amp; countertops</li>
                         <li>&bull; Backsplash tile</li>
@@ -161,15 +164,15 @@ export function KitchenCalculatorInline() {
                       </ul>
                     </div>
 
-                    <p className="text-xs text-white/60 mb-6">
+                    <p className="text-xs text-white/70 mb-6">
                       * Estimate only. Final pricing depends on material selections, site conditions, and design scope.
                     </p>
 
-                    <Link href="/contact">
-                      <Button size="lg" rounded="full" className="w-full">
+                    <Button asChild size="lg" rounded="full" className="w-full">
+                      <Link href="/contact">
                         Design Your Kitchen <ArrowRight className="h-5 w-5 ml-2" />
-                      </Button>
-                    </Link>
+                      </Link>
+                    </Button>
                   </div>
                 </CardContent>
               </Card>

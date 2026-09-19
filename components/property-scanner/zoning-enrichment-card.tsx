@@ -28,7 +28,7 @@ export function ZoningEnrichmentCard({ data }: ZoningEnrichmentCardProps) {
           </div>
           <h3 className="text-xl font-semibold text-secondary">Zoning Enrichment</h3>
         </div>
-        <span className="text-xs bg-primary/10 text-primary px-2 py-0.5 rounded-full">
+        <span className="inline-flex items-center gap-1.5 text-xs font-medium px-2.5 py-1 rounded-full whitespace-nowrap bg-primary/5 text-primary">
           Planning context
         </span>
       </div>

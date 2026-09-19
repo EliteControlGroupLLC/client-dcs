@@ -1,7 +1,12 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { ArrowRight, Home, Bath, ChefHat, Paintbrush } from "lucide-react";
+
+export const metadata: Metadata = {
+  title: "Remodeling",
+};
 
 const remodelTypes = [
   {
@@ -37,10 +42,10 @@ const remodelTypes = [
 export default function RemodelingPage() {
   return (
     <div className="min-h-screen">
-      <section className="bg-secondary text-white pt-40 pb-20">
+      <section className="bg-secondary bg-[radial-gradient(ellipse_at_top,rgba(51,102,102,0.35),transparent_60%)] text-white pt-40 pb-20">
         <div className="container mx-auto px-4">
           <div className="max-w-3xl">
-            <span className="inline-block text-primary-light font-semibold text-sm uppercase tracking-wider mb-4">
+            <span className="inline-block text-accent font-semibold text-sm uppercase tracking-wider mb-4">
               REMODELING SERVICES
             </span>
             <h1 className="text-4xl md:text-5xl font-bold mb-6 text-balance">
@@ -50,12 +55,12 @@ export default function RemodelingPage() {
               From kitchens and bathrooms to whole-home renovations, we deliver quality remodeling
               with transparent pricing and professional project management.
             </p>
-            <p className="text-2xl font-bold text-primary-light mb-8">Starting at $18,000</p>
-            <Link href="/contact">
-              <Button size="lg" rounded="full">
+            <p className="text-2xl font-bold text-accent mb-8">Starting at $18,000</p>
+            <Button asChild size="lg" rounded="full">
+              <Link href="/contact">
                 Schedule On-Site Consultation <ArrowRight className="h-5 w-5 ml-2" />
-              </Button>
-            </Link>
+              </Link>
+            </Button>
           </div>
         </div>
       </section>
@@ -80,11 +85,11 @@ export default function RemodelingPage() {
                     <h3 className="text-xl font-semibold text-secondary mb-2">{type.title}</h3>
                     <p className="text-muted-foreground mb-4">{type.description}</p>
                     <p className="text-lg font-bold text-primary mt-auto mb-6">Starting at {type.starting}</p>
-                    <Link href={type.href}>
-                      <Button variant="outline" rounded="full" className="group">
+                    <Button asChild variant="outline" rounded="full" className="group self-start">
+                      <Link href={type.href}>
                         Learn More <ArrowRight className="h-4 w-4 ml-2 group-hover:translate-x-1 transition-transform" />
-                      </Button>
-                    </Link>
+                      </Link>
+                    </Button>
                   </CardContent>
                 </Card>
               );
@@ -93,17 +98,17 @@ export default function RemodelingPage() {
         </div>
       </section>
 
-      <section className="py-20 bg-secondary text-white">
+      <section className="py-20 bg-secondary bg-[radial-gradient(ellipse_at_top,rgba(51,102,102,0.35),transparent_60%)] text-white">
         <div className="container mx-auto px-4 text-center">
           <h2 className="text-3xl md:text-4xl font-bold mb-4">Ready to Remodel?</h2>
           <p className="text-lg text-white/80 mb-8 max-w-2xl mx-auto">
             Tell us about your project and get a free, no-obligation quote.
           </p>
-          <Link href="/contact">
-            <Button size="lg" rounded="full">
+          <Button asChild size="lg" rounded="full">
+            <Link href="/contact">
               Schedule On-Site Consultation <ArrowRight className="h-5 w-5 ml-2" />
-            </Button>
-          </Link>
+            </Link>
+          </Button>
         </div>
       </section>
     </div>

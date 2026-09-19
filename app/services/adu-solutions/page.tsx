@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { 
@@ -17,6 +18,10 @@ import {
   FloorPlanLegend,
 } from "@/components/floor-plans";
 import { SERVICE_PRICING } from "@/lib/data/site-data";
+
+export const metadata: Metadata = {
+  title: "ADU Solutions",
+};
 
 const floorPlanComponents = [
   DetachedADUFloorPlan,
@@ -48,6 +53,29 @@ const aduTypes = [
   },
 ];
 
+const benefits = [
+  {
+    icon: DollarSign,
+    title: "Rental Income",
+    description: "Typical TruthCore ADU products can support roughly $2,000 – $6,000/month depending on size and layout",
+  },
+  {
+    icon: Home,
+    title: "Property Value",
+    description: "Add usable square footage and create a more valuable long-term real estate asset",
+  },
+  {
+    icon: Users,
+    title: "Multi-Gen Living",
+    description: "Create independent living space for family without leaving the property",
+  },
+  {
+    icon: Shield,
+    title: "Financial Security",
+    description: "Add an income-producing or family-supporting asset on land you already own",
+  },
+];
+
 const process = [
   { step: 1, title: "Design Your ADU and Get Pricing", description: "Use our online tools to explore ADU options for your property. Choose your type, layout, and style to see realistic pricing." },
   { step: 2, title: "Funding and Pre-Approval Guidance", description: "We help review funding options and confirm your project budget so the project is financially ready to move forward." },
@@ -60,10 +88,10 @@ export default function ADUSolutionsPage() {
   return (
     <div className="min-h-screen">
       {/* Hero Section */}
-      <section className="bg-secondary text-white pt-40 pb-20">
+      <section className="bg-secondary bg-[radial-gradient(ellipse_at_top,rgba(51,102,102,0.35),transparent_60%)] text-white pt-40 pb-20">
         <div className="container mx-auto px-4">
           <div className="max-w-3xl">
-            <span className="inline-block text-primary-light font-semibold text-sm uppercase tracking-wider mb-4">
+            <span className="inline-block text-accent font-semibold text-sm uppercase tracking-wider mb-4">
               ADU SOLUTIONS
             </span>
             <h1 className="text-4xl md:text-5xl font-bold mb-6 text-balance">
@@ -73,16 +101,14 @@ export default function ADUSolutionsPage() {
               We design and build detached ADUs, attached ADUs, and garage conversions for homeowners
               who want better use of their lot, stronger rental performance, or flexible family living.
             </p>
-            <p className="text-2xl font-bold text-primary-light mb-8">
+            <p className="text-2xl font-bold text-accent mb-8">
               Starting at {SERVICE_PRICING.adu.startingPrice}
             </p>
-            <div className="flex flex-col sm:flex-row gap-4">
+            <Button asChild size="lg" rounded="full">
               <Link href="/build-your-adu">
-                <Button size="lg" rounded="full">
-                  Open ADU Calculator <ArrowRight className="h-5 w-5 ml-2" />
-                </Button>
+                Open ADU Calculator <ArrowRight className="h-5 w-5 ml-2" />
               </Link>
-            </div>
+            </Button>
           </div>
         </div>
       </section>
@@ -147,43 +173,21 @@ export default function ADUSolutionsPage() {
             </h2>
           </div>
 
-          <div className="grid sm:grid-cols-2 md:grid-cols-4 gap-6 max-w-6xl mx-auto">
-            <div className="text-center">
-              <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4">
-                <DollarSign className="h-8 w-8 text-primary" />
-              </div>
-              <h3 className="text-xl font-semibold text-secondary mb-2">Rental Income</h3>
-              <p className="text-sm text-muted-foreground">
-                Typical TruthCore ADU products can support roughly $2,000 – $6,000/month depending on size and layout
-              </p>
-            </div>
-            <div className="text-center">
-              <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4">
-                <Home className="h-8 w-8 text-primary" />
-              </div>
-              <h3 className="text-xl font-semibold text-secondary mb-2">Property Value</h3>
-              <p className="text-sm text-muted-foreground">
-                Add usable square footage and create a more valuable long-term real estate asset
-              </p>
-            </div>
-            <div className="text-center">
-              <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4">
-                <Users className="h-8 w-8 text-primary" />
-              </div>
-              <h3 className="text-xl font-semibold text-secondary mb-2">Multi-Gen Living</h3>
-              <p className="text-sm text-muted-foreground">
-                Create independent living space for family without leaving the property
-              </p>
-            </div>
-            <div className="text-center">
-              <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4">
-                <Shield className="h-8 w-8 text-primary" />
-              </div>
-              <h3 className="text-xl font-semibold text-secondary mb-2">Financial Security</h3>
-              <p className="text-sm text-muted-foreground">
-                Add an income-producing or family-supporting asset on land you already own
-              </p>
-            </div>
+          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 max-w-6xl mx-auto">
+            {benefits.map((benefit) => {
+              const Icon = benefit.icon;
+              return (
+                <Card key={benefit.title} className="h-full">
+                  <CardContent className="p-6 text-center">
+                    <div className="w-14 h-14 rounded-xl bg-primary/10 flex items-center justify-center mx-auto mb-4">
+                      <Icon className="h-7 w-7 text-primary" />
+                    </div>
+                    <h3 className="text-xl font-semibold text-secondary mb-2">{benefit.title}</h3>
+                    <p className="text-sm text-muted-foreground">{benefit.description}</p>
+                  </CardContent>
+                </Card>
+              );
+            })}
           </div>
         </div>
       </section>
@@ -200,14 +204,15 @@ export default function ADUSolutionsPage() {
             </p>
           </div>
 
-          <div className="grid md:grid-cols-5 gap-6 max-w-6xl mx-auto">
+          {/* 5 steps: 2 per row on small tablets, 3 + 2 on tablets, one row of 5 on desktop — odd rows stay centered */}
+          <div className="flex flex-wrap justify-center gap-x-6 gap-y-10 max-w-6xl mx-auto">
             {process.map((item) => (
-              <div key={item.step} className="text-center">
+              <div key={item.step} className="w-full sm:w-[calc(50%-0.75rem)] md:w-[calc(33.333%-1rem)] lg:w-[calc(20%-1.2rem)] text-center">
                 <div className="w-12 h-12 bg-primary text-white rounded-full flex items-center justify-center mx-auto mb-4 font-bold">
                   {item.step}
                 </div>
-                <h3 className="font-semibold text-secondary text-sm mb-2">{item.title}</h3>
-                <p className="text-xs text-muted-foreground leading-relaxed">{item.description}</p>
+                <h3 className="text-lg font-semibold text-secondary mb-2 text-balance">{item.title}</h3>
+                <p className="text-sm text-muted-foreground leading-relaxed">{item.description}</p>
               </div>
             ))}
           </div>
@@ -215,7 +220,7 @@ export default function ADUSolutionsPage() {
       </section>
 
       {/* CTA */}
-      <section className="py-20 bg-secondary text-white">
+      <section className="py-20 bg-secondary bg-[radial-gradient(ellipse_at_top,rgba(51,102,102,0.35),transparent_60%)] text-white">
         <div className="container mx-auto px-4 text-center">
           <h2 className="text-3xl md:text-4xl font-bold mb-4">
             Ready to Build Your ADU?
@@ -224,16 +229,16 @@ export default function ADUSolutionsPage() {
             Schedule a free consultation to explore your options. We&apos;ll assess your property and provide a detailed estimate.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Link href="/build-your-adu">
-              <Button size="lg" rounded="full">
+            <Button asChild size="lg" rounded="full">
+              <Link href="/build-your-adu">
                 Design Your ADU <ArrowRight className="h-5 w-5 ml-2" />
-              </Button>
-            </Link>
-            <Link href="/contact">
-              <Button size="lg" variant="outlineWhite" rounded="full">
+              </Link>
+            </Button>
+            <Button asChild size="lg" variant="outlineWhite" rounded="full">
+              <Link href="/contact">
                 Contact Us
-              </Button>
-            </Link>
+              </Link>
+            </Button>
           </div>
         </div>
       </section>

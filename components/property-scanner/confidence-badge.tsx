@@ -50,7 +50,7 @@ export function ConfidenceBadge({ status, confidence, sources, size = "sm" }: Co
     <div className="relative inline-block">
       <button
         type="button"
-        className={`inline-flex items-center gap-1 rounded-full border font-medium whitespace-nowrap cursor-help ${c.bg} ${c.text} ${c.border} ${
+        className={`relative inline-flex items-center gap-1 rounded-full border font-medium whitespace-nowrap cursor-help before:absolute before:-inset-x-1 before:-inset-y-[11px] before:content-[''] ${c.bg} ${c.text} ${c.border} ${
           size === "sm" ? "px-2 py-0.5 text-xs" : "px-2.5 py-0.5 text-xs"
         }`}
         onMouseEnter={() => setShowTooltip(true)}
@@ -65,7 +65,7 @@ export function ConfidenceBadge({ status, confidence, sources, size = "sm" }: Co
         <div className="absolute z-50 bottom-full left-0 mb-2 w-56 bg-white rounded-lg shadow-xl border border-border p-3 text-left animate-fade-in">
           <div className="flex items-center justify-between mb-1.5">
             <span className={`text-xs font-semibold ${c.text}`}>{status}</span>
-            <span className="text-xs font-mono text-muted-foreground">
+            <span className="text-xs tabular-nums text-muted-foreground">
               {confidence}%
             </span>
           </div>

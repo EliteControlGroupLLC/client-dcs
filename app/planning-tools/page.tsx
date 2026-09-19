@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -6,6 +7,10 @@ import {
   DollarSign, BarChart3, ArrowLeftRight, Palette, Zap,
   Layers, ChefHat, Bath,
 } from "lucide-react";
+
+export const metadata: Metadata = {
+  title: "Planning Tools",
+};
 
 interface ToolItem {
   icon: React.ComponentType<{ className?: string }>;
@@ -129,12 +134,12 @@ function ToolCard({ tool, isPrimary = false }: { tool: ToolItem; isPrimary?: boo
         <h3 className="text-xl font-semibold text-secondary mb-2">{tool.title}</h3>
         <p className="text-muted-foreground mb-6">{tool.description}</p>
         <div className="mt-auto">
-          <Link href={tool.href}>
-            <Button variant={isPrimary ? "default" : "outline"} rounded="full">
+          <Button asChild variant={isPrimary ? "default" : "outline"} rounded="full">
+            <Link href={tool.href}>
               {tool.cta}
               <ArrowRight className="h-4 w-4 ml-2" />
-            </Button>
-          </Link>
+            </Link>
+          </Button>
         </div>
       </CardContent>
     </Card>
@@ -158,10 +163,10 @@ export default function PlanningToolsPage() {
   return (
     <div className="min-h-screen">
       {/* Hero */}
-      <section className="bg-secondary text-white pt-40 pb-20">
+      <section className="bg-secondary bg-[radial-gradient(ellipse_at_top,rgba(51,102,102,0.35),transparent_60%)] text-white pt-40 pb-20">
         <div className="container mx-auto px-4">
           <div className="max-w-3xl">
-            <span className="inline-block text-primary-light font-semibold text-sm uppercase tracking-wider mb-4">
+            <span className="inline-block text-accent font-semibold text-sm uppercase tracking-wider mb-4">
               PLANNING TOOLS
             </span>
             <h1 className="text-4xl md:text-5xl font-bold mb-6 text-balance">
@@ -218,20 +223,20 @@ export default function PlanningToolsPage() {
       </section>
 
       {/* CTA */}
-      <section className="py-20 bg-muted">
+      <section className="py-20 bg-secondary bg-[radial-gradient(ellipse_at_top,rgba(51,102,102,0.35),transparent_60%)] text-white">
         <div className="container mx-auto px-4 text-center">
-          <h2 className="text-3xl md:text-4xl font-bold text-secondary mb-4">
+          <h2 className="text-3xl md:text-4xl font-bold mb-4">
             Need Expert Guidance?
           </h2>
-          <p className="text-lg text-muted-foreground mb-8 max-w-2xl mx-auto">
+          <p className="text-lg text-white/80 mb-8 max-w-2xl mx-auto">
             Our team is ready to help you explore your options and find the best path forward for your project.
           </p>
-          <Link href="/contact">
-            <Button size="lg" rounded="full">
+          <Button asChild size="lg" rounded="full">
+            <Link href="/contact">
               Schedule a Consultation
               <ArrowRight className="h-5 w-5 ml-2" />
-            </Button>
-          </Link>
+            </Link>
+          </Button>
         </div>
       </section>
     </div>

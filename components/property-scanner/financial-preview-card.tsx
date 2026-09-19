@@ -69,7 +69,7 @@ export function FinancialPreviewCard({ scenarios, disclaimer }: FinancialPreview
         <div className="flex flex-wrap items-center justify-between gap-2 mb-3">
           <h4 className="text-sm font-semibold text-secondary">{primaryScenario.scenarioName}</h4>
           {primaryScenario.estimatedMonthlyCashflow > 0 && (
-            <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-primary/10 text-primary whitespace-nowrap">
+            <span className="inline-flex items-center gap-1.5 text-xs font-medium px-2.5 py-1 rounded-full whitespace-nowrap bg-primary/10 text-primary">
               Cash Flow Positive
             </span>
           )}
@@ -94,7 +94,7 @@ export function FinancialPreviewCard({ scenarios, disclaimer }: FinancialPreview
           <div className="text-center">
             <p className="text-xs text-muted-foreground">Monthly Cash Flow</p>
             <p className={`text-base font-bold ${
-              primaryScenario.estimatedMonthlyCashflow >= 0 ? "text-primary" : "text-red-600"
+              primaryScenario.estimatedMonthlyCashflow >= 0 ? "text-primary" : "text-red-700"
             }`}>
               {primaryScenario.estimatedMonthlyCashflow >= 0 ? "+" : ""}
               {formatCurrencyFull(primaryScenario.estimatedMonthlyCashflow)}/mo
@@ -143,7 +143,7 @@ export function FinancialPreviewCard({ scenarios, disclaimer }: FinancialPreview
                 {maximizeScenario.scenarioName}
               </h4>
             </div>
-            <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-primary/10 text-primary">
+            <span className="inline-flex items-center gap-1.5 text-xs font-medium px-2.5 py-1 rounded-full whitespace-nowrap bg-primary/10 text-primary">
               {maximizeScenario.projectedUnits} units
             </span>
           </div>
@@ -163,7 +163,7 @@ export function FinancialPreviewCard({ scenarios, disclaimer }: FinancialPreview
             <div>
               <p className="text-xs text-muted-foreground">Cash Flow</p>
               <p className={`text-sm font-bold ${
-                maximizeScenario.estimatedMonthlyCashflow >= 0 ? "text-primary" : "text-red-600"
+                maximizeScenario.estimatedMonthlyCashflow >= 0 ? "text-primary" : "text-red-700"
               }`}>
                 {maximizeScenario.estimatedMonthlyCashflow >= 0 ? "+" : ""}
                 {formatCurrencyFull(maximizeScenario.estimatedMonthlyCashflow)}/mo
@@ -180,8 +180,9 @@ export function FinancialPreviewCard({ scenarios, disclaimer }: FinancialPreview
           {scenarios.map((scenario, i) => (
             <div key={i} className="border border-border/50 rounded-xl overflow-hidden">
               <button
+                type="button"
                 onClick={() => setExpandedIndex(expandedIndex === i ? null : i)}
-                className="w-full flex items-center justify-between p-3 text-left hover:bg-muted/30 transition-colors"
+                className="w-full min-h-11 flex items-center justify-between p-3 text-left hover:bg-muted/30 transition-colors"
               >
                 <div className="flex items-center gap-2">
                   <span className="text-xs font-semibold text-secondary">{scenario.scenarioName}</span>
@@ -193,7 +194,7 @@ export function FinancialPreviewCard({ scenarios, disclaimer }: FinancialPreview
                 </div>
                 <div className="flex items-center gap-3">
                   <span className={`text-xs font-semibold ${
-                    scenario.estimatedMonthlyCashflow >= 0 ? "text-primary" : "text-red-600"
+                    scenario.estimatedMonthlyCashflow >= 0 ? "text-primary" : "text-red-700"
                   }`}>
                     {scenario.estimatedMonthlyCashflow >= 0 ? "+" : ""}
                     {formatCurrencyFull(scenario.estimatedMonthlyCashflow)}/mo

@@ -1,10 +1,10 @@
 "use client";
 
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo } from "react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { optionClass } from "@/components/calculators/calculator-ui";
+import { optionClass, ResultIcon, resultCardClass } from "@/components/calculators/calculator-ui";
 import { LeadGate } from "@/components/lead-gate/lead-gate";
 import { LEAD_GATE_INTERESTS } from "@/lib/lead-gate-interests";
 import { ArrowRight, Zap, Check, X } from "lucide-react";
@@ -36,29 +36,32 @@ export default function InstantADUEstimatorPage() {
     return sizeOptions;
   }, [selected.id]);
 
-  useEffect(() => {
-    if (!availableSizes.includes(size)) {
-      setSize(availableSizes[0]);
-    }
-
-    if (selected.id === "attached") {
+  // Choosing a type snaps size / beds / baths / stories to what that build
+  // path supports (done in the click handler rather than an effect so the
+  // estimate never renders with a stale combination).
+  const selectType = (index: number) => {
+    const id = aduTypes[index].id;
+    const sizes = id === "attached" ? [500] : id === "two-story" ? [1200] : sizeOptions;
+    setTypeIndex(index);
+    if (!sizes.includes(size)) setSize(sizes[0]);
+    if (id === "attached") {
       setBedrooms(1);
       setBathrooms(1);
       setStories(1);
-    } else if (selected.id === "garage-2") {
+    } else if (id === "garage-2") {
       setBedrooms(0);
       setBathrooms(1);
       setStories(1);
-    } else if (selected.id === "garage-3") {
+    } else if (id === "garage-3") {
       setBedrooms(1);
       setBathrooms(1);
       setStories(1);
-    } else if (selected.id === "two-story") {
+    } else if (id === "two-story") {
       setBedrooms(4);
       setBathrooms(2);
       setStories(2);
     }
-  }, [availableSizes, selected.id, size]);
+  };
 
   const maxBedrooms = useMemo(() => {
     if (selected.id === "garage-2") return 0;
@@ -117,10 +120,10 @@ export default function InstantADUEstimatorPage() {
 
   return (
     <div className="min-h-screen">
-      <section className="bg-secondary text-white pt-40 pb-20">
+      <section className="bg-secondary bg-[radial-gradient(ellipse_at_top,rgba(51,102,102,0.35),transparent_60%)] text-white pt-40 pb-20">
         <div className="container mx-auto px-4">
           <div className="max-w-3xl">
-            <span className="inline-block text-primary-light font-semibold text-sm uppercase tracking-wider mb-4">
+            <span className="inline-block text-accent font-semibold text-sm uppercase tracking-wider mb-4">
               INSTANT ESTIMATOR
             </span>
             <h1 className="text-4xl md:text-5xl font-bold mb-6 text-balance">
@@ -150,7 +153,7 @@ export default function InstantADUEstimatorPage() {
                     {aduTypes.map((t, i) => (
                       <button
                         key={t.id}
-                        onClick={() => setTypeIndex(i)}
+                        onClick={() => selectType(i)}
                         className={optionClass(typeIndex === i)}
                       >
                         {t.label}
@@ -224,46 +227,46 @@ export default function InstantADUEstimatorPage() {
                 </div>
               </div>
 
-              <Card className="bg-secondary text-white border-secondary min-w-0">
+              <Card className={resultCardClass}>
                 <CardContent className="p-6 md:p-8">
                   <div className="text-center mb-6">
-                    <Zap className="h-12 w-12 text-primary-light mx-auto mb-4" />
-                    <p className="text-white/70 text-sm mb-2">Estimated Price Range</p>
-                    <p className="text-3xl md:text-4xl font-bold text-primary-light mb-1 text-balance">
+                    <ResultIcon icon={Zap} />
+                    <p className="text-white/75 text-sm mb-2">Estimated Price Range</p>
+                    <p className="text-3xl md:text-4xl font-bold text-accent mb-1 text-balance">
                       ${lowEstimate.toLocaleString()}&nbsp;&ndash; ${highEstimate.toLocaleString()}
                     </p>
-                    <p className="text-white/60 text-sm">
+                    <p className="text-white/75 text-sm">
                       {selected.label} &bull; {isGarage ? "Existing garage shell" : `${size.toLocaleString()} sq ft`} &bull; {effectiveBedrooms === 0 ? "Studio" : `${effectiveBedrooms} Bed`}, {effectiveBathrooms} Bath
                     </p>
                   </div>
 
                   <div className="border-t border-white/10 pt-6 mb-4">
-                    <p className="text-white/70 text-sm mb-1">Estimated Rental Potential</p>
+                    <p className="text-white/75 text-sm mb-1">Estimated Rental Potential</p>
                     <p className="text-2xl font-bold text-white">
                       ${rentEstimate.low.toLocaleString()}&nbsp;&ndash; ${rentEstimate.high.toLocaleString()}/mo
                     </p>
-                    <p className="text-white/60 text-xs mt-1">
+                    <p className="text-white/70 text-xs mt-1">
                       Based on the current TruthCore plan library and San Diego market rates for the selected build path
                     </p>
                   </div>
 
                   <div className="border-t border-white/10 pt-6 space-y-4 mb-6">
                     <div>
-                      <p className="text-white/70 text-sm font-semibold mb-2">Generally includes:</p>
+                      <p className="text-white text-sm font-semibold mb-2">Generally includes:</p>
                       <ul className="space-y-1.5">
                         {included.map((item) => (
-                          <li key={item} className="flex items-start gap-2 text-sm text-white/60">
-                            <Check className="h-4 w-4 text-primary-light shrink-0 mt-0.5" />
+                          <li key={item} className="flex items-start gap-2 text-sm text-white/80">
+                            <Check className="h-4 w-4 text-accent shrink-0 mt-0.5" />
                             {item}
                           </li>
                         ))}
                       </ul>
                     </div>
                     <div>
-                      <p className="text-white/70 text-sm font-semibold mb-2">Generally excludes:</p>
+                      <p className="text-white text-sm font-semibold mb-2">Generally excludes:</p>
                       <ul className="space-y-1.5">
                         {excluded.map((item) => (
-                          <li key={item} className="flex items-start gap-2 text-sm text-white/60">
+                          <li key={item} className="flex items-start gap-2 text-sm text-white/80">
                             <X className="h-4 w-4 text-white/60 shrink-0 mt-0.5" />
                             {item}
                           </li>
@@ -272,21 +275,21 @@ export default function InstantADUEstimatorPage() {
                     </div>
                   </div>
 
-                  <p className="text-xs text-white/60 mb-6">
+                  <p className="text-xs text-white/70 mb-6">
                     * Estimate only. Pricing based on standard scope for San Diego. Actual pricing depends on site, design, and selections.
                   </p>
 
-                  <div className="space-y-3">
-                    <Link href="/contact" className="block">
-                      <Button size="lg" rounded="full" className="w-full">
+                  <div className="flex flex-col gap-3">
+                    <Button asChild size="lg" rounded="full" className="w-full">
+                      <Link href="/contact">
                         Request Exact Pricing <ArrowRight className="h-5 w-5 ml-2" />
-                      </Button>
-                    </Link>
-                    <Link href="/build-your-adu" className="block">
-                      <Button size="lg" variant="outlineWhite" rounded="full" className="w-full">
+                      </Link>
+                    </Button>
+                    <Button asChild size="lg" variant="outlineWhite" rounded="full" className="w-full">
+                      <Link href="/build-your-adu">
                         Scan Your Property <ArrowRight className="h-5 w-5 ml-2" />
-                      </Button>
-                    </Link>
+                      </Link>
+                    </Button>
                   </div>
                 </CardContent>
               </Card>
@@ -295,25 +298,25 @@ export default function InstantADUEstimatorPage() {
         </section>
       </LeadGate>
 
-      <section className="py-20 bg-muted">
+      <section className="py-20 bg-secondary bg-[radial-gradient(ellipse_at_top,rgba(51,102,102,0.35),transparent_60%)] text-white">
         <div className="container mx-auto px-4 text-center">
-          <h2 className="text-3xl md:text-4xl font-bold text-secondary mb-4">
+          <h2 className="text-3xl md:text-4xl font-bold mb-4">
             Want to Compare Options?
           </h2>
-          <p className="text-lg text-muted-foreground mb-8 max-w-2xl mx-auto">
+          <p className="text-lg text-white/80 mb-8 max-w-2xl mx-auto">
             Use our comparison tool to see different ADU sizes and types side by side.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Link href="/tools/compare-adu-sizes">
-              <Button size="lg" rounded="full">
+            <Button asChild size="lg" rounded="full">
+              <Link href="/tools/compare-adu-sizes">
                 Compare ADU Sizes <ArrowRight className="h-5 w-5 ml-2" />
-              </Button>
-            </Link>
-            <Link href="/tools/adu-income-calculator">
-              <Button size="lg" variant="outline" rounded="full">
+              </Link>
+            </Button>
+            <Button asChild size="lg" variant="outlineWhite" rounded="full">
+              <Link href="/tools/adu-income-calculator">
                 Calculate Income Potential
-              </Button>
-            </Link>
+              </Link>
+            </Button>
           </div>
         </div>
       </section>

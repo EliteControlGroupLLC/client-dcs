@@ -1,6 +1,11 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { ArrowRight } from "lucide-react";
+
+export const metadata: Metadata = {
+  title: "Custom Homes",
+};
 
 const journeySections = [
   {
@@ -73,30 +78,30 @@ export default function CustomHomesPage() {
   return (
     <div className="min-h-screen">
       {/* Hero */}
-      <section className="bg-secondary text-white pt-40 pb-20">
+      <section className="bg-secondary bg-[radial-gradient(ellipse_at_top,rgba(51,102,102,0.35),transparent_60%)] text-white pt-40 pb-20">
         <div className="container mx-auto px-4">
           <div className="max-w-3xl">
-            <span className="inline-block text-primary-light font-semibold text-sm uppercase tracking-wider mb-4">
+            <span className="inline-block text-accent font-semibold text-sm uppercase tracking-wider mb-4">
               CUSTOM HOMES
             </span>
             <h1 className="text-4xl md:text-5xl font-bold mb-6 text-balance">
-              A Home Designed Around <span className="text-primary-light">Your Life</span>
+              A Home Designed Around <span className="text-accent">Your Life</span>
             </h1>
-            <p className="text-xl text-white/80 mb-4 leading-relaxed max-w-2xl">
+            <p className="text-xl text-white/80 mb-4">
               Building a custom home is one of the most personal things you will ever do.
               It deserves a team that treats your vision with the same care you would —
               from the first sketch to the final walkthrough.
             </p>
-            <p className="text-lg text-white/60 mb-8 leading-relaxed max-w-2xl">
+            <p className="text-lg text-white/75 mb-8">
               We are a boutique design-build firm in San Diego that brings together architecture,
               interior design, and construction under one roof. Every home we build is a
               collaboration — shaped by how you live, not by a template.
             </p>
-            <Link href="/contact">
-              <Button size="lg" rounded="full" className="group">
+            <Button asChild size="lg" rounded="full" className="group">
+              <Link href="/contact">
                 Start Your Custom Home Journey <ArrowRight className="h-5 w-5 ml-2 group-hover:translate-x-1 transition-transform" />
-              </Button>
-            </Link>
+              </Link>
+            </Button>
           </div>
         </div>
       </section>
@@ -151,14 +156,15 @@ export default function CustomHomesPage() {
             </p>
           </div>
 
-          <div className="grid md:grid-cols-5 gap-6 max-w-6xl mx-auto">
+          {/* 5 steps: 2 per row on small tablets, 3 + 2 on tablets, one row of 5 on desktop — odd rows stay centered */}
+          <div className="flex flex-wrap justify-center gap-x-6 gap-y-10 max-w-6xl mx-auto">
             {processSteps.map((item) => (
-              <div key={item.step} className="text-center">
+              <div key={item.step} className="w-full sm:w-[calc(50%-0.75rem)] md:w-[calc(33.333%-1rem)] lg:w-[calc(20%-1.2rem)] text-center">
                 <div className="w-12 h-12 bg-primary text-white rounded-full flex items-center justify-center mx-auto mb-4 font-bold">
                   {item.step}
                 </div>
-                <h3 className="font-semibold text-secondary text-sm mb-2">{item.title}</h3>
-                <p className="text-xs text-muted-foreground leading-relaxed">{item.description}</p>
+                <h3 className="text-lg font-semibold text-secondary mb-2 text-balance">{item.title}</h3>
+                <p className="text-sm text-muted-foreground leading-relaxed">{item.description}</p>
               </div>
             ))}
           </div>
@@ -166,31 +172,31 @@ export default function CustomHomesPage() {
       </section>
 
       {/* Closing Emotional CTA */}
-      <section className="py-20 bg-secondary text-white">
+      <section className="py-20 bg-secondary bg-[radial-gradient(ellipse_at_top,rgba(51,102,102,0.35),transparent_60%)] text-white">
         <div className="container mx-auto px-4">
           <div className="max-w-3xl mx-auto text-center">
             <h2 className="text-3xl md:text-4xl font-bold mb-4">
               Imagine Walking Into Your Finished Home at Sunset
             </h2>
-            <p className="text-lg text-white/70 mb-4 leading-relaxed">
+            <p className="text-lg text-white/80 mb-4">
               The light is warm. The floors feel right underfoot. The kitchen opens to the patio
               exactly the way you pictured it. Your family is already making it theirs.
             </p>
-            <p className="text-lg text-white/70 mb-8 leading-relaxed">
+            <p className="text-lg text-white/80 mb-8">
               That feeling — of standing in a space that was built around your life — is what
               we work toward from day one. Every material, every decision, every detail leads here.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Link href="/contact">
-                <Button size="lg" rounded="full" className="group">
+              <Button asChild size="lg" rounded="full" className="group">
+                <Link href="/contact">
                   Start Your Custom Home Journey <ArrowRight className="h-5 w-5 ml-2 group-hover:translate-x-1 transition-transform" />
-                </Button>
-              </Link>
-              <Link href="/gallery">
-                <Button size="lg" variant="outlineWhite" rounded="full">
+                </Link>
+              </Button>
+              <Button asChild size="lg" variant="outlineWhite" rounded="full">
+                <Link href="/gallery">
                   View Our Work
-                </Button>
-              </Link>
+                </Link>
+              </Button>
             </div>
           </div>
         </div>

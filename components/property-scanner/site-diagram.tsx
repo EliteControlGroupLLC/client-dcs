@@ -160,7 +160,7 @@ function FallbackDiagram({
               {message}
             </p>
             {sourceAudit && (
-              <div className="text-xs text-amber-600 space-y-1">
+              <div className="text-xs text-amber-700 space-y-1">
                 {sourceAudit.parcelGISReason && (
                   <p>Parcel data: {sourceAudit.parcelGISReason}</p>
                 )}
@@ -306,10 +306,10 @@ function RealGeometryDiagram({
           </div>
           <h3 className="text-xl font-semibold text-secondary">Site Layout Diagram</h3>
         </div>
-        <span className={`text-xs px-2 py-0.5 rounded-full whitespace-nowrap ${
-          confidence >= 80 ? "bg-primary/10 text-primary" :
-          confidence >= 60 ? "bg-amber-100 text-amber-700" :
-          "bg-red-100 text-red-700"
+        <span className={`inline-flex items-center gap-1.5 text-xs font-medium px-2.5 py-1 rounded-full whitespace-nowrap ${
+          confidence >= 80 ? "bg-primary/5 text-primary" :
+          confidence >= 60 ? "bg-amber-50 text-amber-700" :
+          "bg-red-50 text-red-700"
         }`}>
           {confidence}% geometry confidence
         </span>
@@ -526,7 +526,7 @@ function EstimatedDiagram({
           </div>
           <h3 className="text-xl font-semibold text-secondary">Site Layout Diagram</h3>
         </div>
-        <span className="text-xs px-2 py-0.5 rounded-full bg-amber-100 text-amber-700">
+        <span className="inline-flex items-center gap-1.5 text-xs font-medium px-2.5 py-1 rounded-full whitespace-nowrap bg-amber-50 text-amber-700">
           Estimated
         </span>
       </div>
@@ -668,7 +668,7 @@ function EstimatedDiagram({
 
       {/* Estimated data warning */}
       <div className="mt-3 pt-3 border-t border-border/50">
-        <p className="text-xs text-amber-600 text-center">
+        <p className="text-xs text-amber-700 text-center">
           This diagram uses estimated dimensions. Real geometry data unavailable.
         </p>
       </div>

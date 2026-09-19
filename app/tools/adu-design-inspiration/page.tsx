@@ -4,7 +4,7 @@ import { useMemo, useState } from "react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { optionClass } from "@/components/calculators/calculator-ui";
+import { optionClass, ResultIcon } from "@/components/calculators/calculator-ui";
 import { LeadGate } from "@/components/lead-gate/lead-gate";
 import { LEAD_GATE_INTERESTS } from "@/lib/lead-gate-interests";
 import { ArrowRight, Palette, Check, Sparkles } from "lucide-react";
@@ -368,10 +368,10 @@ export default function ADUDesignInspirationPage() {
 
   return (
     <div className="min-h-screen">
-      <section className="bg-secondary text-white pt-40 pb-20">
+      <section className="bg-secondary bg-[radial-gradient(ellipse_at_top,rgba(51,102,102,0.35),transparent_60%)] text-white pt-40 pb-20">
         <div className="container mx-auto px-4">
           <div className="max-w-3xl">
-            <span className="inline-block text-primary-light font-semibold text-sm uppercase tracking-wider mb-4">
+            <span className="inline-block text-accent font-semibold text-sm uppercase tracking-wider mb-4">
               DESIGN INSPIRATION
             </span>
             <h1 className="text-4xl md:text-5xl font-bold mb-6 text-balance">
@@ -491,23 +491,23 @@ export default function ADUDesignInspirationPage() {
 
                 <Card className="bg-secondary text-white border-secondary mb-8">
                   <CardContent className="p-8 text-center">
-                    <Palette className="h-12 w-12 text-primary-light mx-auto mb-4" />
+                    <ResultIcon icon={Palette} />
                     <h3 className="text-xl font-semibold mb-3">Use These Concepts to Start a Real Design Conversation</h3>
                     <p className="text-white/80 mb-6">
                       Bring this direction into a consultation and we can turn it into floor-plan refinements,
                       exterior massing options, finish packages, and a buildable scope for your property.
                     </p>
                     <div className="flex flex-col sm:flex-row gap-3 justify-center">
-                      <Link href="/build-your-adu">
-                        <Button size="lg" rounded="full">
+                      <Button asChild size="lg" rounded="full">
+                        <Link href="/build-your-adu">
                           Start Building Your ADU <ArrowRight className="h-5 w-5 ml-2" />
-                        </Button>
-                      </Link>
-                      <Link href="/contact">
-                        <Button size="lg" variant="outlineWhite" rounded="full">
+                        </Link>
+                      </Button>
+                      <Button asChild size="lg" variant="outlineWhite" rounded="full">
+                        <Link href="/contact">
                           Schedule Consultation
-                        </Button>
-                      </Link>
+                        </Link>
+                      </Button>
                     </div>
                   </CardContent>
                 </Card>
@@ -536,19 +536,19 @@ export default function ADUDesignInspirationPage() {
         </section>
       </LeadGate>
 
-      <section className="py-20 bg-muted">
+      <section className="py-20 bg-secondary bg-[radial-gradient(ellipse_at_top,rgba(51,102,102,0.35),transparent_60%)] text-white">
         <div className="container mx-auto px-4 text-center">
-          <h2 className="text-3xl md:text-4xl font-bold text-secondary mb-4">
+          <h2 className="text-3xl md:text-4xl font-bold mb-4">
             Ready to Turn Inspiration Into Plans?
           </h2>
-          <p className="text-lg text-muted-foreground mb-8 max-w-2xl mx-auto">
+          <p className="text-lg text-white/80 mb-8 max-w-2xl mx-auto">
             Our design team can refine your concept direction into a buildable ADU plan, finish package, and price for your property.
           </p>
-          <Link href="/contact">
-            <Button size="lg" rounded="full">
+          <Button asChild size="lg" rounded="full">
+            <Link href="/contact">
               Schedule Free Consultation <ArrowRight className="h-5 w-5 ml-2" />
-            </Button>
-          </Link>
+            </Link>
+          </Button>
         </div>
       </section>
     </div>

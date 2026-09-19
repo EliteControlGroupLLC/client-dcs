@@ -13,6 +13,8 @@ import {
   ShieldCheck,
   Building2,
 } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/form";
 
 function formatCurrencyFull(v: number): string {
   return `$${Math.round(v).toLocaleString()}`;
@@ -191,7 +193,7 @@ export function EquityAppraisalCard({
       {/* Loading */}
       {loading && (
         <div className="rounded-xl border border-border bg-muted/30 p-6 flex flex-col items-center justify-center gap-3 text-center">
-          <div className="h-6 w-6 rounded-full border-2 border-secondary/20 border-t-secondary animate-spin" />
+          <div className="h-6 w-6 rounded-full border-2 border-primary/20 border-t-primary animate-spin" />
           <p className="text-sm text-muted-foreground">
             Estimating your home value&hellip;
           </p>
@@ -238,7 +240,7 @@ export function EquityAppraisalCard({
                 </h4>
               </div>
               {valuation.pricePerSqft != null && (
-                <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-secondary/10 text-secondary">
+                <span className="inline-flex items-center gap-1.5 text-xs font-medium px-2.5 py-1 rounded-full whitespace-nowrap bg-secondary/10 text-secondary">
                   {formatCurrencyFull(valuation.pricePerSqft)}/sqft
                 </span>
               )}
@@ -250,7 +252,7 @@ export function EquityAppraisalCard({
 
             {valuation.valueLow != null && valuation.valueHigh != null && (
               <p className="text-xs text-muted-foreground mt-1">
-                Range {formatCurrencyFull(valuation.valueLow)} &ndash;{" "}
+                Range {formatCurrencyFull(valuation.valueLow)}&nbsp;&ndash;{" "}
                 {formatCurrencyFull(valuation.valueHigh)}
               </p>
             )}
@@ -268,7 +270,7 @@ export function EquityAppraisalCard({
               <button
                 type="button"
                 onClick={() => setCompsExpanded((v) => !v)}
-                className="w-full flex items-center justify-between p-3 text-left hover:bg-muted/30 transition-colors"
+                className="w-full min-h-11 flex items-center justify-between p-3 text-left hover:bg-muted/30 transition-colors"
               >
                 <span className="text-xs font-semibold text-secondary">
                   View comparable properties
@@ -382,17 +384,12 @@ export function EquityAppraisalCard({
             </div>
 
             <div className="space-y-2 mb-4">
-              <label
-                htmlFor="mortgage-balance"
-                className="block text-xs font-medium text-muted-foreground mb-1.5"
-              >
-                Remaining mortgage balance
-              </label>
+              <Label htmlFor="mortgage-balance">Remaining mortgage balance</Label>
               <div className="relative">
                 <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">
                   $
                 </span>
-                <input
+                <Input
                   id="mortgage-balance"
                   type="number"
                   inputMode="numeric"
@@ -404,7 +401,7 @@ export function EquityAppraisalCard({
                       e.target.value === "" ? null : Math.max(0, Number(e.target.value) || 0)
                     )
                   }
-                  className="w-full h-11 rounded-lg border border-border bg-white pl-7 pr-3 text-sm text-secondary placeholder:text-muted-foreground/70 focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all disabled:bg-muted disabled:text-muted-foreground"
+                  className="pl-7 disabled:opacity-100 disabled:bg-muted disabled:text-muted-foreground"
                   placeholder="Enter your balance"
                 />
               </div>
@@ -468,7 +465,7 @@ export function EquityAppraisalCard({
                     After building the {recommendedAduLabel}
                   </h4>
                 </div>
-                <span className="inline-flex items-center gap-1 text-xs font-semibold px-2 py-0.5 rounded-full bg-primary/10 text-primary whitespace-nowrap">
+                <span className="inline-flex items-center gap-1.5 text-xs font-medium px-2.5 py-1 rounded-full whitespace-nowrap bg-primary/10 text-primary">
                   <ArrowUpRight className="h-3 w-3" />
                   +{formatCurrencyK(data.aduValueAdd.expected)} added value
                 </span>
@@ -482,7 +479,7 @@ export function EquityAppraisalCard({
               </p>
 
               <p className="text-xs text-muted-foreground mt-1">
-                Range {formatCurrencyFull(data.projectedValue.low)} &ndash;{" "}
+                Range {formatCurrencyFull(data.projectedValue.low)}&nbsp;&ndash;{" "}
                 {formatCurrencyFull(data.projectedValue.high)}
               </p>
 

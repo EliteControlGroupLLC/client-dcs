@@ -4,7 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { selectClass } from "@/components/calculators/calculator-ui";
+import { selectClass, ResultIcon, resultCardClass, resultTileClass } from "@/components/calculators/calculator-ui";
 import { LeadGate } from "@/components/lead-gate/lead-gate";
 import { LEAD_GATE_INTERESTS } from "@/lib/lead-gate-interests";
 import { ArrowRight, BarChart3 } from "lucide-react";
@@ -87,10 +87,10 @@ export default function ADUROISimulatorPage() {
 
   return (
     <div className="min-h-screen">
-      <section className="bg-secondary text-white pt-40 pb-20">
+      <section className="bg-secondary bg-[radial-gradient(ellipse_at_top,rgba(51,102,102,0.35),transparent_60%)] text-white pt-40 pb-20">
         <div className="container mx-auto px-4">
           <div className="max-w-3xl">
-            <span className="inline-block text-primary-light font-semibold text-sm uppercase tracking-wider mb-4">
+            <span className="inline-block text-accent font-semibold text-sm uppercase tracking-wider mb-4">
               ROI SIMULATOR
             </span>
             <h1 className="text-4xl md:text-5xl font-bold mb-6 text-balance">
@@ -152,7 +152,7 @@ export default function ADUROISimulatorPage() {
                     type="range" min={80000} max={800000} step={5000}
                     value={projectCost}
                     onChange={(e) => { setProjectCost(Number(e.target.value)); if (Number(e.target.value) < loanAmount) setLoanAmount(Number(e.target.value)); }}
-                    className="w-full accent-primary"
+                    className="w-full h-11 -my-3.5 accent-primary cursor-pointer"
                   />
                   <div className="flex justify-between text-xs text-muted-foreground mt-1">
                     <span>$80K</span><span>$800K</span>
@@ -167,7 +167,7 @@ export default function ADUROISimulatorPage() {
                     type="range" min={1500} max={7000} step={100}
                     value={monthlyRent}
                     onChange={(e) => setMonthlyRent(Number(e.target.value))}
-                    className="w-full accent-primary"
+                    className="w-full h-11 -my-3.5 accent-primary cursor-pointer"
                   />
                   <div className="flex justify-between text-xs text-muted-foreground mt-1">
                     <span>$1,500</span><span>$7,000</span>
@@ -185,7 +185,7 @@ export default function ADUROISimulatorPage() {
                         type="range" min={0} max={projectCost} step={5000}
                         value={loanAmount}
                         onChange={(e) => setLoanAmount(Number(e.target.value))}
-                        className="w-full accent-primary"
+                        className="w-full h-11 -my-3.5 accent-primary cursor-pointer"
                       />
                     </div>
                     <div>
@@ -196,7 +196,7 @@ export default function ADUROISimulatorPage() {
                         type="range" min={3} max={12} step={0.25}
                         value={interestRate}
                         onChange={(e) => setInterestRate(Number(e.target.value))}
-                        className="w-full accent-primary"
+                        className="w-full h-11 -my-3.5 accent-primary cursor-pointer"
                       />
                     </div>
                     <div>
@@ -207,73 +207,73 @@ export default function ADUROISimulatorPage() {
                         type="range" min={5} max={40} step={5}
                         value={loanTermYears}
                         onChange={(e) => setLoanTermYears(Number(e.target.value))}
-                        className="w-full accent-primary"
+                        className="w-full h-11 -my-3.5 accent-primary cursor-pointer"
                       />
                     </div>
                   </div>
                 </div>
               </div>
 
-              <Card className="bg-secondary text-white border-secondary min-w-0">
+              <Card className={resultCardClass}>
                 <CardContent className="p-6 md:p-8">
-                  <BarChart3 className="h-12 w-12 text-primary-light mx-auto mb-4" />
+                  <ResultIcon icon={BarChart3} />
                   <h3 className="text-xl font-semibold text-center text-white mb-6">Investment Projection</h3>
 
                   <div className="space-y-4 mb-6">
                     <div className="flex justify-between items-center border-b border-white/10 pb-3">
-                      <span className="text-white/70 text-sm">Monthly Loan Payment</span>
+                      <span className="text-white/75 text-sm">Monthly Loan Payment</span>
                       <span className="font-bold text-white">${monthlyPayment.toLocaleString()}</span>
                     </div>
                     <div className="flex justify-between items-center border-b border-white/10 pb-3">
-                      <span className="text-white/70 text-sm">Monthly Rental Income</span>
-                      <span className="font-bold text-primary-light">${monthlyRent.toLocaleString()}</span>
+                      <span className="text-white/75 text-sm">Monthly Rental Income</span>
+                      <span className="font-bold text-accent">${monthlyRent.toLocaleString()}</span>
                     </div>
                     <div className="flex justify-between items-center border-b border-white/10 pb-3">
-                      <span className="text-white/70 text-sm">Monthly Cash Flow</span>
-                      <span className={`font-bold text-lg ${monthlyCashFlow >= 0 ? "text-primary-light" : "text-red-400"}`}>
+                      <span className="text-white/75 text-sm">Monthly Cash Flow</span>
+                      <span className={`font-bold text-lg ${monthlyCashFlow >= 0 ? "text-accent" : "text-red-400"}`}>
                         {monthlyCashFlow >= 0 ? "+" : ""}${monthlyCashFlow.toLocaleString()}
                       </span>
                     </div>
                     <div className="flex justify-between items-center border-b border-white/10 pb-3">
-                      <span className="text-white/70 text-sm">Annual Cash Flow</span>
-                      <span className={`font-bold ${annualCashFlow >= 0 ? "text-primary-light" : "text-red-400"}`}>
+                      <span className="text-white/75 text-sm">Annual Cash Flow</span>
+                      <span className={`font-bold ${annualCashFlow >= 0 ? "text-accent" : "text-red-400"}`}>
                         {annualCashFlow >= 0 ? "+" : ""}${annualCashFlow.toLocaleString()}
                       </span>
                     </div>
                     {downPayment > 0 && (
                       <div className="flex justify-between items-center border-b border-white/10 pb-3">
-                        <span className="text-white/70 text-sm">Cash-on-Cash Return</span>
-                        <span className={`font-bold ${cashOnCashReturn >= 0 ? "text-primary-light" : "text-red-400"}`}>
+                        <span className="text-white/75 text-sm">Cash-on-Cash Return</span>
+                        <span className={`font-bold ${cashOnCashReturn >= 0 ? "text-accent" : "text-red-400"}`}>
                           {cashOnCashReturn}%
                         </span>
                       </div>
                     )}
                     {monthlyCashFlow > 0 && (
                       <div className="flex justify-between items-center border-b border-white/10 pb-3">
-                        <span className="text-white/70 text-sm">Rough Payoff Timeline</span>
+                        <span className="text-white/75 text-sm">Rough Payoff Timeline</span>
                         <span className="font-bold text-white">~{yearsToPayoff} years</span>
                       </div>
                     )}
                   </div>
 
-                  <div className="bg-primary/10 border border-primary/20 rounded-xl p-4 mb-6">
+                  <div className={`${resultTileClass} p-4 mb-6`}>
                     <p className="text-sm text-white/80">
-                      <strong className="text-primary-light">10-Year Outlook:</strong>{" "}
+                      <strong className="text-accent">10-Year Outlook:</strong>{" "}
                       ${tenYearIncome.toLocaleString()} gross rental income
                       {loanAmount > 0 && <> minus ${tenYearPayments.toLocaleString()} in loan payments</>}
-                      {" "}= <strong className="text-primary-light">${tenYearNetCashFlow.toLocaleString()} net</strong>
+                      {" "}= <strong className="text-accent">${tenYearNetCashFlow.toLocaleString()} net</strong>
                     </p>
                   </div>
 
-                  <p className="text-xs text-white/60 mb-6">
+                  <p className="text-xs text-white/70 mb-6">
                     * Simplified projection. Does not account for taxes, insurance, maintenance, vacancy, or rent increases. Consult a financial advisor.
                   </p>
 
-                  <Link href="/contact">
-                    <Button size="lg" rounded="full" className="w-full">
+                  <Button asChild size="lg" rounded="full" className="w-full">
+                    <Link href="/contact">
                       Explore Your ADU Investment <ArrowRight className="h-5 w-5 ml-2" />
-                    </Button>
-                  </Link>
+                    </Link>
+                  </Button>
                 </CardContent>
               </Card>
             </div>
@@ -281,19 +281,19 @@ export default function ADUROISimulatorPage() {
         </section>
       </LeadGate>
 
-      <section className="py-20 bg-muted">
+      <section className="py-20 bg-secondary bg-[radial-gradient(ellipse_at_top,rgba(51,102,102,0.35),transparent_60%)] text-white">
         <div className="container mx-auto px-4 text-center">
-          <h2 className="text-3xl md:text-4xl font-bold text-secondary mb-4">
+          <h2 className="text-3xl md:text-4xl font-bold mb-4">
             Get Realistic Numbers Before You Commit
           </h2>
-          <p className="text-lg text-muted-foreground mb-8 max-w-2xl mx-auto">
+          <p className="text-lg text-white/80 mb-8 max-w-2xl mx-auto">
             Our team can provide a detailed feasibility analysis and financing guidance specific to your property.
           </p>
-          <Link href="/build-your-adu">
-            <Button size="lg" rounded="full">
+          <Button asChild size="lg" rounded="full">
+            <Link href="/build-your-adu">
               Scan Your Property <ArrowRight className="h-5 w-5 ml-2" />
-            </Button>
-          </Link>
+            </Link>
+          </Button>
         </div>
       </section>
     </div>

@@ -24,7 +24,7 @@ function getLevelColor(level: string): string {
 
 function getLevelBadge(level: string): string {
   if (level === "high") return "bg-primary/10 text-primary";
-  if (level === "moderate") return "bg-amber-100 text-amber-700";
+  if (level === "moderate") return "bg-amber-50 text-amber-700";
   return "bg-primary-light/10 text-secondary-light";
 }
 

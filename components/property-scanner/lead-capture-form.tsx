@@ -1,8 +1,10 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Lock, User, Mail, Phone, MapPin, Loader2, Shield, CheckCircle, AlertCircle } from "lucide-react";
+import { Lock, User, Mail, Phone, MapPin, Loader2, Shield, CheckCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { FormField, FormAlert } from "@/components/ui/form";
 
 interface LeadCaptureFormProps {
   propertyAddress: string;
@@ -29,23 +31,8 @@ interface PhoneVerificationState {
   lastSentAt?: number;
 }
 
-// Same field + error styling as the site-wide lead gate (components/lead-gate).
-const inputClass = (invalid: boolean, valid = false) =>
-  `w-full h-11 px-3 rounded-lg border text-sm text-secondary placeholder:text-muted-foreground/70 focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all ${
-    invalid ? "border-red-400 bg-red-50" : valid ? "border-primary/40 bg-primary/5 pr-9" : "border-border bg-white"
-  }`;
-
-const labelClass = "block text-xs font-medium text-muted-foreground mb-1.5";
-
-function FieldError({ message }: { message?: string }) {
-  if (!message) return null;
-  return (
-    <p className="text-xs text-red-600 mt-1 flex items-center gap-1" role="alert">
-      <AlertCircle className="h-3 w-3 shrink-0" />
-      {message}
-    </p>
-  );
-}
+// Fields use the sitewide form primitives (components/ui/form + input) —
+// the same components as the lead gate and every other form on the site.
 
 export function LeadCaptureForm({
   propertyAddress,
@@ -428,8 +415,8 @@ export function LeadCaptureForm({
       <div className="bg-white rounded-2xl border-2 border-primary/30 shadow-2xl overflow-hidden">
         {/* Header */}
         <div className="bg-gradient-to-r from-secondary to-secondary-light text-white p-6 text-center">
-          <div className="inline-flex items-center justify-center w-12 h-12 bg-white/10 rounded-full mb-4">
-            <Phone className="h-6 w-6 text-primary-light" />
+          <div className="inline-flex items-center justify-center w-12 h-12 bg-primary border-2 border-accent/60 rounded-full mb-4">
+            <Phone className="h-6 w-6 text-white" />
           </div>
           <h3 className="text-xl font-bold mb-2">Verify Your Phone Number</h3>
           <p className="text-sm text-white/80 max-w-md mx-auto">
@@ -439,11 +426,8 @@ export function LeadCaptureForm({
 
         {/* OTP Form */}
         <div className="p-6 space-y-4">
-          <div>
-            <label htmlFor="lcf-code" className={labelClass}>
-              Verification Code
-            </label>
-            <input
+          <FormField label="Verification Code" htmlFor="lcf-code" error={errors.otp}>
+            <Input
               id="lcf-code"
               type="text"
               autoComplete="one-time-code"
@@ -453,18 +437,12 @@ export function LeadCaptureForm({
               value={otpCode}
               onChange={(e) => setOtpCode(e.target.value.replace(/\D/g, ""))}
               placeholder="Enter 6-digit code"
-              className={`w-full px-4 py-3 rounded-lg border text-lg text-center tracking-widest font-mono focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all ${
-                errors.otp ? "border-red-400 bg-red-50" : "border-border"
-              }`}
+              invalid={!!errors.otp}
+              className="h-auto px-4 py-3 text-lg text-center tracking-widest tabular-nums"
             />
-            <FieldError message={errors.otp} />
-          </div>
+          </FormField>
 
-          {errors.form && (
-            <div className="bg-red-50 border border-red-200 rounded-lg p-3">
-              <p className="text-sm text-red-600">{errors.form}</p>
-            </div>
-          )}
+          <FormAlert>{errors.form}</FormAlert>
 
           <Button
             type="button"
@@ -527,8 +505,8 @@ export function LeadCaptureForm({
     <div className="bg-white rounded-2xl border-2 border-primary/30 shadow-2xl overflow-hidden">
       {/* Header */}
       <div className="bg-gradient-to-r from-secondary to-secondary-light text-white p-6 text-center">
-        <div className="inline-flex items-center justify-center w-12 h-12 bg-white/10 rounded-full mb-4">
-          <Lock className="h-6 w-6 text-primary-light" />
+        <div className="inline-flex items-center justify-center w-12 h-12 bg-primary border-2 border-accent/60 rounded-full mb-4">
+          <Lock className="h-6 w-6 text-white" />
         </div>
         <h3 className="text-xl font-bold mb-2">Unlock Your Free ADU Feasibility Report</h3>
         <p className="text-sm text-white/80 max-w-md mx-auto">
@@ -539,47 +517,33 @@ export function LeadCaptureForm({
       {/* Form */}
       <form onSubmit={handleFormSubmit} className="p-6 space-y-4" noValidate>
         <div className="grid sm:grid-cols-2 gap-4">
-          <div>
-            <label htmlFor="lcf-first" className={labelClass}>
-              <User className="h-3 w-3 inline mr-1" />
-              First Name *
-            </label>
-            <input
+          <FormField label="First Name *" htmlFor="lcf-first" icon={User} error={errors.firstName}>
+            <Input
               id="lcf-first"
               type="text"
               autoComplete="given-name"
               value={firstName}
               onChange={(e) => setFirstName(e.target.value)}
               placeholder="John"
-              className={inputClass(!!errors.firstName)}
+              invalid={!!errors.firstName}
             />
-            <FieldError message={errors.firstName} />
-          </div>
-          <div>
-            <label htmlFor="lcf-last" className={labelClass}>
-              <User className="h-3 w-3 inline mr-1" />
-              Last Name *
-            </label>
-            <input
+          </FormField>
+          <FormField label="Last Name *" htmlFor="lcf-last" icon={User} error={errors.lastName}>
+            <Input
               id="lcf-last"
               type="text"
               autoComplete="family-name"
               value={lastName}
               onChange={(e) => setLastName(e.target.value)}
               placeholder="Smith"
-              className={inputClass(!!errors.lastName)}
+              invalid={!!errors.lastName}
             />
-            <FieldError message={errors.lastName} />
-          </div>
+          </FormField>
         </div>
 
-        <div>
-          <label htmlFor="lcf-email" className={labelClass}>
-            <Mail className="h-3 w-3 inline mr-1" />
-            Email Address *
-          </label>
+        <FormField label="Email Address *" htmlFor="lcf-email" icon={Mail} error={errors.email}>
           <div className="relative">
-            <input
+            <Input
               id="lcf-email"
               type="email"
               autoComplete="email"
@@ -591,22 +555,27 @@ export function LeadCaptureForm({
                 if (emailValidation) setEmailValidation(null);
               }}
               placeholder="john@example.com"
-              className={inputClass(!!errors.email, !!emailValidation?.valid)}
+              invalid={!!errors.email}
+              valid={!!emailValidation?.valid}
             />
             {emailValidation?.valid && (
               <CheckCircle className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-primary" />
             )}
           </div>
-          <FieldError message={errors.email} />
-        </div>
+        </FormField>
 
-        <div>
-          <label htmlFor="lcf-phone" className={labelClass}>
-            <Phone className="h-3 w-3 inline mr-1" />
-            Phone Number *
-            <span className="font-normal text-muted-foreground/80 ml-1">(for verification)</span>
-          </label>
-          <input
+        <FormField
+          label={
+            <>
+              Phone Number *
+              <span className="font-normal text-muted-foreground/80 ml-1">(for verification)</span>
+            </>
+          }
+          htmlFor="lcf-phone"
+          icon={Phone}
+          error={errors.phone}
+        >
+          <Input
             id="lcf-phone"
             type="tel"
             autoComplete="tel"
@@ -614,33 +583,23 @@ export function LeadCaptureForm({
             value={phone}
             onChange={(e) => setPhone(e.target.value)}
             placeholder="(619) 555-0123"
-            className={inputClass(!!errors.phone)}
+            invalid={!!errors.phone}
           />
-          <FieldError message={errors.phone} />
-        </div>
+        </FormField>
 
-        <div>
-          <label htmlFor="lcf-address" className={labelClass}>
-            <MapPin className="h-3 w-3 inline mr-1" />
-            Property Address *
-          </label>
-          <input
+        <FormField label="Property Address *" htmlFor="lcf-address" icon={MapPin} error={errors.address}>
+          <Input
             id="lcf-address"
             type="text"
             autoComplete="street-address"
             value={address}
             onChange={(e) => setAddress(e.target.value)}
             placeholder="123 Main St, San Diego, CA"
-            className={inputClass(!!errors.address)}
+            invalid={!!errors.address}
           />
-          <FieldError message={errors.address} />
-        </div>
+        </FormField>
 
-        {errors.form && (
-          <div className="bg-red-50 border border-red-200 rounded-lg p-3">
-            <p className="text-sm text-red-600">{errors.form}</p>
-          </div>
-        )}
+        <FormAlert>{errors.form}</FormAlert>
 
         <Button
           type="submit"

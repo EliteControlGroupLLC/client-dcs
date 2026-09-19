@@ -1,8 +1,13 @@
+import type { Metadata } from "next";
 import { Card, CardContent } from "@/components/ui/card";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { ArrowRight, Shield, CheckCircle, Clock, Award, Layers } from "lucide-react";
 import { RoofCalculatorInline } from "@/components/calculators/roof-calculator-inline";
+
+export const metadata: Metadata = {
+  title: "Roofing",
+};
 
 const roofTypes = [
   {
@@ -64,10 +69,10 @@ const includes = [
 export default function RoofingPage() {
   return (
     <div className="min-h-screen">
-      <section className="bg-secondary text-white pt-40 pb-20">
+      <section className="bg-secondary bg-[radial-gradient(ellipse_at_top,rgba(51,102,102,0.35),transparent_60%)] text-white pt-40 pb-20">
         <div className="container mx-auto px-4">
           <div className="max-w-3xl">
-            <span className="inline-block text-primary-light font-semibold text-sm uppercase tracking-wider mb-4">
+            <span className="inline-block text-accent font-semibold text-sm uppercase tracking-wider mb-4">
               ROOFING SERVICES
             </span>
             <h1 className="text-4xl md:text-5xl font-bold mb-6 text-balance">
@@ -77,7 +82,7 @@ export default function RoofingPage() {
               Complete roof replacement, repairs, and new installations for San Diego homes.
               From composition shingles to tile and metal — quality materials and expert installation.
             </p>
-            <p className="text-2xl font-bold text-primary-light">Starting at $12,500</p>
+            <p className="text-2xl font-bold text-accent">Starting at $12,500</p>
           </div>
         </div>
       </section>
@@ -148,17 +153,17 @@ export default function RoofingPage() {
         </div>
       </section>
 
-      <section className="py-20 bg-secondary text-white">
+      <section className="py-20 bg-secondary bg-[radial-gradient(ellipse_at_top,rgba(51,102,102,0.35),transparent_60%)] text-white">
         <div className="container mx-auto px-4 text-center">
           <h2 className="text-3xl md:text-4xl font-bold mb-4">Need a Professional Roof Inspection?</h2>
           <p className="text-lg text-white/80 mb-8 max-w-2xl mx-auto">
             Our team can inspect your roof, provide exact measurements, and deliver a detailed quote with no obligation.
           </p>
-          <Link href="/contact">
-            <Button size="lg" rounded="full">
+          <Button asChild size="lg" rounded="full">
+            <Link href="/contact">
               Schedule On-Site Consultation <ArrowRight className="h-5 w-5 ml-2" />
-            </Button>
-          </Link>
+            </Link>
+          </Button>
         </div>
       </section>
     </div>
