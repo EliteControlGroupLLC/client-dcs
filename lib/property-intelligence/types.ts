@@ -41,6 +41,8 @@ export interface BuildableAnalysis {
   requiredMainHomeSeparationFt: number;
   requiredPropertyLineSetbackFt: number;
   estimatedBuildableEnvelopeSqFt: number;
+  /** Display override when the envelope isn't a measured value (e.g. "Site review needed"). */
+  envelopeLabel?: string;
   oneStoryPotential: string;
   twoStoryPotential: string;
 }
@@ -62,6 +64,8 @@ export interface FinalBuildabilityResult {
     minWidthFt: number;
     minDepthFt: number;
     suitableFor: string[];
+    /** Real-parcel analysis: total contiguous buildable area of the zone. */
+    contiguousAreaSqFt?: number;
   }[];
   candidateZoneCount: number;
   buildabilityConfidence: number;
@@ -100,8 +104,46 @@ export interface LotDimensions {
   mainHomeDepth: number;
 }
 
+/**
+ * Real site facts behind the ADU-type verdicts (County Assessor + SANDAG
+ * parcel polygon + SANDAG Building Outlines). Null fields = unknown.
+ */
+export interface SiteFacts {
+  /** Estimated stories of the main home: (living + attached garage) ÷ footprint. */
+  stories: number | null;
+  storiesMethod: string;
+  garageStalls: number | null;
+  garageConverted: boolean;
+  garageAttached: boolean | null;
+  garageSqFtEstimate: number | null;
+  livingAreaSqFt: number | null;
+  lotSizeSqFt: number | null;
+  mainFootprintSqFt: number | null;
+  totalFootprintSqFt: number | null;
+  buildingCount: number | null;
+  openYardSqFt: number | null;
+  geometryVerified: boolean;
+  geometrySource: string;
+  detachedZone: {
+    areaSqFt: number;
+    widthFt: number;
+    depthFt: number;
+    position: string;
+    contiguousAreaSqFt: number | null;
+  } | null;
+  attachedFit: { areaSqFt: number; widthFt: number; depthFt: number } | null;
+  measuredYards: { frontFt: number; rearFt: number; leftFt: number; rightFt: number } | null;
+  setbacksUsed: { sideRearFt: number; frontFt: number; separationFt: number };
+  frontEdgeMethod?: string;
+  /** How the County parcel was matched to the address. */
+  parcelMatch?: "exact-address" | "address-point" | "nearest" | "none";
+  sources: string[];
+}
+
 export interface PropertyAnalysisResult {
   property: PropertyIntelligence;
+  /** Real site facts driving the ADU-type verdicts (optional). */
+  siteFacts?: SiteFacts;
   buildable: BuildableAnalysis;
   finalBuildability: FinalBuildabilityResult;
   recommendations: ADURecommendation[];

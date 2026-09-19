@@ -14,6 +14,15 @@ export interface JurisdictionIdentity {
   lastVerifiedDate: string;
   sourceUrls: string[];
   notesInternal?: string;
+  /**
+   * True only when the size/setback/height numbers in this profile were
+   * checked against the jurisdiction's own ordinance (or, where the city has
+   * no local ordinance, State law) on `lastVerifiedDate`. Unverified profiles
+   * fall back to State-law defaults and must be labelled as such.
+   */
+  rulesVerified?: boolean;
+  /** Short citation shown as the source of ADU rule fields, e.g. "SDMC § 141.0302". */
+  rulesCitation?: string;
 }
 
 export interface EligibilityRules {

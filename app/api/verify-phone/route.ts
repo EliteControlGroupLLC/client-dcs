@@ -4,13 +4,15 @@
 
 import { NextRequest, NextResponse } from "next/server";
 import { checkRateLimit, getClientIp } from "@/lib/rate-limit";
+import { issuePhoneToken } from "@/lib/verification-token";
 
 const TWILIO_ACCOUNT_SID = process.env.TWILIO_ACCOUNT_SID;
 const TWILIO_AUTH_TOKEN = process.env.TWILIO_AUTH_TOKEN;
 const TWILIO_VERIFY_SERVICE_SID = process.env.TWILIO_VERIFY_SERVICE_SID;
 
-// In-memory store for verification state (per phone number)
-// In production, use Redis or database
+// Best-effort, per-instance send cooldown only. Code state lives in Twilio
+// Verify and proof of verification is a signed token (lib/verification-token),
+// so nothing here is required to survive across serverless instances.
 const verificationStore = new Map<string, {
   verified: boolean;
   attempts: number;
@@ -209,42 +211,26 @@ export async function POST(request: NextRequest) {
         );
       }
 
-      // Get existing state
-      const existing = verificationStore.get(formattedPhone);
-      if (!existing) {
-        return NextResponse.json(
-          { error: "Please request a verification code first" },
-          { status: 400 }
-        );
-      }
-
-      // Check if already verified
-      if (existing.verified) {
-        return NextResponse.json({
-          success: true,
-          verified: true,
-          message: "Phone already verified",
-        });
-      }
-
-      // Verify with Twilio
+      // Verify with Twilio (Twilio holds the pending code — no local state needed)
       const result = await verifyTwilioOTP(formattedPhone, code.trim());
 
       if (!result.valid) {
-        existing.attempts++;
         return NextResponse.json(
           { error: result.error || "Invalid code" },
           { status: 400 }
         );
       }
 
-      // Mark as verified
-      existing.verified = true;
-      existing.verifiedAt = Date.now();
+      const existing = verificationStore.get(formattedPhone);
+      if (existing) {
+        existing.verified = true;
+        existing.verifiedAt = Date.now();
+      }
 
       return NextResponse.json({
         success: true,
         verified: true,
+        phoneToken: issuePhoneToken(formattedPhone),
         message: "Phone verified successfully",
       });
     }

@@ -11,6 +11,8 @@
 // All coordinates are in [lng, lat] format (GeoJSON standard).
 // Distance calculations use local meter approximation.
 
+import { analyzeParcelRaster, type RasterRect } from "./parcel-raster-analysis";
+
 // ─── Core Types ───
 
 export interface Point {
@@ -92,6 +94,9 @@ export interface LeftoverZone {
   minDepthFt: number;
   /** Suitable ADU types for this zone */
   suitableFor: string[];
+  /** Real-parcel analysis only: total contiguous buildable area of the zone
+   *  (areaSqFt is the largest unit-shaped rectangle that fits inside it). */
+  contiguousAreaSqFt?: number;
 }
 
 export interface GeometryAnalysis {
@@ -136,7 +141,21 @@ export interface GeometryAnalysis {
     totalSetbackAreaSqFt: number;
     totalLeftoverSqFt: number;
     bestBuildableZoneSqFt: number;
+    /** Lot minus all building footprints (never negative, never > lot). */
+    openYardSqFt?: number;
   };
+  /** True when the parcel polygon is an authoritative surveyed boundary (e.g. SANDAG). */
+  parcelIsReal?: boolean;
+  /** True when building footprints come from real traced outlines (SANDAG/OSM/Microsoft). */
+  footprintIsReal?: boolean;
+  /** Real-parcel analysis: largest attached-addition rectangle next to the home. */
+  attachedFit?: RasterRect | null;
+  /** Real-parcel analysis: how the street frontage was identified. */
+  frontEdgeMethod?: string;
+  /** Real-parcel analysis: measured yard depths around the main home (ft). */
+  measuredYards?: { frontFt: number; rearFt: number; leftFt: number; rightFt: number };
+  /** Real-parcel analysis: lot width along frontage / depth perpendicular (ft). */
+  orientedLotDims?: { widthFt: number; depthFt: number };
 }
 
 // ─── Coordinate Conversion Constants ───
@@ -1159,6 +1178,28 @@ export interface GeometryInput {
   rearSetbackFt: number;
   sideSetbackFt: number;
   separationFt: number;
+  /**
+   * AUTHORITATIVE parcel boundary (e.g. SANDAG/SanGIS). When present it
+   * replaces every rectangle/bounding-box estimate and enables the real
+   * raster yard analysis.
+   */
+  realParcel?: {
+    polygon: GeometryPolygon;
+    areaSqFt: number;
+    source: string;
+    /** WGS84 rings of adjacent parcels — identifies street frontage. */
+    adjacentParcelRings?: number[][][][];
+  } | null;
+  /**
+   * AUTHORITATIVE building outlines (e.g. SANDAG Building Outlines). Used
+   * ahead of OSM / Microsoft / ATTOM / estimated footprints.
+   */
+  authoritativeBuildings?: {
+    buildings: Array<{ areaSqFt: number; buildingType?: string; nodes: Array<{ lat: number; lon: number }>; levels?: number }>;
+    source: string;
+  } | null;
+  /** Estimated stories of the main home (from assessor living area ÷ footprint). */
+  storiesEstimate?: number | null;
 }
 
 /**
@@ -1186,8 +1227,13 @@ export function analyzePropertyGeometry(input: GeometryInput): GeometryAnalysis 
   // ── Step 1: Determine parcel polygon ──
   let parcelPolygon: GeometryPolygon;
   let parcelSource: string;
+  const realParcel = input.realParcel && input.realParcel.polygon.coordinates[0]?.length >= 4 ? input.realParcel : null;
 
-  if (attomLotWidth && attomLotDepth && attomLotWidth > 0 && attomLotDepth > 0) {
+  if (realParcel) {
+    // Authoritative surveyed parcel boundary (SANDAG/SanGIS)
+    parcelPolygon = realParcel.polygon;
+    parcelSource = realParcel.source;
+  } else if (attomLotWidth && attomLotDepth && attomLotWidth > 0 && attomLotDepth > 0) {
     // Best case: ATTOM has real lot dimensions
     parcelPolygon = createRectPolygon(lat, lng, attomLotWidth, attomLotDepth);
     parcelSource = "ATTOM Property Data (lot dimensions)";
@@ -1218,15 +1264,22 @@ export function analyzePropertyGeometry(input: GeometryInput): GeometryAnalysis 
   }
 
   const parcelBBox = geoPolygonBBox(parcelPolygon);
-  const parcelAreaSqFt = attomLotSizeSqFt || geoPolygonAreaSqFt(parcelPolygon);
+  const parcelAreaSqFt = realParcel?.areaSqFt || attomLotSizeSqFt || geoPolygonAreaSqFt(parcelPolygon);
 
   // ── Step 2: Detect structures as polygons ──
   let structures: DetectedStructure[] = [];
   let footprintSource: string;
   let geometryStatus: GeometryAnalysis["geometryStatus"];
 
-  if (osmBuildings.length > 0) {
-    // Best case: OSM has real building polygons
+  const authBuildings = input.authoritativeBuildings?.buildings?.filter((b) => b.nodes.length >= 3) ?? [];
+  if (authBuildings.length > 0) {
+    // Best case: authoritative traced outlines (SANDAG Building Outlines)
+    const src = input.authoritativeBuildings!.source;
+    structures = classifyStructures(authBuildings, src);
+    footprintSource = `${src} (traced polygons)`;
+    geometryStatus = "polygon-verified";
+  } else if (osmBuildings.length > 0) {
+    // OSM / Microsoft real building polygons
     structures = classifyStructures(osmBuildings, "OpenStreetMap building outlines");
     footprintSource = "OpenStreetMap building outlines (polygon vectors)";
     geometryStatus = "polygon-verified";
@@ -1275,6 +1328,16 @@ export function analyzePropertyGeometry(input: GeometryInput): GeometryAnalysis 
   // ── Step 3: Identify main structure and secondary structures ──
   const mainStructure = structures.find(s => s.classification === "main-residence") || structures[0] || null;
   const secondaryStructures = structures.filter(s => s !== mainStructure);
+  if (mainStructure && input.storiesEstimate && input.storiesEstimate > 0) {
+    mainStructure.levels = input.storiesEstimate;
+  }
+
+  // Honesty: real footprints drawn on a GUESSED (rectangle) parcel are not
+  // "verified" — the yard between them and a made-up lot line is fiction.
+  const footprintIsReal = geometryStatus === "polygon-verified";
+  if (!realParcel && geometryStatus === "polygon-verified") {
+    geometryStatus = "polygon-estimated";
+  }
 
   // ── Step 4: Anchor main structure placement within parcel ──
   let placement: ParcelPlacement | null = null;
@@ -1282,7 +1345,9 @@ export function analyzePropertyGeometry(input: GeometryInput): GeometryAnalysis 
     const measuredSetbacks = measureSetbacksToParcel(mainStructure.polygon, parcelPolygon);
 
     let placementMethod: ParcelPlacement["placementMethod"];
-    if (geometryStatus === "polygon-verified") {
+    if (realParcel && footprintIsReal) {
+      placementMethod = "vector-anchored";
+    } else if (footprintIsReal) {
       placementMethod = "osm-anchored";
     } else if (attomLotWidth && attomLotDepth) {
       placementMethod = "centroid-estimated";
@@ -1307,14 +1372,30 @@ export function analyzePropertyGeometry(input: GeometryInput): GeometryAnalysis 
 
   // ── Step 6: Analyze leftover buildable zones ──
   let leftoverZones: LeftoverZone[] = [];
-  if (mainStructure) {
+  let raster: ReturnType<typeof analyzeParcelRaster> = null;
+  if (mainStructure && realParcel && footprintIsReal) {
+    // Real parcel + real outlines → exact raster analysis on the true shape.
+    raster = analyzeParcelRaster({
+      parcel: parcelPolygon,
+      structures,
+      mainStructure,
+      addressPoint: lat || lng ? { lat, lng } : null,
+      adjacentParcelRings: realParcel.adjacentParcelRings,
+      frontSetbackFt,
+      sideSetbackFt,
+      rearSetbackFt,
+      separationFt,
+    });
+    if (raster) leftoverZones = raster.zones;
+  }
+  if (!raster && mainStructure) {
     leftoverZones = analyzeLeftoverZones(
       parcelPolygon, mainStructure, secondaryStructures,
       frontSetbackFt, rearSetbackFt, sideSetbackFt, separationFt
     );
   }
 
-  const bestAduZone = leftoverZones.find(z =>
+  const bestAduZone = [...leftoverZones].sort((a, b) => b.areaSqFt - a.areaSqFt).find(z =>
     z.suitableFor.includes("Detached ADU") || z.suitableFor.includes("Small Detached ADU")
   ) || null;
 
@@ -1324,7 +1405,13 @@ export function analyzePropertyGeometry(input: GeometryInput): GeometryAnalysis 
 
   // ── Step 7: Identify attached ADU candidate walls ──
   const attachedCandidateWalls: ("rear" | "left" | "right")[] = [];
-  if (placement) {
+  if (raster) {
+    const y = raster.measuredYards;
+    const need = Math.max(sideSetbackFt, rearSetbackFt) + 10; // setback + 10 ft addition
+    if (y.rearFt >= need) attachedCandidateWalls.push("rear");
+    if (y.leftFt >= need) attachedCandidateWalls.push("left");
+    if (y.rightFt >= need) attachedCandidateWalls.push("right");
+  } else if (placement) {
     if (placement.measuredSetbacks.rearFt >= 4) attachedCandidateWalls.push("rear");
     if (placement.measuredSetbacks.leftFt >= 8) attachedCandidateWalls.push("left");
     if (placement.measuredSetbacks.rightFt >= 8) attachedCandidateWalls.push("right");
@@ -1340,13 +1427,17 @@ export function analyzePropertyGeometry(input: GeometryInput): GeometryAnalysis 
   const mainLevels = mainStructure?.levels || (attomStories || 1);
   const mainLivingSqFt = attomLivingAreaSqFt || mainFootprintSqFt * mainLevels;
   const totalStructureFootprintSqFt = structures.reduce((s, st) => s + st.areaSqFt, 0);
+  const openYardSqFt = Math.max(0, Math.min(parcelAreaSqFt, parcelAreaSqFt - totalStructureFootprintSqFt));
   const totalLeftoverSqFt = leftoverZones.reduce((s, z) => s + z.areaSqFt, 0);
   const totalSetbackAreaSqFt = Math.max(0, parcelAreaSqFt - (setbackEnvelope ? geoPolygonAreaSqFt(setbackEnvelope) : 0));
   const bestBuildableZoneSqFt = bestAduZone?.areaSqFt || 0;
 
   // ── Step 10: Calculate overall geometry confidence ──
   let geometryConfidence: number;
-  if (geometryStatus === "polygon-verified") {
+  if (geometryStatus === "polygon-verified" && raster) {
+    // Surveyed parcel + traced outlines + exact raster analysis
+    geometryConfidence = input.authoritativeBuildings?.buildings?.length ? 92 : 85;
+  } else if (geometryStatus === "polygon-verified") {
     geometryConfidence = 80;
   } else if (geometryStatus === "polygon-estimated") {
     geometryConfidence = 55;
@@ -1384,6 +1475,13 @@ export function analyzePropertyGeometry(input: GeometryInput): GeometryAnalysis 
       totalSetbackAreaSqFt,
       totalLeftoverSqFt,
       bestBuildableZoneSqFt,
+      openYardSqFt,
     },
+    parcelIsReal: Boolean(realParcel),
+    footprintIsReal,
+    attachedFit: raster ? raster.attachedFit : undefined,
+    frontEdgeMethod: raster?.frontEdgeMethod,
+    measuredYards: raster?.measuredYards,
+    orientedLotDims: raster ? { widthFt: raster.lotWidthFt, depthFt: raster.lotDepthFt } : undefined,
   };
 }

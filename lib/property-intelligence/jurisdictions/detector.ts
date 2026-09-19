@@ -30,22 +30,81 @@ const CITY_BOUNDARIES: {
   { id: "vista", name: "Vista", keywords: ["vista"] },
 ];
 
+// Common unincorporated San Diego County community / mailing-city names.
+const UNINCORPORATED_COMMUNITIES = [
+  "spring valley", "lakeside", "ramona", "alpine", "fallbrook", "valley center",
+  "jamul", "bonita", "julian", "borrego springs", "campo", "descanso",
+  "pine valley", "rancho santa fe", "bonsall", "pauma valley", "boulevard",
+  "jacumba", "dulzura", "potrero", "la presa", "casa de oro", "mount helix",
+  "harbison canyon", "4s ranch", "warner springs", "santa ysabel", "ranchita",
+];
+
 export interface JurisdictionDetectionResult {
   jurisdictionId: string;
   jurisdictionName: string;
   profile: JurisdictionProfile;
   confidence: number;
-  method: "geocode" | "address-parse" | "fallback";
+  method: "parcel" | "geocode" | "address-parse" | "fallback";
   uncertain: boolean;
 }
 
 /**
- * Detect jurisdiction from a formatted address string.
- * Uses the address components to match against known SD County cities.
+ * SANDAG / SanGIS parcel `situs_juris` codes → jurisdiction profile id.
+ * Verified against the distinct values of situs_juris in
+ * https://geo.sandag.org/server/rest/services/Hosted/Parcels/FeatureServer/0
+ * (CB, CN, CO, CV, DM, EC, EN, ES, IB, LG, LM, NC, OC, PW, SD, SM, SO, ST, VS).
+ * The parcel's situs jurisdiction is authoritative — mailing-city names in an
+ * address ("Spring Valley", "Bonita", "La Jolla") are NOT jurisdictions.
+ */
+export const SITUS_JURIS_TO_JURISDICTION: Record<string, string> = {
+  CB: "carlsbad",
+  CN: "san-diego-county", // unincorporated County of San Diego
+  CO: "coronado",
+  CV: "chula-vista",
+  DM: "del-mar",
+  EC: "el-cajon",
+  EN: "encinitas",
+  ES: "escondido",
+  IB: "imperial-beach",
+  LG: "lemon-grove",
+  LM: "la-mesa",
+  NC: "national-city",
+  OC: "oceanside",
+  PW: "poway",
+  SD: "san-diego-city",
+  SM: "san-marcos",
+  SO: "solana-beach",
+  ST: "santee",
+  VS: "vista",
+};
+
+/** Map a parcel situs_juris code to a jurisdiction profile id (or null). */
+export function jurisdictionIdFromSitusJuris(situsJuris: string | null | undefined): string | null {
+  if (!situsJuris) return null;
+  return SITUS_JURIS_TO_JURISDICTION[situsJuris.trim().toUpperCase()] ?? null;
+}
+
+/**
+ * Detect jurisdiction. When the county parcel's `situs_juris` is known it is
+ * used first (authoritative); otherwise falls back to parsing the address.
  */
 export function detectJurisdictionFromAddress(
-  formattedAddress: string
+  formattedAddress: string,
+  situsJuris?: string | null
 ): JurisdictionDetectionResult {
+  const parcelJurisdictionId = jurisdictionIdFromSitusJuris(situsJuris);
+  if (parcelJurisdictionId && JURISDICTION_PROFILES[parcelJurisdictionId]) {
+    const profile = JURISDICTION_PROFILES[parcelJurisdictionId];
+    return {
+      jurisdictionId: parcelJurisdictionId,
+      jurisdictionName: profile.identity.name,
+      profile,
+      confidence: 95,
+      method: "parcel",
+      uncertain: false,
+    };
+  }
+
   const addressLower = formattedAddress.toLowerCase();
 
   // Check for San Diego County (unincorporated) signals
@@ -62,6 +121,22 @@ export function detectJurisdictionFromAddress(
       confidence: 75,
       method: "address-parse",
       uncertain: false,
+    };
+  }
+
+  // Unincorporated community mailing names (not cities). Without a parcel
+  // match this is only a hint — some of these mailing areas straddle city
+  // limits (e.g. Bonita / Chula Vista), so it is marked uncertain.
+  const community = UNINCORPORATED_COMMUNITIES.find((c) => addressLower.includes(c));
+  if (community) {
+    const profile = JURISDICTION_PROFILES["san-diego-county"];
+    return {
+      jurisdictionId: "san-diego-county",
+      jurisdictionName: profile.identity.name,
+      profile,
+      confidence: 65,
+      method: "address-parse",
+      uncertain: true,
     };
   }
 

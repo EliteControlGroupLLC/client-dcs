@@ -360,7 +360,7 @@ function generateStructuraPDFContent(data: PropertyAnalysisResult): string {
           </div>
           <div class="data-row">
             <span class="data-label">Buildable Envelope</span>
-            <span class="data-value highlight">${data.buildable.estimatedBuildableEnvelopeSqFt.toLocaleString()} sq ft</span>
+            <span class="data-value highlight">${data.buildable.envelopeLabel ?? `${data.buildable.estimatedBuildableEnvelopeSqFt.toLocaleString()} sq ft`}</span>
           </div>
         </div>
       </div>

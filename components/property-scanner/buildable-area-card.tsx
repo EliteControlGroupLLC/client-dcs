@@ -4,6 +4,8 @@ interface BuildableAreaData {
   requiredMainHomeSeparationFt: number;
   requiredPropertyLineSetbackFt: number;
   estimatedBuildableEnvelopeSqFt: number;
+  /** Overrides the numeric envelope when it isn't a measured value. */
+  envelopeLabel?: string;
   oneStoryPotential: string;
   twoStoryPotential: string;
 }
@@ -26,7 +28,7 @@ export function BuildableAreaCard({ data }: BuildableAreaCardProps) {
     },
     {
       label: "Estimated buildable envelope",
-      value: `${data.estimatedBuildableEnvelopeSqFt.toLocaleString()} sq ft`,
+      value: data.envelopeLabel ?? `${data.estimatedBuildableEnvelopeSqFt.toLocaleString()} sq ft`,
       icon: Ruler,
       highlight: true,
     },

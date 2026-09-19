@@ -117,4 +117,6 @@ export const RATE_LIMITS = {
   phoneSend: { maxRequests: 3, windowSeconds: 10 * 60 },
   // Phone OTP verify — 5 per 5 min per IP  
   phoneVerify: { maxRequests: 5, windowSeconds: 5 * 60 },
+  // Address autocomplete (one call per debounced keystroke) — 60 per min per IP
+  addressSuggest: { maxRequests: 60, windowSeconds: 60 },
 } as const;

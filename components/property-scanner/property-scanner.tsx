@@ -28,6 +28,7 @@ import { SiteConstraintsCard } from "./site-constraints-card";
 import { LeadCaptureForm } from "./lead-capture-form";
 import { PropertyReportModal } from "./property-report-modal";
 import { LockedReportPreview } from "./locked-report-preview";
+import { FLOOR_PLANS } from "@/lib/data/site-data";
 import { ReportExportButtons } from "./report-export-buttons";
 // Removed: ShowSourcesPanel - not client-facing per requirements
 import { analyzeProperty } from "@/lib/property-intelligence";
@@ -355,6 +356,42 @@ export function PropertyScanner() {
               <p className="text-[11px] text-muted-foreground leading-relaxed">
                 {analysisData.disclaimer}
               </p>
+            </div>
+
+            {/* Floor plans + pricing — all DCS options so clients can compare */}
+            <div className="mt-12 bg-white rounded-2xl border border-border p-6 sm:p-8">
+              <div className="text-center mb-8">
+                <h2 className="text-2xl font-bold text-secondary">Our ADU Floor Plans &amp; Pricing</h2>
+                <p className="text-sm text-muted-foreground mt-2">
+                  Every option we build, from garage conversions to full detached units. Prices are
+                  turnkey estimates — your site review confirms the exact scope.
+                </p>
+              </div>
+              <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
+                {FLOOR_PLANS.map((plan) => (
+                  <div
+                    key={plan.id}
+                    className="rounded-xl border border-border p-5 flex flex-col hover:shadow-md transition-shadow"
+                  >
+                    <div className="flex items-baseline justify-between gap-2">
+                      <h3 className="font-bold text-secondary">{plan.name}</h3>
+                      <span className="text-xs text-muted-foreground whitespace-nowrap">
+                        {plan.sqFt.toLocaleString()} sq ft
+                      </span>
+                    </div>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      {plan.bedrooms === 0 ? "Studio" : `${plan.bedrooms} bed`} · {plan.bathrooms} bath
+                    </p>
+                    <div className="mt-4 pt-4 border-t border-border">
+                      <div className="text-lg font-bold text-primary">{plan.priceRange}</div>
+                      <div className="text-xs text-muted-foreground mt-1">
+                        Est. rent ${plan.rentEstimate.low.toLocaleString()}–$
+                        {plan.rentEstimate.high.toLocaleString()}/mo
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
             </div>
 
             {/* CTA Section */}

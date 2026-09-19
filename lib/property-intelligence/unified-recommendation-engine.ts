@@ -91,6 +91,14 @@ export interface UnifiedRecommendationInput {
   bestRecommendationType: string;
   maxAllowedSqFt: number; // From jurisdiction rules (typically 1200 for detached)
   jaduMaxSqFt: number;    // From jurisdiction rules (typically 500)
+  /**
+   * Hard cap on the modeled unit size from the REAL site fit (e.g. the
+   * largest detached footprint that fits after setbacks, or stalls × 200 sq
+   * ft for a garage). Never exceeded, even if it's below the smallest plan.
+   */
+  hardSizeCapSqFt?: number;
+  /** Plain-English reason prepended to the banner details (why this type). */
+  contextNote?: string;
 }
 
 /**
@@ -106,12 +114,17 @@ export async function generateUnifiedRecommendation(
     maxAllowedSqFt,
   } = input;
 
-  const normalizedType = normalizeAduType(bestRecommendationType, bestRecommendationType === "Second-Story ADU" ? 2 : 1);
-  const allowedSqFt = Math.max(400, Math.min(buildableEnvelopeSqFt, maxAllowedSqFt));
+  // JADU (inside the existing home) is priced/rented like a small attached unit.
+  const isJadu = bestRecommendationType === "JADU";
+  const normalizedType = isJadu
+    ? "attached"
+    : normalizeAduType(bestRecommendationType, bestRecommendationType === "Second-Story ADU" ? 2 : 1);
+  const hardCap = input.hardSizeCapSqFt && input.hardSizeCapSqFt > 0 ? input.hardSizeCapSqFt : Infinity;
+  const allowedSqFt = Math.min(hardCap, Math.max(400, Math.min(buildableEnvelopeSqFt, maxAllowedSqFt)));
   const plan = pickPrimaryPlan(normalizedType, allowedSqFt);
   const variation = pickPrimaryVariation(plan, normalizedType);
-  const primaryType = labelForType(normalizedType);
-  const primarySizeSqFt = Math.min(plan.sqFt, allowedSqFt);
+  const primaryType = isJadu ? "JADU" : labelForType(normalizedType);
+  const primarySizeSqFt = Math.round(Math.min(plan.sqFt, allowedSqFt, isJadu ? input.jaduMaxSqFt : Infinity));
 
   const pricing = estimateAduPriceRange({
     sqFt: primarySizeSqFt,
@@ -145,7 +158,7 @@ export async function generateUnifiedRecommendation(
 
   const { bannerRecommendation, bannerDetails } = generateSmartBannerText(
     primaryType,
-    plan.name,
+    isJadu ? "Junior ADU (JADU)" : plan.name,
     primarySizeSqFt,
     variation,
     pricing.low,
@@ -155,6 +168,7 @@ export async function generateUnifiedRecommendation(
     zipCode,
     buildableEnvelopeSqFt > maxAllowedSqFt
   );
+  const bannerDetailsFinal = input.contextNote ? `${input.contextNote} ${bannerDetails}` : bannerDetails;
 
   return {
     primaryType,
@@ -183,7 +197,7 @@ export async function generateUnifiedRecommendation(
     },
     
     bannerRecommendation,
-    bannerDetails,
+    bannerDetails: bannerDetailsFinal,
     derivedFromFeasibility: bestRecommendationType,
     zipCode,
     rentSource: "estimated",

@@ -45,15 +45,6 @@ interface GoogleAutocompleteSuggestion {
   };
 }
 
-// Fallback suggestions when Google API is not available
-const fallbackSuggestions = [
-  "1234 Sample St, San Diego, CA 92101",
-  "1250 Garnet Ave, San Diego, CA 92109",
-  "4567 University Ave, San Diego, CA 92105",
-  "7890 La Jolla Blvd, La Jolla, CA 92037",
-  "2345 El Cajon Blvd, San Diego, CA 92104",
-];
-
 const GOOGLE_API_KEY = process.env.NEXT_PUBLIC_GOOGLE_PLACES_API_KEY;
 
 function loadGoogleMapsScript(): Promise<void> {
@@ -171,13 +162,25 @@ export function AddressAutocompleteInput({
     }
   }, []);
 
-  const searchWithFallback = useCallback((inputValue: string) => {
-    const filtered = fallbackSuggestions.filter((s) =>
-      s.toLowerCase().includes(inputValue.toLowerCase())
-    );
-    setSuggestions(filtered.length > 0 ? filtered : fallbackSuggestions.slice(0, 5));
-    setIsOpen(true);
-    setIsSearching(false);
+  // Keyless real-address search (ArcGIS via /api/address-suggest). Used when
+  // no Google Places key is configured, or if Google fails to load.
+  const requestSeqRef = useRef(0);
+  const searchWithFallback = useCallback(async (inputValue: string) => {
+    const seq = ++requestSeqRef.current;
+    try {
+      const res = await fetch(`/api/address-suggest?q=${encodeURIComponent(inputValue)}`);
+      const data = (await res.json()) as { suggestions?: string[] };
+      if (seq !== requestSeqRef.current) return; // a newer keystroke won
+      const results = data.suggestions ?? [];
+      setSuggestions(results);
+      setIsOpen(results.length > 0);
+    } catch {
+      if (seq !== requestSeqRef.current) return;
+      setSuggestions([]);
+      setIsOpen(false);
+    } finally {
+      if (seq === requestSeqRef.current) setIsSearching(false);
+    }
   }, []);
 
   const handleInputChange = (inputValue: string) => {

@@ -191,15 +191,18 @@ export function runSanityChecks(input: SanityInput): SanityCheckResult {
     /^RS-\d/i, /^RM-\d/i, /^R-\d/i, /^C-\d/i, /^M-\d/i,
     /^CC-/i, /^CN-/i, /^CO-/i, /^IL-/i, /^IP-/i,
     /residential/i, /commercial/i, /industrial/i, /mixed/i, /agricultural/i,
+    // Other SD County jurisdictions: Chula Vista P-C / R zones (e.g. PC4RP8, R1),
+    // County use regulations (RS, RR, RU, RV, A70, S92 …), R-1-15000, RS-6, etc.
+    /^P-?C/i, /^R\d/i, /^R[A-Z]{0,3}\d*(-|$)/i, /^[ACMS]\d{2}$/i,
   ];
-  const zoningBase = input.zoning.split("(")[0].trim();
+  const zoningBase = input.zoning === "Not available" ? "" : input.zoning.split("(")[0].trim();
   const zoningValid = validZoningPatterns.some((p) => p.test(zoningBase));
   if (!zoningValid && zoningBase.length > 0) {
     checks.push({
       name: "zoning-format",
       passed: false,
       severity: "warning",
-      message: `Zoning code "${zoningBase}" does not match known San Diego formats. Verification recommended.`,
+      message: `Zoning code "${zoningBase}" does not match known San Diego County formats. Verification recommended.`,
     });
     confidenceAdjustment -= 3;
   } else {

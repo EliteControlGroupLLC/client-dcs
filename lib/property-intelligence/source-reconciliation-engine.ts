@@ -46,6 +46,11 @@ export interface ReconciliationInput {
   resolvedFootprintSqFt: number;
   resolvedOpenYardSqFt: number;
   resolvedZoning: string;
+  /** Actual source + confidence of resolvedZoning (e.g. "City of Chula Vista GIS — …"). */
+  resolvedZoningSource?: string;
+  resolvedZoningConfidence?: number;
+  /** Which geocoder produced geocodedAddress (e.g. "U.S. Census Geocoder"). */
+  geocodeProvider?: string;
   resolvedParcelShape: string;
   resolvedApn: string;
   bestRecommendation: string;
@@ -289,7 +294,7 @@ export function reconcileAllSources(input: ReconciliationInput): SourceAudit {
   const addressCandidates: SourceCandidate<string>[] = [];
   addressCandidates.push(makeCandidate(input.rawAddress, "User Input", 70));
   if (input.geocodedAddress) {
-    addressCandidates.push(makeCandidate(input.geocodedAddress, "Google Geocoding", 95));
+    addressCandidates.push(makeCandidate(input.geocodedAddress, input.geocodeProvider ?? "Address geocoder", 95));
   }
   if (input.osmData?.nominatimAddress) {
     addressCandidates.push(makeCandidate(input.osmData.nominatimAddress, "OpenStreetMap Nominatim", 72));
@@ -302,7 +307,7 @@ export function reconcileAllSources(input: ReconciliationInput): SourceAudit {
   if (input.attomData?.apn) {
     apnCandidates.push(makeCandidate(input.attomData.apn, "ATTOM Property Data", 97));
   }
-  if (input.resolvedApn && !input.resolvedApn.includes("Estimated")) {
+  if (input.resolvedApn && !input.resolvedApn.includes("Estimated") && input.resolvedApn !== "Not available") {
     apnCandidates.push(makeCandidate(input.resolvedApn, "Resolved (multi-source)", 80));
   }
   const apnResult = reconcileString("apn", apnCandidates, true);
@@ -334,7 +339,16 @@ export function reconcileAllSources(input: ReconciliationInput): SourceAudit {
   if (input.attomData?.zoning) {
     zoningCandidates.push(makeCandidate(input.attomData.zoning, "ATTOM Property Data", 82));
   }
-  zoningCandidates.push(makeCandidate(input.resolvedZoning, "City Zoning GIS (estimated)", 75));
+  // Only a REAL zone (from the parcel's own jurisdiction GIS) is a candidate.
+  if (input.resolvedZoning && input.resolvedZoning !== "Not available") {
+    zoningCandidates.push(
+      makeCandidate(
+        input.resolvedZoning,
+        input.resolvedZoningSource ?? "Jurisdiction zoning GIS",
+        input.resolvedZoningConfidence ?? 75
+      )
+    );
+  }
   const zoningResult = reconcileString("zoning", zoningCandidates, true);
   allDiscrepancies.push(...zoningResult.discrepancies);
 
@@ -499,7 +513,7 @@ export function reconcileAllSources(input: ReconciliationInput): SourceAudit {
     sourcePolicy: {
       primaryBackbone: [
         "ATTOM Property Data",
-        "Google Geocoding",
+        "Address geocoder (Census / ArcGIS / Google)",
         "Official city/county/state sources",
         "Zoneomics",
         "RentCast",
