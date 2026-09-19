@@ -1,7 +1,18 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
+import { BadgeCheck, Camera, FileText, HardHat, IdCard, MessagesSquare, Sparkles, type LucideIcon } from "lucide-react";
 import { FOUNDER, FOUNDER_STORY } from "@/lib/data/founder-story";
+
+const listIcons: Record<string, LucideIcon> = {
+  Documentation: FileText,
+  "Progress photos": Camera,
+  "RFIs & coordination": MessagesSquare,
+  Warranties: BadgeCheck,
+  "Employee compliance": IdCard,
+  Safety: HardHat,
+  "Site cleanliness": Sparkles,
+};
 
 export const metadata: Metadata = {
   title: "Our Story",
@@ -28,47 +39,82 @@ export default function OurStoryPage() {
         </div>
       </section>
 
-      {/* The letter */}
-      <section className="py-20 bg-white">
-        <article className="container mx-auto px-4 max-w-3xl">
-          {FOUNDER_STORY.map((section, i) => (
-            <div key={i} className={i === 0 ? "" : "mt-12"}>
-              {section.heading && (
-                <h2 className="text-3xl md:text-4xl font-bold text-secondary mb-4">{section.heading}</h2>
-              )}
-              <div className="space-y-5">
-                {section.paragraphs.map((p, j) => (
-                  <p
-                    key={j}
-                    className={`text-lg leading-relaxed text-secondary/80 ${
-                      i === 0 && j === 0 ? "font-serif text-2xl md:text-3xl leading-snug text-secondary" : ""
-                    }`}
-                  >
-                    {p}
-                  </p>
-                ))}
+      {/* The letter — dark, per owner (no white backgrounds) */}
+      <section className="relative py-20 border-t border-white/10 bg-secondary overflow-hidden">
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom,rgba(51,102,102,0.25),transparent_60%)]" />
+        <article className="relative container mx-auto px-4 max-w-3xl">
+          {FOUNDER_STORY.map((section, i) => {
+            const renderParagraph = (p: string, j: number) => (
+              <p
+                key={j}
+                className={
+                  i === 0 && j === 0
+                    ? "font-serif text-2xl md:text-3xl leading-snug text-white"
+                    : "text-lg leading-relaxed text-white/80"
+                }
+              >
+                {p}
+              </p>
+            );
+            const split = section.list ? section.listAfter ?? section.paragraphs.length : section.paragraphs.length;
+            return (
+              <div key={i} className={i === 0 ? "" : "mt-14"}>
+                {section.heading && (
+                  <h2 className="text-3xl md:text-4xl font-bold text-white mb-4 text-balance">{section.heading}</h2>
+                )}
+                <div className="space-y-5">{section.paragraphs.slice(0, split).map(renderParagraph)}</div>
+                {section.list && (
+                  <ul className="my-8 grid gap-4 sm:grid-cols-2">
+                    {section.list.map((item, k, all) => {
+                      const Icon = listIcons[item.title] ?? BadgeCheck;
+                      // Odd count: the last card spans both columns so the grid ends evenly.
+                      const spanLast = all.length % 2 === 1 && k === all.length - 1;
+                      return (
+                        <li
+                          key={item.title}
+                          className={`flex items-start gap-4 rounded-2xl border border-white/10 bg-secondary-light p-5 shadow-lg shadow-black/20 ${
+                            spanLast ? "sm:col-span-2" : ""
+                          }`}
+                        >
+                          <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-primary">
+                            <Icon className="h-5 w-5 text-white" aria-hidden="true" />
+                          </span>
+                          <span>
+                            <span className="block font-semibold text-white">{item.title}</span>
+                            <span className="mt-1 block text-sm leading-relaxed text-white/75">{item.text}</span>
+                          </span>
+                        </li>
+                      );
+                    })}
+                  </ul>
+                )}
+                {split < section.paragraphs.length && (
+                  <div className="space-y-5">
+                    {section.paragraphs.slice(split).map((p, j) => renderParagraph(p, split + j))}
+                  </div>
+                )}
+                {section.pullQuote && (
+                  <blockquote className="mt-10 border-l-2 border-accent pl-6">
+                    <p className="font-serif text-3xl md:text-4xl italic leading-tight text-accent">
+                      &ldquo;{section.pullQuote}&rdquo;
+                    </p>
+                  </blockquote>
+                )}
               </div>
-              {section.pullQuote && (
-                <blockquote className="mt-10 border-l-2 border-accent pl-6">
-                  <p className="font-serif text-3xl md:text-4xl italic leading-tight text-primary">
-                    &ldquo;{section.pullQuote}&rdquo;
-                  </p>
-                </blockquote>
-              )}
-            </div>
-          ))}
+            );
+          })}
 
           {/* Signature */}
-          <div className="mt-14 border-t border-border pt-8">
-            <p className="font-serif text-3xl italic text-secondary">{FOUNDER.name}</p>
-            <p className="mt-1 text-sm font-semibold uppercase tracking-wider text-primary">{FOUNDER.title}</p>
-            <p className="mt-1 text-sm text-muted-foreground">TruthCore, a DBA of Distinct Construction Solutions</p>
+          <div className="mt-16 border-t border-white/10 pt-8">
+            <p className="font-serif text-3xl italic text-white">{FOUNDER.name}</p>
+            <p className="mt-1 text-sm font-semibold uppercase tracking-wider text-accent">{FOUNDER.title}</p>
+            <p className="mt-1 text-sm text-white/65">TruthCore, a DBA of Distinct Construction Solutions</p>
           </div>
         </article>
       </section>
 
       {/* CTA */}
-      <section className="py-20 bg-secondary bg-[radial-gradient(ellipse_at_top,rgba(51,102,102,0.35),transparent_60%)] text-white">
+      <section className="py-20 border-t border-white/10 bg-secondary bg-[radial-gradient(ellipse_at_top,rgba(51,102,102,0.35),transparent_60%)] text-white">
         <div className="container mx-auto px-4 text-center">
           <h2 className="text-3xl md:text-4xl font-bold mb-4">Work With a Contractor You Can Trust</h2>
           <p className="text-lg text-white/80 mb-8 max-w-2xl mx-auto">

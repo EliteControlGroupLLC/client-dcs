@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { FOUNDER, FOUNDER_STORY_TEASER } from "@/lib/data/founder-story";
+import { FOUNDER, FOUNDER_STORY_TEASER, FOUNDER_TEASER_QUOTE } from "@/lib/data/founder-story";
 
 /** Homepage teaser for the founder's story (/our-story). */
 export function FounderStory() {
@@ -27,7 +27,7 @@ export function FounderStory() {
           <figure className="rounded-2xl border border-accent/40 bg-secondary-light p-6 sm:p-8 shadow-lg shadow-black/20">
             <blockquote className="space-y-4">
               <p className="font-serif text-2xl md:text-3xl italic leading-snug text-white/90">
-                &ldquo;We were stuck trying to meet a market that rewards cutting corners.&rdquo;
+                &ldquo;{FOUNDER_TEASER_QUOTE}&rdquo;
               </p>
               <p className="font-serif text-4xl md:text-5xl italic leading-none text-accent">Not anymore.</p>
             </blockquote>
