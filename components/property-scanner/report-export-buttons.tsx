@@ -26,7 +26,7 @@ export function ReportExportButtons({ analysisData }: ReportExportButtonsProps) 
     setDownloading(true);
 
     try {
-      const pdfContent = generateStructuraPDFContent(analysisData);
+      const pdfContent = generateReportHtml(analysisData);
       const printWindow = window.open("", "_blank");
       if (printWindow) {
         printWindow.document.write(pdfContent);
@@ -46,7 +46,7 @@ export function ReportExportButtons({ analysisData }: ReportExportButtonsProps) 
   };
 
   const handlePrint = () => {
-    const printContent = generateStructuraPDFContent(analysisData);
+    const printContent = generateReportHtml(analysisData);
     
     const printWindow = window.open("", "_blank");
     if (printWindow) {
@@ -98,9 +98,9 @@ export function ReportExportButtons({ analysisData }: ReportExportButtonsProps) 
 }
 
 /**
- * Generate PDF/Print content with Structura Aetrnum branding
+ * Generate PDF/Print content with Distinct Construction Solutions branding
  */
-function generateStructuraPDFContent(data: PropertyAnalysisResult): string {
+function generateReportHtml(data: PropertyAnalysisResult): string {
   const generatedDate = new Date().toLocaleDateString("en-US", {
     year: "numeric",
     month: "long",
@@ -167,10 +167,10 @@ function generateStructuraPDFContent(data: PropertyAnalysisResult): string {
     }
     
     .logo-main {
-      font-size: 24pt;
+      font-size: 18pt;
       font-weight: 700;
       color: #1a4d2e;
-      letter-spacing: 3px;
+      letter-spacing: 1px;
       text-transform: uppercase;
     }
     
@@ -319,8 +319,8 @@ function generateStructuraPDFContent(data: PropertyAnalysisResult): string {
   <div class="page">
     <header class="header">
       <div class="logo">
-        <div class="logo-main">Structura</div>
-        <div class="logo-sub">Aetrnum</div>
+        <div class="logo-main">Distinct Construction</div>
+        <div class="logo-sub">Solutions</div>
       </div>
       <div class="report-info">
         <div><strong>Report Generated:</strong> ${generatedDate}</div>
@@ -445,8 +445,8 @@ function generateStructuraPDFContent(data: PropertyAnalysisResult): string {
     </div>
     
     <footer class="footer">
-      <div class="footer-brand">Prepared by Structura Aetrnum</div>
-      <div>info@structuraaetrnum.com | (858) 833-0705</div>
+      <div class="footer-brand">Prepared by Distinct Construction Solutions</div>
+      <div>jtalavera@distinctcsolutions.com | (858) 833-0705</div>
     </footer>
   </div>
 </body>

@@ -31,8 +31,8 @@ export function PropertyReportModal({
     setDownloading(true);
 
     try {
-      // Generate PDF-styled HTML content with Structura Aetrnum branding
-      const pdfContent = generateStructuraPDFContent(analysisData);
+      // Generate PDF-styled HTML content with Distinct Construction Solutions branding
+      const pdfContent = generateReportHtml(analysisData);
       
       // Create a new window for the PDF content
       const printWindow = window.open("", "_blank");
@@ -55,8 +55,8 @@ export function PropertyReportModal({
   };
 
   const handlePrint = () => {
-    // Generate print-friendly content with Structura Aetrnum branding
-    const printContent = generateStructuraPDFContent(analysisData);
+    // Generate print-friendly content with Distinct Construction Solutions branding
+    const printContent = generateReportHtml(analysisData);
     
     const printWindow = window.open("", "_blank");
     if (printWindow) {
@@ -310,12 +310,12 @@ function ReportRow({ label, value }: { label: string; value: string }) {
 }
 
 /**
- * Generate PDF/Print content with Structura Aetrnum branding
+ * Generate PDF/Print content with Distinct Construction Solutions branding
  * Colors: Dark green (primary), Gold (accent), neutral light tones
  * Typography: Clean architectural font (Bahnschrift style)
  * Layout: Minimal, high-end, structured, no clutter
  */
-function generateStructuraPDFContent(data: PropertyAnalysisResult): string {
+function generateReportHtml(data: PropertyAnalysisResult): string {
   const generatedDate = new Date().toLocaleDateString("en-US", {
     year: "numeric",
     month: "long",
@@ -384,10 +384,10 @@ function generateStructuraPDFContent(data: PropertyAnalysisResult): string {
     }
     
     .logo-main {
-      font-size: 24pt;
+      font-size: 18pt;
       font-weight: 700;
       color: #1a4d2e;
-      letter-spacing: 3px;
+      letter-spacing: 1px;
       text-transform: uppercase;
     }
     
@@ -561,8 +561,8 @@ function generateStructuraPDFContent(data: PropertyAnalysisResult): string {
   <div class="page">
     <header class="header">
       <div class="logo">
-        <div class="logo-main">Structura</div>
-        <div class="logo-sub">Aetrnum</div>
+        <div class="logo-main">Distinct Construction</div>
+        <div class="logo-sub">Solutions</div>
       </div>
       <div class="report-info">
         <div><strong>Report Generated:</strong> ${generatedDate}</div>
@@ -687,8 +687,8 @@ function generateStructuraPDFContent(data: PropertyAnalysisResult): string {
     </div>
     
     <footer class="footer">
-      <div class="footer-brand">Prepared by Structura Aetrnum</div>
-      <div>info@structuraaetrnum.com | (858) 833-0705</div>
+      <div class="footer-brand">Prepared by Distinct Construction Solutions</div>
+      <div>jtalavera@distinctcsolutions.com | (858) 833-0705</div>
     </footer>
   </div>
 </body>
