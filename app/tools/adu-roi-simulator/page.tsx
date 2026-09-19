@@ -4,6 +4,8 @@ import { useState } from "react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { LeadGate } from "@/components/lead-gate/lead-gate";
+import { LEAD_GATE_INTERESTS } from "@/lib/lead-gate-interests";
 import { ArrowRight, BarChart3 } from "lucide-react";
 import { estimateAduPriceRange, getAverageMonthlyRent } from "@/lib/data/site-data";
 
@@ -101,175 +103,182 @@ export default function ADUROISimulatorPage() {
         </div>
       </section>
 
-      <section className="py-20">
-        <div className="container mx-auto px-4 max-w-5xl">
-          <div className="grid md:grid-cols-2 gap-8">
-            <div className="space-y-6">
-              <div>
-                <label className="block text-sm font-semibold text-secondary mb-2">
-                  Recommended Scenario
-                </label>
-                <select
-                  value={presetIndex}
-                  onChange={(e) => {
-                    const nextIndex = Number(e.target.value);
-                    const preset = scenarioPresets[nextIndex];
-                    const nextRange = estimateAduPriceRange(preset);
-                    const nextCost = Math.round((nextRange.low + nextRange.high) / 2);
-                    setPresetIndex(nextIndex);
-                    setProjectCost(nextCost);
-                    setMonthlyRent(
-                      getAverageMonthlyRent(preset.sqFt, preset.type, preset.bedrooms, {
-                        stories: preset.stories,
-                      })
-                    );
-                    setLoanAmount(nextCost);
-                  }}
-                  className="w-full px-4 py-3 rounded-lg border border-gray-200 text-secondary font-medium bg-white"
-                >
-                  {scenarioPresets.map((preset, index) => (
-                    <option key={preset.label} value={index}>
-                      {preset.label}
-                    </option>
-                  ))}
-                </select>
-              </div>
+      <LeadGate
+        interest={LEAD_GATE_INTERESTS.aduRoiSimulator}
+        headline="Unlock the ADU ROI simulator"
+        subhead="Model build cost, financing and rent to see your ADU payback period and return."
+        ctaLabel="Unlock the ROI Simulator"
+      >
+        <section className="py-20">
+          <div className="container mx-auto px-4 max-w-5xl">
+            <div className="grid md:grid-cols-2 gap-8">
+              <div className="space-y-6">
+                <div>
+                  <label className="block text-sm font-semibold text-secondary mb-2">
+                    Recommended Scenario
+                  </label>
+                  <select
+                    value={presetIndex}
+                    onChange={(e) => {
+                      const nextIndex = Number(e.target.value);
+                      const preset = scenarioPresets[nextIndex];
+                      const nextRange = estimateAduPriceRange(preset);
+                      const nextCost = Math.round((nextRange.low + nextRange.high) / 2);
+                      setPresetIndex(nextIndex);
+                      setProjectCost(nextCost);
+                      setMonthlyRent(
+                        getAverageMonthlyRent(preset.sqFt, preset.type, preset.bedrooms, {
+                          stories: preset.stories,
+                        })
+                      );
+                      setLoanAmount(nextCost);
+                    }}
+                    className="w-full px-4 py-3 rounded-lg border border-gray-200 text-secondary font-medium bg-white"
+                  >
+                    {scenarioPresets.map((preset, index) => (
+                      <option key={preset.label} value={index}>
+                        {preset.label}
+                      </option>
+                    ))}
+                  </select>
+                </div>
 
-              <div>
-                <label className="block text-sm font-semibold text-secondary mb-2">
-                  Project Cost: ${projectCost.toLocaleString()}
-                </label>
-                <input
-                  type="range" min={80000} max={800000} step={5000}
-                  value={projectCost}
-                  onChange={(e) => { setProjectCost(Number(e.target.value)); if (Number(e.target.value) < loanAmount) setLoanAmount(Number(e.target.value)); }}
-                  className="w-full accent-primary"
-                />
-                <div className="flex justify-between text-xs text-muted-foreground mt-1">
-                  <span>$80K</span><span>$800K</span>
+                <div>
+                  <label className="block text-sm font-semibold text-secondary mb-2">
+                    Project Cost: ${projectCost.toLocaleString()}
+                  </label>
+                  <input
+                    type="range" min={80000} max={800000} step={5000}
+                    value={projectCost}
+                    onChange={(e) => { setProjectCost(Number(e.target.value)); if (Number(e.target.value) < loanAmount) setLoanAmount(Number(e.target.value)); }}
+                    className="w-full accent-primary"
+                  />
+                  <div className="flex justify-between text-xs text-muted-foreground mt-1">
+                    <span>$80K</span><span>$800K</span>
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-semibold text-secondary mb-2">
+                    Monthly Rent: ${monthlyRent.toLocaleString()}
+                  </label>
+                  <input
+                    type="range" min={1500} max={7000} step={100}
+                    value={monthlyRent}
+                    onChange={(e) => setMonthlyRent(Number(e.target.value))}
+                    className="w-full accent-primary"
+                  />
+                  <div className="flex justify-between text-xs text-muted-foreground mt-1">
+                    <span>$1,500</span><span>$7,000</span>
+                  </div>
+                </div>
+
+                <div className="border-t pt-6">
+                  <p className="text-sm font-semibold text-secondary mb-4">Financing Assumptions</p>
+                  <div className="space-y-4">
+                    <div>
+                      <label className="block text-sm text-muted-foreground mb-2">
+                        Loan Amount: ${loanAmount.toLocaleString()} <span className="text-primary">(Down: ${downPayment.toLocaleString()})</span>
+                      </label>
+                      <input
+                        type="range" min={0} max={projectCost} step={5000}
+                        value={loanAmount}
+                        onChange={(e) => setLoanAmount(Number(e.target.value))}
+                        className="w-full accent-primary"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm text-muted-foreground mb-2">
+                        Interest Rate: {interestRate}%
+                      </label>
+                      <input
+                        type="range" min={3} max={12} step={0.25}
+                        value={interestRate}
+                        onChange={(e) => setInterestRate(Number(e.target.value))}
+                        className="w-full accent-primary"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm text-muted-foreground mb-2">
+                        Loan Term: {loanTermYears} years
+                      </label>
+                      <input
+                        type="range" min={5} max={40} step={5}
+                        value={loanTermYears}
+                        onChange={(e) => setLoanTermYears(Number(e.target.value))}
+                        className="w-full accent-primary"
+                      />
+                    </div>
+                  </div>
                 </div>
               </div>
 
-              <div>
-                <label className="block text-sm font-semibold text-secondary mb-2">
-                  Monthly Rent: ${monthlyRent.toLocaleString()}
-                </label>
-                <input
-                  type="range" min={1500} max={7000} step={100}
-                  value={monthlyRent}
-                  onChange={(e) => setMonthlyRent(Number(e.target.value))}
-                  className="w-full accent-primary"
-                />
-                <div className="flex justify-between text-xs text-muted-foreground mt-1">
-                  <span>$1,500</span><span>$7,000</span>
-                </div>
-              </div>
+              <Card className="bg-secondary text-white">
+                <CardContent className="p-8">
+                  <BarChart3 className="h-10 w-10 text-primary mx-auto mb-4" />
+                  <h3 className="text-lg font-bold text-center text-white mb-6">Investment Projection</h3>
 
-              <div className="border-t pt-6">
-                <p className="text-sm font-semibold text-secondary mb-4">Financing Assumptions</p>
-                <div className="space-y-4">
-                  <div>
-                    <label className="block text-sm text-muted-foreground mb-2">
-                      Loan Amount: ${loanAmount.toLocaleString()} <span className="text-primary">(Down: ${downPayment.toLocaleString()})</span>
-                    </label>
-                    <input
-                      type="range" min={0} max={projectCost} step={5000}
-                      value={loanAmount}
-                      onChange={(e) => setLoanAmount(Number(e.target.value))}
-                      className="w-full accent-primary"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm text-muted-foreground mb-2">
-                      Interest Rate: {interestRate}%
-                    </label>
-                    <input
-                      type="range" min={3} max={12} step={0.25}
-                      value={interestRate}
-                      onChange={(e) => setInterestRate(Number(e.target.value))}
-                      className="w-full accent-primary"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm text-muted-foreground mb-2">
-                      Loan Term: {loanTermYears} years
-                    </label>
-                    <input
-                      type="range" min={5} max={40} step={5}
-                      value={loanTermYears}
-                      onChange={(e) => setLoanTermYears(Number(e.target.value))}
-                      className="w-full accent-primary"
-                    />
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <Card className="bg-secondary text-white">
-              <CardContent className="p-8">
-                <BarChart3 className="h-10 w-10 text-primary mx-auto mb-4" />
-                <h3 className="text-lg font-bold text-center text-white mb-6">Investment Projection</h3>
-
-                <div className="space-y-4 mb-6">
-                  <div className="flex justify-between items-center border-b border-white/10 pb-3">
-                    <span className="text-white/70 text-sm">Monthly Loan Payment</span>
-                    <span className="font-bold text-white">${monthlyPayment.toLocaleString()}</span>
-                  </div>
-                  <div className="flex justify-between items-center border-b border-white/10 pb-3">
-                    <span className="text-white/70 text-sm">Monthly Rental Income</span>
-                    <span className="font-bold text-primary">${monthlyRent.toLocaleString()}</span>
-                  </div>
-                  <div className="flex justify-between items-center border-b border-white/10 pb-3">
-                    <span className="text-white/70 text-sm">Monthly Cash Flow</span>
-                    <span className={`font-bold text-lg ${monthlyCashFlow >= 0 ? "text-primary" : "text-red-400"}`}>
-                      {monthlyCashFlow >= 0 ? "+" : ""}${monthlyCashFlow.toLocaleString()}
-                    </span>
-                  </div>
-                  <div className="flex justify-between items-center border-b border-white/10 pb-3">
-                    <span className="text-white/70 text-sm">Annual Cash Flow</span>
-                    <span className={`font-bold ${annualCashFlow >= 0 ? "text-primary" : "text-red-400"}`}>
-                      {annualCashFlow >= 0 ? "+" : ""}${annualCashFlow.toLocaleString()}
-                    </span>
-                  </div>
-                  {downPayment > 0 && (
+                  <div className="space-y-4 mb-6">
                     <div className="flex justify-between items-center border-b border-white/10 pb-3">
-                      <span className="text-white/70 text-sm">Cash-on-Cash Return</span>
-                      <span className={`font-bold ${cashOnCashReturn >= 0 ? "text-primary" : "text-red-400"}`}>
-                        {cashOnCashReturn}%
+                      <span className="text-white/70 text-sm">Monthly Loan Payment</span>
+                      <span className="font-bold text-white">${monthlyPayment.toLocaleString()}</span>
+                    </div>
+                    <div className="flex justify-between items-center border-b border-white/10 pb-3">
+                      <span className="text-white/70 text-sm">Monthly Rental Income</span>
+                      <span className="font-bold text-primary">${monthlyRent.toLocaleString()}</span>
+                    </div>
+                    <div className="flex justify-between items-center border-b border-white/10 pb-3">
+                      <span className="text-white/70 text-sm">Monthly Cash Flow</span>
+                      <span className={`font-bold text-lg ${monthlyCashFlow >= 0 ? "text-primary" : "text-red-400"}`}>
+                        {monthlyCashFlow >= 0 ? "+" : ""}${monthlyCashFlow.toLocaleString()}
                       </span>
                     </div>
-                  )}
-                  {monthlyCashFlow > 0 && (
                     <div className="flex justify-between items-center border-b border-white/10 pb-3">
-                      <span className="text-white/70 text-sm">Rough Payoff Timeline</span>
-                      <span className="font-bold text-white">~{yearsToPayoff} years</span>
+                      <span className="text-white/70 text-sm">Annual Cash Flow</span>
+                      <span className={`font-bold ${annualCashFlow >= 0 ? "text-primary" : "text-red-400"}`}>
+                        {annualCashFlow >= 0 ? "+" : ""}${annualCashFlow.toLocaleString()}
+                      </span>
                     </div>
-                  )}
-                </div>
+                    {downPayment > 0 && (
+                      <div className="flex justify-between items-center border-b border-white/10 pb-3">
+                        <span className="text-white/70 text-sm">Cash-on-Cash Return</span>
+                        <span className={`font-bold ${cashOnCashReturn >= 0 ? "text-primary" : "text-red-400"}`}>
+                          {cashOnCashReturn}%
+                        </span>
+                      </div>
+                    )}
+                    {monthlyCashFlow > 0 && (
+                      <div className="flex justify-between items-center border-b border-white/10 pb-3">
+                        <span className="text-white/70 text-sm">Rough Payoff Timeline</span>
+                        <span className="font-bold text-white">~{yearsToPayoff} years</span>
+                      </div>
+                    )}
+                  </div>
 
-                <div className="bg-primary/10 border border-primary/20 rounded-xl p-4 mb-6">
-                  <p className="text-sm text-white/80">
-                    <strong className="text-primary">10-Year Outlook:</strong>{" "}
-                    ${tenYearIncome.toLocaleString()} gross rental income
-                    {loanAmount > 0 && <> minus ${tenYearPayments.toLocaleString()} in loan payments</>}
-                    {" "}= <strong className="text-primary">${tenYearNetCashFlow.toLocaleString()} net</strong>
+                  <div className="bg-primary/10 border border-primary/20 rounded-xl p-4 mb-6">
+                    <p className="text-sm text-white/80">
+                      <strong className="text-primary">10-Year Outlook:</strong>{" "}
+                      ${tenYearIncome.toLocaleString()} gross rental income
+                      {loanAmount > 0 && <> minus ${tenYearPayments.toLocaleString()} in loan payments</>}
+                      {" "}= <strong className="text-primary">${tenYearNetCashFlow.toLocaleString()} net</strong>
+                    </p>
+                  </div>
+
+                  <p className="text-xs text-white/40 mb-6">
+                    * Simplified projection. Does not account for taxes, insurance, maintenance, vacancy, or rent increases. Consult a financial advisor.
                   </p>
-                </div>
 
-                <p className="text-xs text-white/40 mb-6">
-                  * Simplified projection. Does not account for taxes, insurance, maintenance, vacancy, or rent increases. Consult a financial advisor.
-                </p>
-
-                <Link href="/contact">
-                  <Button size="lg" className="w-full bg-primary hover:bg-primary-dark text-secondary font-semibold">
-                    Explore Your ADU Investment <ArrowRight className="h-5 w-5 ml-2" />
-                  </Button>
-                </Link>
-              </CardContent>
-            </Card>
+                  <Link href="/contact">
+                    <Button size="lg" className="w-full bg-primary hover:bg-primary-dark text-secondary font-semibold">
+                      Explore Your ADU Investment <ArrowRight className="h-5 w-5 ml-2" />
+                    </Button>
+                  </Link>
+                </CardContent>
+              </Card>
+            </div>
           </div>
-        </div>
-      </section>
+        </section>
+      </LeadGate>
 
       <section className="py-20 bg-muted">
         <div className="container mx-auto px-4 text-center">

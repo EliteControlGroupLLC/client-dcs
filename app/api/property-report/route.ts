@@ -5,7 +5,15 @@ import { NextRequest, NextResponse } from "next/server";
 import { checkRateLimit, getClientIp, RATE_LIMITS } from "@/lib/rate-limit";
 import { buildAduReportPdf } from "@/lib/adu-report-pdf";
 import { pushLeadToBuildCore } from "@/lib/buildcore-intake";
-import { isPhoneTokenValid } from "@/lib/verification-token";
+import { isPhoneTokenValid, normalizePhoneE164 } from "@/lib/verification-token";
+import {
+  LEAD_PASS_COOKIE,
+  encodeLeadPass,
+  leadPassCookieOptions,
+  newLeadPass,
+  readLeadPass,
+} from "@/lib/lead-pass";
+import { isTwilioConfigured } from "@/lib/lead-gate-server";
 
 // pdf-lib + Buffer need the Node runtime; PDF build + CRM push can take a few seconds.
 export const runtime = "nodejs";
@@ -43,13 +51,20 @@ export async function POST(request: NextRequest) {
 
     // Extract verification data. phoneVerified is NOT trusted from the client:
     // it must be backed by the signed token /api/verify-phone issued.
+    // A lead pass (set by any lead gate) whose phone was SMS-verified also
+    // counts, so visitors who already verified don't get a second code.
+    const existingPass = readLeadPass(request.cookies.get(LEAD_PASS_COOKIE)?.value);
+    const passCoversPhone =
+      !!existingPass?.phoneVerified &&
+      normalizePhoneE164(existingPass.phone) === normalizePhoneE164(String(phone || ""));
     const verificationData = {
       emailValidated: false,
       emailScore: 0,
       emailIsDisposable: false,
       verificationCompletedAt: null,
       ...(verification || {}),
-      phoneVerified: isPhoneTokenValid(verification?.phoneToken, String(phone || "")),
+      phoneVerified:
+        isPhoneTokenValid(verification?.phoneToken, String(phone || "")) || passCoversPhone,
     };
 
     // Validate required fields
@@ -203,12 +218,28 @@ export async function POST(request: NextRequest) {
       console.error(`[API] BuildCore push failed:`, JSON.stringify(buildCoreResult));
     }
 
-    return NextResponse.json({
+    const res = NextResponse.json({
       success: true,
       leadSaved,
       crmSynced: buildCoreResult.success,
       report: reportData,
     });
+
+    // Verified ADU leads also get a lead pass, so the website tools and the
+    // showroom open without asking for the same info again.
+    if (!existingPass && (verificationData.phoneVerified || !isTwilioConfigured())) {
+      const pass = newLeadPass({
+        firstName: String(firstName).trim(),
+        lastName: String(lastName).trim(),
+        email: String(email).trim().toLowerCase(),
+        phone: String(phone).trim(),
+        propertyAddress: String(propertyAddress).trim(),
+        phoneVerified: verificationData.phoneVerified,
+      });
+      const value = encodeLeadPass(pass);
+      if (value) res.cookies.set(LEAD_PASS_COOKIE, value, leadPassCookieOptions(pass));
+    }
+    return res;
   } catch (error) {
     console.error("Property report API error:", error);
     return NextResponse.json(

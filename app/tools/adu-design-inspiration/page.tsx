@@ -4,6 +4,8 @@ import { useMemo, useState } from "react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { LeadGate } from "@/components/lead-gate/lead-gate";
+import { LEAD_GATE_INTERESTS } from "@/lib/lead-gate-interests";
 import { ArrowRight, Palette, Check, Sparkles } from "lucide-react";
 
 const projectScales = [
@@ -382,153 +384,160 @@ export default function ADUDesignInspirationPage() {
         </div>
       </section>
 
-      <section className="py-20">
-        <div className="container mx-auto px-4 max-w-5xl">
-          <div className="mb-10">
-            <div className="flex justify-between text-sm text-muted-foreground mb-2">
-              <span>Step {Math.min(step + 1, steps.length)} of {steps.length}</span>
-              <span>{progress}% complete</span>
+      <LeadGate
+        interest={LEAD_GATE_INTERESTS.aduDesignInspiration}
+        headline="Unlock ADU design inspiration"
+        subhead="Pick your style preferences and generate exterior and interior concept visuals for your ADU."
+        ctaLabel="Unlock Design Inspiration"
+      >
+        <section className="py-20">
+          <div className="container mx-auto px-4 max-w-5xl">
+            <div className="mb-10">
+              <div className="flex justify-between text-sm text-muted-foreground mb-2">
+                <span>Step {Math.min(step + 1, steps.length)} of {steps.length}</span>
+                <span>{progress}% complete</span>
+              </div>
+              <div className="w-full bg-gray-200 rounded-full h-2">
+                <div
+                  className="bg-primary h-2 rounded-full transition-all duration-500"
+                  style={{ width: `${progress}%` }}
+                />
+              </div>
             </div>
-            <div className="w-full bg-gray-200 rounded-full h-2">
-              <div
-                className="bg-primary h-2 rounded-full transition-all duration-500"
-                style={{ width: `${progress}%` }}
-              />
-            </div>
-          </div>
 
-          {!isComplete ? (
-            <div>
-              <h2 className="text-2xl font-bold text-secondary mb-2">{currentStep.title}</h2>
-              <p className="text-muted-foreground mb-8">{currentStep.subtitle}</p>
+            {!isComplete ? (
+              <div>
+                <h2 className="text-2xl font-bold text-secondary mb-2">{currentStep.title}</h2>
+                <p className="text-muted-foreground mb-8">{currentStep.subtitle}</p>
 
-              <div className="grid sm:grid-cols-2 gap-3 mb-8">
-                {currentStep.options.map((opt) => (
-                  <button
-                    key={opt.id}
-                    onClick={() => select(currentStep.key, opt.id)}
-                    className={`text-left px-5 py-4 rounded-xl border-2 transition-all ${
-                      selections[currentStep.key] === opt.id
-                        ? "border-primary bg-primary/5"
-                        : "border-gray-200 hover:border-primary/30"
-                    }`}
+                <div className="grid sm:grid-cols-2 gap-3 mb-8">
+                  {currentStep.options.map((opt) => (
+                    <button
+                      key={opt.id}
+                      onClick={() => select(currentStep.key, opt.id)}
+                      className={`text-left px-5 py-4 rounded-xl border-2 transition-all ${
+                        selections[currentStep.key] === opt.id
+                          ? "border-primary bg-primary/5"
+                          : "border-gray-200 hover:border-primary/30"
+                      }`}
+                    >
+                      <span className="font-semibold text-secondary block">{opt.label}</span>
+                      {"description" in opt && (
+                        <span className="text-xs text-muted-foreground mt-1 block">
+                          {(opt as { description?: string }).description}
+                        </span>
+                      )}
+                      {selections[currentStep.key] === opt.id && (
+                        <Check className="h-4 w-4 text-primary mt-2" />
+                      )}
+                    </button>
+                  ))}
+                </div>
+
+                <div className="flex gap-3">
+                  {step > 0 && (
+                    <Button variant="outline" onClick={() => setStep(step - 1)}>
+                      Back
+                    </Button>
+                  )}
+                  <Button
+                    onClick={() => setStep(step + 1)}
+                    disabled={!selections[currentStep.key]}
+                    className="bg-primary hover:bg-primary-dark text-secondary font-semibold"
                   >
-                    <span className="font-semibold text-secondary block">{opt.label}</span>
-                    {"description" in opt && (
-                      <span className="text-xs text-muted-foreground mt-1 block">
-                        {(opt as { description?: string }).description}
-                      </span>
-                    )}
-                    {selections[currentStep.key] === opt.id && (
-                      <Check className="h-4 w-4 text-primary mt-2" />
-                    )}
-                  </button>
-                ))}
-              </div>
-
-              <div className="flex gap-3">
-                {step > 0 && (
-                  <Button variant="outline" onClick={() => setStep(step - 1)}>
-                    Back
+                    {step === steps.length - 1 ? "Generate Concepts" : "Next"}
+                    <ArrowRight className="h-4 w-4 ml-2" />
                   </Button>
-                )}
-                <Button
-                  onClick={() => setStep(step + 1)}
-                  disabled={!selections[currentStep.key]}
-                  className="bg-primary hover:bg-primary-dark text-secondary font-semibold"
-                >
-                  {step === steps.length - 1 ? "Generate Concepts" : "Next"}
-                  <ArrowRight className="h-4 w-4 ml-2" />
-                </Button>
+                </div>
               </div>
-            </div>
-          ) : (
-            <div>
-              <div className="text-center mb-10">
-                <Sparkles className="h-14 w-14 text-primary mx-auto mb-4" />
-                <h2 className="text-3xl font-bold text-secondary mb-2">Your Generated Concept Direction</h2>
-                <p className="text-muted-foreground max-w-2xl mx-auto">
-                  These concept visuals are generated from your chosen project scale, architectural style,
-                  exterior materials, and interior moods so you can react to something visual instead of abstract descriptions.
-                </p>
-              </div>
-
-              <Card className="mb-8">
-                <CardContent className="p-8">
-                  <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
-                    {(["scale", "style", "roof", "exterior", "windows", "kitchen", "bathroom", "finish"] as const).map((key) => (
-                      <div key={key}>
-                        <p className="text-xs text-muted-foreground uppercase tracking-wider mb-1">
-                          {key === "scale" ? "Project Scale" : key === "roof" ? "Roof Style" : key === "windows" ? "Window Style" : key === "kitchen" ? "Kitchen Mood" : key === "bathroom" ? "Bathroom Mood" : key === "finish" ? "Finish Level" : key === "exterior" ? "Exterior Material" : "Overall Style"}
-                        </p>
-                        <p className="font-bold text-secondary text-lg">{getLabel(key)}</p>
-                      </div>
-                    ))}
-                  </div>
-                </CardContent>
-              </Card>
-
-              <div className="grid md:grid-cols-2 gap-6 mb-8">
-                {conceptCards.map((concept) => (
-                  <div key={concept.title} className="overflow-hidden rounded-2xl border bg-white shadow-sm">
-                    <img
-                      src={concept.image}
-                      alt={concept.title}
-                      className="h-72 w-full object-cover"
-                    />
-                    <div className="p-5">
-                      <h3 className="font-bold text-secondary text-lg mb-2">{concept.title}</h3>
-                      <p className="text-sm text-muted-foreground">{concept.caption}</p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-
-              <Card className="bg-secondary text-white mb-8">
-                <CardContent className="p-8 text-center">
-                  <Palette className="h-12 w-12 text-primary mx-auto mb-4" />
-                  <h3 className="text-xl font-bold mb-3">Use These Concepts to Start a Real Design Conversation</h3>
-                  <p className="text-white/70 mb-6">
-                    Bring this direction into a consultation and we can turn it into floor-plan refinements,
-                    exterior massing options, finish packages, and a buildable scope for your property.
+            ) : (
+              <div>
+                <div className="text-center mb-10">
+                  <Sparkles className="h-14 w-14 text-primary mx-auto mb-4" />
+                  <h2 className="text-3xl font-bold text-secondary mb-2">Your Generated Concept Direction</h2>
+                  <p className="text-muted-foreground max-w-2xl mx-auto">
+                    These concept visuals are generated from your chosen project scale, architectural style,
+                    exterior materials, and interior moods so you can react to something visual instead of abstract descriptions.
                   </p>
-                  <div className="flex flex-col sm:flex-row gap-3 justify-center">
-                    <Link href="/build-your-adu">
-                      <Button size="lg" className="bg-primary hover:bg-primary-dark text-secondary font-semibold">
-                        Start Building Your ADU <ArrowRight className="h-5 w-5 ml-2" />
-                      </Button>
-                    </Link>
-                    <Link href="/contact">
-                      <Button size="lg" variant="outlineWhite">
-                        Schedule Consultation
-                      </Button>
-                    </Link>
-                  </div>
-                </CardContent>
-              </Card>
+                </div>
 
-              <button
-                onClick={() => {
-                  setStep(0);
-                  setSelections({
-                    scale: null,
-                    style: null,
-                    roof: null,
-                    exterior: null,
-                    windows: null,
-                    kitchen: null,
-                    bathroom: null,
-                    finish: null,
-                  });
-                }}
-                className="text-primary text-sm font-semibold hover:underline mx-auto block"
-              >
-                Start Over
-              </button>
-            </div>
-          )}
-        </div>
-      </section>
+                <Card className="mb-8">
+                  <CardContent className="p-8">
+                    <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                      {(["scale", "style", "roof", "exterior", "windows", "kitchen", "bathroom", "finish"] as const).map((key) => (
+                        <div key={key}>
+                          <p className="text-xs text-muted-foreground uppercase tracking-wider mb-1">
+                            {key === "scale" ? "Project Scale" : key === "roof" ? "Roof Style" : key === "windows" ? "Window Style" : key === "kitchen" ? "Kitchen Mood" : key === "bathroom" ? "Bathroom Mood" : key === "finish" ? "Finish Level" : key === "exterior" ? "Exterior Material" : "Overall Style"}
+                          </p>
+                          <p className="font-bold text-secondary text-lg">{getLabel(key)}</p>
+                        </div>
+                      ))}
+                    </div>
+                  </CardContent>
+                </Card>
+
+                <div className="grid md:grid-cols-2 gap-6 mb-8">
+                  {conceptCards.map((concept) => (
+                    <div key={concept.title} className="overflow-hidden rounded-2xl border bg-white shadow-sm">
+                      <img
+                        src={concept.image}
+                        alt={concept.title}
+                        className="h-72 w-full object-cover"
+                      />
+                      <div className="p-5">
+                        <h3 className="font-bold text-secondary text-lg mb-2">{concept.title}</h3>
+                        <p className="text-sm text-muted-foreground">{concept.caption}</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+
+                <Card className="bg-secondary text-white mb-8">
+                  <CardContent className="p-8 text-center">
+                    <Palette className="h-12 w-12 text-primary mx-auto mb-4" />
+                    <h3 className="text-xl font-bold mb-3">Use These Concepts to Start a Real Design Conversation</h3>
+                    <p className="text-white/70 mb-6">
+                      Bring this direction into a consultation and we can turn it into floor-plan refinements,
+                      exterior massing options, finish packages, and a buildable scope for your property.
+                    </p>
+                    <div className="flex flex-col sm:flex-row gap-3 justify-center">
+                      <Link href="/build-your-adu">
+                        <Button size="lg" className="bg-primary hover:bg-primary-dark text-secondary font-semibold">
+                          Start Building Your ADU <ArrowRight className="h-5 w-5 ml-2" />
+                        </Button>
+                      </Link>
+                      <Link href="/contact">
+                        <Button size="lg" variant="outlineWhite">
+                          Schedule Consultation
+                        </Button>
+                      </Link>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                <button
+                  onClick={() => {
+                    setStep(0);
+                    setSelections({
+                      scale: null,
+                      style: null,
+                      roof: null,
+                      exterior: null,
+                      windows: null,
+                      kitchen: null,
+                      bathroom: null,
+                      finish: null,
+                    });
+                  }}
+                  className="text-primary text-sm font-semibold hover:underline mx-auto block"
+                >
+                  Start Over
+                </button>
+              </div>
+            )}
+          </div>
+        </section>
+      </LeadGate>
     </div>
   );
 }

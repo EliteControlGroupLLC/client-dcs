@@ -4,6 +4,8 @@ import { useMemo, useState } from "react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { LeadGate } from "@/components/lead-gate/lead-gate";
+import { LEAD_GATE_INTERESTS } from "@/lib/lead-gate-interests";
 import { ArrowRight, Calculator } from "lucide-react";
 import { estimateAduPriceRange, getRentEstimate } from "@/lib/data/site-data";
 
@@ -72,105 +74,112 @@ export default function ADUCalculatorPage() {
         </div>
       </section>
 
-      <section className="py-20">
-        <div className="container mx-auto px-4 max-w-4xl">
-          <div className="grid md:grid-cols-2 gap-8">
-            {/* Input */}
-            <div className="space-y-8">
-              <div>
-                <label className="block text-sm font-semibold text-secondary mb-3">ADU Type</label>
-                <div className="space-y-2">
-                  {aduTypes.map((t, i) => (
-                    <button
-                      key={t.label}
-                      onClick={() => setType(i)}
-                      className={`w-full text-left px-4 py-3 rounded-lg border transition-all ${
-                        type === i
-                          ? "border-primary bg-primary/5 text-secondary font-medium"
-                          : "border-gray-200 text-muted-foreground hover:border-primary/30"
-                      }`}
-                    >
-                      {t.label}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-sm font-semibold text-secondary mb-3">
-                  Size: {adjustedSize} sq ft
-                </label>
-                <input
-                  type="range"
-                  min={400}
-                  max={1200}
-                  step={50}
-                  value={adjustedSize}
-                  onChange={(e) => setSize(Number(e.target.value))}
-                  disabled={selected.type === "garage-conversion" || selected.type === "attached" || selected.type === "two-story"}
-                  className="w-full accent-primary"
-                />
-                <div className="flex justify-between text-xs text-muted-foreground mt-1">
-                  <span>400 sq ft</span>
-                  <span>1,200 sq ft</span>
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-sm font-semibold text-secondary mb-3">Finish Level</label>
-                <div className="flex gap-3">
-                  {finishLevels.map((f, i) => (
-                    <button
-                      key={f.label}
-                      onClick={() => setFinish(i)}
-                      className={`flex-1 px-4 py-3 rounded-lg border text-sm font-medium transition-all ${
-                        finish === i
-                          ? "border-primary bg-primary/5 text-secondary"
-                          : "border-gray-200 text-muted-foreground hover:border-primary/30"
-                      }`}
-                    >
-                      {f.label}
-                    </button>
-                  ))}
-                </div>
-              </div>
-            </div>
-
-            {/* Result */}
-            <Card className="bg-secondary text-white">
-              <CardContent className="p-8 flex flex-col justify-center h-full">
-                <div className="text-center">
-                  <Calculator className="h-12 w-12 text-primary mx-auto mb-4" />
-                  <p className="text-white/70 text-sm mb-2">Estimated Project Cost</p>
-                  <p className="text-4xl md:text-5xl font-bold text-primary mb-2">
-                    ${estimateLow.toLocaleString()}-${estimateHigh.toLocaleString()}
-                  </p>
-                  <p className="text-white/50 text-sm mb-6">
-                    {selected.label} &bull; {adjustedSize} sq ft &bull; {finishLevel.label}
-                  </p>
-
-                  <div className="border-t border-white/10 pt-6 mb-6">
-                    <p className="text-white/70 text-sm mb-1">Estimated Monthly Rental Income</p>
-                    <p className="text-2xl font-bold text-white">
-                      ${rentEstimate.low.toLocaleString()}-${rentEstimate.high.toLocaleString()}/mo
-                    </p>
+      <LeadGate
+        interest={LEAD_GATE_INTERESTS.aduCalculator}
+        headline="Unlock your ADU cost estimate"
+        subhead="Get a San Diego ADU cost range based on type, size and finish level."
+        ctaLabel="Unlock My ADU Estimate"
+      >
+        <section className="py-20">
+          <div className="container mx-auto px-4 max-w-4xl">
+            <div className="grid md:grid-cols-2 gap-8">
+              {/* Input */}
+              <div className="space-y-8">
+                <div>
+                  <label className="block text-sm font-semibold text-secondary mb-3">ADU Type</label>
+                  <div className="space-y-2">
+                    {aduTypes.map((t, i) => (
+                      <button
+                        key={t.label}
+                        onClick={() => setType(i)}
+                        className={`w-full text-left px-4 py-3 rounded-lg border transition-all ${
+                          type === i
+                            ? "border-primary bg-primary/5 text-secondary font-medium"
+                            : "border-gray-200 text-muted-foreground hover:border-primary/30"
+                        }`}
+                      >
+                        {t.label}
+                      </button>
+                    ))}
                   </div>
-
-                  <p className="text-xs text-white/40 mb-6">
-                    * This is an estimate only. Actual costs may vary based on site conditions, design, and permits. Schedule a consultation for an accurate quote.
-                  </p>
-
-                  <Link href="/contact">
-                    <Button size="lg" className="w-full bg-primary hover:bg-primary-dark text-secondary font-semibold">
-                      Get Accurate Quote <ArrowRight className="h-5 w-5 ml-2" />
-                    </Button>
-                  </Link>
                 </div>
-              </CardContent>
-            </Card>
+
+                <div>
+                  <label className="block text-sm font-semibold text-secondary mb-3">
+                    Size: {adjustedSize} sq ft
+                  </label>
+                  <input
+                    type="range"
+                    min={400}
+                    max={1200}
+                    step={50}
+                    value={adjustedSize}
+                    onChange={(e) => setSize(Number(e.target.value))}
+                    disabled={selected.type === "garage-conversion" || selected.type === "attached" || selected.type === "two-story"}
+                    className="w-full accent-primary"
+                  />
+                  <div className="flex justify-between text-xs text-muted-foreground mt-1">
+                    <span>400 sq ft</span>
+                    <span>1,200 sq ft</span>
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-semibold text-secondary mb-3">Finish Level</label>
+                  <div className="flex gap-3">
+                    {finishLevels.map((f, i) => (
+                      <button
+                        key={f.label}
+                        onClick={() => setFinish(i)}
+                        className={`flex-1 px-4 py-3 rounded-lg border text-sm font-medium transition-all ${
+                          finish === i
+                            ? "border-primary bg-primary/5 text-secondary"
+                            : "border-gray-200 text-muted-foreground hover:border-primary/30"
+                        }`}
+                      >
+                        {f.label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              </div>
+
+              {/* Result */}
+              <Card className="bg-secondary text-white">
+                <CardContent className="p-8 flex flex-col justify-center h-full">
+                  <div className="text-center">
+                    <Calculator className="h-12 w-12 text-primary mx-auto mb-4" />
+                    <p className="text-white/70 text-sm mb-2">Estimated Project Cost</p>
+                    <p className="text-4xl md:text-5xl font-bold text-primary mb-2">
+                      ${estimateLow.toLocaleString()}-${estimateHigh.toLocaleString()}
+                    </p>
+                    <p className="text-white/50 text-sm mb-6">
+                      {selected.label} &bull; {adjustedSize} sq ft &bull; {finishLevel.label}
+                    </p>
+
+                    <div className="border-t border-white/10 pt-6 mb-6">
+                      <p className="text-white/70 text-sm mb-1">Estimated Monthly Rental Income</p>
+                      <p className="text-2xl font-bold text-white">
+                        ${rentEstimate.low.toLocaleString()}-${rentEstimate.high.toLocaleString()}/mo
+                      </p>
+                    </div>
+
+                    <p className="text-xs text-white/40 mb-6">
+                      * This is an estimate only. Actual costs may vary based on site conditions, design, and permits. Schedule a consultation for an accurate quote.
+                    </p>
+
+                    <Link href="/contact">
+                      <Button size="lg" className="w-full bg-primary hover:bg-primary-dark text-secondary font-semibold">
+                        Get Accurate Quote <ArrowRight className="h-5 w-5 ml-2" />
+                      </Button>
+                    </Link>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
           </div>
-        </div>
-      </section>
+        </section>
+      </LeadGate>
 
       <section className="py-20 bg-muted">
         <div className="container mx-auto px-4 text-center">

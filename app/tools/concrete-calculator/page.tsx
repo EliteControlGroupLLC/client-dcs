@@ -4,6 +4,8 @@ import { useState } from "react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { LeadGate } from "@/components/lead-gate/lead-gate";
+import { LEAD_GATE_INTERESTS } from "@/lib/lead-gate-interests";
 import { ArrowRight, Layers } from "lucide-react";
 
 const finishTypes = [
@@ -57,176 +59,183 @@ export default function ConcreteCalculatorPage() {
         </div>
       </section>
 
-      <section className="py-20">
-        <div className="container mx-auto px-4 max-w-5xl">
-          <div className="grid md:grid-cols-2 gap-8">
-            <div className="space-y-8">
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-semibold text-secondary mb-3">
-                    Length: {length} ft
-                  </label>
-                  <input
-                    type="range"
-                    min={5}
-                    max={100}
-                    step={1}
-                    value={length}
-                    onChange={(e) => setLength(Number(e.target.value))}
-                    className="w-full accent-primary"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-semibold text-secondary mb-3">
-                    Width: {width} ft
-                  </label>
-                  <input
-                    type="range"
-                    min={5}
-                    max={100}
-                    step={1}
-                    value={width}
-                    onChange={(e) => setWidth(Number(e.target.value))}
-                    className="w-full accent-primary"
-                  />
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-sm font-semibold text-secondary mb-2">
-                  Total Area: <span className="text-primary">{sqFt.toLocaleString()} sq ft</span>
-                </label>
-              </div>
-
-              <div>
-                <label className="block text-sm font-semibold text-secondary mb-3">Thickness</label>
-                <div className="flex gap-3">
-                  {thicknessOptions.map((t, i) => (
-                    <button
-                      key={t.label}
-                      onClick={() => setThickness(i)}
-                      className={`flex-1 px-3 py-3 rounded-lg border text-sm font-medium transition-all ${
-                        thickness === i
-                          ? "border-primary bg-primary/5 text-secondary"
-                          : "border-gray-200 text-muted-foreground hover:border-primary/30"
-                      }`}
-                    >
-                      {t.label}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-sm font-semibold text-secondary mb-3">Finish Type</label>
-                <div className="space-y-2">
-                  {finishTypes.map((f, i) => (
-                    <button
-                      key={f.label}
-                      onClick={() => setFinish(i)}
-                      className={`w-full text-left px-4 py-3 rounded-lg border transition-all ${
-                        finish === i
-                          ? "border-primary bg-primary/5 text-secondary font-medium"
-                          : "border-gray-200 text-muted-foreground hover:border-primary/30"
-                      }`}
-                    >
-                      <span>{f.label}</span>
-                      <span className="text-muted-foreground ml-2 text-sm">(~${f.pricePerSqFt}/sq ft)</span>
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              <div className="border-t pt-6">
-                <label className="flex items-center gap-3 cursor-pointer">
-                  <input
-                    type="checkbox"
-                    checked={hasRetainingWall}
-                    onChange={(e) => setHasRetainingWall(e.target.checked)}
-                    className="w-5 h-5 accent-primary"
-                  />
-                  <span className="text-sm font-semibold text-secondary">Add Retaining Wall Estimate</span>
-                </label>
-                {hasRetainingWall && (
-                  <div className="mt-4 grid grid-cols-2 gap-4">
-                    <div>
-                      <label className="block text-sm text-muted-foreground mb-2">
-                        Wall Length: {wallLength} ft
-                      </label>
-                      <input
-                        type="range"
-                        min={5}
-                        max={80}
-                        step={1}
-                        value={wallLength}
-                        onChange={(e) => setWallLength(Number(e.target.value))}
-                        className="w-full accent-primary"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-sm text-muted-foreground mb-2">
-                        Wall Height: {wallHeight} ft
-                      </label>
-                      <input
-                        type="range"
-                        min={2}
-                        max={10}
-                        step={1}
-                        value={wallHeight}
-                        onChange={(e) => setWallHeight(Number(e.target.value))}
-                        className="w-full accent-primary"
-                      />
-                    </div>
+      <LeadGate
+        interest={LEAD_GATE_INTERESTS.concreteCalculator}
+        headline="Get your concrete estimate"
+        subhead="Driveways, patios, walkways and slabs — see your price range with finish, thickness and retaining-wall options."
+        ctaLabel="Get My Concrete Estimate"
+      >
+        <section className="py-20">
+          <div className="container mx-auto px-4 max-w-5xl">
+            <div className="grid md:grid-cols-2 gap-8">
+              <div className="space-y-8">
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-semibold text-secondary mb-3">
+                      Length: {length} ft
+                    </label>
+                    <input
+                      type="range"
+                      min={5}
+                      max={100}
+                      step={1}
+                      value={length}
+                      onChange={(e) => setLength(Number(e.target.value))}
+                      className="w-full accent-primary"
+                    />
                   </div>
-                )}
-              </div>
-            </div>
+                  <div>
+                    <label className="block text-sm font-semibold text-secondary mb-3">
+                      Width: {width} ft
+                    </label>
+                    <input
+                      type="range"
+                      min={5}
+                      max={100}
+                      step={1}
+                      value={width}
+                      onChange={(e) => setWidth(Number(e.target.value))}
+                      className="w-full accent-primary"
+                    />
+                  </div>
+                </div>
 
-            <Card className="bg-secondary text-white">
-              <CardContent className="p-8 flex flex-col justify-center h-full">
-                <div className="text-center">
-                  <Layers className="h-12 w-12 text-primary mx-auto mb-4" />
-                  <p className="text-white/70 text-sm mb-2">Estimated Project Cost</p>
-                  <p className="text-3xl md:text-4xl font-bold text-primary mb-1">
-                    ${totalLow.toLocaleString()} &ndash; ${totalHigh.toLocaleString()}
-                  </p>
-                  <p className="text-white/50 text-sm mb-6">
-                    {sqFt.toLocaleString()} sq ft &bull; {selectedFinish.label} &bull; ~{cubicYards} cubic yards
-                  </p>
+                <div>
+                  <label className="block text-sm font-semibold text-secondary mb-2">
+                    Total Area: <span className="text-primary">{sqFt.toLocaleString()} sq ft</span>
+                  </label>
+                </div>
 
+                <div>
+                  <label className="block text-sm font-semibold text-secondary mb-3">Thickness</label>
+                  <div className="flex gap-3">
+                    {thicknessOptions.map((t, i) => (
+                      <button
+                        key={t.label}
+                        onClick={() => setThickness(i)}
+                        className={`flex-1 px-3 py-3 rounded-lg border text-sm font-medium transition-all ${
+                          thickness === i
+                            ? "border-primary bg-primary/5 text-secondary"
+                            : "border-gray-200 text-muted-foreground hover:border-primary/30"
+                        }`}
+                      >
+                        {t.label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-semibold text-secondary mb-3">Finish Type</label>
+                  <div className="space-y-2">
+                    {finishTypes.map((f, i) => (
+                      <button
+                        key={f.label}
+                        onClick={() => setFinish(i)}
+                        className={`w-full text-left px-4 py-3 rounded-lg border transition-all ${
+                          finish === i
+                            ? "border-primary bg-primary/5 text-secondary font-medium"
+                            : "border-gray-200 text-muted-foreground hover:border-primary/30"
+                        }`}
+                      >
+                        <span>{f.label}</span>
+                        <span className="text-muted-foreground ml-2 text-sm">(~${f.pricePerSqFt}/sq ft)</span>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="border-t pt-6">
+                  <label className="flex items-center gap-3 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={hasRetainingWall}
+                      onChange={(e) => setHasRetainingWall(e.target.checked)}
+                      className="w-5 h-5 accent-primary"
+                    />
+                    <span className="text-sm font-semibold text-secondary">Add Retaining Wall Estimate</span>
+                  </label>
                   {hasRetainingWall && (
-                    <div className="border-t border-white/10 pt-4 mb-4">
-                      <p className="text-white/60 text-sm">
-                        Slab: ~${slabCost.toLocaleString()} &bull; Retaining Wall: ~${wallCost.toLocaleString()}
-                      </p>
+                    <div className="mt-4 grid grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-sm text-muted-foreground mb-2">
+                          Wall Length: {wallLength} ft
+                        </label>
+                        <input
+                          type="range"
+                          min={5}
+                          max={80}
+                          step={1}
+                          value={wallLength}
+                          onChange={(e) => setWallLength(Number(e.target.value))}
+                          className="w-full accent-primary"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-sm text-muted-foreground mb-2">
+                          Wall Height: {wallHeight} ft
+                        </label>
+                        <input
+                          type="range"
+                          min={2}
+                          max={10}
+                          step={1}
+                          value={wallHeight}
+                          onChange={(e) => setWallHeight(Number(e.target.value))}
+                          className="w-full accent-primary"
+                        />
+                      </div>
                     </div>
                   )}
-
-                  <div className="border-t border-white/10 pt-6 space-y-3 text-left mb-6">
-                    <p className="text-white/70 text-sm font-semibold">Scope assumptions:</p>
-                    <ul className="text-white/60 text-sm space-y-1">
-                      <li>&bull; Standard site preparation &amp; grading</li>
-                      <li>&bull; Rebar or fiber mesh reinforcement</li>
-                      <li>&bull; Forming, pouring &amp; finishing</li>
-                      <li>&bull; Expansion joints &amp; curing</li>
-                    </ul>
-                  </div>
-
-                  <p className="text-xs text-white/40 mb-6">
-                    * Estimate only. Actual pricing depends on site access, grading, soil conditions, and design.
-                  </p>
-
-                  <Link href="/contact">
-                    <Button size="lg" className="w-full bg-primary hover:bg-primary-dark text-secondary font-semibold">
-                      Get Exact Site Evaluation <ArrowRight className="h-5 w-5 ml-2" />
-                    </Button>
-                  </Link>
                 </div>
-              </CardContent>
-            </Card>
+              </div>
+
+              <Card className="bg-secondary text-white">
+                <CardContent className="p-8 flex flex-col justify-center h-full">
+                  <div className="text-center">
+                    <Layers className="h-12 w-12 text-primary mx-auto mb-4" />
+                    <p className="text-white/70 text-sm mb-2">Estimated Project Cost</p>
+                    <p className="text-3xl md:text-4xl font-bold text-primary mb-1">
+                      ${totalLow.toLocaleString()} &ndash; ${totalHigh.toLocaleString()}
+                    </p>
+                    <p className="text-white/50 text-sm mb-6">
+                      {sqFt.toLocaleString()} sq ft &bull; {selectedFinish.label} &bull; ~{cubicYards} cubic yards
+                    </p>
+
+                    {hasRetainingWall && (
+                      <div className="border-t border-white/10 pt-4 mb-4">
+                        <p className="text-white/60 text-sm">
+                          Slab: ~${slabCost.toLocaleString()} &bull; Retaining Wall: ~${wallCost.toLocaleString()}
+                        </p>
+                      </div>
+                    )}
+
+                    <div className="border-t border-white/10 pt-6 space-y-3 text-left mb-6">
+                      <p className="text-white/70 text-sm font-semibold">Scope assumptions:</p>
+                      <ul className="text-white/60 text-sm space-y-1">
+                        <li>&bull; Standard site preparation &amp; grading</li>
+                        <li>&bull; Rebar or fiber mesh reinforcement</li>
+                        <li>&bull; Forming, pouring &amp; finishing</li>
+                        <li>&bull; Expansion joints &amp; curing</li>
+                      </ul>
+                    </div>
+
+                    <p className="text-xs text-white/40 mb-6">
+                      * Estimate only. Actual pricing depends on site access, grading, soil conditions, and design.
+                    </p>
+
+                    <Link href="/contact">
+                      <Button size="lg" className="w-full bg-primary hover:bg-primary-dark text-secondary font-semibold">
+                        Get Exact Site Evaluation <ArrowRight className="h-5 w-5 ml-2" />
+                      </Button>
+                    </Link>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
           </div>
-        </div>
-      </section>
+        </section>
+      </LeadGate>
 
       <section className="py-20 bg-muted">
         <div className="container mx-auto px-4 text-center">

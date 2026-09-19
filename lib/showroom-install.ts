@@ -1,5 +1,6 @@
 import { readFile } from "node:fs/promises";
 import path from "node:path";
+import { gateShowroomRequest } from "@/lib/showroom-gate";
 
 const SHOWROOM_ROOT = path.join(process.cwd(), "public_html", "showroom");
 const SHOWROOM_ASSETS_ROOT = path.join(SHOWROOM_ROOT, "assets");
@@ -19,16 +20,23 @@ const CONTENT_TYPES: Record<string, string> = {
   ".webp": "image/webp",
 };
 
-export async function getShowroomInstallResponse() {
+// Serves the store's HTML entry — behind the showroom lead gate
+// (lib/showroom-gate.ts). The response depends on the visitor's lead-pass
+// cookie, so it must never be shared-cached.
+export async function getShowroomInstallResponse(request: Request) {
+  const gate = gateShowroomRequest(request);
+  if (!gate.allowed) return gate.response;
+
   const filePath = path.join(SHOWROOM_ROOT, "index.html");
   const html = await readFile(filePath, "utf8");
 
-  return new Response(html, {
-    headers: {
-      "content-type": "text/html; charset=utf-8",
-      "cache-control": "public, max-age=0, must-revalidate",
-    },
+  const headers = new Headers({
+    "content-type": "text/html; charset=utf-8",
+    "cache-control": "private, no-cache",
+    vary: "Cookie",
   });
+  if (gate.setCookie) headers.append("set-cookie", gate.setCookie);
+  return new Response(html, { headers });
 }
 
 export async function getShowroomAssetResponse(assetPath: string[]) {

@@ -66,6 +66,27 @@ export function LeadCaptureForm({
     setAddress(propertyAddress);
   }, [propertyAddress]);
 
+  // Visitors who already registered through a lead gate (tools / showroom)
+  // get their info pre-filled; if that phone was SMS-verified, no new code.
+  const [passPhoneVerified, setPassPhoneVerified] = useState<string | null>(null);
+  useEffect(() => {
+    let cancelled = false;
+    fetch("/api/lead-gate", { cache: "no-store" })
+      .then((r) => r.json())
+      .then((d: { hasPass?: boolean; firstName?: string; lastName?: string; email?: string; phone?: string; phoneVerified?: boolean }) => {
+        if (cancelled || !d.hasPass) return;
+        setFirstName((v) => v || d.firstName || "");
+        setLastName((v) => v || d.lastName || "");
+        setEmail((v) => v || d.email || "");
+        setPhone((v) => v || d.phone || "");
+        if (d.phoneVerified && d.phone) setPassPhoneVerified(d.phone.replace(/\D/g, "").slice(-10));
+      })
+      .catch(() => {});
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
   // Resend cooldown timer
   useEffect(() => {
     if (resendCooldown > 0) {
@@ -303,6 +324,13 @@ export function LeadCaptureForm({
     // Validate email server-side
     const emailValid = await validateEmailServer();
     if (!emailValid) return;
+
+    // Phone already verified through a lead gate — no second code needed
+    // (the server re-checks this against the signed lead-pass cookie).
+    if (passPhoneVerified && phone.replace(/\D/g, "").slice(-10) === passPhoneVerified) {
+      await submitLeadDirectly(true);
+      return;
+    }
 
     // Try to send OTP
     const otpResult = await sendOtpCode();
