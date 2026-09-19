@@ -37,6 +37,11 @@ export function gateShowroomRequest(request: Request): ShowroomGateResult {
     };
   }
 
+  // Only a real page visit registers a lead. Link prefetches and the Next
+  // client router's RSC fetch (which precedes the hard navigation into the
+  // static store) must not — they caused duplicate "Showroom shopper" leads.
+  if (isBackgroundRequest(request)) return { allowed: true, setCookie: null };
+
   const interest = LEAD_GATE_INTERESTS.showroom;
   const updated = claimInterestLead(pass, interest, true);
   if (!updated) return { allowed: true, setCookie: null };
@@ -45,4 +50,15 @@ export function gateShowroomRequest(request: Request): ShowroomGateResult {
   const pageUrl = `${url.origin}${url.pathname}`;
   after(() => pushInterestLead(updated, interest, { pageUrl, returning: true }));
   return { allowed: true, setCookie: serializeLeadPassCookie(updated) };
+}
+
+function isBackgroundRequest(request: Request): boolean {
+  const h = request.headers;
+  const purpose = `${h.get("purpose") ?? ""} ${h.get("sec-purpose") ?? ""} ${h.get("x-purpose") ?? ""}`.toLowerCase();
+  return (
+    purpose.includes("prefetch") ||
+    h.has("next-router-prefetch") ||
+    h.get("rsc") === "1" ||
+    h.has("next-router-state-tree")
+  );
 }

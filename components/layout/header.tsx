@@ -213,6 +213,7 @@ export function Header() {
                               <Link
                                 key={child.name}
                                 href={child.href}
+                            prefetch={child.href === SHOWROOM_HREF ? false : undefined}
                                 {...(external ? { target: "_blank", rel: "noopener noreferrer" } : {})}
                                 className={`group flex items-start justify-between gap-3 rounded-xl px-3.5 py-2.5 transition-colors hover:bg-muted ${
                                   childActive ? "bg-muted" : ""
@@ -256,6 +257,7 @@ export function Header() {
           <div className="hidden lg:flex lg:items-center lg:gap-2 xl:gap-3 shrink-0">
             <Link
               href={SHOWROOM_HREF}
+              prefetch={false}
               className={`group inline-flex items-center gap-2 whitespace-nowrap rounded-full border px-3.5 xl:px-4 py-2.5 text-[14px] font-semibold transition-colors ${
                 light
                   ? "border-accent text-secondary hover:bg-accent/10"
@@ -333,6 +335,7 @@ export function Header() {
                           <Link
                             key={child.name}
                             href={child.href}
+                            prefetch={child.href === SHOWROOM_HREF ? false : undefined}
                             {...(external ? { target: "_blank", rel: "noopener noreferrer" } : {})}
                             className={`flex min-h-11 items-center gap-1 text-[15px] ${
                               childActive ? "font-medium text-primary-dark" : "text-secondary/85"
@@ -377,6 +380,7 @@ export function Header() {
               </Link>
               <Link
                 href={SHOWROOM_HREF}
+                prefetch={false}
                 className="flex w-full items-center justify-center gap-2 rounded-full border border-accent px-6 py-3.5 text-[15px] font-semibold text-secondary"
               >
                 <Store className="h-4 w-4 text-accent" aria-hidden />
