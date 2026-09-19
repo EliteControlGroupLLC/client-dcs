@@ -129,12 +129,11 @@ export function AddressAutocompleteInput({
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  const searchWithGoogle = useCallback(async (inputValue: string) => {
-    if (!placesLibRef.current) {
-      setIsSearching(false);
-      return;
-    }
-
+  // Google Places when a working key is configured; any error or empty result
+  // (e.g. billing disabled -> PERMISSION_DENIED) falls through to the keyless
+  // search so the box never goes blank.
+  const searchWithGoogle = useCallback(async (inputValue: string): Promise<boolean> => {
+    if (!placesLibRef.current) return false;
     try {
       const { suggestions: results } =
         await placesLibRef.current.AutocompleteSuggestion.fetchAutocompleteSuggestions({
@@ -147,18 +146,16 @@ export function AddressAutocompleteInput({
         .filter((s) => s.placePrediction?.text?.text)
         .map((s) => s.placePrediction!.text.text);
 
+      if (addresses.length === 0) return false;
       setIsSearching(false);
-      if (addresses.length > 0) {
-        setSuggestions(addresses);
-        setIsOpen(true);
-      } else {
-        setSuggestions([]);
-        setIsOpen(false);
-      }
+      setSuggestions(addresses);
+      setIsOpen(true);
+      return true;
     } catch {
-      setIsSearching(false);
-      setSuggestions([]);
-      setIsOpen(false);
+      // Key present but unusable — stop trying Google for this session.
+      placesLibRef.current = null;
+      setUseGoogleApi(false);
+      return false;
     }
   }, []);
 
@@ -194,11 +191,10 @@ export function AddressAutocompleteInput({
     if (inputValue.length >= 3) {
       setIsSearching(true);
       debounceTimerRef.current = setTimeout(() => {
-        if (useGoogleApi) {
-          searchWithGoogle(inputValue);
-        } else {
-          searchWithFallback(inputValue);
-        }
+        void (async () => {
+          const handled = useGoogleApi && (await searchWithGoogle(inputValue));
+          if (!handled) await searchWithFallback(inputValue);
+        })();
       }, 300);
     } else {
       setSuggestions([]);
