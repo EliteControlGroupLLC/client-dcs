@@ -45,7 +45,7 @@ export function HeroReviewTicker() {
         onFocus={() => setPaused(true)}
         onBlur={() => setPaused(false)}
         style={{ borderColor: "rgba(185, 154, 90, 0.35)" }}
-        className={`group relative block overflow-hidden rounded-xl border bg-[#1A2B2B]/80 px-7 pb-6 pt-6 text-left shadow-[0_24px_60px_-24px_rgba(0,0,0,0.7)] backdrop-blur-xl transition-all duration-700 ease-out focus:outline-none focus-visible:ring-2 focus-visible:ring-[#B99A5A]/70 motion-reduce:transition-none ${
+        className={`group relative block overflow-hidden rounded-3xl border bg-[#1A2B2B]/80 p-6 sm:p-8 text-left shadow-[0_24px_60px_-24px_rgba(0,0,0,0.7)] backdrop-blur-xl transition-all duration-700 ease-out focus:outline-none focus-visible:ring-2 focus-visible:ring-[#B99A5A]/70 motion-reduce:transition-none ${
           visible ? "translate-x-0 opacity-100" : "pointer-events-none translate-x-6 opacity-0"
         }`}
       >
