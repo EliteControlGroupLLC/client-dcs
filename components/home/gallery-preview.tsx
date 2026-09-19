@@ -42,7 +42,7 @@ export function GalleryPreview() {
           className={`flex flex-col md:flex-row md:items-end md:justify-between gap-6 mb-12 transition-all duration-700 ${headerVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"}`}
         >
           <div>
-            <span className="inline-flex items-center gap-2 text-primary-light font-semibold text-sm uppercase tracking-wider mb-4">
+            <span className="inline-flex items-center gap-2 text-accent font-semibold text-sm uppercase tracking-wider mb-4">
               Our Work
             </span>
             <h2 className="text-3xl md:text-4xl font-bold text-white text-balance">
@@ -95,20 +95,20 @@ export function GalleryPreview() {
                     </span>
                   )}
                 
-                <h3 className="text-xl font-semibold text-white mb-1 group-hover:text-primary-light transition-colors">
+                <h3 className="text-xl font-semibold text-white mb-1 group-hover:text-accent-light transition-colors">
                   {project.title}
                 </h3>
                 
                 <div className="flex items-center justify-between gap-4">
-                  <p className="text-sm text-white/70">
+                  <p className="text-sm text-white/80">
                     {project.location} • {project.sqft}
                   </p>
                   <div className="w-8 h-8 rounded-full bg-white/10 backdrop-blur-sm flex items-center justify-center border border-white/10 opacity-0 group-hover:opacity-100 transition-opacity">
-                    <ExternalLink className="h-4 w-4 text-white group-hover:text-primary-light transition-colors" />
+                    <ExternalLink className="h-4 w-4 text-white group-hover:text-accent-light transition-colors" />
                   </div>
                 </div>
                 {project.imageNote && (
-                  <p className="text-xs text-white/55 mt-2 max-w-sm">
+                  <p className="text-xs text-white/70 mt-2 max-w-sm">
                     {project.imageNote}
                   </p>
                 )}
@@ -118,14 +118,14 @@ export function GalleryPreview() {
         </div>
 
         {/* Stats bar with glass styling */}
-        <div ref={statsRef} className={`mt-12 bg-white/[0.04] backdrop-blur-sm rounded-2xl p-8 border border-white/10 transition-all duration-700 delay-300 ${statsVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"}`}>
+        <div ref={statsRef} className={`mt-12 bg-secondary-light rounded-2xl p-8 border border-white/10 shadow-lg shadow-black/20 transition-all duration-700 delay-300 ${statsVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"}`}>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
             {projectStats.map((stat) => (
               <div key={stat.label} className="group">
-                <div className="text-3xl lg:text-4xl font-bold text-white mb-1 group-hover:scale-105 transition-transform">
+                <div className="text-3xl lg:text-4xl font-bold text-accent mb-1 group-hover:scale-105 transition-transform">
                   {stat.value}
                 </div>
-                <div className="text-sm text-white/60 font-medium">{stat.label}</div>
+                <div className="text-sm text-white/75 font-medium">{stat.label}</div>
               </div>
             ))}
           </div>
