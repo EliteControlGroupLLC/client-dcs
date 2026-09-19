@@ -334,7 +334,7 @@ export function PropertyScanner() {
       </section>
 
       {/* Content area */}
-      <div className="relative z-10 container mx-auto px-4 max-w-7xl -mt-8 pb-20">
+      <div className="relative z-10 mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 -mt-8 pb-20">
         {/* Scanning phase */}
         {phase === "scanning" && (
           <div className="bg-white rounded-2xl shadow-xl border border-border p-6 sm:p-8">
