@@ -77,7 +77,10 @@
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: var(--font-sans);
+  /* Reference the next/font variable directly: --font-sans lives in
+     `@theme inline`, so it is never emitted as a runtime CSS variable and
+     var(--font-sans) here would be invalid (falling back to ui-sans-serif). */
+  font-family: var(--font-redhat), 'Red Hat Display', system-ui, sans-serif;
   letter-spacing: normal;
   text-rendering: optimizeLegibility;
 }
