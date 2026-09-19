@@ -14,12 +14,14 @@ import {
   ResultIcon,
   resultCardClass,
 } from "@/components/calculators/calculator-ui";
+import { TierComparison, TierWhy, TrustCallout } from "@/components/calculators/tier-explainer";
+import { GAF_TRUST, ROOF_COMPLEXITY_WHY, ROOF_OPTIONS } from "@/components/calculators/tier-details";
 import { LeadGate } from "@/components/lead-gate/lead-gate";
 import { LEAD_GATE_INTERESTS } from "@/lib/lead-gate-interests";
 
 const roofTypes = [
-  { label: "30-Year Composition Shingle", pricePerSquare: 852 },
-  { label: "50-Year Composition Shingle", pricePerSquare: 1050 },
+  { label: "GAF Shingle — Value Line", pricePerSquare: 852 },
+  { label: "GAF Shingle — Premium Line", pricePerSquare: 1050 },
   { label: "Concrete Tile", pricePerSquare: 1200 },
   { label: "Clay Tile", pricePerSquare: 1500 },
   { label: "Standing Seam Metal", pricePerSquare: 1800 },
@@ -65,6 +67,7 @@ export function RoofCalculatorInline({ standalone = false }: { standalone?: bool
                 <p className="text-lg text-white/80">Adjust roof size, material, and complexity to see your estimated range.</p>
               </div>
             )}
+            <TrustCallout title={GAF_TRUST.title} text={GAF_TRUST.text} />
             <div className="grid md:grid-cols-2 gap-8 [&>*]:min-w-0">
               <div className={`space-y-8 ${inputPanelClass}`}>
                 <div>
@@ -129,6 +132,9 @@ export function RoofCalculatorInline({ standalone = false }: { standalone?: bool
                       {squares} squares &bull; {selected.label} &bull; {comp.label}
                     </p>
 
+                    <TierWhy title={`Why ${selected.label}`} text={ROOF_OPTIONS.options[roofType].why} />
+                    {complexity > 0 && <TierWhy title={`Why ${comp.label.split(" (")[0].toLowerCase()} roofs cost more`} text={ROOF_COMPLEXITY_WHY[complexity]} />}
+
                     <div className="border-t border-white/10 pt-6 space-y-3 text-left mb-6">
                       <p className="text-white text-sm font-semibold">Typically includes:</p>
                       <ul className="text-white/80 text-sm space-y-1">
@@ -158,6 +164,14 @@ export function RoofCalculatorInline({ standalone = false }: { standalone?: bool
                 </CardContent>
               </Card>
             </div>
+
+            <TierComparison
+              title="Every roof is a system"
+              intro="The shingles or tile are only the top layer. Longevity comes from what's underneath and how it's installed. Here's how each roof type compares."
+              ladder={ROOF_OPTIONS}
+              selected={roofType}
+              onSelect={setRoofType}
+            />
           </div>
         </section>
       </LeadGate>
