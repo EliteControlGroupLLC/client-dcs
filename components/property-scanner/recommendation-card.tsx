@@ -64,7 +64,7 @@ export function RecommendationCard({ data, isRecommended = false }: Recommendati
           <p className="text-sm font-bold text-secondary">{data.estimatedSizeRange}</p>
         </div>
         <div className="bg-muted/50 rounded-xl p-3">
-          <p className="text-xs text-muted-foreground">Est. Price Range</p>
+          <p className="text-xs text-muted-foreground">Est. Price Range (DCS plan pricing)</p>
           <p className="text-sm font-bold text-primary">{data.priceRange}</p>
         </div>
       </div>

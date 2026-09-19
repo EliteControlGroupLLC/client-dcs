@@ -11,6 +11,12 @@ interface ConfidenceInput {
   hasDimensions: boolean;
   hasAttomData: boolean;
   hasOsmData: boolean;
+  /** San Diego County Assessor parcel record matched by house number. */
+  hasCountyParcelRecord?: boolean;
+  /** Real SANDAG building outlines on the parcel polygon. */
+  hasCountyBuildingOutlines?: boolean;
+  /** Flood/fire/coastal overlays were actually queried for this parcel. */
+  overlaysChecked?: boolean;
   slope: string;
   parcelShape: string;
   cornerLot: boolean;
@@ -56,6 +62,16 @@ export function calculateConfidence(
     positiveSignals.push("ATTOM property data available");
   }
 
+  // Official County parcel record + traced building outlines
+  if (input.hasCountyParcelRecord) {
+    score += 6;
+    positiveSignals.push("San Diego County Assessor parcel record matched by house number");
+  }
+  if (input.hasCountyBuildingOutlines) {
+    score += 4;
+    positiveSignals.push("SANDAG traced building outlines on the parcel");
+  }
+
   // OSM data available
   if (input.hasOsmData) {
     score += 5;
@@ -78,17 +94,22 @@ export function calculateConfidence(
     score += 2;
   }
 
-  // Standard lot and shape
-  if (input.parcelShape === "Rectangular" || input.parcelShape === "Square") {
+  // Standard lot and shape (`parcelShape` may carry measured dimensions,
+  // e.g. "Rectangular (56 ft × 99 ft)" — compare the leading category).
+  const shapeCat = (input.parcelShape || "").split("(")[0].trim();
+  const shapeKnown = shapeCat !== "" && !/^not available/i.test(shapeCat);
+  if (shapeCat === "Rectangular" || shapeCat === "Nearly square" || shapeCat === "Square") {
     score += 3;
-    positiveSignals.push("Standard parcel shape");
+    positiveSignals.push("Standard parcel shape (measured on County parcel map)");
   }
 
-  // No overlays
+  // No overlays — only a positive signal when the overlay maps were queried.
   const detectedOverlays = input.overlays.filter((o) => o.detected);
-  if (detectedOverlays.length === 0) {
+  if (detectedOverlays.length === 0 && input.overlaysChecked) {
     score += 5;
-    positiveSignals.push("No overlay conflicts detected");
+    positiveSignals.push("No flood, fire, coastal or historic overlay on the parcel (FEMA / CAL FIRE / Coastal Zone maps checked)");
+  } else if (!input.overlaysChecked) {
+    negativeSignals.push("Flood / fire / coastal overlay maps could not all be checked");
   }
 
   // ── Negative signals ──
@@ -122,7 +143,7 @@ export function calculateConfidence(
   }
 
   // Missing data
-  if (!input.hasAttomData && !input.hasOsmData) {
+  if (!input.hasAttomData && !input.hasOsmData && !input.hasCountyParcelRecord) {
     score -= 10;
     negativeSignals.push("No authoritative property data sources available");
   }
@@ -132,8 +153,8 @@ export function calculateConfidence(
     negativeSignals.push("Missing parcel geometry and dimensions");
   }
 
-  // Irregular parcel
-  if (input.parcelShape !== "Rectangular" && input.parcelShape !== "Square" && input.parcelShape !== "Nearly Rectangular") {
+  // Irregular parcel (measured) — unknown shape is not called irregular
+  if (shapeKnown && /^(irregular|deep narrow|flag)/i.test(shapeCat)) {
     score -= 5;
     negativeSignals.push("Irregular parcel shape");
     manualReviewReasons.push("Irregular parcel may affect build placement");

@@ -2,7 +2,7 @@
 
 import { MapPin, Maximize2, Home, TreePine, FileText, Mountain, Ruler, Shield, ArrowLeftRight, LucideIcon, Hash } from "lucide-react";
 import { ConfidenceBadge } from "./confidence-badge";
-import type { PropertyIntelligence, IntelligenceField } from "@/lib/property-intelligence/types";
+import { displayFieldValue, type PropertyIntelligence, type IntelligenceField } from "@/lib/property-intelligence/types";
 
 interface PropertySummaryCardProps {
   data: PropertyIntelligence;
@@ -20,85 +20,73 @@ const fields: FieldDef[] = [
     label: "Address",
     icon: MapPin,
     getField: (d) => d.address,
-    formatValue: (f) => String(f.value),
+    formatValue: (f) => displayFieldValue(f),
   },
   {
     label: "APN",
     icon: Hash,
     getField: (d) => d.apn,
-    formatValue: (f) => String(f.value),
+    formatValue: (f) => displayFieldValue(f),
   },
   {
     label: "Lot Size",
     icon: Maximize2,
     getField: (d) => d.lotSizeSqFt,
-    formatValue: (f) => {
-      const prefix = f.status === "Estimated" ? "Approx. " : "";
-      return `${prefix}${Number(f.value).toLocaleString()} sq ft`;
-    },
+    formatValue: (f) => displayFieldValue(f, "sq ft"),
   },
   {
     label: "Existing Home Square Footage",
     icon: Home,
     getField: (d) => d.homeAreaSqFt,
-    formatValue: (f) => {
-      const prefix = f.status === "Estimated" ? "Approx. " : "";
-      return `${prefix}${Number(f.value).toLocaleString()} sq ft`;
-    },
+    formatValue: (f) => displayFieldValue(f, "sq ft"),
   },
   {
     label: "Structure Footprint",
     icon: Ruler,
     getField: (d) => d.footprintSqFt,
-    formatValue: (f) => {
-      const prefix = f.status === "Estimated" ? "Approx. " : "";
-      return `${prefix}${Number(f.value).toLocaleString()} sq ft`;
-    },
+    formatValue: (f) => displayFieldValue(f, "sq ft"),
   },
   {
     label: "Open Yard Area",
     icon: TreePine,
     getField: (d) => d.openYardSqFt,
-    formatValue: (f) => {
-      const prefix = f.status === "Estimated" ? "Approx. " : "";
-      return `${prefix}${Number(f.value).toLocaleString()} sq ft`;
-    },
+    formatValue: (f) => displayFieldValue(f, "sq ft"),
   },
   {
     label: "Zoning Category",
     icon: FileText,
     getField: (d) => d.zoning,
-    formatValue: (f) => String(f.value),
+    formatValue: (f) => displayFieldValue(f),
   },
   {
     label: "ADU / JADU Allowances",
     icon: Shield,
     getField: (d) => d.aduAllowances,
-    formatValue: (f) => String(f.value),
+    formatValue: (f) => displayFieldValue(f),
   },
   {
     label: "Height Limit",
     icon: ArrowLeftRight,
     getField: (d) => d.heightLimit,
-    formatValue: (f) => String(f.value),
+    formatValue: (f) => displayFieldValue(f),
   },
   {
     label: "Setbacks",
     icon: ArrowLeftRight,
     getField: (d) => d.setbacks,
-    formatValue: (f) => String(f.value),
+    formatValue: (f) => displayFieldValue(f),
   },
   {
     label: "Topography / Slope",
     icon: Mountain,
     getField: (d) => d.slope,
-    formatValue: (f) => String(f.value),
+    formatValue: (f) => displayFieldValue(f),
   },
   {
     label: "Parcel Shape",
     icon: Maximize2,
     getField: (d) => d.parcelShape,
-    formatValue: (f) => String(f.value),
+    formatValue: (f) => displayFieldValue(f),
   },
 ];
 
@@ -141,6 +129,9 @@ export function PropertySummaryCard({ data }: PropertySummaryCardProps) {
                 <p className="text-sm font-semibold text-secondary">
                   {fieldDef.formatValue(field)}
                 </p>
+                {field.sources?.[0] && fieldDef.label !== "Address" && (
+                  <p className="text-[10px] text-muted-foreground mt-0.5">Source: {field.sources[0]}</p>
+                )}
               </div>
             </div>
           );

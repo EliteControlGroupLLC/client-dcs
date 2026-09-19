@@ -234,21 +234,30 @@ export function PropertyScanner() {
   const bestRec = analysisData?.recommendations?.find(
     (r) => r.type === analysisData?.bestRecommendation
   );
-  const recommendedAduSqFt = parseRecommendedSqFt(bestRec?.estimatedSizeRange) ?? 0;
   const recommendedAduType = analysisData?.bestRecommendation || bestRec?.type || "ADU";
+  // The financial scenario for the SAME unit the report recommends (its name
+  // is "<size> sq ft <type>"), so value-add inputs match what's shown.
+  const primaryScenario =
+    analysisData?.financialScenarios?.find((s) => s.scenarioName.endsWith(recommendedAduType)) ??
+    analysisData?.financialScenarios?.find((s) => s.scenarioType !== "maximize") ??
+    analysisData?.financialScenarios?.[0];
+  const scenarioSqFt = primaryScenario ? parseInt(primaryScenario.scenarioName.replace(/,/g, ""), 10) : NaN;
+  const recommendedAduSqFt =
+    Number.isFinite(scenarioSqFt) && scenarioSqFt > 0
+      ? scenarioSqFt
+      : parseRecommendedSqFt(bestRec?.estimatedSizeRange) ?? 0;
   const recommendedAduLabel =
     recommendedAduSqFt > 0
       ? `${recommendedAduSqFt.toLocaleString()} sq ft ${recommendedAduType}`
       : recommendedAduType;
-  const primaryScenario =
-    analysisData?.financialScenarios?.find((s) => s.scenarioType !== "maximize") ??
-    analysisData?.financialScenarios?.[0];
   // Income figure for the value-add model = NOI (cashflow before debt service).
   const aduAnnualNetIncome = primaryScenario
     ? primaryScenario.estimatedAnnualNetCashflow + primaryScenario.estimatedMonthlyPayment * 12
     : null;
   const aduTotalCost = primaryScenario?.estimatedTotalCost ?? null;
-  const homeAreaSqFt = analysisData?.property?.homeAreaSqFt?.value ?? null;
+  // Only a real recorded living area — never the resolver's "typical" stand-in.
+  const homeAreaField = analysisData?.property?.homeAreaSqFt;
+  const homeAreaSqFt = homeAreaField && homeAreaField.status !== "Unavailable" ? homeAreaField.value : null;
 
   return (
     <div className="min-h-screen bg-muted pt-20">

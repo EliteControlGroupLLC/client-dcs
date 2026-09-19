@@ -35,6 +35,8 @@ interface SanityInput {
   parcelShape: string;
   hasAttomData: boolean;
   hasOsmData: boolean;
+  /** County Assessor parcel + SANDAG building outlines were found. */
+  hasCountyRecord?: boolean;
   hasGeocoded: boolean;
 }
 
@@ -236,7 +238,14 @@ export function runSanityChecks(input: SanityInput): SanityCheckResult {
   }
 
   // ── Check 8: Data source availability ──
-  if (!input.hasAttomData && !input.hasOsmData) {
+  if (input.hasCountyRecord) {
+    checks.push({
+      name: "county-records",
+      passed: true,
+      severity: "info",
+      message: "San Diego County Assessor parcel record and SANDAG building outlines found for this parcel.",
+    });
+  } else if (!input.hasAttomData && !input.hasOsmData) {
     checks.push({
       name: "no-authoritative-data",
       passed: false,

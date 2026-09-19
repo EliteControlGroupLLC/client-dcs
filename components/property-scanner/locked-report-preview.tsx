@@ -3,6 +3,7 @@
 import { Lock, CheckCircle, FileText, Building, DollarSign, MapPin } from "lucide-react";
 import { LeadCaptureForm } from "./lead-capture-form";
 import type { PropertyAnalysisResult } from "@/lib/property-intelligence";
+import { displayFieldValue } from "@/lib/property-intelligence/types";
 
 interface LockedReportPreviewProps {
   analysisData: PropertyAnalysisResult;
@@ -15,6 +16,10 @@ export function LockedReportPreview({
   propertyAddress,
   onReportUnlocked,
 }: LockedReportPreviewProps) {
+  // Real values for THIS property only (blurred, but still in the DOM).
+  const best = analysisData.recommendations?.find((r) => r.type === analysisData.bestRecommendation);
+  const rules = analysisData.aduRulesSnapshot;
+  const shortAddress = propertyAddress.length > 30 ? `${propertyAddress.slice(0, 30)}...` : propertyAddress;
   return (
     <div className="space-y-8 animate-fade-in">
       {/* Success message - Report is ready */}
@@ -59,19 +64,21 @@ export function LockedReportPreview({
                 <div className="space-y-3">
                   <div className="flex justify-between">
                     <span className="text-sm text-muted-foreground">Address</span>
-                    <span className="text-sm font-medium">{propertyAddress.slice(0, 30)}...</span>
+                    <span className="text-sm font-medium">{shortAddress}</span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-sm text-muted-foreground">Lot Size</span>
-                    <span className="text-sm font-medium">{analysisData.property.lotSizeSqFt.value.toLocaleString()} sq ft</span>
+                    <span className="text-sm font-medium">{displayFieldValue(analysisData.property.lotSizeSqFt, "sq ft")}</span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-sm text-muted-foreground">Zoning</span>
-                    <span className="text-sm font-medium">{analysisData.property.zoning.value}</span>
+                    <span className="text-sm font-medium">{displayFieldValue(analysisData.property.zoning)}</span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-sm text-muted-foreground">Feasibility</span>
-                    <span className="text-sm font-medium text-primary">Likely Eligible</span>
+                    <span className="text-sm font-medium text-primary">
+                      {best ? `${best.type}: ${best.feasibility}` : "See report"}
+                    </span>
                   </div>
                 </div>
               </div>
@@ -85,15 +92,19 @@ export function LockedReportPreview({
                 <div className="space-y-3">
                   <div className="flex justify-between">
                     <span className="text-sm text-muted-foreground">Jurisdiction</span>
-                    <span className="text-sm font-medium">{analysisData.jurisdiction?.name || "San Diego"}</span>
+                    <span className="text-sm font-medium">{analysisData.jurisdiction?.name ?? "Not available"}</span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-sm text-muted-foreground">Max ADU Size</span>
-                    <span className="text-sm font-medium">1,200 sq ft</span>
+                    <span className="text-sm font-medium">
+                      {rules ? `${rules.detachedMaxSqft.toLocaleString()} sq ft` : "Not available"}
+                    </span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-sm text-muted-foreground">Setback Requirements</span>
-                    <span className="text-sm font-medium">4 ft rear/side</span>
+                    <span className="text-sm font-medium">
+                      {rules ? `${rules.rearSetbackFt} ft rear / ${rules.sideSetbackFt} ft side` : "Not available"}
+                    </span>
                   </div>
                 </div>
               </div>

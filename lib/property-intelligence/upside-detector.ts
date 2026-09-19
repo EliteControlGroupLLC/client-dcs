@@ -120,10 +120,9 @@ export function detectUpsideOpportunities(
       recommendedFollowupFlow: "multifamily-calculator",
     });
   } else if (
-    input.zoning.toLowerCase().includes("multi") ||
-    input.zoning.toLowerCase().includes("rm") ||
-    input.zoning.toLowerCase().includes("r-2") ||
-    input.zoning.toLowerCase().includes("r-3")
+    // Match the ZONE CODE token only ("RM-1-1", "R-2", "R3 ..."), never a
+    // substring of a description (e.g. "Uniform", "Farm", "Not available").
+    /^(RM|MF|R-?2|R-?3|R-?4)\b/i.test(input.zoning.trim().split(/[\s(]/)[0] ?? "")
   ) {
     opportunities.push({
       triggerType: "multifamily-adu",
@@ -137,8 +136,13 @@ export function detectUpsideOpportunities(
   }
 
   // ── Bonus ADU Program (San Diego specific) ──
+  // O-21989 bars the Bonus program in RS-1-1/2/3/4/8/9/10/11 (outside
+  // high-opportunity areas, which we don't check) — don't suggest it there.
+  const zoneCode = (input.zoning.trim().split(/[\s(]/)[0] ?? "").toUpperCase();
+  const bonusBarredZone = /^RS-1-(1|2|3|4|8|9|10|11)$/.test(zoneCode);
   if (
     jurisdiction.identity.id === "san-diego-city" &&
+    !bonusBarredZone &&
     jurisdiction.sizeRules.bonusProgramNotes.toLowerCase().includes("bonus")
   ) {
     if (input.lotSizeSqFt >= 5000) {

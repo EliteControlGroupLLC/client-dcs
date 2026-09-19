@@ -105,6 +105,8 @@ export function SiteDiagram({
         setbackPolygon={geometryResult.buildableEnvelope?.parcelSetbackPolygon || null}
         separationPolygon={geometryResult.buildableEnvelope?.residenceSeparationPolygon || null}
         buildablePolygon={geometryResult.buildableEnvelope?.buildablePolygon || null}
+        setbackFt={geometryResult.buildableEnvelope?.propertyLineSetbackFt}
+        separationFt={geometryResult.buildableEnvelope?.residenceSeparationFt}
         metrics={geometryResult.metrics}
         status={geometryResult.status}
         confidence={geometryResult.confidence}
@@ -176,11 +178,13 @@ function FallbackDiagram({
 // ─── Real Geometry Diagram ───
 
 function RealGeometryDiagram({
-  parcelPolygon,
-  buildingPolygon,
-  setbackPolygon,
-  separationPolygon,
-  buildablePolygon,
+  parcelPolygon: rawParcel,
+  buildingPolygon: rawBuilding,
+  setbackPolygon: rawSetback,
+  separationPolygon: rawSeparation,
+  buildablePolygon: rawBuildable,
+  setbackFt,
+  separationFt,
   metrics,
   status,
   confidence,
@@ -192,12 +196,28 @@ function RealGeometryDiagram({
   setbackPolygon: GeometryPolygon | null;
   separationPolygon: GeometryPolygon | null;
   buildablePolygon: GeometryPolygon | null;
+  setbackFt?: number;
+  separationFt?: number;
   metrics: StrictGeometryResult["metrics"];
   status: StrictGeometryResult["status"];
   confidence: number;
   parcelSource?: string;
   buildingSource?: string;
 }) {
+  // True-to-scale plan view (north up): a degree of longitude is only
+  // cos(latitude) as long as a degree of latitude, so compress x accordingly.
+  const refRing = rawParcel?.coordinates[0] ?? [];
+  const refLat = refRing.length ? refRing.reduce((a, p) => a + p[1], 0) / refRing.length : 0;
+  const refLng = refRing.length ? refRing[0][0] : 0;
+  const kx = Math.cos((refLat * Math.PI) / 180);
+  const toPlan = (p: GeometryPolygon | null): GeometryPolygon | null =>
+    p ? { ...p, coordinates: p.coordinates.map((r) => r.map(([x, y]) => [refLng + (x - refLng) * kx, y])) } : null;
+  const parcelPolygon = toPlan(rawParcel);
+  const buildingPolygon = toPlan(rawBuilding);
+  const setbackPolygon = toPlan(rawSetback);
+  const separationPolygon = toPlan(rawSeparation);
+  const buildablePolygon = toPlan(rawBuildable);
+
   // Calculate bounds from all polygons
   const bounds = calculateBounds([
     parcelPolygon,
@@ -206,7 +226,7 @@ function RealGeometryDiagram({
     buildablePolygon,
   ]);
 
-  if (!bounds || !parcelPolygon) {
+  if (!bounds || !parcelPolygon || !(bounds.maxLng > bounds.minLng) || !(bounds.maxLat > bounds.minLat)) {
     return <FallbackDiagram message="Unable to calculate diagram bounds" />;
   }
 
@@ -281,12 +301,12 @@ function RealGeometryDiagram({
           confidence >= 60 ? "bg-amber-100 text-amber-700" :
           "bg-red-100 text-red-700"
         }`}>
-          {confidence}% verified
+          {confidence}% geometry confidence
         </span>
       </div>
       <p className="text-xs text-muted-foreground mb-4">
         {status === "geometry-verified"
-          ? "Real parcel and building geometry from verified sources"
+          ? "Drawn to scale from the County parcel map and traced building outlines (north is up)"
           : "Partial geometry data - some elements estimated"}
       </p>
 
@@ -415,34 +435,26 @@ function RealGeometryDiagram({
           <text x={14} y={22} className="text-[8px] fill-muted-foreground">ADU Buildable Area</text>
 
           <line x1={0} y1={32} x2={10} y2={32} stroke="#F59E0B" strokeWidth="1" strokeDasharray="3 3" />
-          <text x={14} y={36} className="text-[8px] fill-muted-foreground">3ft Property Setback</text>
+          <text x={14} y={36} className="text-[8px] fill-muted-foreground">{setbackFt != null ? `${setbackFt} ft` : "ADU"} Property Setback</text>
 
           <line x1={0} y1={46} x2={10} y2={46} stroke="#EF4444" strokeWidth="1" strokeDasharray="3 3" />
-          <text x={14} y={50} className="text-[8px] fill-muted-foreground">6ft Residence Separation</text>
+          <text x={14} y={50} className="text-[8px] fill-muted-foreground">{separationFt != null ? `${separationFt} ft` : "Required"} Residence Separation</text>
         </g>
 
-        {/* Measured setbacks (if available) */}
-        {metrics && (
-          <g className="text-[7px] fill-muted-foreground">
-            {/* Front setback */}
-            <text x={SVG_WIDTH / 2} y={SVG_HEIGHT - PADDING + 12} textAnchor="middle">
-              Front: {metrics.frontYardDepthFt}ft
-            </text>
-            {/* Rear setback */}
-            <text x={SVG_WIDTH / 2} y={PADDING + 12} textAnchor="middle">
-              Rear: {metrics.rearYardDepthFt}ft
-            </text>
-            {/* Left setback */}
-            <text x={PADDING - 2} y={SVG_HEIGHT / 2} textAnchor="start" transform={`rotate(-90, ${PADDING - 2}, ${SVG_HEIGHT / 2})`}>
-              Left: {metrics.leftSideYardFt}ft
-            </text>
-            {/* Right setback */}
-            <text x={SVG_WIDTH - PADDING + 2} y={SVG_HEIGHT / 2} textAnchor="end" transform={`rotate(90, ${SVG_WIDTH - PADDING + 2}, ${SVG_HEIGHT / 2})`}>
-              Right: {metrics.rightSideYardFt}ft
-            </text>
-          </g>
-        )}
+        {/* North arrow (plan is drawn north-up) */}
+        <g transform={`translate(${SVG_WIDTH - 18}, 18)`}>
+          <line x1={0} y1={10} x2={0} y2={-6} stroke="#0F2A4A" strokeWidth="1" />
+          <path d="M -3 -2 L 0 -8 L 3 -2 Z" fill="#0F2A4A" />
+          <text x={0} y={20} textAnchor="middle" className="text-[8px] fill-muted-foreground">N</text>
+        </g>
       </svg>
+
+      {metrics && (
+        <p className="mt-2 text-[10px] text-muted-foreground text-center">
+          Measured yards around the home (street side = front): front {metrics.frontYardDepthFt} ft · rear{" "}
+          {metrics.rearYardDepthFt} ft · sides {metrics.leftSideYardFt} ft / {metrics.rightSideYardFt} ft
+        </p>
+      )}
 
       {/* Data source attribution */}
       <div className="mt-3 pt-3 border-t border-border/50">

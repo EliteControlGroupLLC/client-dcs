@@ -43,6 +43,7 @@ interface Valuation {
   confidence: number;
   available: boolean;
   source: "rentcast" | "estimated";
+  unavailableReason?: string;
 }
 
 interface ValueAdd {
@@ -98,8 +99,9 @@ export function EquityAppraisalCard({
   const [error, setError] = useState<string | null>(null);
   const [data, setData] = useState<ValuationResponse | null>(null);
 
-  // Equity state (computed client-side, NOT from the API)
-  const [mortgageBalance, setMortgageBalance] = useState(0);
+  // Equity state (computed client-side, NOT from the API). The balance is
+  // unknown until the owner enters it — never assumed.
+  const [mortgageBalance, setMortgageBalance] = useState<number | null>(null);
   const [ownOutright, setOwnOutright] = useState(false);
   const [compsExpanded, setCompsExpanded] = useState(false);
 
@@ -131,9 +133,7 @@ export function EquityAppraisalCard({
 
         setData(json);
 
-        // Seed mortgage balance at ~50% of estimated value once data loads.
-        const ev = json.valuation?.estimatedValue;
-        setMortgageBalance(ev ? Math.round(ev * 0.5) : 0);
+        setMortgageBalance(null);
         setOwnOutright(false);
       } catch (err) {
         if (cancelled) return;
@@ -164,11 +164,12 @@ export function EquityAppraisalCard({
   const owner = data?.owner;
   const estimatedValue = valuation?.estimatedValue ?? 0;
   const effectiveBalance = ownOutright ? 0 : mortgageBalance;
+  const balanceKnown = effectiveBalance !== null;
 
-  const equity = Math.max(0, estimatedValue - effectiveBalance);
+  const equity = Math.max(0, estimatedValue - (effectiveBalance ?? 0));
   const equityPct =
     estimatedValue > 0 ? Math.round((equity / estimatedValue) * 100) : 0;
-  const usableEquity = Math.max(0, estimatedValue * 0.85 - effectiveBalance);
+  const usableEquity = Math.max(0, estimatedValue * 0.85 - (effectiveBalance ?? 0));
 
   return (
     <div className="bg-white rounded-2xl border border-border p-6 animate-slide-up">
@@ -217,8 +218,9 @@ export function EquityAppraisalCard({
         <div className="rounded-xl border border-border bg-muted/40 p-4 flex items-start gap-3">
           <Info className="h-4 w-4 text-muted-foreground mt-0.5 shrink-0" />
           <p className="text-sm text-secondary">
-            We couldn&apos;t auto-estimate this address &mdash; our team can
-            pull a precise valuation for you.
+            Home value: not available.{" "}
+            {valuation.unavailableReason ? `${valuation.unavailableReason} ` : ""}
+            Our team can pull a precise valuation for you.
           </p>
         </div>
       )}
@@ -254,9 +256,9 @@ export function EquityAppraisalCard({
             )}
 
             <p className="text-[11px] text-muted-foreground mt-2">
-              {valuation.source === "rentcast" && valuation.comps.length > 0
-                ? `Based on ${valuation.comps.length} comparable sales nearby`
-                : "Market estimate"}
+              {valuation.comps.length > 0
+                ? `Automated valuation (RentCast AVM) for this address, based on ${valuation.comps.length} comparable properties nearby`
+                : "Automated valuation (RentCast AVM) for this address"}
             </p>
           </div>
 
@@ -269,7 +271,7 @@ export function EquityAppraisalCard({
                 className="w-full flex items-center justify-between p-3 text-left hover:bg-muted/30 transition-colors"
               >
                 <span className="text-xs font-semibold text-secondary">
-                  View comparable sales
+                  View comparable properties
                 </span>
                 <div className="flex items-center gap-2">
                   <span className="text-[10px] text-muted-foreground">
@@ -339,7 +341,7 @@ export function EquityAppraisalCard({
 
                 {owner.ownerType && (
                   <div className="flex items-start justify-between gap-3 py-2 px-3 rounded-lg bg-muted/30">
-                    <p className="text-xs text-muted-foreground">Title held as</p>
+                    <p className="text-xs text-muted-foreground">Owner type</p>
                     <p className="text-sm font-semibold text-secondary text-right capitalize">
                       {owner.ownerType}
                     </p>
@@ -365,7 +367,7 @@ export function EquityAppraisalCard({
               )}
 
               <p className="mt-3 text-[10px] text-muted-foreground">
-                Ownership from public property records. Verify against title before closing.
+                Ownership from public property records (via RentCast), matched to this address. Verify against title before closing.
               </p>
             </div>
           )}
@@ -396,12 +398,14 @@ export function EquityAppraisalCard({
                   inputMode="numeric"
                   min={0}
                   disabled={ownOutright}
-                  value={ownOutright ? 0 : mortgageBalance}
+                  value={ownOutright ? 0 : mortgageBalance ?? ""}
                   onChange={(e) =>
-                    setMortgageBalance(Math.max(0, Number(e.target.value) || 0))
+                    setMortgageBalance(
+                      e.target.value === "" ? null : Math.max(0, Number(e.target.value) || 0)
+                    )
                   }
                   className="w-full rounded-lg border border-border bg-white pl-7 pr-3 py-2 text-sm text-secondary placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-secondary/20 disabled:bg-muted disabled:text-muted-foreground"
-                  placeholder="0"
+                  placeholder="Enter your balance"
                 />
               </div>
 
@@ -422,6 +426,11 @@ export function EquityAppraisalCard({
               </label>
             </div>
 
+            {!balanceKnown ? (
+              <p className="pt-3 border-t border-border text-xs text-muted-foreground">
+                Enter your remaining mortgage balance (or check &ldquo;I own it outright&rdquo;) to see your equity.
+              </p>
+            ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-3 border-t border-border">
               <div>
                 <p className="text-[10px] text-muted-foreground">
@@ -446,6 +455,7 @@ export function EquityAppraisalCard({
                 </p>
               </div>
             </div>
+            )}
           </div>
 
           {/* 7. Projected value */}

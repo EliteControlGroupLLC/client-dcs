@@ -17,7 +17,9 @@ interface JurisdictionSnapshotCardProps {
 }
 
 export function JurisdictionSnapshotCard({ data }: JurisdictionSnapshotCardProps) {
-  const isHighConfidence = data.confidence >= 80;
+  // Same bar as every other "Verified" label (≥ 90), and never while the
+  // boundary match is uncertain.
+  const isHighConfidence = data.confidence >= 90 && !data.uncertain;
 
   return (
     <div className="bg-white rounded-2xl border border-border p-6 animate-slide-up">
@@ -84,7 +86,13 @@ export function JurisdictionSnapshotCard({ data }: JurisdictionSnapshotCardProps
                 className="inline-flex items-center gap-1 text-[10px] text-blue-600 hover:text-blue-800 transition-colors"
               >
                 <ExternalLink className="h-2.5 w-2.5" />
-                Municipal Code
+                {(() => {
+                  try {
+                    return new URL(url).hostname.replace(/^www\./, "");
+                  } catch {
+                    return "Source";
+                  }
+                })()}
               </a>
             ))}
           </div>

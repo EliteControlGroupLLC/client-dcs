@@ -13,6 +13,7 @@
  */
 
 import type { FeasibilityResult, FinancialScenario } from "./jurisdictions/types";
+import type { MarketRentResult } from "./rentcast-service";
 import {
   FLOOR_PLANS_SORTED,
   estimateAduPriceRange,
@@ -76,13 +77,21 @@ export interface UnifiedRecommendation {
   
   // Audit trail
   derivedFromFeasibility: string;
-  zipCode: string;
+  zipCode: string | null;
+  /** "market-data" = RentCast rent AVM for this address; "estimated" = DCS rent table. */
   rentSource: "market-data" | "estimated";
+  /** Plain-English basis of the rent figure shown. */
+  rentBasis: string;
+  /** Nearby rental comps behind a market-data rent (empty for the table). */
+  rentComparables: MarketRentResult["comparables"];
+  rentComparableCount: number;
+  /** Planning assumptions behind the cost / financing / cash-flow figures. */
+  financialAssumptions: string[];
 }
 
 export interface UnifiedRecommendationInput {
   address: string;
-  zipCode: string;
+  zipCode: string | null;
   lotSizeSqFt: number;
   openYardSqFt: number;
   buildableEnvelopeSqFt: number;
@@ -101,7 +110,27 @@ export interface UnifiedRecommendationInput {
   contextNote?: string;
   /** Extra site cost (USD) added to the price range, e.g. a steep-lot engineered foundation. */
   siteCostAdderUsd?: number;
+  /**
+   * Real market-rent lookup for the modeled unit at this address (RentCast).
+   * When it returns null the DCS rent table is used and labeled as such.
+   */
+  marketRentLookup?: (q: {
+    sqft: number;
+    bedrooms: number;
+    bathrooms: number;
+    propertyType: "Single Family" | "Apartment";
+  }) => Promise<MarketRentResult | null>;
 }
+
+// Financing / operating assumptions for the planning cash-flow model.
+const LOAN_TO_COST = 0.8;
+const INTEREST_RATE = 0.0725;
+const TERM_YEARS = 30;
+const VACANCY = 0.05;
+const RESERVES_PCT_OF_RENT = 0.1;
+const RESERVES_FIXED_MONTHLY = 250;
+const SOFT_COST_SHARE = 0.15;
+const VALUE_ADD_MULTIPLE = 1.35;
 
 /**
  * Generate a unified recommendation that drives ALL downstream outputs
@@ -130,7 +159,9 @@ export async function generateUnifiedRecommendation(
 
   const basePricing = estimateAduPriceRange({
     sqFt: primarySizeSqFt,
-    type: primaryType,
+    // JADU is priced like the small attached unit its rent comes from (same
+    // basis as the recommendation card), not as a detached build.
+    type: isJadu ? "Attached ADU" : primaryType,
     bedrooms: variation.bedrooms,
     bathrooms: variation.bathrooms,
     stories: variation.stories,
@@ -139,26 +170,52 @@ export async function generateUnifiedRecommendation(
   const siteAdder = input.siteCostAdderUsd && input.siteCostAdderUsd > 0 ? input.siteCostAdderUsd : 0;
   const pricing = { low: basePricing.low + siteAdder, high: basePricing.high + siteAdder };
   const totalCost = roundToNearest((pricing.low + pricing.high) / 2, 1000);
-  const softCost = Math.round(totalCost * 0.15);
+  const softCost = Math.round(totalCost * SOFT_COST_SHARE);
   const buildCost = totalCost - softCost;
 
-  const rentRange = getCanonicalRentEstimate(primarySizeSqFt, plan.type, variation.bedrooms, {
+  // Rent: REAL market rent for this unit at this address when RentCast
+  // answers; otherwise the DCS rent table (labeled as a planning estimate).
+  const unitIsHouseLike = (normalizedType === "detached" || normalizedType === "two-story") && variation.bedrooms >= 2;
+  const market = input.marketRentLookup
+    ? await input
+        .marketRentLookup({
+          sqft: primarySizeSqFt,
+          bedrooms: variation.bedrooms,
+          bathrooms: variation.bathrooms,
+          propertyType: unitIsHouseLike ? "Single Family" : "Apartment",
+        })
+        .catch(() => null)
+    : null;
+  const tableRange = getCanonicalRentEstimate(primarySizeSqFt, plan.type, variation.bedrooms, {
     stories: variation.stories,
     garageStalls: plan.id === "garage-conversion" && variation.bedrooms > 0 ? 3 : 2,
   });
-  const monthlyRent = getAverageMonthlyRent(primarySizeSqFt, plan.type, variation.bedrooms, {
+  const tableMonthly = getAverageMonthlyRent(primarySizeSqFt, plan.type, variation.bedrooms, {
     stories: variation.stories,
     garageStalls: plan.id === "garage-conversion" && variation.bedrooms > 0 ? 3 : 2,
   });
+  const rentRange = market ? { low: market.rentRangeLow, high: market.rentRangeHigh } : tableRange;
+  const monthlyRent = market ? market.monthlyRent : tableMonthly;
+  const layout = variation.bedrooms === 0 ? "studio" : `${variation.bedrooms}-bed / ${variation.bathrooms}-bath`;
+  const rentBasis = market
+    ? `RentCast rent estimate for a ${market.basis} (${market.comparableCount} comparable rentals)`
+    : `Planning estimate from DCS's San Diego County ADU rent table for a ${primarySizeSqFt.toLocaleString()} sq ft ${layout} unit — not a market quote for this address (live market rent was unavailable)`;
 
-  const loanAmount = totalCost; // zero-down planning assumption, aligned with the site calculators
-  const monthlyPayment = calculateMonthlyPayment(loanAmount, 0.0725, 30);
-  const monthlyReserves = Math.round(monthlyRent * 0.10 + 250);
-  const monthlyCashFlow = Math.round(monthlyRent * 0.95) - monthlyPayment - monthlyReserves;
+  const loanAmount = Math.round(totalCost * LOAN_TO_COST);
+  const monthlyPayment = calculateMonthlyPayment(loanAmount, INTEREST_RATE, TERM_YEARS);
+  const monthlyReserves = Math.round(monthlyRent * RESERVES_PCT_OF_RENT + RESERVES_FIXED_MONTHLY);
+  const monthlyCashFlow = Math.round(monthlyRent * (1 - VACANCY)) - monthlyPayment - monthlyReserves;
   const annualNetCashFlow = monthlyCashFlow * 12;
   const roi = totalCost > 0 ? Math.round((annualNetCashFlow / totalCost) * 1000) / 10 : 0;
   const paybackYears = annualNetCashFlow > 0 ? Math.round((totalCost / annualNetCashFlow) * 10) / 10 : 99;
-  const valueAdd = roundToNearest(totalCost * 1.35, 1000);
+  const valueAdd = roundToNearest(totalCost * VALUE_ADD_MULTIPLE, 1000);
+  const financialAssumptions = [
+    `Project cost = DCS turnkey price for this plan (${formatPriceRange(pricing.low, pricing.high)}, midpoint used)${siteAdder ? `, incl. $${siteAdder.toLocaleString()} measured-slope foundation allowance` : ""}; ${Math.round(SOFT_COST_SHARE * 100)}% of it shown as soft costs (design, permits, fees)`,
+    `Financing: ${Math.round(LOAN_TO_COST * 100)}% of project cost at ${(INTEREST_RATE * 100).toFixed(2)}% for ${TERM_YEARS} years, ${Math.round((1 - LOAN_TO_COST) * 100)}% down`,
+    `Rent: ${market ? "RentCast market estimate for this address" : "DCS rent-table planning estimate"}; cash flow nets ${Math.round(VACANCY * 100)}% vacancy and reserves of ${Math.round(RESERVES_PCT_OF_RENT * 100)}% of rent + $${RESERVES_FIXED_MONTHLY}/mo`,
+    "ROI = annual net cash flow ÷ total project cost",
+    `Value add = ${VALUE_ADD_MULTIPLE}× project cost (cost-based rule of thumb, not an appraisal)`,
+  ];
 
   const { bannerRecommendation, bannerDetails } = generateSmartBannerText(
     primaryType,
@@ -169,7 +226,7 @@ export async function generateUnifiedRecommendation(
     pricing.high,
     rentRange.low,
     rentRange.high,
-    zipCode,
+    market ? "market" : "table",
     buildableEnvelopeSqFt > maxAllowedSqFt
   );
   const bannerDetailsFinal = input.contextNote ? `${input.contextNote} ${bannerDetails}` : bannerDetails;
@@ -183,7 +240,13 @@ export async function generateUnifiedRecommendation(
     estimatedBuildCost: buildCost,
     estimatedSoftCost: softCost,
     estimatedTotalCost: totalCost,
-    priceRange: formatPriceRange(pricing.low, pricing.high),
+    priceRange:
+      basePricing.matchedPlan &&
+      basePricing.low === basePricing.matchedPlan.priceLow &&
+      basePricing.high === basePricing.matchedPlan.priceHigh &&
+      Math.abs(basePricing.matchedPlan.sqFt - primarySizeSqFt) >= 100
+        ? `${formatPriceRange(pricing.low, pricing.high)} (priced from DCS's ${basePricing.matchedPlan.sqFt.toLocaleString()} sq ft ${basePricing.matchedPlan.name} plan)`
+        : formatPriceRange(pricing.low, pricing.high),
     primaryRentEstimate: {
       monthlyRent,
       annualRent: monthlyRent * 12,
@@ -204,7 +267,11 @@ export async function generateUnifiedRecommendation(
     bannerDetails: bannerDetailsFinal,
     derivedFromFeasibility: bestRecommendationType,
     zipCode,
-    rentSource: "estimated",
+    rentSource: market ? "market-data" : "estimated",
+    rentBasis,
+    rentComparables: market?.comparables ?? [],
+    rentComparableCount: market?.comparableCount ?? 0,
+    financialAssumptions,
   };
 }
 
@@ -227,7 +294,7 @@ function generateSmartBannerText(
   priceHigh: number,
   rentLow: number,
   rentHigh: number,
-  zipCode: string,
+  rentKind: "market" | "table",
   sizeIsCappedByRules: boolean
 ): { bannerRecommendation: string; bannerDetails: string } {
   const sizeLabel = primarySizeSqFt.toLocaleString();
@@ -238,7 +305,7 @@ function generateSmartBannerText(
 
   return {
     bannerRecommendation: `Best fit for this property: ${planName} at ${sizeLabel} sq ft`,
-    bannerDetails: `${primaryType} recommendation aligned to the current parcel allowance${sizeIsCappedByRules ? " and city size cap" : ""}. Recommended configuration: ${layoutLabel}. Estimated project investment: ${formatPriceRange(priceLow, priceHigh)}. Estimated market rent for ZIP ${zipCode}: $${rentLow.toLocaleString()}-$${rentHigh.toLocaleString()}/month.`,
+    bannerDetails: `${primaryType} recommendation aligned to the current parcel allowance${sizeIsCappedByRules ? " and city size cap" : ""}. Recommended configuration: ${layoutLabel}. Estimated project investment (DCS plan pricing): ${formatPriceRange(priceLow, priceHigh)}. ${rentKind === "market" ? "Market rent estimate for this address (RentCast)" : "Planning rent estimate (DCS rent table; live market rent unavailable)"}: $${rentLow.toLocaleString()}-$${rentHigh.toLocaleString()}/month.`,
   };
 }
 
@@ -361,8 +428,8 @@ export function buildUnifiedFinancialScenarios(
     estimatedBuildCost: recommendation.estimatedBuildCost,
     estimatedSoftCost: recommendation.estimatedSoftCost,
     estimatedTotalCost: recommendation.estimatedTotalCost,
-    estimatedLoanAmount: Math.round(recommendation.estimatedTotalCost * 0.80),
-    estimatedDownPayment: Math.round(recommendation.estimatedTotalCost * 0.20),
+    estimatedLoanAmount: Math.round(recommendation.estimatedTotalCost * LOAN_TO_COST),
+    estimatedDownPayment: recommendation.estimatedTotalCost - Math.round(recommendation.estimatedTotalCost * LOAN_TO_COST),
     estimatedMonthlyPayment: fp.monthlyPayment,
     estimatedMonthlyIncome: fp.monthlyIncome,
     estimatedMonthlyCashflow: fp.monthlyCashFlow,
@@ -371,5 +438,8 @@ export function buildUnifiedFinancialScenarios(
     estimatedRoi: fp.roi,
     estimatedPaybackYears: fp.paybackYears,
     estimatedValueAdd: fp.valueAdd,
+    rentSource: recommendation.rentSource === "market-data" ? "rentcast" : "estimated",
+    rentBasis: recommendation.rentBasis,
+    assumptions: recommendation.financialAssumptions,
   }];
 }

@@ -60,12 +60,13 @@ import {
   type ZoneomicsZoningData,
 } from "./zoneomics-service";
 import {
-  isRentCastAvailable,
+  fetchMarketRent,
   type RentEstimate,
 } from "./rentcast-service";
 import type { OverlayDetection } from "./jurisdictions/types";
 import { runSanityChecks } from "./sanity-check-engine";
 import { analyzeSiteConstraints } from "./site-constraint-engine";
+import { getParcelOverlays, type ParcelOverlays } from "./hazard-overlay-service";
 import {
   analyzePropertyGeometry,
   runGeometrySanityChecks,
@@ -96,6 +97,8 @@ import {
   estimateAduPriceRange,
   formatPriceRange,
 } from "../data/site-data";
+
+const NOT_AVAILABLE_TEXT = "Not available";
 
 export async function analyzeProperty(address: string): Promise<PropertyAnalysisResult> {
   // Step 1: Geocode the address (Google Places API)
@@ -160,11 +163,19 @@ export async function analyzeProperty(address: string): Promise<PropertyAnalysis
   // street frontage). These are authoritative over OSM/Microsoft/estimates.
   let sdBuildings: SanDiegoBuildingsResult | undefined;
   let sdAdjacentRings: number[][][][] | undefined;
+  // Real flood / fire / coastal / historic / recorded-easement overlays for
+  // THIS parcel polygon (FEMA, CAL FIRE, City of San Diego, SanGIS).
+  let parcelOverlays: ParcelOverlays | null = null;
   if (sdParcel?.available && sdParcel.parcelRings) {
-    const [bldgs, adjacent] = await Promise.all([
+    const [bldgs, adjacent, overlaysResult] = await Promise.all([
       getSanDiegoBuildings(sdParcel.parcelRings),
       getSanDiegoAdjacentParcels(sdParcel.parcelRings, sdParcel.apn),
+      getParcelOverlays(sdParcel.parcelRings, sdParcel.jurisdiction === "SD").catch((err) => {
+        console.error(`[PROVIDER-ERROR] Parcel overlays: ${err}`);
+        return null;
+      }),
     ]);
+    parcelOverlays = overlaysResult;
     sdBuildings = bldgs;
     sdAdjacentRings = adjacent.available ? adjacent.rings : undefined;
     if (!bldgs.available) {
@@ -208,6 +219,15 @@ export async function analyzeProperty(address: string): Promise<PropertyAnalysis
     }
     if (sdParcel.livingAreaSqFt && sdParcel.livingAreaSqFt > 0) {
       intelligence.homeAreaSqFt = realField(sdParcel.livingAreaSqFt, exact ? 92 : 78, "San Diego County Assessor");
+    } else if (attomData?.available !== true) {
+      // No living area on the Assessor roll: never substitute an OSM
+      // levels-guess or a "typical" size — show "Not available".
+      intelligence.homeAreaSqFt = {
+        ...intelligence.homeAreaSqFt,
+        confidence: Math.min(intelligence.homeAreaSqFt.confidence, 30),
+        status: "Unavailable",
+        sources: ["No living-area record on the San Diego County Assessor roll"],
+      };
     }
     if (sdParcel.apn) {
       intelligence.apn = realField(sdParcel.apn, 96, "San Diego County Assessor");
@@ -224,39 +244,6 @@ export async function analyzeProperty(address: string): Promise<PropertyAnalysis
           sources: [cityZoning.source, ...(cityZoning.sourceUrl ? [cityZoning.sourceUrl] : [])],
         }
       : realField("Not available", 0, cityZoning.reason ? `${cityZoning.source} — ${cityZoning.reason}` : cityZoning.source);
-  }
-
-  // Step 3b: Run sanity checks before proceeding
-  const sanityResult = runSanityChecks({
-    lotSizeSqFt: rawLotSizeSqFt,
-    footprintSqFt: rawFootprintSqFt,
-    homeAreaSqFt: intelligence.homeAreaSqFt.value,
-    openYardSqFt: intelligence.openYardSqFt.value,
-    lotWidth: 0, // computed later
-    lotDepth: 0,
-    zoning: intelligence.zoning.value,
-    slope: intelligence.slope.value,
-    parcelShape: intelligence.parcelShape.value,
-    hasAttomData: attomData?.available === true,
-    hasOsmData: osmData?.parcel !== null && osmData?.parcel !== undefined,
-    hasGeocoded: Boolean(geocoded),
-  });
-
-  // Apply sanity adjustments
-  for (const adj of sanityResult.adjustments) {
-    if (adj.field === "footprintSqFt") {
-      rawFootprintSqFt = adj.adjustedValue;
-      console.warn(
-        `[SANITY-CHECK] Adjusted footprint: ${adj.originalValue} -> ${adj.adjustedValue} (${adj.reason})`
-      );
-    }
-  }
-
-  if (!sanityResult.passed) {
-    const failures = sanityResult.checks.filter((c) => !c.passed && c.severity === "error");
-    for (const f of failures) {
-      console.warn(`[SANITY-CHECK] FAILED: ${f.name} — ${f.message}`);
-    }
   }
 
   // Step 3c: Multi-structure detection from OSM data
@@ -472,6 +459,61 @@ export async function analyzeProperty(address: string): Promise<PropertyAnalysis
     );
     rawFootprintSqFt = summary.mainFootprintSqFt;
   }
+  // Step 3b: Sanity checks — run AFTER the real County/SANDAG values are in
+  // place, so they test the measured footprint, not a resolver stand-in.
+  const sanityResult = runSanityChecks({
+    lotSizeSqFt: rawLotSizeSqFt,
+    footprintSqFt: rawFootprintSqFt,
+    homeAreaSqFt: intelligence.homeAreaSqFt.value,
+    openYardSqFt: intelligence.openYardSqFt.value,
+    lotWidth: 0, // computed later
+    lotDepth: 0,
+    zoning: intelligence.zoning.value,
+    slope: intelligence.slope.value,
+    parcelShape: intelligence.parcelShape.value,
+    hasAttomData: attomData?.available === true,
+    hasOsmData: osmData?.parcel !== null && osmData?.parcel !== undefined,
+    hasCountyRecord: sdParcel?.available === true && (sdBuildings?.buildings.length ?? 0) > 0,
+    hasGeocoded: Boolean(geocoded),
+  });
+
+  // Apply sanity adjustments
+  for (const adj of sanityResult.adjustments) {
+    if (adj.field === "footprintSqFt") {
+      rawFootprintSqFt = adj.adjustedValue;
+      console.warn(
+        `[SANITY-CHECK] Adjusted footprint: ${adj.originalValue} -> ${adj.adjustedValue} (${adj.reason})`
+      );
+    }
+  }
+
+  if (!sanityResult.passed) {
+    const failures = sanityResult.checks.filter((c) => !c.passed && c.severity === "error");
+    for (const f of failures) {
+      console.warn(`[SANITY-CHECK] FAILED: ${f.name} — ${f.message}`);
+    }
+  }
+
+  // Parcel shape MEASURED on the real County polygon: frontage-aligned
+  // width × depth, and how much of that bounding rectangle the lot fills.
+  // (The resolver's shape was derived from √(lot area) — never shown.)
+  {
+    const dims = geometryAnalysis?.parcelIsReal ? geometryAnalysis.orientedLotDims : undefined;
+    const area = sdParcel?.lotSizeSqFt ?? 0;
+    if (dims && dims.widthFt > 0 && dims.depthFt > 0 && area > 0) {
+      const fill = area / (dims.widthFt * dims.depthFt);
+      const ratio = Math.max(dims.widthFt, dims.depthFt) / Math.min(dims.widthFt, dims.depthFt);
+      const cat = fill < 0.85 ? "Irregular" : ratio > 2.5 ? "Deep narrow lot" : ratio < 1.25 ? "Nearly square" : "Rectangular";
+      intelligence.parcelShape = realField(
+        `${cat} (${dims.widthFt} ft wide × ${dims.depthFt} ft deep)`,
+        exactParcelMatch ? 90 : 75,
+        `Measured on the County parcel polygon (SANDAG/SanGIS) — lot fills ${Math.round(Math.min(fill, 1) * 100)}% of its frontage-aligned rectangle`
+      );
+    } else {
+      intelligence.parcelShape = realField(NOT_AVAILABLE_TEXT, 0, "Parcel polygon not available");
+    }
+  }
+
   // A parcel that is merely the NEAREST to the address point is real
   // geometry, but not verified to be THIS property — never label it so.
   if (geometryAnalysis?.parcelIsReal && !exactParcelMatch && geometryAnalysis.geometryStatus === "polygon-verified") {
@@ -520,6 +562,9 @@ export async function analyzeProperty(address: string): Promise<PropertyAnalysis
         lng: geocoded.lng,
         knownParcelPolygon,
         knownBuildingPolygon,
+        // Draw the jurisdiction's real ADU setback/separation, not a generic 3/6 ft.
+        propertyLineSetbackFt: stdSideRearFt,
+        residenceSeparationFt: profile.separation.minDistanceFromPrimaryHomeFt,
       });
 
       console.log(`[STRICT-GEOMETRY] ${summarizeGeometryResult(strictGeometry).replace(/\n/g, " | ")}`);
@@ -579,7 +624,6 @@ export async function analyzeProperty(address: string): Promise<PropertyAnalysis
 
   // Step 4c: Site Constraint Intelligence Layer
   // Runs after zoning determination and before buildable-area calculations
-  const hasCoastalOverlay = false; // will be updated after overlay detection
   const siteConstraints = analyzeSiteConstraints({
     lat: geocoded?.lat || 0,
     lng: geocoded?.lng || 0,
@@ -593,9 +637,8 @@ export async function analyzeProperty(address: string): Promise<PropertyAnalysis
     formattedAddress,
     lotSizeSqFt: rawLotSizeSqFt,
     zoning: intelligence.zoning.value,
-    hasCoastalOverlay,
     hasHillsideOverlay: slopePercent > 15,
-    overlayTypes: [],
+    overlays: parcelOverlays,
   });
 
   // Step 5: Calculate buildable area
@@ -772,7 +815,50 @@ export async function analyzeProperty(address: string): Promise<PropertyAnalysis
       };
 
   // Step 6: Detect overlays (base detection + Zoneomics enrichment)
-  const baseOverlays = detectOverlays(formattedAddress, jurisdictionResult.jurisdictionId, slopePercent);
+  // Hillside from the MEASURED slope; coastal/historic/flood/fire only from
+  // the real per-parcel map queries (never a whole-city "may be coastal").
+  const baseOverlays: OverlayDetection[] = detectOverlays(formattedAddress, jurisdictionResult.jurisdictionId, slopePercent).filter(
+    (o) => o.type !== "coastal"
+  );
+  if (parcelOverlays) {
+    const { coastal, historic, flood, fire } = parcelOverlays;
+    if (coastal.available && coastal.inCoastalZone) {
+      baseOverlays.push({
+        type: "coastal",
+        name: "Coastal Zone",
+        detected: true,
+        confidence: 90,
+        notes: `Parcel is inside the California Coastal Zone${coastal.zoneName ? ` (${coastal.zoneName})` : ""} — ${coastal.source}.`,
+      });
+    }
+    if (historic.available && historic.inHistoricDistrict) {
+      baseOverlays.push({
+        type: "historic",
+        name: "Historic District",
+        detected: true,
+        confidence: 90,
+        notes: `Parcel is in the ${historic.districtName ?? "a designated"} historic district — ${historic.source}.`,
+      });
+    }
+    if (flood.available && flood.anySfha) {
+      baseOverlays.push({
+        type: "flood",
+        name: "FEMA Special Flood Hazard Area",
+        detected: true,
+        confidence: 90,
+        notes: `Part or all of the parcel is in FEMA Zone ${flood.sfhaZones.join("/")} — ${flood.source}.`,
+      });
+    }
+    if (fire.available && (fire.hazardClass === "High" || fire.hazardClass === "Very High")) {
+      baseOverlays.push({
+        type: "fire",
+        name: `${fire.hazardClass} Fire Hazard Severity Zone`,
+        detected: true,
+        confidence: 90,
+        notes: `${fire.hazardClass} Fire Hazard Severity Zone per ${fire.determinedBy ?? fire.sources.join("; ")}.`,
+      });
+    }
+  }
 
   // Enrich overlays with Zoneomics data
   let overlays = baseOverlays;
@@ -866,7 +952,7 @@ export async function analyzeProperty(address: string): Promise<PropertyAnalysis
 
   // Step 9b: Generate UNIFIED recommendation that drives rent and financial scenarios
   // This is the single source of truth for the entire page
-  const zipCode = geocoded?.components.zip || "92115";
+  const zipCode = geocoded?.components.zip || null;
   let unifiedRecommendation: UnifiedRecommendation | undefined;
 
   try {
@@ -888,6 +974,8 @@ export async function analyzeProperty(address: string): Promise<PropertyAnalysis
       contextNote: buildBestContextNote(bestRec as AduTypeName, aduVerdicts, siteFacts),
       // Measured-terrain foundation cost (steep lots) on top of the build price.
       siteCostAdderUsd: bestVerdict.siteCostUsd ?? 0,
+      // Real market rent for the modeled unit at THIS address (RentCast).
+      marketRentLookup: (q) => fetchMarketRent({ address: formattedAddress, ...q }),
     });
   } catch (err) {
     console.error("[UNIFIED-RECOMMENDATION] Failed to generate unified recommendation:", err);
@@ -909,14 +997,15 @@ export async function analyzeProperty(address: string): Promise<PropertyAnalysis
       rentRangeLow: unifiedRecommendation.primaryRentEstimate.rentRangeLow,
       rentRangeHigh: unifiedRecommendation.primaryRentEstimate.rentRangeHigh,
       pricePerSqft: unifiedRecommendation.primaryRentEstimate.pricePerSqft,
-      comparableCount: 0,
+      comparableCount: unifiedRecommendation.rentComparableCount,
       bedrooms: unifiedRecommendation.primaryBedrooms,
       bathrooms: unifiedRecommendation.primaryBathrooms,
       sqft: unifiedRecommendation.primarySizeSqFt,
-      propertyType: "apartment",
-      confidence: 75,
+      propertyType: "adu",
+      // RentCast AVM for this address vs. a generic planning table.
+      confidence: unifiedRecommendation.rentSource === "market-data" ? 80 : 40,
       available: true,
-      source: "estimated",
+      source: unifiedRecommendation.rentSource === "market-data" ? "rentcast" : "estimated",
     });
   }
 
@@ -994,10 +1083,15 @@ export async function analyzeProperty(address: string): Promise<PropertyAnalysis
       jurisdictionUncertain: jurisdictionResult.uncertain,
       lotSizeSqFt: rawLotSizeSqFt,
       footprintSqFt: rawFootprintSqFt,
-      hasGeometry: parcelVisualization !== undefined,
-      hasDimensions: lotWidth > 0 && lotDepth > 0,
+      hasGeometry: geometryAnalysis?.parcelIsReal === true,
+      hasDimensions: Boolean(geometryAnalysis?.parcelIsReal && geometryAnalysis.orientedLotDims),
       hasAttomData: attomData?.available === true,
       hasOsmData: osmData?.parcel !== null && osmData?.parcel !== undefined,
+      hasCountyParcelRecord: exactParcelMatch && sdParcel?.available === true,
+      hasCountyBuildingOutlines: (sdBuildings?.buildings.length ?? 0) > 0,
+      overlaysChecked: Boolean(
+        parcelOverlays?.flood.available && parcelOverlays.fire.available && parcelOverlays.coastal.available
+      ),
       slope: slopeStr,
       parcelShape,
       cornerLot: false,
@@ -1063,6 +1157,8 @@ export async function analyzeProperty(address: string): Promise<PropertyAnalysis
     }
   }
 
+  // A desktop report is never 100% certain — a site visit always confirms it.
+  adjustedScore = Math.min(adjustedScore, 95);
   const adjustedBand: "high" | "moderate" | "low" =
     adjustedScore >= 85 ? "high" : adjustedScore >= 65 ? "moderate" : "low";
 
@@ -1124,12 +1220,18 @@ export async function analyzeProperty(address: string): Promise<PropertyAnalysis
         source: (Array.from(rentEstimates.values()).some((r) => r.source === "rentcast") ? "rentcast" : "estimated") as
           | "rentcast"
           | "estimated",
+        basis: unifiedRecommendation?.rentBasis,
+        comparableCount: unifiedRecommendation?.rentComparableCount ?? 0,
+        comparables: unifiedRecommendation?.rentComparables ?? [],
       }
     : undefined;
 
-  // Step 14: Calculate lot dimensions for site diagram
-  const mainHomeWidth = Math.round(Math.sqrt(rawFootprintSqFt * 0.7));
-  const mainHomeDepth = Math.round(rawFootprintSqFt / mainHomeWidth);
+  // Step 14: Lot / home dimensions (measured on the real polygons when
+  // available; the legacy √-area estimate is only a guarded last resort).
+  const measuredHome = strictGeometry?.metrics;
+  const estHomeWidth = rawFootprintSqFt > 0 ? Math.round(Math.sqrt(rawFootprintSqFt * 0.7)) : 0;
+  const mainHomeWidth = measuredHome?.buildingWidthFt || estHomeWidth;
+  const mainHomeDepth = measuredHome?.buildingDepthFt || (estHomeWidth > 0 ? Math.round(rawFootprintSqFt / estHomeWidth) : 0);
 
   const lotDimensions: LotDimensions = {
     lotWidth,
@@ -1204,11 +1306,13 @@ export async function analyzeProperty(address: string): Promise<PropertyAnalysis
     zoningEnrichment,
     rentData,
     dataSources: {
-      googlePlaces: Boolean(geocoded),
+      geocoder: geocoded?.provider ?? null,
+      googlePlaces: Boolean(geocoded) && /google/i.test(geocoded?.provider ?? ""),
       attom: attomData?.available === true,
       openStreetMap: osmData?.parcel !== null && osmData?.parcel !== undefined,
       zoneomics: zoneomicsData?.available === true,
-      rentCast: isRentCastAvailable(),
+      // True only when RentCast actually returned the rent shown.
+      rentCast: unifiedRecommendation?.rentSource === "market-data",
       mapbox: isMapboxAvailable(),
       microsoftFootprints: msFootprints?.available === true,
       lidar: lidarTerrain?.lidarAvailable === true,
@@ -1224,7 +1328,8 @@ export async function analyzeProperty(address: string): Promise<PropertyAnalysis
     rentScenarios: unifiedRecommendation
       ? buildUnifiedRentScenarios(unifiedRecommendation).map((s) => ({
           aduType: s.aduType,
-          source: "estimated" as const,
+          source: (unifiedRecommendation!.rentSource === "market-data" ? "rentcast" : "estimated") as "rentcast" | "estimated",
+          basis: unifiedRecommendation!.rentBasis,
           conservative: s.conservative,
           market: s.market,
           premium: s.premium,
@@ -1233,7 +1338,7 @@ export async function analyzeProperty(address: string): Promise<PropertyAnalysis
     imageryWarning: [
       countyRecordsNote,
       siteFacts.recordsVintageNote,
-      "Aerial imagery may not reflect recent construction or site changes. A professional site visit is recommended to verify current conditions.",
+      "County building outlines may not reflect recent construction or site changes. A professional site visit is recommended to verify current conditions.",
     ]
       .filter(Boolean)
       .join(" "),
@@ -1294,6 +1399,13 @@ export async function analyzeProperty(address: string): Promise<PropertyAnalysis
       footprintSource: geometryAnalysis?.footprintSource,
       placementMethod: geometryAnalysis?.placement?.placementMethod,
       geometryConfidence: geometryAnalysis?.geometryConfidence,
+      resolvedFieldSources: Object.fromEntries(
+        (["apn", "lotSizeSqFt", "homeAreaSqFt", "footprintSqFt", "openYardSqFt", "parcelShape"] as const).map((k) => [
+          k,
+          { source: intelligence[k].sources[0] ?? "Not available", confidence: intelligence[k].confidence },
+        ])
+      ),
+      countyRecordsAuthoritative: exactParcelMatch && sdParcel?.available === true && (sdBuildings?.buildings.length ?? 0) > 0,
     }),
 
     // v8 layers — Strict Geometry Pipeline (single-source, for site diagram)
@@ -1313,6 +1425,8 @@ export async function analyzeProperty(address: string): Promise<PropertyAnalysis
                 buildableAreaSqFt: strictGeometry.buildableEnvelope.buildableAreaSqFt,
                 bestZone: strictGeometry.buildableEnvelope.bestZone,
                 constraints: strictGeometry.buildableEnvelope.constraints,
+                propertyLineSetbackFt: strictGeometry.buildableEnvelope.propertyLineSetbackFt,
+                residenceSeparationFt: strictGeometry.buildableEnvelope.residenceSeparationFt,
               }
             : null,
           parcelSource: strictGeometry.parcelSource,
@@ -1606,7 +1720,14 @@ function verdictPriceRange(v: AduTypeVerdict): string {
     garageStalls: v.type === "Garage Conversion" ? (v.maxSqFt >= 3 * GARAGE_SQFT_PER_STALL ? 3 : 2) : undefined,
   });
   const site = v.siteCostUsd ?? 0;
-  return formatPriceRange(price.low + site, price.high + site);
+  const range = formatPriceRange(price.low + site, price.high + site);
+  // When the only DCS plan of this type is a different size (e.g. the one
+  // 1,200 sq ft two-story plan for an 800 sq ft unit), say what was priced.
+  const plan = price.matchedPlan;
+  const planPriced = plan && price.low === plan.priceLow && price.high === plan.priceHigh;
+  return planPriced && Math.abs(plan.sqFt - v.maxSqFt) >= 100
+    ? `${range} (priced from DCS's ${plan.sqFt.toLocaleString()} sq ft ${plan.name} plan)`
+    : range;
 }
 
 /** One plain-English sentence explaining why the best type was chosen. */
@@ -1723,7 +1844,7 @@ function synchronizeRecommendations(
       if (recommendation.type !== unifiedRecommendation.primaryType) return recommendation;
       const verdict = verdicts[recommendation.type as AduTypeName];
       const sizeKnown = verdict ? verdict.maxSqFt > 0 : true;
-      const rent = `$${unifiedRecommendation.primaryRentEstimate.rentRangeLow.toLocaleString()}-$${unifiedRecommendation.primaryRentEstimate.rentRangeHigh.toLocaleString()}/month`;
+      const rent = `$${unifiedRecommendation.primaryRentEstimate.rentRangeLow.toLocaleString()}-$${unifiedRecommendation.primaryRentEstimate.rentRangeHigh.toLocaleString()}/month (${unifiedRecommendation.rentSource === "market-data" ? "RentCast market estimate for this address" : "DCS rent-table planning estimate"})`;
       return {
         ...recommendation,
         // Feasibility stays exactly what the real-data rules said — the
@@ -1733,7 +1854,7 @@ function synchronizeRecommendations(
           : recommendation.estimatedSizeRange,
         priceRange: unifiedRecommendation.priceRange,
         description: sizeKnown
-          ? `${recommendation.description} Best fit: ${unifiedRecommendation.primaryUnitLabel} at ${unifiedRecommendation.primarySizeSqFt.toLocaleString()} sq ft, estimated market rent ${rent}.`
+          ? `${recommendation.description} Best fit: ${unifiedRecommendation.primaryUnitLabel} at ${unifiedRecommendation.primarySizeSqFt.toLocaleString()} sq ft, estimated rent ${rent}.`
           : `${recommendation.description} Financials below model a ${unifiedRecommendation.primarySizeSqFt.toLocaleString()} sq ft unit pending site review.`,
       };
     })

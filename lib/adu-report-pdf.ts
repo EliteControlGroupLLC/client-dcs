@@ -111,7 +111,8 @@ function fmtPct(n: number | null, digits = 1): string {
 }
 
 function fmtYears(n: number | null): string {
-  if (n === null) return "";
+  // 99 is the model's "never pays back" sentinel — not a real payback period.
+  if (n === null || n >= 99) return "";
   const rounded = Number(n.toFixed(1));
   return `${rounded.toLocaleString("en-US", { maximumFractionDigits: 1 })} yrs`;
 }
@@ -505,6 +506,8 @@ function intelField(
     return { value: v || NA, status: v ? "Reported" : "Unavailable" };
   }
   const display = str(f.displayValue);
+  // An "Unavailable" field holds an assumed stand-in, not data — never print it.
+  if (!display && str(f.status) === "Unavailable") return { value: NA, status: "Unavailable" };
   const v = display || format(f.value);
   const status = str(f.status) || (v ? "Reported" : "Unavailable");
   return { value: v || NA, status: v ? status : "Unavailable" };
@@ -622,8 +625,9 @@ export async function buildAduReportPdf(lead: AduReportLead, scanResults: unknow
   if (best) {
     w.callout("BEST RECOMMENDATION", bannerDetails && bannerDetails !== best ? `${best}\n${bannerDetails}` : best);
   }
-  const enhanced = arr(get(scan, "enhancedFeasibility")).filter(isObj);
-  const feasRows = (enhanced.length ? enhanced : arr(get(scan, "recommendations")).filter(isObj)).slice(0, 12);
+  // Same rows (and DCS plan pricing) the client saw in "Recommended ADU Paths".
+  const recs = arr(get(scan, "recommendations")).filter(isObj);
+  const feasRows = (recs.length ? recs : arr(get(scan, "enhancedFeasibility")).filter(isObj)).slice(0, 12);
   if (feasRows.length) {
     w.space(4);
     w.table(
@@ -663,7 +667,7 @@ export async function buildAduReportPdf(lead: AduReportLead, scanResults: unknow
       [
         { header: "Scenario", width: 170 },
         { header: "Total cost", width: 85, align: "right" },
-        { header: "Monthly income", width: 90, align: "right" },
+        { header: "Monthly rent", width: 90, align: "right" },
         { header: "ROI", width: 60, align: "right" },
         { header: "Payback", width: 70, align: "right" },
       ],
@@ -678,8 +682,32 @@ export async function buildAduReportPdf(lead: AduReportLead, scanResults: unknow
         bold: [true],
       })),
     );
+    const first = scenarios[0];
+    const rentBasis = str(first.rentBasis);
+    const assumptions = arr(first.assumptions).map(str).filter(Boolean);
+    if (rentBasis) {
+      w.space(4);
+      w.paragraph(`Rent basis: ${rentBasis}`, { size: 8.5, color: C.muted });
+    }
+    if (assumptions.length) {
+      w.space(4);
+      w.paragraph("Planning assumptions", { font: fonts.bold, size: 9, color: C.ink });
+      w.bullets(assumptions);
+    }
   } else {
     w.paragraph("Financial scenarios were not available for this property.", { size: 9.5, color: C.muted });
+  }
+
+  // 5b. Site conditions (each from a real map query, or "Not checked")
+  const constraints = arr(get(scan, "siteConstraints", "constraints")).filter(isObj);
+  if (constraints.length) {
+    w.sectionTitle("Site Conditions", ++n);
+    w.keyValues(
+      constraints.map((c) => ({
+        label: titleCase(str(c.category)),
+        value: num(c.confidence) === 0 ? `Not checked — ${str(c.classification)}` : `${str(c.classification)} (source: ${str(c.source)})`,
+      })),
+    );
   }
 
   // 6. Confidence

@@ -210,9 +210,9 @@ const sampleCache = new Map<string, { t: number; p: Promise<TerrainSampleResult>
 
 function cacheKey(lat: number, lng: number, rings: LngLatRings | null | undefined, w: number, d: number): string {
   if (rings && rings.length > 0 && rings[0].length > 0) {
-    let h = 0;
-    for (const ring of rings) for (const [x, y] of ring) h = (h * 31 + Math.round(x * 1e6) * 7 + Math.round(y * 1e6)) | 0;
-    return `rings:${rings.length}:${rings[0].length}:${h}`;
+    // Exact vertex list (not a 32-bit hash) so two parcels can never share
+    // a cache entry and receive each other's slope.
+    return `rings:${rings.map((r) => r.map(([x, y]) => `${x.toFixed(7)},${y.toFixed(7)}`).join(";")).join("|")}`;
   }
   return `pt:${lat.toFixed(6)},${lng.toFixed(6)}:${Math.round(w)}x${Math.round(d)}`;
 }

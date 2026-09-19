@@ -18,8 +18,25 @@ export function getConfidenceStatus(score: number): ConfidenceStatus {
 }
 
 export function formatFieldValue(field: IntelligenceField<number>, unit: string): string {
-  const prefix = field.status === "Estimated" ? "Approx. " : "";
-  return `${prefix}${field.value.toLocaleString()} ${unit}`;
+  return displayFieldValue(field, unit);
+}
+
+/**
+ * The one way a report field is printed. An "Unavailable" field (confidence
+ * < 50 — e.g. an assumed typical value when no record exists) is shown as
+ * "Not available", never as a number that looks like data.
+ */
+export function displayFieldValue(field: IntelligenceField<string | number> | null | undefined, unit?: string): string {
+  if (!field) return "Not available";
+  if (field.displayValue) return field.displayValue;
+  const v = field.value;
+  if (typeof v === "number") {
+    if (field.status === "Unavailable" || !Number.isFinite(v)) return "Not available";
+    const prefix = field.status === "Estimated" ? "Approx. " : "";
+    return `${prefix}${v.toLocaleString()}${unit ? ` ${unit}` : ""}`;
+  }
+  const str = v == null ? "" : String(v).trim();
+  return str === "" ? "Not available" : str;
 }
 
 export interface PropertyIntelligence {
@@ -271,6 +288,9 @@ export interface PropertyAnalysisResult {
     estimatedRoi: number;
     estimatedPaybackYears: number;
     estimatedValueAdd: number;
+    rentSource?: "rentcast" | "estimated";
+    rentBasis?: string;
+    assumptions?: string[];
   }[];
   confidenceScore?: number;
   confidenceBand?: "high" | "moderate" | "low";
@@ -327,8 +347,21 @@ export interface PropertyAnalysisResult {
     }[];
     available: true;
     source: "rentcast" | "estimated";
+    /** Plain-English basis of the rent shown (what was priced, and by whom). */
+    basis?: string;
+    comparableCount?: number;
+    comparables?: {
+      address: string;
+      monthlyRent: number;
+      squareFootage: number | null;
+      bedrooms: number | null;
+      bathrooms: number | null;
+      distanceMiles: number | null;
+    }[];
   };
   dataSources?: {
+    /** Which geocoder actually resolved the address (e.g. "U.S. Census Geocoder"). */
+    geocoder?: string | null;
     googlePlaces: boolean;
     attom: boolean;
     openStreetMap: boolean;
@@ -366,6 +399,7 @@ export interface PropertyAnalysisResult {
     premium: { monthlyRent: number; annualRent: number };
     source: "rentcast" | "estimated";
     aduType: string;
+    basis?: string;
   }[];
   imageryWarning?: string;
 
@@ -491,6 +525,8 @@ export interface PropertyAnalysisResult {
       buildableAreaSqFt: number;
       bestZone: "rear" | "left-side" | "right-side" | "none";
       constraints: string[];
+      propertyLineSetbackFt?: number;
+      residenceSeparationFt?: number;
     } | null;
     /** Parcel data source */
     parcelSource: string;

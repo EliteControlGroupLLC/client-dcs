@@ -43,7 +43,7 @@ export async function POST(request: NextRequest) {
     });
 
     const projectedValue =
-      valuation.estimatedValue !== null
+      valuation.estimatedValue !== null && aduValueAdd.expected > 0
         ? {
             low: valuation.estimatedValue + aduValueAdd.low,
             expected: valuation.estimatedValue + aduValueAdd.expected,

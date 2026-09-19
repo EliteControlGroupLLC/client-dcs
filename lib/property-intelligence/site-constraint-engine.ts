@@ -2,6 +2,12 @@
 // Analyzes environmental and regulatory conditions affecting property development.
 // Runs after zoning determination and before buildable-area calculations.
 // Evaluates: flood risk, fire hazard, terrain/slope, coastal zone, easements.
+// Every category comes from a real query for THIS parcel (FEMA NFHL, CAL FIRE
+// + City fire maps, Coastal Zone boundary, SanGIS recorded easements, USGS
+// 3DEP slope). A category that couldn't be checked says "Not available" with
+// confidence 0 — it is never assumed to be hazard-free.
+
+import type { ParcelOverlays } from "./hazard-overlay-service";
 
 export interface SiteConstraint {
   category: "flood" | "fire" | "terrain" | "coastal" | "easement";
@@ -15,15 +21,20 @@ export interface SiteConstraint {
 
 export interface FloodRiskAnalysis {
   floodZone: string;
-  floodRisk: "None" | "Low" | "Moderate" | "Elevated" | "High";
+  floodRisk: "None" | "Low" | "Moderate" | "Elevated" | "High" | "Unknown";
   baseFloodElevation: string | null;
   developmentRestrictions: string;
+  source: string;
+  /** True when FEMA's map was actually queried for this parcel. */
+  checked: boolean;
 }
 
 export interface FireHazardAnalysis {
-  hazardZone: "None" | "Moderate" | "High" | "Very High";
+  hazardZone: "None" | "Moderate" | "High" | "Very High" | "Unknown";
   classification: string;
   constructionImplications: string;
+  source: string;
+  checked: boolean;
 }
 
 export interface TerrainAnalysis {
@@ -47,6 +58,8 @@ export interface CoastalZoneAnalysis {
   inCoastalZone: boolean;
   permitRequirement: string;
   additionalApprovalLayers: string[];
+  source: string;
+  checked: boolean;
 }
 
 export interface EasementAnalysis {
@@ -56,6 +69,8 @@ export interface EasementAnalysis {
     confidence: number;
   }[];
   buildableAreaImpact: string;
+  source: string;
+  checked: boolean;
 }
 
 export type ConstraintRiskLevel = "Low" | "Moderate" | "High";
@@ -88,130 +103,105 @@ interface ConstraintInput {
   formattedAddress: string;
   lotSizeSqFt: number;
   zoning: string;
-  hasCoastalOverlay: boolean;
   hasHillsideOverlay: boolean;
-  overlayTypes: string[];
+  /** Real per-parcel overlay queries (null when no parcel polygon). */
+  overlays: ParcelOverlays | null;
 }
 
 // ──────────────────────────────────────────────────────────
-// FLOOD RISK ANALYSIS
-// Uses FEMA flood zone classification based on location data
+// FLOOD RISK — FEMA NFHL queried with the real parcel polygon
+// (hazard-overlay-service). Not checked ⇒ says so; never assumed "minimal".
 // ──────────────────────────────────────────────────────────
 
 function analyzeFloodRisk(input: ConstraintInput): FloodRiskAnalysis {
-  // San Diego County flood zone estimation based on geographic indicators
-  const { lat, lng, formattedAddress } = input;
-  const addressLower = formattedAddress.toLowerCase();
-
-  // Known flood-prone areas in San Diego County
-  const floodProneKeywords = [
-    "mission valley", "fashion valley", "hotel circle",
-    "mission bay", "pacific beach", "ocean beach",
-    "san diego river", "sweetwater", "otay river",
-    "tijuana river", "chollas creek", "tecolote",
-    "rose canyon", "los penasquitos",
-  ];
-
-  const nearFloodArea = floodProneKeywords.some((kw) => addressLower.includes(kw));
-
-  // Low-elevation coastal areas
-  const isLowCoastal = lat > 0 && lng < -117.1 && lat < 32.85;
-
-  if (nearFloodArea) {
+  const f = input.overlays?.flood;
+  if (!f || !f.available) {
     return {
-      floodZone: "AE (estimated)",
-      floodRisk: "Elevated",
-      baseFloodElevation: "Varies — site-specific BFE determination needed",
-      developmentRestrictions: "Elevated foundations or flood mitigation may be required. FEMA flood insurance likely required.",
-    };
-  }
-
-  if (isLowCoastal) {
-    return {
-      floodZone: "X (Moderate)",
-      floodRisk: "Moderate",
+      floodZone: "Not available",
+      floodRisk: "Unknown",
       baseFloodElevation: null,
-      developmentRestrictions: "Standard construction permitted. Flood insurance may be recommended but not required.",
+      developmentRestrictions: "FEMA flood map could not be checked for this parcel — confirm the flood zone at msc.fema.gov.",
+      source: f?.source ?? "FEMA National Flood Hazard Layer (not queried)",
+      checked: false,
     };
   }
-
+  const bfe = f.baseFloodElevationFt != null ? `${f.baseFloodElevationFt} ft (FEMA static BFE)` : null;
+  if (f.anySfha) {
+    const centerIsSfha = f.zone != null && f.sfhaZones.includes(f.zone);
+    return {
+      floodZone: centerIsSfha
+        ? `${f.zone} (Special Flood Hazard Area)`
+        : `${f.zone ?? "Unmapped"} at lot center; part of the lot touches Zone ${f.sfhaZones.join("/")}`,
+      floodRisk: centerIsSfha ? "High" : "Elevated",
+      baseFloodElevation: bfe ?? (centerIsSfha ? "Not published — site-specific BFE determination needed" : null),
+      developmentRestrictions: centerIsSfha
+        ? "Parcel is in a FEMA Special Flood Hazard Area: new habitable floor must be elevated above base flood elevation; flood insurance required with a federally backed mortgage."
+        : "Part of the parcel is mapped in a FEMA Special Flood Hazard Area — keep the ADU outside it or elevate; confirm with an elevation certificate.",
+      source: f.source,
+      checked: true,
+    };
+  }
+  const zone = f.zone ?? "Unmapped";
+  const subtype = f.zoneSubtype ? ` — ${f.zoneSubtype.toLowerCase()}` : "";
+  const shaded = /0\.2|500/i.test(f.zoneSubtype ?? "");
   return {
-    floodZone: "X (Minimal)",
-    floodRisk: "Low",
+    floodZone: `${zone}${subtype}`,
+    floodRisk: f.zone ? (shaded ? "Moderate" : "Low") : "Unknown",
     baseFloodElevation: null,
-    developmentRestrictions: "No flood-related development restrictions expected.",
+    developmentRestrictions: f.zone
+      ? "Outside FEMA's Special Flood Hazard Area — no flood-related building restrictions."
+      : "Parcel is not on a FEMA flood map panel — confirm with the City/County floodplain administrator.",
+    source: f.source,
+    checked: true,
   };
 }
 
 // ──────────────────────────────────────────────────────────
-// FIRE HAZARD ZONE ANALYSIS
-// Uses California wildfire hazard severity zone classifications
+// FIRE HAZARD — CAL FIRE LRA/SRA maps + City of San Diego adopted VHFHSZ map
 // ──────────────────────────────────────────────────────────
 
 function analyzeFireHazard(input: ConstraintInput): FireHazardAnalysis {
-  const { formattedAddress, slopePercent } = input;
-  const addressLower = formattedAddress.toLowerCase();
-
-  // Known Very High Fire Hazard Severity Zones in San Diego County
-  const veryHighFireAreas = [
-    "rancho bernardo", "4s ranch", "rancho penasquitos",
-    "scripps ranch", "tierrasanta", "san pasqual",
-    "ramona", "julian", "alpine", "jamul", "lakeside",
-    "harbison canyon", "dehesa", "crest", "flinn springs",
-    "eucalyptus hills", "blossom valley", "mount helix",
-    "rancho san diego", "dictionary hill",
-  ];
-
-  // High Fire Hazard areas
-  const highFireAreas = [
-    "poway", "san marcos", "escondido", "valley center",
-    "fallbrook", "bonsall", "vista", "elfin forest",
-    "harmony grove", "san elijo", "olivenhain",
-    "del dios", "rancho santa fe",
-  ];
-
-  // Moderate fire areas (hillside / semi-rural)
-  const moderateFireAreas = [
-    "la jolla", "torrey pines", "carmel valley",
-    "del mar", "solana beach", "encinitas",
-    "carlsbad", "san dieguito",
-  ];
-
-  const isVeryHigh = veryHighFireAreas.some((a) => addressLower.includes(a));
-  const isHigh = highFireAreas.some((a) => addressLower.includes(a));
-  const isModerate = moderateFireAreas.some((a) => addressLower.includes(a));
-
-  // Slope > 15% also increases fire risk
-  const slopeElevated = slopePercent > 15;
-
-  if (isVeryHigh || (isHigh && slopeElevated)) {
+  const f = input.overlays?.fire;
+  if (!f || !f.available) {
+    return {
+      hazardZone: "Unknown",
+      classification: "Fire hazard zone not available",
+      constructionImplications:
+        "The CAL FIRE / City fire hazard maps could not be checked for this parcel — confirm the Fire Hazard Severity Zone before design.",
+      source: f?.sources.join("; ") || "CAL FIRE Fire Hazard Severity Zone maps (not queried)",
+      checked: false,
+    };
+  }
+  const by = f.determinedBy ? ` (${f.determinedBy})` : "";
+  const src = f.sources.join("; ");
+  if (f.hazardClass === "Very High") {
     return {
       hazardZone: "Very High",
-      classification: "Very High Fire Hazard Severity Zone (VHFHSZ)",
-      constructionImplications: "Ignition-resistant materials required. Enhanced defensible space (100ft+). Fire-rated roofing, eaves, and vents mandatory. May require fire sprinkler system for ADU.",
+      classification: `Very High Fire Hazard Severity Zone${by}`,
+      constructionImplications:
+        "Wildland-urban interface building standards apply (CBC Ch. 7A: ignition-resistant exterior, Class A roof, ember-resistant vents); defensible space required. In the City of San Diego this also means 4 ft ADU side/rear setbacks.",
+      source: src,
+      checked: true,
     };
   }
-
-  if (isHigh) {
+  if (f.hazardClass === "High" || f.hazardClass === "Moderate") {
     return {
-      hazardZone: "High",
-      classification: "High Fire Hazard Severity Zone",
-      constructionImplications: "Ignition-resistant materials may be required. Defensible space requirements apply. Fire-rated roofing recommended.",
+      hazardZone: f.hazardClass,
+      classification: `${f.hazardClass} Fire Hazard Severity Zone${by}`,
+      constructionImplications:
+        f.responsibilityArea === "SRA" || f.hazardClass === "High"
+          ? "Wildland-urban interface building standards (CBC Ch. 7A) likely apply; defensible space required."
+          : "Moderate zone — confirm with the local fire authority whether CBC Ch. 7A standards apply.",
+      source: src,
+      checked: true,
     };
   }
-
-  if (isModerate || slopeElevated) {
-    return {
-      hazardZone: "Moderate",
-      classification: "Moderate Fire Hazard Severity Zone",
-      constructionImplications: "Standard fire safety construction codes apply. Ignition-resistant materials recommended but may not be mandatory.",
-    };
-  }
-
   return {
     hazardZone: "None",
-    classification: "Non-Fire Hazard Area",
-    constructionImplications: "Standard construction codes apply. No additional fire-related requirements.",
+    classification: "Not in a mapped Fire Hazard Severity Zone",
+    constructionImplications: "Standard construction codes apply — no wildland-urban interface requirements from the state or City maps.",
+    source: src,
+    checked: true,
   };
 }
 
@@ -312,123 +302,71 @@ function analyzeTerrain(input: ConstraintInput): TerrainAnalysis {
 }
 
 // ──────────────────────────────────────────────────────────
-// COASTAL ZONE ANALYSIS
-// Determines if property is in a regulated coastal zone
+// COASTAL ZONE — Coastal Commission boundary queried with the parcel polygon
 // ──────────────────────────────────────────────────────────
 
 function analyzeCoastalZone(input: ConstraintInput): CoastalZoneAnalysis {
-  const { hasCoastalOverlay, formattedAddress, jurisdictionId } = input;
-  const addressLower = formattedAddress.toLowerCase();
-
-  // Coastal jurisdictions in San Diego County
-  const coastalJurisdictions = [
-    "coronado", "del-mar", "solana-beach", "imperial-beach",
-    "carlsbad", "encinitas", "oceanside",
-  ];
-
-  // Coastal neighborhoods within City of San Diego
-  const coastalNeighborhoods = [
-    "ocean beach", "pacific beach", "mission beach",
-    "la jolla", "point loma", "sunset cliffs",
-    "torrey pines", "del mar heights", "carmel valley",
-    "bird rock", "windansea",
-  ];
-
-  const isCoastalJurisdiction = coastalJurisdictions.includes(jurisdictionId);
-  const isCoastalNeighborhood = coastalNeighborhoods.some((n) => addressLower.includes(n));
-  const inCoastalZone = hasCoastalOverlay || isCoastalJurisdiction || isCoastalNeighborhood;
-
-  if (inCoastalZone) {
-    const approvalLayers: string[] = [
-      "Coastal Development Permit (CDP) likely required",
-    ];
-
-    if (isCoastalJurisdiction && jurisdictionId !== "san-diego-city") {
-      approvalLayers.push("California Coastal Commission review may apply");
-    }
-
-    if (addressLower.includes("la jolla") || addressLower.includes("torrey pines")) {
-      approvalLayers.push("Community Plan area review may be required");
-    }
-
+  const c = input.overlays?.coastal;
+  if (!c || !c.available) {
     return {
-      inCoastalZone: true,
-      permitRequirement: "Coastal Development Permit likely required. Additional review timelines apply.",
-      additionalApprovalLayers: approvalLayers,
+      inCoastalZone: false,
+      checked: false,
+      permitRequirement: "Coastal Zone boundary could not be checked — confirm whether a Coastal Development Permit applies.",
+      additionalApprovalLayers: [],
+      source: c?.source ?? "California Coastal Zone boundary (not queried)",
     };
   }
-
+  if (c.inCoastalZone) {
+    return {
+      inCoastalZone: true,
+      checked: true,
+      permitRequirement:
+        "Parcel is inside the California Coastal Zone — a Coastal Development Permit (or exemption) is typically required for an ADU.",
+      additionalApprovalLayers: [
+        "Coastal Development Permit or exemption determination",
+        ...(input.jurisdictionId !== "san-diego-city" ? ["Coastal Commission appeal jurisdiction may apply"] : []),
+      ],
+      source: c.source,
+    };
+  }
   return {
     inCoastalZone: false,
-    permitRequirement: "No coastal permit required.",
+    checked: true,
+    permitRequirement: "Outside the Coastal Zone — no Coastal Development Permit needed.",
     additionalApprovalLayers: [],
+    source: c.source,
   };
 }
 
 // ──────────────────────────────────────────────────────────
-// UTILITY AND EASEMENT DETECTION
-// Flags potential easements based on parcel characteristics
+// EASEMENTS — only RECORDED open-space/conservation easements are public GIS
+// data. Utility/access/drainage easements live in the title report; we never
+// guess them.
 // ──────────────────────────────────────────────────────────
 
 function analyzeEasements(input: ConstraintInput): EasementAnalysis {
-  const { lotSizeSqFt, formattedAddress } = input;
-  const addressLower = formattedAddress.toLowerCase();
-  const possibleEasements: { type: string; description: string; confidence: number }[] = [];
-
-  // Standard utility easement — most residential parcels have one
-  possibleEasements.push({
-    type: "utility",
-    description: "Standard utility easement likely present along property boundaries (typically 5-10 ft).",
-    confidence: 70,
-  });
-
-  // Sewer easement detection
-  const sewerKeywords = ["canyon", "creek", "valley", "river", "wash"];
-  if (sewerKeywords.some((kw) => addressLower.includes(kw))) {
-    possibleEasements.push({
-      type: "sewer",
-      description: "Possible sewer or drainage easement — property near natural drainage feature.",
-      confidence: 50,
-    });
+  const e = input.overlays?.recordedEasements;
+  const titleNote = "Utility, access and drainage easements are only shown on a title report / survey (not checked here).";
+  if (!e || !e.available) {
+    return {
+      possibleEasements: [],
+      checked: false,
+      buildableAreaImpact: `Recorded easement map could not be checked. ${titleNote}`,
+      source: e?.source ?? "SanGIS recorded easements (not queried)",
+    };
   }
-
-  // Access easement on larger lots or flag lots
-  if (lotSizeSqFt > 10000) {
-    possibleEasements.push({
-      type: "access",
-      description: "Possible access easement — larger lot may have shared driveway or utility access corridor.",
-      confidence: 40,
-    });
-  }
-
-  // Drainage easement near hillside
-  if (input.slopePercent > 10) {
-    possibleEasements.push({
-      type: "drainage",
-      description: "Possible drainage easement — sloped terrain may have runoff management requirements.",
-      confidence: 45,
-    });
-  }
-
-  // Corner lots often have additional easements
-  if (addressLower.includes("corner") || addressLower.includes("intersection")) {
-    possibleEasements.push({
-      type: "utility",
-      description: "Corner lot may have additional utility easements along both street frontages.",
-      confidence: 55,
-    });
-  }
-
-  const impactCount = possibleEasements.filter((e) => e.confidence >= 50).length;
-  const buildableAreaImpact = impactCount >= 2
-    ? "Buildable area may be reduced by multiple easements. Professional survey recommended."
-    : impactCount === 1
-    ? "Minor buildable area reduction possible. Verification recommended."
-    : "Minimal easement impact expected. Standard utility easements assumed.";
-
   return {
-    possibleEasements,
-    buildableAreaImpact,
+    possibleEasements: e.easements.map((x) => ({
+      type: "open-space",
+      description: `Recorded open-space/conservation-type easement overlapping the parcel${x.docNumber ? ` (Doc. ${x.docNumber}` : ""}${x.recordedDate ? `${x.docNumber ? ", " : " ("}recorded ${x.recordedDate})` : x.docNumber ? ")" : ""}.`,
+      confidence: 80,
+    })),
+    checked: true,
+    buildableAreaImpact:
+      e.easements.length > 0
+        ? `A recorded open-space/conservation easement overlaps this parcel — no building is allowed inside it; its exact location must be confirmed on the recorded document. ${titleNote}`
+        : `No recorded open-space/conservation easement on this parcel. ${titleNote}`,
+    source: e.source,
   };
 }
 
@@ -446,42 +384,48 @@ function buildConstraints(
   const constraints: SiteConstraint[] = [];
 
   // Flood constraint
-  const floodSeverityMap: Record<string, SiteConstraint["severity"]> = {
+  const floodSeverityMap: Record<FloodRiskAnalysis["floodRisk"], SiteConstraint["severity"]> = {
     None: "none",
-    Low: "low",
-    Moderate: "moderate",
-    Elevated: "high",
-    High: "very-high",
+    Low: "none",
+    Moderate: "low",
+    Elevated: "moderate",
+    High: "high",
+    Unknown: "none",
   };
   constraints.push({
     category: "flood",
-    classification: `Flood Zone: ${flood.floodZone}`,
-    severity: floodSeverityMap[flood.floodRisk] || "low",
+    classification: flood.checked ? `FEMA Flood Zone: ${flood.floodZone}` : "Flood zone not available",
+    severity: floodSeverityMap[flood.floodRisk] || "none",
     constructionImpact: flood.developmentRestrictions,
-    recommendation: flood.floodRisk === "Low"
-      ? "No action needed."
-      : "Obtain FEMA flood determination letter. Consider flood insurance.",
-    confidence: flood.floodRisk === "Low" ? 70 : 55,
-    source: "FEMA Flood Zone Estimation",
+    recommendation: !flood.checked
+      ? "Look up the parcel on FEMA's Flood Map Service Center (msc.fema.gov) before design."
+      : flood.floodRisk === "High" || flood.floodRisk === "Elevated"
+        ? "Get an elevation certificate and plan the ADU floor above base flood elevation."
+        : "No action needed.",
+    confidence: flood.checked ? 90 : 0,
+    source: flood.source,
   });
 
   // Fire constraint
-  const fireSeverityMap: Record<string, SiteConstraint["severity"]> = {
+  const fireSeverityMap: Record<FireHazardAnalysis["hazardZone"], SiteConstraint["severity"]> = {
     None: "none",
-    Moderate: "moderate",
-    High: "high",
-    "Very High": "very-high",
+    Moderate: "low",
+    High: "moderate",
+    "Very High": "high",
+    Unknown: "none",
   };
   constraints.push({
     category: "fire",
     classification: fire.classification,
     severity: fireSeverityMap[fire.hazardZone] || "none",
     constructionImpact: fire.constructionImplications,
-    recommendation: fire.hazardZone === "None"
-      ? "No additional fire safety measures required."
-      : "Plan for ignition-resistant materials and defensible space requirements.",
-    confidence: fire.hazardZone === "None" ? 70 : 60,
-    source: "CAL FIRE Hazard Severity Zone Estimation",
+    recommendation: !fire.checked
+      ? "Confirm the Fire Hazard Severity Zone with the local fire authority before design."
+      : fire.hazardZone === "None"
+        ? "No additional fire safety measures required."
+        : "Design to wildland-urban interface standards (ignition-resistant materials, defensible space).",
+    confidence: fire.checked ? 90 : 0,
+    source: fire.source,
   });
 
   // Terrain constraint
@@ -514,30 +458,35 @@ function buildConstraints(
   // Coastal constraint
   constraints.push({
     category: "coastal",
-    classification: coastal.inCoastalZone ? "Coastal Zone" : "Non-Coastal",
+    classification: !coastal.checked ? "Coastal Zone not available" : coastal.inCoastalZone ? "In the Coastal Zone" : "Outside the Coastal Zone",
     severity: coastal.inCoastalZone ? "moderate" : "none",
     constructionImpact: coastal.inCoastalZone
-      ? "Additional permitting required. Expect 2-6 months added to approval timeline."
-      : "No coastal-related impact.",
+      ? "Coastal Development Permit review adds time to approval (commonly 2–6 months)."
+      : coastal.checked
+        ? "No coastal-related impact."
+        : "Not checked.",
     recommendation: coastal.permitRequirement,
-    confidence: coastal.inCoastalZone ? 60 : 75,
-    source: "California Coastal Commission Zone Estimation",
+    confidence: coastal.checked ? 90 : 0,
+    source: coastal.source,
   });
 
-  // Easement constraint
-  const highConfEasements = easements.possibleEasements.filter((e) => e.confidence >= 50);
+  // Easement constraint (recorded open-space/conservation easements only)
+  const recorded = easements.possibleEasements.length;
   constraints.push({
     category: "easement",
-    classification: highConfEasements.length > 0
-      ? `${highConfEasements.length} possible easement(s) detected`
-      : "Standard utility easements assumed",
-    severity: highConfEasements.length >= 2 ? "moderate" : highConfEasements.length === 1 ? "low" : "none",
+    classification: !easements.checked
+      ? "Recorded easements not available"
+      : recorded > 0
+        ? `${recorded} recorded open-space/conservation easement(s) on the parcel`
+        : "No recorded open-space/conservation easement",
+    severity: recorded > 0 ? "moderate" : "none",
     constructionImpact: easements.buildableAreaImpact,
-    recommendation: highConfEasements.length > 0
-      ? "Professional title search and property survey recommended to verify easement locations."
-      : "No action needed. Standard easements assumed.",
-    confidence: 50,
-    source: "Parcel Characteristic Analysis",
+    recommendation:
+      recorded > 0
+        ? "Pull the recorded easement document and a survey to locate it before siting the ADU."
+        : "A preliminary title report will show any utility/access easements.",
+    confidence: easements.checked ? 80 : 0,
+    source: easements.source,
   });
 
   return constraints;
@@ -568,24 +517,26 @@ function calculateOverallRisk(constraints: SiteConstraint[]): {
   for (const c of constraints) {
     totalScore += severityScores[c.severity];
 
-    // Cost adjustments by severity
-    if (c.severity === "moderate") costAdjustment += 5;
-    else if (c.severity === "high") costAdjustment += 12;
-    else if (c.severity === "very-high") costAdjustment += 20;
+    // No blanket % cost markup: measured-slope foundation cost is already
+    // priced into the build estimate (adu-fit-rules siteCostUsd), and flood/
+    // fire/coastal cost impacts are design-specific, so they're described in
+    // words rather than invented as a percentage.
+    costAdjustment += 0;
 
-    // Timeline adjustments
+    // Timeline adjustments (planning estimates for extra review steps)
     if (c.category === "coastal" && c.severity !== "none") timelineAdjustment += 3;
-    if (c.category === "flood" && (c.severity === "high" || c.severity === "very-high")) timelineAdjustment += 2;
-    if (c.category === "fire" && c.severity === "very-high") timelineAdjustment += 1;
-    if (c.category === "terrain" && (c.severity === "moderate" || c.severity === "high")) timelineAdjustment += 1;
+    if (c.category === "flood" && (c.severity === "moderate" || c.severity === "high")) timelineAdjustment += 1;
   }
 
   // Normalize score to 0-100
   const maxPossibleScore = constraints.length * 65;
   const normalizedScore = Math.round((totalScore / maxPossibleScore) * 100);
 
+  // Any single high-severity condition (e.g. a Very High fire zone or a
+  // mapped flood zone) makes the overall picture at least Moderate.
+  const worst = constraints.some((c) => c.severity === "high" || c.severity === "very-high");
   const riskLevel: ConstraintRiskLevel =
-    normalizedScore >= 40 ? "High" : normalizedScore >= 15 ? "Moderate" : "Low";
+    normalizedScore >= 40 ? "High" : normalizedScore >= 15 || worst ? "Moderate" : "Low";
 
   return {
     riskLevel,

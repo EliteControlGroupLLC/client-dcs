@@ -99,7 +99,7 @@ export function ZoningEnrichmentCard({ data }: ZoningEnrichmentCardProps) {
           Confidence: {data.confidence}%
         </span>
         <span className="text-[10px] text-muted-foreground">
-          Cross-checked against parcel rules and planning overlays
+          Source: Zoneomics zoning data
         </span>
       </div>
     </div>

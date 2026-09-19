@@ -243,6 +243,11 @@ export interface FinancialScenario {
   estimatedRoi: number;
   estimatedPaybackYears: number;
   estimatedValueAdd: number;
+  /** Where the rent came from: RentCast market estimate or a labeled planning table. */
+  rentSource?: "rentcast" | "estimated";
+  rentBasis?: string;
+  /** Stated planning assumptions behind the cost / financing / return figures. */
+  assumptions?: string[];
 }
 
 // Full analysis result (enhanced)
