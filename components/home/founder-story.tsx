@@ -2,6 +2,7 @@ import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { FOUNDER, FOUNDER_STORY_TEASER, FOUNDER_TEASER_QUOTE } from "@/lib/data/founder-story";
+import { Logo } from "@/components/layout/logo";
 
 /** Homepage teaser for the founder's story (/our-story). */
 export function FounderStory() {
@@ -14,7 +15,11 @@ export function FounderStory() {
             <span className="inline-block text-accent font-semibold text-sm uppercase tracking-wider mb-4">
               Our Story
             </span>
-            <h2 className="text-3xl md:text-4xl font-bold text-white mb-4 text-balance">How TruthCore Was Born</h2>
+            <h2 className="text-3xl md:text-4xl font-bold text-white mb-4 text-balance">
+              How{" "}
+              <Logo variant="light" inline className="h-[0.74em] align-[-0.02em] mx-[0.02em]" />{" "}
+              Was Born
+            </h2>
             <p className="text-lg text-white/80 leading-relaxed mb-8">{FOUNDER_STORY_TEASER}</p>
             <Button asChild size="lg" rounded="full" className="group w-full sm:w-auto">
               <Link href="/our-story">

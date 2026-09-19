@@ -3,6 +3,7 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { BadgeCheck, Camera, FileText, HardHat, IdCard, MessagesSquare, Sparkles, type LucideIcon } from "lucide-react";
 import { FOUNDER, FOUNDER_STORY } from "@/lib/data/founder-story";
+import { Logo } from "@/components/layout/logo";
 
 const listIcons: Record<string, LucideIcon> = {
   Documentation: FileText,
@@ -30,7 +31,11 @@ export default function OurStoryPage() {
             <span className="inline-block text-accent font-semibold text-sm uppercase tracking-wider mb-4">
               Our Story
             </span>
-            <h1 className="text-4xl md:text-5xl font-bold mb-6 text-balance">How TruthCore Was Born</h1>
+            <h1 className="text-4xl md:text-5xl font-bold mb-6 text-balance">
+              How{" "}
+              <Logo variant="light" inline className="h-[0.74em] align-[-0.02em] mx-[0.02em]" />{" "}
+              Was Born
+            </h1>
             <p className="text-xl text-white/80">
               Who we are, why we exist, and how Distinct Construction Solutions became TruthCore &mdash; in
               our founder&apos;s own words.

@@ -39,9 +39,12 @@ export function logoSvgMarkup(variant: LogoVariant = "color", height = 26): stri
 export function Logo({
   variant = "color",
   className = "",
+  inline = false,
 }: {
   variant?: LogoVariant;
   className?: string;
+  /** Flow inside a line of text (e.g. a headline) instead of as a block. */
+  inline?: boolean;
 }) {
   const truthColor = variant === "light" ? LOGO_COLORS.truthOnDark : LOGO_COLORS.truth;
   const coreColor = LOGO_COLORS.core;
@@ -52,7 +55,7 @@ export function Logo({
       aria-label="TruthCore"
       viewBox={LOGO_VIEW_BOX}
       className={className}
-      style={{ display: "block", width: "auto" }}
+      style={{ display: inline ? "inline-block" : "block", width: "auto" }}
     >
       <path d={LOGO_TRUTH_PATH} fill={truthColor} fillRule="evenodd" />
       <path d={LOGO_CORE_PATH} fill={coreColor} />
