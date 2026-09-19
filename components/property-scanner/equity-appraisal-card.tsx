@@ -13,6 +13,8 @@ import {
   ShieldCheck,
   Building2,
 } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/form";
 
 function formatCurrencyFull(v: number): string {
   return `$${Math.round(v).toLocaleString()}`;
@@ -172,17 +174,17 @@ export function EquityAppraisalCard({
   const usableEquity = Math.max(0, estimatedValue * 0.85 - (effectiveBalance ?? 0));
 
   return (
-    <div className="bg-white rounded-2xl border border-border p-6 animate-slide-up">
+    <div className="bg-secondary-light text-white rounded-2xl border border-white/10 shadow-lg shadow-black/20 p-6 animate-slide-up">
       {/* Header */}
-      <div className="flex items-center gap-2 mb-5">
-        <div className="w-8 h-8 rounded-lg bg-emerald-50 flex items-center justify-center">
-          <Home className="h-4 w-4 text-emerald-600" />
+      <div className="flex items-center gap-3 mb-5">
+        <div className="w-10 h-10 rounded-xl bg-primary flex items-center justify-center shrink-0">
+          <Home className="h-5 w-5 text-white" />
         </div>
         <div>
-          <h3 className="text-lg font-bold text-secondary">
+          <h3 className="text-xl font-semibold text-white">
             Your Home Value &amp; Equity
           </h3>
-          <p className="text-xs text-muted-foreground">
+          <p className="text-sm text-white/75">
             Estimated value, equity, and what the recommended ADU could add
           </p>
         </div>
@@ -190,23 +192,23 @@ export function EquityAppraisalCard({
 
       {/* Loading */}
       {loading && (
-        <div className="rounded-xl border border-border bg-muted/30 p-6 flex flex-col items-center justify-center gap-3 text-center">
-          <div className="h-6 w-6 rounded-full border-2 border-secondary/20 border-t-secondary animate-spin" />
-          <p className="text-sm text-muted-foreground">
+        <div className="rounded-xl border border-white/10 bg-white/[0.04] p-6 flex flex-col items-center justify-center gap-3 text-center">
+          <div className="h-6 w-6 rounded-full border-2 border-white/15 border-t-accent animate-spin" />
+          <p className="text-sm text-white/75">
             Estimating your home value&hellip;
           </p>
           <div className="w-full max-w-xs space-y-2 mt-2">
-            <div className="h-8 rounded-lg bg-muted animate-pulse" />
-            <div className="h-4 w-2/3 mx-auto rounded bg-muted animate-pulse" />
+            <div className="h-8 rounded-lg bg-white/10 animate-pulse" />
+            <div className="h-4 w-2/3 mx-auto rounded bg-white/10 animate-pulse" />
           </div>
         </div>
       )}
 
       {/* Error */}
       {!loading && error && (
-        <div className="rounded-xl border border-border bg-muted/40 p-4 flex items-start gap-3">
-          <Info className="h-4 w-4 text-muted-foreground mt-0.5 shrink-0" />
-          <p className="text-sm text-secondary">
+        <div className="rounded-xl border border-white/10 bg-white/[0.04] p-4 flex items-start gap-3">
+          <Info className="h-4 w-4 text-white/75 mt-0.5 shrink-0" />
+          <p className="text-sm text-white/80">
             We couldn&apos;t auto-estimate this address &mdash; our team can
             pull a precise valuation for you.
           </p>
@@ -215,9 +217,9 @@ export function EquityAppraisalCard({
 
       {/* Unavailable valuation */}
       {!loading && !error && valuation && !valuation.available && (
-        <div className="rounded-xl border border-border bg-muted/40 p-4 flex items-start gap-3">
-          <Info className="h-4 w-4 text-muted-foreground mt-0.5 shrink-0" />
-          <p className="text-sm text-secondary">
+        <div className="rounded-xl border border-white/10 bg-white/[0.04] p-4 flex items-start gap-3">
+          <Info className="h-4 w-4 text-white/75 mt-0.5 shrink-0" />
+          <p className="text-sm text-white/80">
             Home value: not available.{" "}
             {valuation.unavailableReason ? `${valuation.unavailableReason} ` : ""}
             Our team can pull a precise valuation for you.
@@ -229,33 +231,33 @@ export function EquityAppraisalCard({
       {!loading && !error && valuation && valuation.available && (
         <div className="space-y-4">
           {/* 4. Current value */}
-          <div className="rounded-xl bg-gradient-to-br from-secondary/[0.03] to-secondary/[0.08] border border-secondary/10 p-4">
-            <div className="flex items-center justify-between mb-2">
+          <div className="rounded-xl bg-secondary border border-white/10 p-4">
+            <div className="flex flex-wrap items-center justify-between gap-2 mb-2">
               <div className="flex items-center gap-2">
-                <DollarSign className="h-4 w-4 text-secondary" />
-                <h4 className="text-sm font-semibold text-secondary">
+                <DollarSign className="h-4 w-4 text-accent" />
+                <h4 className="text-sm font-semibold text-white">
                   Estimated home value
                 </h4>
               </div>
               {valuation.pricePerSqft != null && (
-                <span className="text-[10px] font-medium px-2 py-0.5 rounded-full bg-secondary/10 text-secondary">
+                <span className="inline-flex items-center gap-1.5 text-xs font-medium px-2.5 py-1 rounded-full whitespace-nowrap bg-accent/10 text-accent-light border border-accent/30">
                   {formatCurrencyFull(valuation.pricePerSqft)}/sqft
                 </span>
               )}
             </div>
 
-            <p className="text-3xl font-bold text-secondary leading-tight">
+            <p className="text-3xl font-bold text-accent leading-tight">
               {formatCurrencyFull(estimatedValue)}
             </p>
 
             {valuation.valueLow != null && valuation.valueHigh != null && (
-              <p className="text-xs text-muted-foreground mt-1">
-                Range {formatCurrencyFull(valuation.valueLow)} &ndash;{" "}
+              <p className="text-xs text-white/75 mt-1">
+                Range {formatCurrencyFull(valuation.valueLow)}&nbsp;&ndash;{" "}
                 {formatCurrencyFull(valuation.valueHigh)}
               </p>
             )}
 
-            <p className="text-[11px] text-muted-foreground mt-2">
+            <p className="text-xs text-white/75 mt-2">
               {valuation.comps.length > 0
                 ? `Automated valuation (RentCast AVM) for this address, based on ${valuation.comps.length} comparable properties nearby`
                 : "Automated valuation (RentCast AVM) for this address"}
@@ -264,40 +266,40 @@ export function EquityAppraisalCard({
 
           {/* 5. Comps */}
           {valuation.comps.length > 0 && (
-            <div className="border border-border/50 rounded-xl overflow-hidden">
+            <div className="border border-white/10 rounded-xl overflow-hidden">
               <button
                 type="button"
                 onClick={() => setCompsExpanded((v) => !v)}
-                className="w-full flex items-center justify-between p-3 text-left hover:bg-muted/30 transition-colors"
+                className="w-full min-h-11 flex items-center justify-between p-3 text-left hover:bg-white/[0.04] transition-colors"
               >
-                <span className="text-xs font-semibold text-secondary">
+                <span className="text-xs font-semibold text-white">
                   View comparable properties
                 </span>
                 <div className="flex items-center gap-2">
-                  <span className="text-[10px] text-muted-foreground">
+                  <span className="text-xs text-white/75">
                     {valuation.comps.length} comps
                   </span>
                   {compsExpanded ? (
-                    <ChevronUp className="h-3.5 w-3.5 text-muted-foreground" />
+                    <ChevronUp className="h-3.5 w-3.5 text-white/75" />
                   ) : (
-                    <ChevronDown className="h-3.5 w-3.5 text-muted-foreground" />
+                    <ChevronDown className="h-3.5 w-3.5 text-white/75" />
                   )}
                 </div>
               </button>
 
               {compsExpanded && (
-                <div className="border-t border-border/30 divide-y divide-border/30">
+                <div className="border-t border-white/10 divide-y divide-white/10">
                   {valuation.comps.map((comp, i) => (
                     <div key={i} className="p-3">
                       <div className="flex items-start justify-between gap-3">
-                        <p className="text-xs font-semibold text-secondary leading-snug">
+                        <p className="text-xs font-semibold text-white leading-snug">
                           {comp.address}
                         </p>
-                        <p className="text-xs font-bold text-secondary whitespace-nowrap">
+                        <p className="text-xs font-bold text-white whitespace-nowrap">
                           {formatCurrencyFull(comp.price)}
                         </p>
                       </div>
-                      <div className="flex flex-wrap gap-x-3 gap-y-0.5 mt-1 text-[10px] text-muted-foreground">
+                      <div className="flex flex-wrap gap-x-3 gap-y-0.5 mt-1 text-xs text-white/75">
                         {comp.sqft != null && <span>{comp.sqft.toLocaleString()} sq ft</span>}
                         {comp.bedrooms != null && <span>{comp.bedrooms} bd</span>}
                         {comp.bathrooms != null && <span>{comp.bathrooms} ba</span>}
@@ -317,41 +319,41 @@ export function EquityAppraisalCard({
 
           {/* 5b. Owner of record */}
           {owner?.available && owner.names.length > 0 && (
-            <div className="rounded-xl border border-border p-4">
+            <div className="rounded-xl bg-secondary border border-white/10 p-4">
               <div className="flex items-center gap-2 mb-3">
                 {owner.heldInTrust ? (
-                  <Building2 className="h-4 w-4 text-secondary" />
+                  <Building2 className="h-4 w-4 text-white" />
                 ) : (
-                  <ShieldCheck className="h-4 w-4 text-secondary" />
+                  <ShieldCheck className="h-4 w-4 text-white" />
                 )}
-                <h4 className="text-sm font-semibold text-secondary">
+                <h4 className="text-sm font-semibold text-white">
                   Owner of record
                 </h4>
               </div>
 
               <div className="space-y-2">
-                <div className="flex items-start justify-between gap-3 py-2 px-3 rounded-lg bg-muted/30">
-                  <p className="text-xs text-muted-foreground">
+                <div className="flex items-start justify-between gap-3 py-2 px-3 rounded-lg bg-white/[0.04]">
+                  <p className="text-xs text-white/75">
                     {owner.names.length > 1 ? "Owners" : "Owner"}
                   </p>
-                  <p className="text-sm font-semibold text-secondary text-right leading-snug">
+                  <p className="text-sm font-semibold text-white text-right leading-snug">
                     {owner.names.join(" & ")}
                   </p>
                 </div>
 
                 {owner.ownerType && (
-                  <div className="flex items-start justify-between gap-3 py-2 px-3 rounded-lg bg-muted/30">
-                    <p className="text-xs text-muted-foreground">Owner type</p>
-                    <p className="text-sm font-semibold text-secondary text-right capitalize">
+                  <div className="flex items-start justify-between gap-3 py-2 px-3 rounded-lg bg-white/[0.04]">
+                    <p className="text-xs text-white/75">Owner type</p>
+                    <p className="text-sm font-semibold text-white text-right capitalize">
                       {owner.ownerType}
                     </p>
                   </div>
                 )}
 
                 {owner.ownerOccupied != null && (
-                  <div className="flex items-start justify-between gap-3 py-2 px-3 rounded-lg bg-muted/30">
-                    <p className="text-xs text-muted-foreground">Occupancy</p>
-                    <p className="text-sm font-semibold text-secondary text-right">
+                  <div className="flex items-start justify-between gap-3 py-2 px-3 rounded-lg bg-white/[0.04]">
+                    <p className="text-xs text-white/75">Occupancy</p>
+                    <p className="text-sm font-semibold text-white text-right">
                       {owner.ownerOccupied ? "Owner-occupied" : "Non-owner-occupied"}
                     </p>
                   </div>
@@ -359,40 +361,36 @@ export function EquityAppraisalCard({
               </div>
 
               {owner.heldInTrust && (
-                <p className="mt-3 text-[11px] leading-relaxed text-muted-foreground">
+                <p className="mt-3 text-xs leading-relaxed text-white/75">
                   This property is held in a trust or entity. A trustee or
                   authorized signer will typically need to sign the ADU
                   agreement and any financing.
                 </p>
               )}
 
-              <p className="mt-3 text-[10px] text-muted-foreground">
+              <p className="mt-3 text-xs text-white/75">
                 Ownership from public property records (via RentCast), matched to this address. Verify against title before closing.
               </p>
             </div>
           )}
 
           {/* 6. Equity */}
-          <div className="rounded-xl border border-border p-4">
+          <div className="rounded-xl bg-secondary border border-white/10 p-4">
             <div className="flex items-center gap-2 mb-3">
-              <PiggyBank className="h-4 w-4 text-emerald-600" />
-              <h4 className="text-sm font-semibold text-secondary">
+              <PiggyBank className="h-4 w-4 text-accent" />
+              <h4 className="text-sm font-semibold text-white">
                 Your equity
               </h4>
             </div>
 
             <div className="space-y-2 mb-4">
-              <label
-                htmlFor="mortgage-balance"
-                className="text-[11px] font-medium text-muted-foreground block"
-              >
-                Remaining mortgage balance
-              </label>
+              <Label tone="dark" htmlFor="mortgage-balance">Remaining mortgage balance</Label>
               <div className="relative">
-                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">
+                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-white/75">
                   $
                 </span>
-                <input
+                <Input
+                  tone="dark"
                   id="mortgage-balance"
                   type="number"
                   inputMode="numeric"
@@ -404,12 +402,12 @@ export function EquityAppraisalCard({
                       e.target.value === "" ? null : Math.max(0, Number(e.target.value) || 0)
                     )
                   }
-                  className="w-full rounded-lg border border-border bg-white pl-7 pr-3 py-2 text-sm text-secondary placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-secondary/20 disabled:bg-muted disabled:text-muted-foreground"
+                  className="pl-7 disabled:opacity-100 disabled:bg-white/5 disabled:text-white/75"
                   placeholder="Enter your balance"
                 />
               </div>
 
-              <label className="flex items-center gap-2 cursor-pointer select-none pt-1">
+              <label className="flex items-center gap-2 min-h-11 cursor-pointer select-none">
                 <input
                   type="checkbox"
                   checked={ownOutright}
@@ -418,39 +416,39 @@ export function EquityAppraisalCard({
                     setOwnOutright(checked);
                     if (checked) setMortgageBalance(0);
                   }}
-                  className="h-3.5 w-3.5 rounded border-border text-emerald-600 focus:ring-emerald-500/30"
+                  className="h-4 w-4 rounded border-white/30 accent-primary [color-scheme:dark] focus:ring-accent/30"
                 />
-                <span className="text-xs text-muted-foreground">
+                <span className="text-xs text-white/75">
                   I own it outright
                 </span>
               </label>
             </div>
 
             {!balanceKnown ? (
-              <p className="pt-3 border-t border-border text-xs text-muted-foreground">
+              <p className="pt-3 border-t border-white/10 text-xs text-white/75">
                 Enter your remaining mortgage balance (or check &ldquo;I own it outright&rdquo;) to see your equity.
               </p>
             ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-3 border-t border-border">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-3 border-t border-white/10">
               <div>
-                <p className="text-[10px] text-muted-foreground">
+                <p className="text-xs text-white/75">
                   Estimated equity
                 </p>
-                <p className="text-xl font-bold text-secondary">
+                <p className="text-xl font-bold text-white">
                   {formatCurrencyFull(equity)}
-                  <span className="ml-1.5 text-xs font-medium text-emerald-600">
+                  <span className="ml-1.5 text-xs font-medium text-accent-light">
                     {equityPct}%
                   </span>
                 </p>
               </div>
               <div>
-                <p className="text-[10px] text-muted-foreground">
+                <p className="text-xs text-white/75">
                   Available to fund your project
                 </p>
-                <p className="text-xl font-bold text-emerald-600">
+                <p className="text-xl font-bold text-accent">
                   {formatCurrencyFull(usableEquity)}
                 </p>
-                <p className="text-[10px] text-muted-foreground">
+                <p className="text-xs text-white/75">
                   up to 85% CLTV
                 </p>
               </div>
@@ -460,39 +458,39 @@ export function EquityAppraisalCard({
 
           {/* 7. Projected value */}
           {data?.projectedValue && (
-            <div className="rounded-xl bg-emerald-50/60 border border-emerald-100 p-4">
-              <div className="flex items-center justify-between mb-2">
+            <div className="rounded-xl bg-secondary border border-accent/60 ring-1 ring-accent/30 p-4">
+              <div className="flex flex-wrap items-center justify-between gap-2 mb-2">
                 <div className="flex items-center gap-2">
-                  <TrendingUp className="h-4 w-4 text-emerald-600" />
-                  <h4 className="text-sm font-semibold text-secondary">
+                  <TrendingUp className="h-4 w-4 text-accent" />
+                  <h4 className="text-sm font-semibold text-white">
                     After building the {recommendedAduLabel}
                   </h4>
                 </div>
-                <span className="inline-flex items-center gap-1 text-[10px] font-semibold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-700 whitespace-nowrap">
+                <span className="inline-flex items-center gap-1.5 text-xs font-medium px-2.5 py-1 rounded-full whitespace-nowrap bg-accent/10 text-accent-light border border-accent/30">
                   <ArrowUpRight className="h-3 w-3" />
                   +{formatCurrencyK(data.aduValueAdd.expected)} added value
                 </span>
               </div>
 
-              <p className="text-[10px] text-muted-foreground">
+              <p className="text-xs text-white/75">
                 Projected home value
               </p>
-              <p className="text-3xl font-bold text-secondary leading-tight">
+              <p className="text-3xl font-bold text-accent leading-tight">
                 {formatCurrencyFull(data.projectedValue.expected)}
               </p>
 
-              <p className="text-xs text-muted-foreground mt-1">
-                Range {formatCurrencyFull(data.projectedValue.low)} &ndash;{" "}
+              <p className="text-xs text-white/75 mt-1">
+                Range {formatCurrencyFull(data.projectedValue.low)}&nbsp;&ndash;{" "}
                 {formatCurrencyFull(data.projectedValue.high)}
               </p>
 
-              <p className="text-sm font-semibold text-emerald-600 mt-2">
+              <p className="text-sm font-semibold text-accent mt-2">
                 +{formatCurrencyFull(data.aduValueAdd.expected)} added by your{" "}
                 {recommendedAduType}
               </p>
 
               {data.aduValueAdd.method && (
-                <p className="text-[10px] text-muted-foreground mt-2">
+                <p className="text-xs text-white/75 mt-2">
                   {data.aduValueAdd.method}
                 </p>
               )}
@@ -500,8 +498,8 @@ export function EquityAppraisalCard({
           )}
 
           {/* 8. Disclaimer */}
-          <div className="pt-3 border-t border-border/50">
-            <p className="text-[10px] text-muted-foreground leading-relaxed">
+          <div className="pt-3 border-t border-white/10">
+            <p className="text-xs text-white/75 leading-relaxed">
               Estimates only &mdash; not a formal appraisal. Home value is
               automated and approximate; equity depends on your actual mortgage
               balance; the value an ADU adds varies by finish, layout, and

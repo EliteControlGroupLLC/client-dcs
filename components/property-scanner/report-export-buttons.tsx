@@ -5,6 +5,8 @@ import { Download, Printer, FileText, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import type { PropertyAnalysisResult } from "@/lib/property-intelligence";
 import { displayFieldValue } from "@/lib/property-intelligence/types";
+import { COMPANY_INFO } from "@/lib/data/site-data";
+import { logoSvgMarkup } from "@/components/layout/logo";
 
 /** Escape text interpolated into the print document's HTML. */
 function esc(v: unknown): string {
@@ -62,23 +64,23 @@ export function ReportExportButtons({ analysisData }: ReportExportButtonsProps) 
   };
 
   return (
-    <div className="bg-gradient-to-r from-primary/5 to-emerald-50 rounded-2xl border border-primary/20 p-6">
-      <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+    <div className="bg-secondary-light rounded-2xl border border-accent/60 ring-1 ring-accent/30 shadow-lg shadow-black/20 p-6">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div className="flex items-center gap-3">
-          <div className="w-12 h-12 bg-primary/10 rounded-xl flex items-center justify-center">
-            <FileText className="h-6 w-6 text-primary" />
+          <div className="w-10 h-10 bg-primary rounded-xl flex items-center justify-center shrink-0">
+            <FileText className="h-5 w-5 text-white" />
           </div>
           <div>
-            <h3 className="font-bold text-secondary">Your Report is Ready</h3>
-            <p className="text-sm text-muted-foreground">Download or print your ADU Feasibility Report</p>
+            <h3 className="text-xl font-semibold text-white">Your Report is Ready</h3>
+            <p className="text-sm text-white/75">Download or print your ADU Feasibility Report</p>
           </div>
         </div>
-        <div className="flex items-center gap-3">
-          <Button variant="outline" rounded="full" onClick={handlePrint}>
+        <div className="flex flex-col sm:flex-row gap-3">
+          <Button variant="outlineWhite" size="lg" rounded="full" onClick={handlePrint}>
             <Printer className="h-4 w-4" />
             Print Report
           </Button>
-          <Button rounded="full" onClick={handleDownloadPDF} disabled={downloading}>
+          <Button size="lg" rounded="full" onClick={handleDownloadPDF} disabled={downloading}>
             {downloading ? (
               <>
                 <Loader2 className="h-4 w-4 animate-spin" />
@@ -97,8 +99,20 @@ export function ReportExportButtons({ analysisData }: ReportExportButtonsProps) 
   );
 }
 
+// Print palette = the site's design tokens (app/globals.css). Inline hex is
+// required here because the report renders in a standalone window.
+const PRINT = {
+  primary: "#336666",
+  secondary: "#1A2B2B",
+  accent: "#B99A5A",
+  muted: "#F5F7F7",
+  mutedForeground: "#5C6B6B",
+  border: "#E2E8E8",
+} as const;
+
 /**
- * Generate PDF/Print content with Distinct Construction Solutions branding
+ * Generate PDF/Print content with TruthCore branding
+ * (TruthCore is a DBA of Distinct Construction Solutions).
  */
 function generateReportHtml(data: PropertyAnalysisResult): string {
   const generatedDate = new Date().toLocaleDateString("en-US", {
@@ -112,201 +126,218 @@ function generateReportHtml(data: PropertyAnalysisResult): string {
 <html>
 <head>
   <meta charset="UTF-8">
-  <title>ADU Feasibility Report - ${data.property.address.value}</title>
+  <title>ADU Feasibility Report - ${esc(data.property.address.value)}</title>
   <style>
-    @import url('https://fonts.googleapis.com/css2?family=Barlow:wght@300;400;500;600;700&display=swap');
-    
+    @import url('https://fonts.googleapis.com/css2?family=Red+Hat+Display:wght@400;500;600;700&display=swap');
+
     * {
       margin: 0;
       padding: 0;
       box-sizing: border-box;
     }
-    
+
     body {
-      font-family: 'Barlow', 'Bahnschrift', 'Segoe UI', sans-serif;
-      color: #1a1a1a;
+      font-family: 'Red Hat Display', system-ui, -apple-system, 'Segoe UI', sans-serif;
+      color: ${PRINT.secondary};
       background: #fff;
       line-height: 1.6;
       font-size: 11pt;
     }
-    
+
     .page {
       max-width: 8.5in;
       margin: 0 auto;
       padding: 0.75in;
       position: relative;
-      min-height: 11in;
     }
-    
+
     .watermark {
       position: fixed;
       top: 50%;
       left: 50%;
       transform: translate(-50%, -50%) rotate(-45deg);
       font-size: 48pt;
-      color: rgba(26, 77, 46, 0.04);
+      color: rgba(51, 102, 102, 0.04);
       font-weight: 700;
       letter-spacing: 4px;
       white-space: nowrap;
       z-index: -1;
       pointer-events: none;
     }
-    
+
     .header {
       display: flex;
       justify-content: space-between;
       align-items: flex-start;
-      border-bottom: 2px solid #1a4d2e;
+      border-bottom: 2px solid ${PRINT.primary};
       padding-bottom: 20px;
       margin-bottom: 30px;
     }
-    
+
     .logo {
       display: flex;
       flex-direction: column;
+      gap: 6px;
     }
-    
-    .logo-main {
-      font-size: 18pt;
-      font-weight: 700;
-      color: #1a4d2e;
-      letter-spacing: 1px;
-      text-transform: uppercase;
-    }
-    
+
+
     .logo-sub {
-      font-size: 10pt;
-      font-weight: 300;
-      color: #c9a227;
-      letter-spacing: 6px;
-      text-transform: uppercase;
-      margin-top: 2px;
+      font-size: 8pt;
+      color: ${PRINT.mutedForeground};
     }
-    
+
     .report-info {
       text-align: right;
       font-size: 9pt;
-      color: #666;
+      color: ${PRINT.mutedForeground};
     }
-    
+
     .report-info strong {
-      color: #1a4d2e;
+      color: ${PRINT.secondary};
+      font-weight: 600;
     }
-    
+
     .report-title {
       text-align: center;
       margin-bottom: 30px;
     }
-    
+
     .report-title h1 {
-      font-size: 18pt;
-      font-weight: 600;
-      color: #1a4d2e;
-      margin-bottom: 8px;
-      letter-spacing: 1px;
+      font-size: 20pt;
+      font-weight: 700;
+      color: ${PRINT.secondary};
+      margin-bottom: 6px;
     }
-    
+
     .report-title .address {
       font-size: 12pt;
-      color: #333;
-      font-weight: 400;
+      color: ${PRINT.secondary};
+      font-weight: 500;
     }
-    
+
     .report-title .confidential {
       font-size: 8pt;
-      color: #c9a227;
+      font-weight: 600;
+      color: ${PRINT.mutedForeground};
       text-transform: uppercase;
       letter-spacing: 2px;
       margin-top: 8px;
     }
-    
+
     .section {
       margin-bottom: 25px;
+      break-inside: avoid;
+      page-break-inside: avoid;
     }
-    
+
     .section-title {
-      font-size: 11pt;
-      font-weight: 600;
-      color: #1a4d2e;
+      font-size: 10pt;
+      font-weight: 700;
+      color: ${PRINT.primary};
       text-transform: uppercase;
-      letter-spacing: 2px;
-      border-bottom: 1px solid #c9a227;
+      letter-spacing: 1.5px;
+      border-bottom: 1px solid ${PRINT.accent};
       padding-bottom: 6px;
       margin-bottom: 15px;
     }
-    
+
     .section-content {
-      background: #fafafa;
-      border-left: 3px solid #1a4d2e;
+      background: ${PRINT.muted};
+      border-left: 3px solid ${PRINT.primary};
+      border-radius: 0 8px 8px 0;
       padding: 15px 20px;
     }
-    
+
     .data-row {
       display: flex;
       justify-content: space-between;
+      gap: 16px;
       padding: 6px 0;
-      border-bottom: 1px solid #eee;
+      border-bottom: 1px solid ${PRINT.border};
     }
-    
+
     .data-row:last-child {
       border-bottom: none;
     }
-    
+
     .data-label {
-      color: #666;
+      color: ${PRINT.mutedForeground};
       font-weight: 400;
     }
-    
+
     .data-value {
-      color: #1a1a1a;
+      color: ${PRINT.secondary};
       font-weight: 500;
       text-align: right;
     }
-    
+
     .data-value.highlight {
-      color: #1a4d2e;
-      font-weight: 600;
+      color: ${PRINT.primary};
+      font-weight: 700;
     }
-    
+
+    .scenario-name {
+      font-weight: 600;
+      color: ${PRINT.primary};
+      margin-bottom: 5px;
+    }
+
     .two-col {
       display: grid;
       grid-template-columns: 1fr 1fr;
       gap: 20px;
     }
-    
+
+    /* Side-by-side sections share one height */
+    .two-col .section {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .two-col .section-content {
+      flex: 1;
+    }
+
+    /* In the document flow (not absolutely positioned) so it can never
+       overlap the disclaimer when the report runs past one page. */
     .footer {
-      position: absolute;
-      bottom: 0.5in;
-      left: 0.75in;
-      right: 0.75in;
-      border-top: 1px solid #ddd;
+      margin-top: 30px;
+      border-top: 1px solid ${PRINT.border};
       padding-top: 15px;
       font-size: 8pt;
-      color: #999;
+      color: ${PRINT.mutedForeground};
       display: flex;
       justify-content: space-between;
+      gap: 16px;
     }
-    
+
     .footer-brand {
-      color: #1a4d2e;
-      font-weight: 500;
+      color: ${PRINT.primary};
+      font-weight: 600;
     }
-    
+
     .disclaimer {
+      break-inside: avoid;
+      page-break-inside: avoid;
       margin-top: 30px;
       padding: 15px;
-      background: #f9f9f9;
-      border: 1px solid #eee;
+      background: ${PRINT.muted};
+      border: 1px solid ${PRINT.border};
+      border-radius: 8px;
       font-size: 8pt;
-      color: #888;
+      color: ${PRINT.mutedForeground};
       line-height: 1.5;
     }
-    
+
+    .disclaimer strong {
+      color: ${PRINT.secondary};
+    }
+
     @media print {
       .page {
         padding: 0.5in;
       }
-      
+
       .watermark {
         display: block;
       }
@@ -319,8 +350,8 @@ function generateReportHtml(data: PropertyAnalysisResult): string {
   <div class="page">
     <header class="header">
       <div class="logo">
-        <div class="logo-main">Distinct Construction</div>
-        <div class="logo-sub">Solutions</div>
+        ${logoSvgMarkup("color", 28)}
+        <div class="logo-sub">TruthCore is a DBA of ${esc(COMPANY_INFO.name)}</div>
       </div>
       <div class="report-info">
         <div><strong>Report Generated:</strong> ${generatedDate}</div>
@@ -398,7 +429,7 @@ function generateReportHtml(data: PropertyAnalysisResult): string {
       <div class="section-content">
         ${data.financialScenarios.slice(0, 3).map(scenario => `
         <div style="margin-bottom: 12px;">
-          <div style="font-weight: 600; color: #1a4d2e; margin-bottom: 5px;">${esc(scenario.scenarioName)} (planning estimate)</div>
+          <div class="scenario-name">${esc(scenario.scenarioName)} (planning estimate)</div>
           <div class="data-row">
             <span class="data-label">Estimated Cost</span>
             <span class="data-value">$${scenario.estimatedTotalCost.toLocaleString()}</span>
@@ -440,13 +471,13 @@ function generateReportHtml(data: PropertyAnalysisResult): string {
     ` : ""}
     
     <div class="disclaimer">
-      <strong>Disclaimer:</strong> ${data.disclaimer}
-      ${data.financialDisclaimer ? `<br><br>${data.financialDisclaimer}` : ""}
+      <strong>Disclaimer:</strong> ${esc(data.disclaimer)}
+      ${data.financialDisclaimer ? `<br><br>${esc(data.financialDisclaimer)}` : ""}
     </div>
     
     <footer class="footer">
-      <div class="footer-brand">Prepared by Distinct Construction Solutions</div>
-      <div>jtalavera@distinctcsolutions.com | (858) 833-0705</div>
+      <div class="footer-brand">Prepared by TruthCore</div>
+      <div>${esc(COMPANY_INFO.email)} | ${esc(COMPANY_INFO.phone)}</div>
     </footer>
   </div>
 </body>

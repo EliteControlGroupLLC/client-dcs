@@ -1,14 +1,19 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { ArrowRight, Home, Bath, ChefHat, Paintbrush } from "lucide-react";
+
+export const metadata: Metadata = {
+  title: "Remodeling",
+};
 
 const remodelTypes = [
   {
     icon: ChefHat,
     title: "Kitchen Remodeling",
     description: "Transform your kitchen with modern layouts, premium countertops, custom cabinetry, and updated appliances.",
-    starting: "$18,000",
+    starting: "$25,000",
     href: "/services/kitchen",
   },
   {
@@ -36,55 +41,55 @@ const remodelTypes = [
 
 export default function RemodelingPage() {
   return (
-    <div className="min-h-screen">
-      <section className="bg-secondary text-white py-20">
+    <div className="min-h-screen bg-secondary">
+      <section className="bg-secondary bg-[radial-gradient(ellipse_at_top,rgba(51,102,102,0.35),transparent_60%)] text-white pt-40 pb-20">
         <div className="container mx-auto px-4">
           <div className="max-w-3xl">
-            <span className="inline-block text-primary font-semibold text-sm uppercase tracking-wider mb-4">
+            <span className="inline-block text-accent font-semibold text-sm uppercase tracking-wider mb-4">
               REMODELING SERVICES
             </span>
-            <h1 className="text-4xl md:text-5xl font-bold mb-6">
+            <h1 className="text-4xl md:text-5xl font-bold mb-6 text-balance">
               Transform Your Home
             </h1>
             <p className="text-xl text-white/80 mb-8">
               From kitchens and bathrooms to whole-home renovations, we deliver quality remodeling
               with transparent pricing and professional project management.
             </p>
-            <p className="text-2xl font-bold text-primary mb-8">Starting at $18,000</p>
-            <Link href="/contact">
-              <Button size="lg" className="bg-primary hover:bg-primary-dark text-secondary font-semibold">
+            <p className="text-2xl font-bold text-accent mb-8">Starting at $18,000</p>
+            <Button asChild size="lg" rounded="full">
+              <Link href="/contact">
                 Schedule On-Site Consultation <ArrowRight className="h-5 w-5 ml-2" />
-              </Button>
-            </Link>
+              </Link>
+            </Button>
           </div>
         </div>
       </section>
 
-      <section className="py-20">
+      <section className="py-20 bg-secondary border-t border-white/10 text-white">
         <div className="container mx-auto px-4">
           <div className="text-center mb-12">
-            <h2 className="text-3xl md:text-4xl font-bold text-secondary mb-4">Remodeling Services</h2>
-            <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+            <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">Remodeling Services</h2>
+            <p className="text-lg text-white/80 max-w-2xl mx-auto">
               We handle every type of residential remodel with the same attention to detail and quality.
             </p>
           </div>
-          <div className="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
+          <div className="grid md:grid-cols-2 gap-6 max-w-6xl mx-auto">
             {remodelTypes.map((type) => {
               const Icon = type.icon;
               return (
-                <Card key={type.title} className="overflow-hidden hover:shadow-lg transition-shadow">
-                  <CardContent className="p-8">
-                    <div className="w-14 h-14 rounded-xl bg-primary/10 flex items-center justify-center mb-6">
-                      <Icon className="h-7 w-7 text-primary" />
+                <Card key={type.title} className="h-full flex flex-col overflow-hidden bg-secondary-light text-white border-white/10 shadow-lg shadow-black/20 hover:border-accent/50 transition-colors">
+                  <CardContent className="p-8 flex flex-col flex-1">
+                    <div className="w-14 h-14 rounded-xl bg-primary flex items-center justify-center mb-6">
+                      <Icon className="h-7 w-7 text-white" />
                     </div>
-                    <h3 className="text-xl font-bold text-secondary mb-2">{type.title}</h3>
-                    <p className="text-muted-foreground mb-4">{type.description}</p>
-                    <p className="text-lg font-bold text-primary mb-4">Starting at {type.starting}</p>
-                    <Link href={type.href}>
-                      <Button variant="outline" className="group">
+                    <h3 className="text-xl font-semibold text-white mb-2">{type.title}</h3>
+                    <p className="text-white/80 mb-4">{type.description}</p>
+                    <p className="text-lg font-bold text-accent-light mt-auto mb-6">Starting at {type.starting}</p>
+                    <Button asChild variant="outlineWhite" rounded="full" className="group self-start">
+                      <Link href={type.href}>
                         Learn More <ArrowRight className="h-4 w-4 ml-2 group-hover:translate-x-1 transition-transform" />
-                      </Button>
-                    </Link>
+                      </Link>
+                    </Button>
                   </CardContent>
                 </Card>
               );
@@ -93,17 +98,17 @@ export default function RemodelingPage() {
         </div>
       </section>
 
-      <section className="py-20 bg-secondary text-white">
+      <section className="py-20 bg-secondary border-t border-white/10 bg-[radial-gradient(ellipse_at_top,rgba(51,102,102,0.35),transparent_60%)] text-white">
         <div className="container mx-auto px-4 text-center">
           <h2 className="text-3xl md:text-4xl font-bold mb-4">Ready to Remodel?</h2>
           <p className="text-lg text-white/80 mb-8 max-w-2xl mx-auto">
             Tell us about your project and get a free, no-obligation quote.
           </p>
-          <Link href="/contact">
-            <Button size="lg" className="bg-primary hover:bg-primary-dark text-secondary font-semibold">
+          <Button asChild size="lg" rounded="full">
+            <Link href="/contact">
               Schedule On-Site Consultation <ArrowRight className="h-5 w-5 ml-2" />
-            </Button>
-          </Link>
+            </Link>
+          </Button>
         </div>
       </section>
     </div>

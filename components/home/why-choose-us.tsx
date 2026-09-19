@@ -8,6 +8,7 @@ import {
   Award, 
   Headphones,
   CheckCircle,
+  ArrowRight,
 } from "lucide-react";
 import { useScrollAnimation, useStaggeredAnimation } from "@/hooks/use-scroll-animation";
 import { COMPANY_INFO, getYearsExperience } from "@/lib/data/site-data";
@@ -56,86 +57,83 @@ export function WhyChooseUs() {
   const { ref: gridRef, isVisible: gridVisible, getDelay } = useStaggeredAnimation(100);
 
   return (
-    <section className="py-24 bg-secondary text-white relative overflow-hidden">
-      {/* Subtle premium grid pattern */}
-      <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.03)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.03)_1px,transparent_1px)] bg-[size:40px_40px]" />
+    <section className="py-20 bg-secondary text-white relative overflow-hidden border-t border-white/10">
       {/* Subtle lighting texture overlay */}
-      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,rgba(62,205,162,0.08),transparent_50%)]" />
-      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom_right,rgba(62,205,162,0.05),transparent_50%)]" />
+      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,rgba(111,163,163,0.08),transparent_50%)]" />
+      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom_right,rgba(111,163,163,0.05),transparent_50%)]" />
       
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 relative z-10">
         {/* Header */}
         <div
           ref={headerRef}
-          className={`text-center max-w-3xl mx-auto mb-16 transition-all duration-700 ${headerVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"}`}
+          className={`text-center max-w-3xl mx-auto mb-12 transition-all duration-700 ${headerVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"}`}
         >
-          <span className="inline-flex items-center gap-2 text-primary font-semibold text-sm uppercase tracking-wider mb-4">
+          <span className="inline-block text-accent font-semibold text-sm uppercase tracking-wider mb-4">
             Why Choose Us
           </span>
-          <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold mb-6 text-balance">
-            The Distinct Construction Solutions Difference
+          <h2 className="text-3xl md:text-4xl font-bold mb-4 text-balance">
+            The TruthCore Difference
           </h2>
-          <p className="text-lg text-white/70 leading-relaxed">
+          <p className="text-lg text-white/80 leading-relaxed">
             Premium residential work depends on tighter systems, better planning, and cleaner execution.
             That is the standard we build around from the first pricing conversation through final delivery.
           </p>
         </div>
 
         {/* Features Grid */}
-        <div ref={gridRef} className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 mb-16">
+        <div ref={gridRef} className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
           {features.map((feature, index) => (
             <div 
               key={feature.title}
               style={{ transitionDelay: gridVisible ? getDelay(index) : "0ms" }}
-              className={`bg-white/5 backdrop-blur-sm rounded-2xl p-6 border border-white/10 hover:bg-white/10 hover:border-white/20 transition-all duration-500 group ${gridVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"}`}
+              className={`bg-secondary-light rounded-2xl p-8 border border-white/10 shadow-lg shadow-black/20 hover:border-accent/50 transition-all duration-500 group ${gridVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"}`}
             >
-              <div className="w-12 h-12 rounded-xl bg-primary/20 flex items-center justify-center mb-4 group-hover:bg-primary/30 transition-colors shadow-lg shadow-primary/10">
-                <feature.icon className="h-6 w-6 text-primary" />
+              <div className="w-14 h-14 rounded-xl bg-primary flex items-center justify-center mb-6 group-hover:bg-primary-dark transition-colors shadow-lg shadow-black/20">
+                <feature.icon className="h-7 w-7 text-white" aria-hidden="true" />
               </div>
-              <h3 className="text-lg font-bold mb-2">{feature.title}</h3>
-              <p className="text-white/70 text-sm leading-relaxed">{feature.description}</p>
+              <h3 className="text-xl font-semibold mb-3">{feature.title}</h3>
+              <p className="text-white/80 text-sm leading-relaxed">{feature.description}</p>
             </div>
           ))}
         </div>
 
-        <div className="bg-white/10 backdrop-blur-sm rounded-3xl p-8 lg:p-12 border border-white/10">
+        <div className="bg-secondary-light rounded-2xl p-6 sm:p-8 lg:p-12 border border-white/10 shadow-lg shadow-black/20">
           <div className="grid gap-8 lg:grid-cols-[1.4fr_1fr]">
             <div>
-              <p className="text-xs font-semibold uppercase tracking-[0.24em] text-primary mb-3">
+              <p className="text-xs font-semibold uppercase tracking-[0.2em] text-accent-light mb-4">
                 Client Experience Standard
               </p>
               <h3 className="text-2xl lg:text-3xl font-bold mb-4">
                 Built to feel organized before construction even starts
               </h3>
-              <p className="text-white/70 leading-relaxed max-w-2xl">
-                Homeowners choose DCS when they want more than a bid and a promise. We build the
+              <p className="text-white/80 leading-relaxed max-w-2xl">
+                Homeowners choose TruthCore when they want more than a bid and a promise. We build the
                 project around scope clarity, permit readiness, premium detailing, and consistent
                 communication so the experience feels controlled from the start.
               </p>
             </div>
-            <div className="rounded-2xl border border-white/10 bg-white/8 p-6">
-              <p className="text-sm font-semibold text-white mb-3">Real review integration</p>
-              <p className="text-sm leading-relaxed text-white/65">
-                Verified Google and Yelp review excerpts are being curated for client approval. No
-                placeholder quotes are shown here until approved copy is supplied.
+            <div className="rounded-2xl border border-accent/30 bg-secondary p-6 sm:p-8">
+              <p className="text-sm font-semibold text-white mb-3">Real client reviews</p>
+              <p className="text-sm leading-relaxed text-white/80">
+                Every review on this site is a real Google or Yelp review from a homeowner we
+                worked with, quoted word for word.
               </p>
               <a
-                href="https://www.google.com/search?q=Distinct+Construction+Solutions+Chula+Vista+reviews"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="mt-5 inline-flex items-center gap-2 text-sm font-semibold text-primary hover:text-primary-light transition-colors"
+                href="#reviews"
+                className="mt-5 inline-flex items-center gap-2 text-sm font-semibold text-accent hover:text-accent-light transition-colors"
               >
-                View public review profiles
+                Read client reviews
+                <ArrowRight className="h-4 w-4" aria-hidden="true" />
               </a>
             </div>
           </div>
         </div>
 
         {/* Bottom Metrics */}
-        <div className="flex flex-wrap justify-center gap-8 mt-12">
+        <div className="flex flex-wrap justify-center gap-x-8 gap-y-4 mt-12">
           {bottomMetrics.map((badge) => (
-            <div key={badge} className="flex items-center gap-2 text-white/60">
-              <CheckCircle className="h-5 w-5 text-primary" />
+            <div key={badge} className="flex items-center gap-2 text-white/75">
+              <CheckCircle className="h-5 w-5 text-accent" />
               <span className="font-medium">{badge}</span>
             </div>
           ))}

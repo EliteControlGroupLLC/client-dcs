@@ -4,6 +4,15 @@ import { useMemo, useState } from "react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import {
+  calcSectionClass,
+  controlLabelClass,
+  inputPanelClass,
+  optionClass,
+  rangeClass,
+  ResultIcon,
+  resultCardClass,
+} from "@/components/calculators/calculator-ui";
 import { LeadGate } from "@/components/lead-gate/lead-gate";
 import { LEAD_GATE_INTERESTS } from "@/lib/lead-gate-interests";
 import { ArrowRight, Calculator } from "lucide-react";
@@ -56,14 +65,14 @@ export default function ADUCalculatorPage() {
   });
 
   return (
-    <div className="min-h-screen">
-      <section className="bg-secondary text-white py-20">
+    <div className="min-h-screen bg-secondary">
+      <section className="bg-secondary bg-[radial-gradient(ellipse_at_top,rgba(51,102,102,0.35),transparent_60%)] text-white pt-40 pb-20">
         <div className="container mx-auto px-4">
           <div className="max-w-3xl">
-            <span className="inline-block text-primary font-semibold text-sm uppercase tracking-wider mb-4">
+            <span className="inline-block text-accent font-semibold text-sm uppercase tracking-wider mb-4">
               COST CALCULATOR
             </span>
-            <h1 className="text-4xl md:text-5xl font-bold mb-6">
+            <h1 className="text-4xl md:text-5xl font-bold mb-6 text-balance">
               ADU Cost Calculator
             </h1>
             <p className="text-xl text-white/80">
@@ -75,28 +84,25 @@ export default function ADUCalculatorPage() {
       </section>
 
       <LeadGate
+        className={calcSectionClass}
         interest={LEAD_GATE_INTERESTS.aduCalculator}
         headline="Unlock your ADU cost estimate"
         subhead="Get a San Diego ADU cost range based on type, size and finish level."
         ctaLabel="Unlock My ADU Estimate"
       >
-        <section className="py-20">
-          <div className="container mx-auto px-4 max-w-4xl">
-            <div className="grid md:grid-cols-2 gap-8">
+        <section className={`py-20 ${calcSectionClass}`}>
+          <div className="container mx-auto px-4 max-w-5xl">
+            <div className="grid md:grid-cols-2 gap-8 [&>*]:min-w-0">
               {/* Input */}
-              <div className="space-y-8">
+              <div className={`space-y-8 ${inputPanelClass}`}>
                 <div>
-                  <label className="block text-sm font-semibold text-secondary mb-3">ADU Type</label>
+                  <label className={controlLabelClass}>ADU Type</label>
                   <div className="space-y-2">
                     {aduTypes.map((t, i) => (
                       <button
                         key={t.label}
                         onClick={() => setType(i)}
-                        className={`w-full text-left px-4 py-3 rounded-lg border transition-all ${
-                          type === i
-                            ? "border-primary bg-primary/5 text-secondary font-medium"
-                            : "border-gray-200 text-muted-foreground hover:border-primary/30"
-                        }`}
+                        className={optionClass(type === i)}
                       >
                         {t.label}
                       </button>
@@ -105,7 +111,7 @@ export default function ADUCalculatorPage() {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-semibold text-secondary mb-3">
+                  <label className={controlLabelClass}>
                     Size: {adjustedSize} sq ft
                   </label>
                   <input
@@ -116,26 +122,22 @@ export default function ADUCalculatorPage() {
                     value={adjustedSize}
                     onChange={(e) => setSize(Number(e.target.value))}
                     disabled={selected.type === "garage-conversion" || selected.type === "attached" || selected.type === "two-story"}
-                    className="w-full accent-primary"
+                    className={rangeClass}
                   />
-                  <div className="flex justify-between text-xs text-muted-foreground mt-1">
+                  <div className="flex justify-between text-xs text-white/70 mt-1">
                     <span>400 sq ft</span>
                     <span>1,200 sq ft</span>
                   </div>
                 </div>
 
                 <div>
-                  <label className="block text-sm font-semibold text-secondary mb-3">Finish Level</label>
+                  <label className={controlLabelClass}>Finish Level</label>
                   <div className="flex gap-3">
                     {finishLevels.map((f, i) => (
                       <button
                         key={f.label}
                         onClick={() => setFinish(i)}
-                        className={`flex-1 px-4 py-3 rounded-lg border text-sm font-medium transition-all ${
-                          finish === i
-                            ? "border-primary bg-primary/5 text-secondary"
-                            : "border-gray-200 text-muted-foreground hover:border-primary/30"
-                        }`}
+                        className={optionClass(finish === i, "flex-1 px-4 py-3 text-sm font-medium")}
                       >
                         {f.label}
                       </button>
@@ -145,34 +147,34 @@ export default function ADUCalculatorPage() {
               </div>
 
               {/* Result */}
-              <Card className="bg-secondary text-white">
-                <CardContent className="p-8 flex flex-col justify-center h-full">
+              <Card className={resultCardClass}>
+                <CardContent className="p-6 md:p-8 flex flex-col justify-center h-full">
                   <div className="text-center">
-                    <Calculator className="h-12 w-12 text-primary mx-auto mb-4" />
-                    <p className="text-white/70 text-sm mb-2">Estimated Project Cost</p>
-                    <p className="text-4xl md:text-5xl font-bold text-primary mb-2">
-                      ${estimateLow.toLocaleString()}-${estimateHigh.toLocaleString()}
+                    <ResultIcon icon={Calculator} />
+                    <p className="text-white/75 text-sm mb-2">Estimated Project Cost</p>
+                    <p className="text-3xl md:text-4xl font-bold text-accent mb-1 text-balance">
+                      ${estimateLow.toLocaleString()}&nbsp;&ndash; ${estimateHigh.toLocaleString()}
                     </p>
-                    <p className="text-white/50 text-sm mb-6">
+                    <p className="text-white/75 text-sm mb-6">
                       {selected.label} &bull; {adjustedSize} sq ft &bull; {finishLevel.label}
                     </p>
 
                     <div className="border-t border-white/10 pt-6 mb-6">
-                      <p className="text-white/70 text-sm mb-1">Estimated Monthly Rental Income</p>
+                      <p className="text-white/75 text-sm mb-1">Estimated Monthly Rental Income</p>
                       <p className="text-2xl font-bold text-white">
-                        ${rentEstimate.low.toLocaleString()}-${rentEstimate.high.toLocaleString()}/mo
+                        ${rentEstimate.low.toLocaleString()}&nbsp;&ndash; ${rentEstimate.high.toLocaleString()}/mo
                       </p>
                     </div>
 
-                    <p className="text-xs text-white/40 mb-6">
+                    <p className="text-xs text-white/70 mb-6">
                       * This is an estimate only. Actual costs may vary based on site conditions, design, and permits. Schedule a consultation for an accurate quote.
                     </p>
 
-                    <Link href="/contact">
-                      <Button size="lg" className="w-full bg-primary hover:bg-primary-dark text-secondary font-semibold">
+                    <Button asChild size="lg" rounded="full" className="w-full">
+                      <Link href="/contact">
                         Get Accurate Quote <ArrowRight className="h-5 w-5 ml-2" />
-                      </Button>
-                    </Link>
+                      </Link>
+                    </Button>
                   </div>
                 </CardContent>
               </Card>
@@ -181,25 +183,25 @@ export default function ADUCalculatorPage() {
         </section>
       </LeadGate>
 
-      <section className="py-20 bg-muted">
+      <section className="py-20 bg-secondary bg-[radial-gradient(ellipse_at_top,rgba(51,102,102,0.35),transparent_60%)] border-t border-white/10 text-white">
         <div className="container mx-auto px-4 text-center">
-          <h2 className="text-3xl md:text-4xl font-bold text-secondary mb-4">
+          <h2 className="text-3xl md:text-4xl font-bold mb-4">
             Want a Detailed Estimate?
           </h2>
-          <p className="text-lg text-muted-foreground mb-8 max-w-2xl mx-auto">
+          <p className="text-lg text-white/80 mb-8 max-w-2xl mx-auto">
             Our team can provide a detailed, fixed-price quote based on your specific property and project goals.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Link href="/build-your-adu">
-              <Button size="lg" className="bg-primary hover:bg-primary-dark text-secondary font-semibold">
+            <Button asChild size="lg" rounded="full">
+              <Link href="/build-your-adu">
                 Design Your ADU <ArrowRight className="h-5 w-5 ml-2" />
-              </Button>
-            </Link>
-            <Link href="/contact">
-              <Button size="lg" variant="outline">
+              </Link>
+            </Button>
+            <Button asChild size="lg" variant="outlineWhite" rounded="full">
+              <Link href="/contact">
                 Free Consultation
-              </Button>
-            </Link>
+              </Link>
+            </Button>
           </div>
         </div>
       </section>

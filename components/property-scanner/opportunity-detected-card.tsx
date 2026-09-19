@@ -17,29 +17,29 @@ interface OpportunityDetectedCardProps {
 }
 
 function getLevelColor(level: string): string {
-  if (level === "high") return "bg-emerald-50 border-emerald-200 text-emerald-800";
-  if (level === "moderate") return "bg-amber-50 border-amber-200 text-amber-800";
-  return "bg-blue-50 border-blue-200 text-blue-800";
+  if (level === "high") return "bg-emerald-500/10 border-emerald-400/30 text-emerald-200";
+  if (level === "moderate") return "bg-amber-500/10 border-amber-400/30 text-amber-200";
+  return "bg-secondary border-white/10 text-white/85";
 }
 
 function getLevelBadge(level: string): string {
-  if (level === "high") return "bg-emerald-100 text-emerald-700";
-  if (level === "moderate") return "bg-amber-100 text-amber-700";
-  return "bg-blue-100 text-blue-700";
+  if (level === "high") return "bg-accent/10 border border-accent/30 text-accent-light";
+  if (level === "moderate") return "bg-amber-500/15 text-amber-200";
+  return "bg-white/10 text-white/80";
 }
 
 export function OpportunityDetectedCard({ opportunities }: OpportunityDetectedCardProps) {
   if (opportunities.length === 0) return null;
 
   return (
-    <div className="rounded-2xl border-2 border-primary/30 bg-gradient-to-br from-primary/[0.03] to-primary/[0.08] p-6 animate-slide-up">
+    <div className="rounded-2xl border border-accent/60 ring-1 ring-accent/30 bg-secondary-light shadow-lg shadow-black/20 p-6 animate-slide-up">
       <div className="flex items-center gap-2 mb-5">
-        <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center">
-          <Sparkles className="h-4 w-4 text-primary" />
+        <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center">
+          <Sparkles className="h-4 w-4 text-white" />
         </div>
         <div>
-          <h3 className="text-lg font-bold text-secondary">Opportunity Detected</h3>
-          <p className="text-xs text-muted-foreground">
+          <h3 className="text-lg font-bold text-white">Opportunity Detected</h3>
+          <p className="text-xs text-white/75">
             This property may support more value than a standard single-ADU approach
           </p>
         </div>
@@ -56,13 +56,13 @@ export function OpportunityDetectedCard({ opportunities }: OpportunityDetectedCa
                 <TrendingUp className="h-4 w-4 flex-shrink-0" />
                 <h4 className="font-semibold text-sm">{opp.title}</h4>
               </div>
-              <span className={`text-[10px] font-medium px-2 py-0.5 rounded-full ${getLevelBadge(opp.estimatedUpsideLevel)}`}>
+              <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${getLevelBadge(opp.estimatedUpsideLevel)}`}>
                 {opp.estimatedUpsideLevel === "high" ? "High Potential" : "Worth Exploring"}
               </span>
             </div>
             <p className="text-xs leading-relaxed mb-3 opacity-90">{opp.summary}</p>
             <div className="flex items-center justify-between">
-              <span className="text-[10px] opacity-70">
+              <span className="text-xs opacity-80">
                 {opp.scenarioCount} scenario{opp.scenarioCount > 1 ? "s" : ""} available
               </span>
               <Link

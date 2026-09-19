@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -6,6 +7,10 @@ import {
   DollarSign, BarChart3, ArrowLeftRight, Palette, Zap,
   Layers, ChefHat, Bath,
 } from "lucide-react";
+
+export const metadata: Metadata = {
+  title: "Planning Tools",
+};
 
 interface ToolItem {
   icon: React.ComponentType<{ className?: string }>;
@@ -121,41 +126,57 @@ const serviceCalculators: ToolItem[] = [
 function ToolCard({ tool, isPrimary = false }: { tool: ToolItem; isPrimary?: boolean }) {
   const Icon = tool.icon;
   return (
-    <Card className="overflow-hidden hover:shadow-lg transition-shadow">
-      <CardContent className="p-8">
-        <div className="w-14 h-14 rounded-xl bg-primary/10 flex items-center justify-center mb-6">
-          <Icon className="h-7 w-7 text-primary" />
+    <Card
+      className={`h-full flex flex-col overflow-hidden bg-secondary-light shadow-lg shadow-black/20 transition-colors ${
+        isPrimary ? "border-accent/60 ring-1 ring-accent/30 hover:border-accent" : "border-white/10 hover:border-accent/50"
+      }`}
+    >
+      <CardContent className="p-8 flex flex-col flex-1">
+        <div className="w-14 h-14 rounded-xl bg-primary flex items-center justify-center mb-6">
+          <Icon className="h-7 w-7 text-white" />
         </div>
-        <h3 className="text-xl font-bold text-secondary mb-3">{tool.title}</h3>
-        <p className="text-muted-foreground mb-6">{tool.description}</p>
-        <Link href={tool.href}>
-          <Button
-            className={isPrimary ? "bg-primary hover:bg-primary-dark text-secondary font-semibold" : ""}
-            variant={isPrimary ? "default" : "outline"}
-          >
-            {tool.cta}
-            <ArrowRight className="h-4 w-4 ml-2" />
+        <h3 className="text-xl font-semibold text-white mb-2">{tool.title}</h3>
+        <p className="text-white/80 mb-6">{tool.description}</p>
+        <div className="mt-auto">
+          <Button asChild variant={isPrimary ? "default" : "outlineWhite"} rounded="full">
+            <Link href={tool.href}>
+              {tool.cta}
+              <ArrowRight className="h-4 w-4 ml-2" />
+            </Link>
           </Button>
-        </Link>
+        </div>
       </CardContent>
     </Card>
   );
 }
 
+// Cards wrap and center so an odd last row (e.g. 5 tools in 3 columns) stays centered.
+const cardCell = "w-full md:w-[calc(50%-0.75rem)]";
+const cardCell3 = "w-full md:w-[calc(50%-0.75rem)] lg:w-[calc(33.333%-1rem)]";
+
+function SectionHeader({ title, subtitle }: { title: string; subtitle: string }) {
+  return (
+    <div className="text-center mb-12">
+      <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">{title}</h2>
+      <p className="text-lg text-white/80 max-w-2xl mx-auto">{subtitle}</p>
+    </div>
+  );
+}
+
 export default function PlanningToolsPage() {
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen bg-secondary text-white">
       {/* Hero */}
-      <section className="bg-secondary text-white py-20">
+      <section className="bg-secondary bg-[radial-gradient(ellipse_at_top,rgba(51,102,102,0.35),transparent_60%)] text-white pt-40 pb-20">
         <div className="container mx-auto px-4">
           <div className="max-w-3xl">
-            <span className="inline-block text-primary font-semibold text-sm uppercase tracking-wider mb-4">
+            <span className="inline-block text-accent font-semibold text-sm uppercase tracking-wider mb-4">
               PLANNING TOOLS
             </span>
-            <h1 className="text-4xl md:text-5xl font-bold mb-6">
+            <h1 className="text-4xl md:text-5xl font-bold mb-6 text-balance">
               Estimate Your Project Instantly
             </h1>
-            <p className="text-xl text-white/80 mb-8">
+            <p className="text-xl text-white/80">
               Use our smart tools to calculate pricing, feasibility, and options
               before starting your project.
             </p>
@@ -164,65 +185,62 @@ export default function PlanningToolsPage() {
       </section>
 
       {/* Primary Tools */}
-      <section className="py-20">
+      <section className="py-20 bg-secondary border-t border-white/10">
         <div className="container mx-auto px-4">
-          <h2 className="text-2xl md:text-3xl font-bold text-secondary mb-2 text-center">Get Started</h2>
-          <p className="text-muted-foreground text-center mb-10 max-w-xl mx-auto">
-            Our most powerful planning and estimating tools.
-          </p>
-          <div className="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
+          <SectionHeader title="Get Started" subtitle="Our most powerful planning and estimating tools." />
+          <div className="flex flex-wrap justify-center gap-6 max-w-6xl mx-auto">
             {primaryTools.map((tool) => (
-              <ToolCard key={tool.title} tool={tool} isPrimary={tool.primary} />
+              <div key={tool.title} className={cardCell}>
+                <ToolCard tool={tool} isPrimary={tool.primary} />
+              </div>
             ))}
           </div>
         </div>
       </section>
 
       {/* ADU Investment & Design Tools */}
-      <section className="py-20 bg-muted">
+      <section className="py-20 bg-secondary bg-[radial-gradient(ellipse_at_top,rgba(51,102,102,0.35),transparent_60%)] border-t border-white/10">
         <div className="container mx-auto px-4">
-          <h2 className="text-2xl md:text-3xl font-bold text-secondary mb-2 text-center">ADU Investment &amp; Design Tools</h2>
-          <p className="text-muted-foreground text-center mb-10 max-w-xl mx-auto">
-            Understand your ADU as an investment and explore design options.
-          </p>
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-5xl mx-auto">
+          <SectionHeader title="ADU Investment & Design Tools" subtitle="Understand your ADU as an investment and explore design options." />
+          <div className="flex flex-wrap justify-center gap-6 max-w-6xl mx-auto">
             {aduTools.map((tool) => (
-              <ToolCard key={tool.title} tool={tool} />
+              <div key={tool.title} className={cardCell3}>
+                <ToolCard tool={tool} />
+              </div>
             ))}
           </div>
         </div>
       </section>
 
       {/* Service Calculators */}
-      <section className="py-20">
+      <section className="py-20 bg-secondary border-t border-white/10">
         <div className="container mx-auto px-4">
-          <h2 className="text-2xl md:text-3xl font-bold text-secondary mb-2 text-center">Service Calculators</h2>
-          <p className="text-muted-foreground text-center mb-10 max-w-xl mx-auto">
-            Estimate costs for roofing, concrete, kitchen, and bathroom projects.
-          </p>
-          <div className="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
+          <SectionHeader title="Service Calculators" subtitle="Estimate costs for roofing, concrete, kitchen, and bathroom projects." />
+          <div className="flex flex-wrap justify-center gap-6 max-w-6xl mx-auto">
             {serviceCalculators.map((tool) => (
-              <ToolCard key={tool.title} tool={tool} />
+              <div key={tool.title} className={cardCell}>
+                <ToolCard tool={tool} />
+              </div>
             ))}
           </div>
         </div>
       </section>
 
       {/* CTA */}
-      <section className="py-20 bg-muted">
+      <section className="py-20 bg-secondary bg-[radial-gradient(ellipse_at_top,rgba(51,102,102,0.35),transparent_60%)] border-t border-white/10 text-white">
         <div className="container mx-auto px-4 text-center">
-          <h2 className="text-3xl md:text-4xl font-bold text-secondary mb-4">
+          <h2 className="text-3xl md:text-4xl font-bold mb-4">
             Need Expert Guidance?
           </h2>
-          <p className="text-lg text-muted-foreground mb-8 max-w-2xl mx-auto">
+          <p className="text-lg text-white/80 mb-8 max-w-2xl mx-auto">
             Our team is ready to help you explore your options and find the best path forward for your project.
           </p>
-          <Link href="/contact">
-            <Button size="lg" className="bg-primary hover:bg-primary-dark text-secondary font-semibold">
+          <Button asChild size="lg" rounded="full">
+            <Link href="/contact">
               Schedule a Consultation
               <ArrowRight className="h-5 w-5 ml-2" />
-            </Button>
-          </Link>
+            </Link>
+          </Button>
         </div>
       </section>
     </div>

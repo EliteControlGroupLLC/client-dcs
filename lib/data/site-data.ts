@@ -10,7 +10,7 @@
 
 export const COMPANY_INFO = {
   name: "Distinct Construction Solutions",
-  shortName: "DCS",
+  shortName: "TruthCore",
   office: "3527 Citrus St, Lemon Grove, CA 91945",
   address: {
     street: "3527 Citrus St",
@@ -145,7 +145,7 @@ export const FLOOR_PLANS: FloorPlan[] = [
     stories: 1,
     style: "Modern",
     type: "Garage Conversion",
-    priceRange: "$155,000-$215,000",
+    priceRange: "$155,000\u00A0– $215,000",
     priceLow: 155000,
     priceHigh: 215000,
     popular: true,
@@ -231,7 +231,7 @@ export const FLOOR_PLANS: FloorPlan[] = [
     stories: 1,
     style: "Contemporary",
     type: "Attached",
-    priceRange: "$220,000-$225,000",
+    priceRange: "$220,000\u00A0– $225,000",
     priceLow: 220000,
     priceHigh: 225000,
     popular: true,
@@ -265,7 +265,7 @@ export const FLOOR_PLANS: FloorPlan[] = [
     stories: 1,
     style: "Craftsman",
     type: "Detached",
-    priceRange: "$255,000-$260,000",
+    priceRange: "$255,000\u00A0– $260,000",
     priceLow: 255000,
     priceHigh: 260000,
     popular: true,
@@ -299,7 +299,7 @@ export const FLOOR_PLANS: FloorPlan[] = [
     stories: 1,
     style: "Modern",
     type: "Detached",
-    priceRange: "$275,000-$280,000",
+    priceRange: "$275,000\u00A0– $280,000",
     priceLow: 275000,
     priceHigh: 280000,
     popular: false,
@@ -342,7 +342,7 @@ export const FLOOR_PLANS: FloorPlan[] = [
     stories: 1,
     style: "Traditional",
     type: "Detached",
-    priceRange: "$320,000-$325,000",
+    priceRange: "$320,000\u00A0– $325,000",
     priceLow: 320000,
     priceHigh: 325000,
     popular: true,
@@ -385,7 +385,7 @@ export const FLOOR_PLANS: FloorPlan[] = [
     stories: 1,
     style: "Modern",
     type: "Detached",
-    priceRange: "$360,000-$365,000",
+    priceRange: "$360,000\u00A0– $365,000",
     priceLow: 360000,
     priceHigh: 365000,
     popular: false,
@@ -419,7 +419,7 @@ export const FLOOR_PLANS: FloorPlan[] = [
     stories: 1,
     style: "Contemporary",
     type: "Detached",
-    priceRange: "$390,000-$400,000",
+    priceRange: "$390,000\u00A0– $400,000",
     priceLow: 390000,
     priceHigh: 400000,
     popular: false,
@@ -453,7 +453,7 @@ export const FLOOR_PLANS: FloorPlan[] = [
     stories: 1,
     style: "Contemporary",
     type: "Detached",
-    priceRange: "$425,000-$430,000",
+    priceRange: "$425,000\u00A0– $430,000",
     priceLow: 425000,
     priceHigh: 430000,
     popular: true,
@@ -496,7 +496,7 @@ export const FLOOR_PLANS: FloorPlan[] = [
     stories: 1,
     style: "Modern",
     type: "Detached",
-    priceRange: "$495,000-$512,000",
+    priceRange: "$495,000\u00A0– $512,000",
     priceLow: 495000,
     priceHigh: 512000,
     popular: false,
@@ -539,7 +539,7 @@ export const FLOOR_PLANS: FloorPlan[] = [
     stories: 2,
     style: "Modern",
     type: "Two-Story",
-    priceRange: "$500,000-$520,000",
+    priceRange: "$500,000\u00A0– $520,000",
     priceLow: 500000,
     priceHigh: 520000,
     popular: true,
@@ -665,7 +665,7 @@ export const SERVICE_PRICING = {
     description: "General Construction",
   },
   kitchen: {
-    startingPrice: "$18,000",
+    startingPrice: "$25,000",
     description: "Kitchen Remodeling",
   },
   bathroom: {
@@ -895,7 +895,8 @@ export function formatPriceFull(price: number): string {
 }
 
 export function formatPriceRange(low: number, high: number): string {
-  return `${formatPriceFull(low)}-${formatPriceFull(high)}`;
+  // Sitewide range format: "$155,000 – $215,000" (no-break space before the en dash)
+  return `${formatPriceFull(low)}\u00A0– ${formatPriceFull(high)}`;
 }
 
 export function formatSqFt(value: number): string {

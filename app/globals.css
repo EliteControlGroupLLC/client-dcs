@@ -1,30 +1,41 @@
 @import "tailwindcss";
 
 :root {
-  /* DCS Brand Colors */
-  --primary: #3ECDA2;
-  --primary-dark: #2BA87F;
-  --primary-light: #5FE8BD;
-  --secondary: #0F2A4A;
-  --secondary-light: #1A3D66;
-  --accent: #F5A623;
-  
+  /* TruthCore Brand Colors (DBA of Distinct Construction Solutions)
+     Misty Emerald + Antique Gold — see BRAND_MANUAL-TRUTHCORE.pdf */
+  --primary: #336666;        /* Misty Emerald — white text on it (6.5:1) */
+  --primary-dark: #25514F;
+  --primary-light: #6FA3A3;  /* accents/icons on dark sections */
+  --primary-foreground: #FFFFFF;
+  --secondary: #1A2B2B;      /* Deep emerald-charcoal (dark sections) */
+  --secondary-light: #2C4747;
+  --secondary-foreground: #FFFFFF;
+  --accent: #B99A5A;         /* Antique Gold — large/decorative or on dark only */
+  --accent-light: #D8C49A;   /* Pale gold — names/hover text on dark surfaces */
+
   /* Semantic Colors */
   --background: #ffffff;
-  --foreground: #0F2A4A;
-  --muted: #F8FAFB;
-  --muted-foreground: #64748B;
+  --foreground: #1A2B2B;
+  --muted: #F5F7F7;
+  --muted-foreground: #5C6B6B;
   --card: #ffffff;
-  --card-foreground: #0F2A4A;
-  --border: #E2E8F0;
-  --input: #E2E8F0;
-  --ring: #3ECDA2;
+  --card-foreground: #1A2B2B;
+  --border: #E2E8E8;
+  --input: #E2E8E8;
+  --ring: #336666;
   --radius: 0.5rem;
   
-  /* Status Colors */
-  --destructive: #EF4444;
+  /* Status Colors
+     Success is the brand emerald (no off-palette green). Errors use a red that
+     passes AA as small text on white (4.8:1) plus the soft fill/line/border
+     shades of the sitewide form style (components/ui/form.tsx). */
+  --destructive: #DC2626;
   --destructive-foreground: #ffffff;
-  --success: #22C55E;
+  --destructive-soft: #FEF2F2;    /* invalid field / error box fill */
+  --destructive-line: #FECACA;    /* error box border */
+  --destructive-border: #F87171;  /* invalid field border */
+  --success: #336666;
+  --success-foreground: #ffffff;
   --warning: #F59E0B;
 }
 
@@ -32,9 +43,12 @@
   --color-primary: var(--primary);
   --color-primary-dark: var(--primary-dark);
   --color-primary-light: var(--primary-light);
+  --color-primary-foreground: var(--primary-foreground);
   --color-secondary: var(--secondary);
   --color-secondary-light: var(--secondary-light);
+  --color-secondary-foreground: var(--secondary-foreground);
   --color-accent: var(--accent);
+  --color-accent-light: var(--accent-light);
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --color-muted: var(--muted);
@@ -46,9 +60,14 @@
   --color-ring: var(--ring);
   --color-destructive: var(--destructive);
   --color-destructive-foreground: var(--destructive-foreground);
+  --color-destructive-soft: var(--destructive-soft);
+  --color-destructive-line: var(--destructive-line);
+  --color-destructive-border: var(--destructive-border);
   --color-success: var(--success);
+  --color-success-foreground: var(--success-foreground);
   --color-warning: var(--warning);
-  --font-sans: 'Inter', var(--font-geist-sans), system-ui, sans-serif;
+  --font-sans: var(--font-redhat), 'Red Hat Display', system-ui, sans-serif;
+  --font-serif: var(--font-crimson), 'Crimson Text', Georgia, serif;
   --font-mono: var(--font-geist-mono);
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: var(--radius);
@@ -56,14 +75,23 @@
   --radius-xl: calc(var(--radius) + 8px);
 }
 
-* {
-  border-color: var(--border);
+/* Default border color. Layered (not a bare rule) so border-color utilities
+   such as border-white/20 or border-accent/30 still win over it. */
+@layer base {
+  *,
+  ::before,
+  ::after {
+    border-color: var(--border);
+  }
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: var(--font-sans);
+  /* Reference the next/font variable directly: --font-sans lives in
+     `@theme inline`, so it is never emitted as a runtime CSS variable and
+     var(--font-sans) here would be invalid (falling back to ui-sans-serif). */
+  font-family: var(--font-redhat), 'Red Hat Display', system-ui, sans-serif;
   letter-spacing: normal;
   text-rendering: optimizeLegibility;
 }
@@ -113,8 +141,8 @@ html {
 }
 
 @keyframes pulse-glow {
-  0%, 100% { box-shadow: 0 0 20px rgba(62, 205, 162, 0.1); }
-  50% { box-shadow: 0 0 40px rgba(62, 205, 162, 0.2); }
+  0%, 100% { box-shadow: 0 0 20px rgba(51, 102, 102, 0.12); }
+  50% { box-shadow: 0 0 40px rgba(51, 102, 102, 0.24); }
 }
 
 .animate-fade-in {
@@ -144,10 +172,23 @@ html {
   border: 1px solid rgba(255, 255, 255, 0.15);
 }
 
-/* Architectural grid pattern */
-.architectural-grid {
-  background-image:
-    linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px);
-  background-size: 60px 60px;
+/*
+ * Page container — one set of left/right edges sitewide.
+ * Full-width inner-page sections use `container mx-auto px-4`; the header,
+ * footer and homepage use `mx-auto max-w-7xl px-4 sm:px-6 lg:px-8`. Make
+ * full-width `container`s identical so content starts exactly under the logo.
+ * Containers with their own max-w-* (centered text/grids) keep their width.
+ * Unlayered on purpose so it wins over the `px-4` utility on the same element.
+ */
+.container:not([class*="max-w-"]) {
+  width: 100%;
+  max-width: 80rem;
+  margin-inline: auto;
+  padding-inline: 1rem;
+}
+@media (min-width: 40rem) {
+  .container:not([class*="max-w-"]) { padding-inline: 1.5rem; }
+}
+@media (min-width: 64rem) {
+  .container:not([class*="max-w-"]) { padding-inline: 2rem; }
 }

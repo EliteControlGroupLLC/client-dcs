@@ -19,7 +19,7 @@ const faqs = [
       },
       {
         q: "How long does it take to build an ADU?",
-        a: "The total timeline from design to completion is typically 12-16 months. This includes design and engineering (1-2 months), permitting (6-9 months), and construction (3-4 months). We manage the entire process for you.",
+        a: "The total timeline from design to completion is typically 12–16 months. This includes design and engineering (1–2 months), permitting (6–9 months), and construction (3–4 months). We manage the entire process for you.",
       },
       {
         q: "Do I need permits to build an ADU?",
@@ -49,7 +49,7 @@ const faqs = [
     questions: [
       {
         q: "Are you licensed and insured?",
-        a: "Yes. Distinct Construction Solutions is a fully licensed California General Contractor (CSLB License #1098531), bonded, and insured. Your property is fully protected throughout the project.",
+        a: "Yes. Distinct Construction Solutions (dba TruthCore) is a fully licensed California General Contractor (CSLB License #1098531), bonded, and insured. Your property is fully protected throughout the project.",
       },
       {
         q: "Will I have a dedicated project manager?",
@@ -66,17 +66,30 @@ const faqs = [
 function FAQItem({ question, answer }: { question: string; answer: string }) {
   const [open, setOpen] = useState(false);
   return (
-    <div className="border-b border-gray-200">
+    <div
+      className={`rounded-2xl border bg-secondary-light shadow-lg shadow-black/20 transition-colors ${
+        open ? "border-accent/60 ring-1 ring-accent/30" : "border-white/10 hover:border-accent/50"
+      }`}
+    >
       <button
+        type="button"
         onClick={() => setOpen(!open)}
-        className="w-full flex items-center justify-between py-5 text-left"
+        aria-expanded={open}
+        className="w-full flex items-center justify-between gap-4 px-6 py-5 text-left"
       >
-        <span className="text-lg font-medium text-secondary pr-4">{question}</span>
-        <ChevronDown className={`h-5 w-5 text-primary shrink-0 transition-transform ${open ? "rotate-180" : ""}`} />
+        <span className={`text-lg font-medium ${open ? "text-accent-light" : "text-white"}`}>{question}</span>
+        <span
+          className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full transition-colors ${
+            open ? "bg-accent text-secondary" : "bg-primary text-white"
+          }`}
+          aria-hidden="true"
+        >
+          <ChevronDown className={`h-5 w-5 transition-transform ${open ? "rotate-180" : ""}`} />
+        </span>
       </button>
       {open && (
-        <div className="pb-5">
-          <p className="text-muted-foreground">{answer}</p>
+        <div className="border-t border-white/10 px-6 pb-6 pt-4">
+          <p className="text-white/80 leading-relaxed">{answer}</p>
         </div>
       )}
     </div>
@@ -86,10 +99,10 @@ function FAQItem({ question, answer }: { question: string; answer: string }) {
 export default function FAQPage() {
   return (
     <div className="min-h-screen">
-      <section className="bg-secondary text-white py-20">
+      <section className="bg-secondary bg-[radial-gradient(ellipse_at_top,rgba(51,102,102,0.35),transparent_60%)] text-white pt-40 pb-20">
         <div className="container mx-auto px-4">
           <div className="max-w-3xl">
-            <span className="inline-block text-primary font-semibold text-sm uppercase tracking-wider mb-4">
+            <span className="inline-block text-accent font-semibold text-sm uppercase tracking-wider mb-4">
               FAQ
             </span>
             <h1 className="text-4xl md:text-5xl font-bold mb-6">
@@ -102,12 +115,12 @@ export default function FAQPage() {
         </div>
       </section>
 
-      <section className="py-20">
+      <section className="py-20 bg-secondary border-t border-white/10">
         <div className="container mx-auto px-4 max-w-3xl">
           {faqs.map((category) => (
             <div key={category.category} className="mb-12">
-              <h2 className="text-2xl font-bold text-secondary mb-6">{category.category}</h2>
-              <div>
+              <h2 className="text-2xl font-bold text-white mb-6">{category.category}</h2>
+              <div className="space-y-3">
                 {category.questions.map((faq) => (
                   <FAQItem key={faq.q} question={faq.q} answer={faq.a} />
                 ))}
@@ -117,15 +130,15 @@ export default function FAQPage() {
         </div>
       </section>
 
-      <section className="py-20 bg-secondary text-white">
+      <section className="py-20 bg-secondary bg-[radial-gradient(ellipse_at_top,rgba(51,102,102,0.35),transparent_60%)] border-t border-white/10 text-white">
         <div className="container mx-auto px-4 text-center">
           <h2 className="text-3xl md:text-4xl font-bold mb-4">Still Have Questions?</h2>
           <p className="text-lg text-white/80 mb-8 max-w-2xl mx-auto">
             Our team is happy to answer any questions about your project.
           </p>
           <Link href="/contact">
-            <Button size="lg" className="bg-primary hover:bg-primary-dark text-secondary font-semibold">
-              Contact Us <ArrowRight className="h-5 w-5 ml-2" />
+            <Button size="lg" rounded="full">
+              Contact Us <ArrowRight className="h-5 w-5" />
             </Button>
           </Link>
         </div>

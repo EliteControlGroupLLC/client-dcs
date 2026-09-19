@@ -1,6 +1,11 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { ArrowRight, Palette, Layers, Box, Sparkles } from "lucide-react";
+
+export const metadata: Metadata = {
+  title: "Digital Showroom",
+};
 
 const categories = [
   {
@@ -32,16 +37,16 @@ const categories = [
 export default function ShowroomPreviewPage() {
   return (
     <div className="min-h-screen">
-      <section className="bg-secondary text-white py-20">
+      <section className="bg-secondary bg-[radial-gradient(ellipse_at_top,rgba(51,102,102,0.35),transparent_60%)] text-white pt-40 pb-20">
         <div className="container mx-auto px-4">
           <div className="max-w-3xl">
-            <span className="inline-block text-primary font-semibold text-sm uppercase tracking-wider mb-4">
+            <span className="inline-block text-accent font-semibold text-sm uppercase tracking-wider mb-4">
               DIGITAL SHOWROOM
             </span>
             <h1 className="text-4xl md:text-5xl font-bold mb-6">
               Explore Materials, Finishes & Design Options
             </h1>
-            <p className="text-xl text-white/80 mb-8">
+            <p className="text-xl text-white/80">
               Browse our curated selection of materials, finishes, fixtures, and design options.
               Visualize your project before construction begins.
             </p>
@@ -49,31 +54,31 @@ export default function ShowroomPreviewPage() {
         </div>
       </section>
 
-      <section className="py-20">
+      <section className="py-20 bg-secondary border-t border-white/10">
         <div className="container mx-auto px-4">
           <div className="text-center mb-12">
-            <h2 className="text-3xl md:text-4xl font-bold text-secondary mb-4">
+            <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">
               Browse by Category
             </h2>
-            <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+            <p className="text-lg text-white/80 max-w-2xl mx-auto">
               Select a category to explore available options for your project.
             </p>
           </div>
 
-          <div className="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
+          <div className="grid md:grid-cols-2 gap-6 max-w-4xl mx-auto">
             {categories.map((cat) => {
               const Icon = cat.icon;
               return (
                 <div
                   key={cat.title}
-                  className="group bg-white rounded-2xl p-8 border border-gray-100 shadow-sm hover:shadow-lg hover:border-primary/20 transition-all duration-300"
+                  className="group flex h-full flex-col bg-secondary-light rounded-2xl p-8 border border-white/10 shadow-lg shadow-black/20 hover:border-accent/50 transition-all duration-300"
                 >
-                  <div className="w-14 h-14 rounded-xl bg-primary/10 flex items-center justify-center mb-6 group-hover:bg-primary/20 transition-colors">
-                    <Icon className="h-7 w-7 text-primary" />
+                  <div className="w-14 h-14 rounded-xl bg-primary flex items-center justify-center mb-6 shadow-lg shadow-black/20 group-hover:bg-primary-dark transition-colors">
+                    <Icon className="h-7 w-7 text-white" aria-hidden="true" />
                   </div>
-                  <h3 className="text-xl font-bold text-secondary mb-2">{cat.title}</h3>
-                  <p className="text-muted-foreground mb-4">{cat.description}</p>
-                  <span className="text-sm font-medium text-primary">{cat.count}</span>
+                  <h3 className="text-xl font-semibold text-white mb-2">{cat.title}</h3>
+                  <p className="text-white/80 mb-4">{cat.description}</p>
+                  <span className="mt-auto pt-4 border-t border-white/10 text-sm font-semibold text-accent-light">{cat.count}</span>
                 </div>
               );
             })}
@@ -81,7 +86,7 @@ export default function ShowroomPreviewPage() {
         </div>
       </section>
 
-      <section className="py-20 bg-secondary text-white">
+      <section className="py-20 bg-secondary bg-[radial-gradient(ellipse_at_top,rgba(51,102,102,0.35),transparent_60%)] border-t border-white/10 text-white">
         <div className="container mx-auto px-4 text-center">
           <h2 className="text-3xl md:text-4xl font-bold mb-4">
             Ready to Start Selecting?
@@ -91,14 +96,14 @@ export default function ShowroomPreviewPage() {
             that match your vision and budget.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Link href="/build-your-adu">
-              <Button size="lg" className="bg-primary hover:bg-primary-dark text-secondary font-semibold">
+            <Link href="/build-your-adu" className="w-full sm:w-auto">
+              <Button size="lg" rounded="full" className="w-full sm:w-auto">
                 Build Your ADU
-                <ArrowRight className="h-5 w-5 ml-2" />
+                <ArrowRight className="h-5 w-5" />
               </Button>
             </Link>
-            <Link href="/contact">
-              <Button size="lg" variant="outline" className="border-white text-white hover:bg-white/10">
+            <Link href="/contact" className="w-full sm:w-auto">
+              <Button size="lg" variant="outlineWhite" rounded="full" className="w-full sm:w-auto">
                 Schedule a Consultation
               </Button>
             </Link>

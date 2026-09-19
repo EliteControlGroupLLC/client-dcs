@@ -1,7 +1,11 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
 import { ArrowRight, Clock } from "lucide-react";
+
+export const metadata: Metadata = {
+  title: "Blog",
+};
 
 const posts = [
   {
@@ -51,10 +55,10 @@ const posts = [
 export default function BlogPage() {
   return (
     <div className="min-h-screen">
-      <section className="bg-secondary text-white py-20">
+      <section className="bg-secondary bg-[radial-gradient(ellipse_at_top,rgba(51,102,102,0.35),transparent_60%)] text-white pt-40 pb-20">
         <div className="container mx-auto px-4">
           <div className="max-w-3xl">
-            <span className="inline-block text-primary font-semibold text-sm uppercase tracking-wider mb-4">
+            <span className="inline-block text-accent font-semibold text-sm uppercase tracking-wider mb-4">
               BLOG
             </span>
             <h1 className="text-4xl md:text-5xl font-bold mb-6">
@@ -67,43 +71,42 @@ export default function BlogPage() {
         </div>
       </section>
 
-      <section className="py-20">
+      <section className="py-20 bg-secondary border-t border-white/10">
         <div className="container mx-auto px-4">
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
             {posts.map((post) => (
-              <Card key={post.title} className="overflow-hidden hover:shadow-lg transition-shadow">
-                <div className="h-48 bg-gradient-to-br from-primary/10 to-secondary/10" />
-                <CardContent className="p-6">
+              <article key={post.title} className="flex h-full flex-col overflow-hidden rounded-2xl border border-white/10 bg-secondary-light text-white shadow-lg shadow-black/20 transition-colors hover:border-accent/50">
+                <div className="flex flex-1 flex-col p-6">
                   <div className="flex items-center gap-3 mb-3">
-                    <span className="text-xs font-semibold text-primary bg-primary/10 px-2 py-1 rounded-full">
+                    <span className="text-xs font-semibold text-accent-light bg-accent/10 border border-accent/30 px-3 py-1 rounded-full">
                       {post.category}
                     </span>
-                    <span className="flex items-center gap-1 text-xs text-muted-foreground">
-                      <Clock className="h-3 w-3" />
+                    <span className="flex items-center gap-1 text-xs text-white/65">
+                      <Clock className="h-3 w-3" aria-hidden="true" />
                       {post.readTime}
                     </span>
                   </div>
-                  <h3 className="text-lg font-bold text-secondary mb-2">{post.title}</h3>
-                  <p className="text-sm text-muted-foreground mb-4">{post.excerpt}</p>
-                  <span className="text-sm text-primary font-medium">{post.date}</span>
-                </CardContent>
-              </Card>
+                  <h3 className="text-xl font-semibold text-white mb-2">{post.title}</h3>
+                  <p className="text-sm text-white/80 mb-4">{post.excerpt}</p>
+                  <span className="mt-auto pt-4 border-t border-white/10 text-sm text-accent-light font-semibold">{post.date}</span>
+                </div>
+              </article>
             ))}
           </div>
         </div>
       </section>
 
-      <section className="py-20 bg-muted">
+      <section className="py-20 bg-secondary bg-[radial-gradient(ellipse_at_top,rgba(51,102,102,0.35),transparent_60%)] border-t border-white/10 text-white">
         <div className="container mx-auto px-4 text-center">
-          <h2 className="text-3xl md:text-4xl font-bold text-secondary mb-4">
+          <h2 className="text-3xl md:text-4xl font-bold mb-4">
             Have a Question?
           </h2>
-          <p className="text-lg text-muted-foreground mb-8 max-w-2xl mx-auto">
+          <p className="text-lg text-white/80 mb-8 max-w-2xl mx-auto">
             Can&apos;t find what you&apos;re looking for? Our team is happy to help.
           </p>
           <Link href="/contact">
-            <Button size="lg" className="bg-primary hover:bg-primary-dark text-secondary font-semibold">
-              Contact Us <ArrowRight className="h-5 w-5 ml-2" />
+            <Button size="lg" rounded="full">
+              Contact Us <ArrowRight className="h-5 w-5" />
             </Button>
           </Link>
         </div>

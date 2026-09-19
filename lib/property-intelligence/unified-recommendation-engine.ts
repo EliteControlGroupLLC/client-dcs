@@ -199,7 +199,7 @@ export async function generateUnifiedRecommendation(
   const layout = variation.bedrooms === 0 ? "studio" : `${variation.bedrooms}-bed / ${variation.bathrooms}-bath`;
   const rentBasis = market
     ? `RentCast rent estimate for a ${market.basis} (${market.comparableCount} comparable rentals)`
-    : `Planning estimate from DCS's San Diego County ADU rent table for a ${primarySizeSqFt.toLocaleString()} sq ft ${layout} unit — not a market quote for this address (live market rent was unavailable)`;
+    : `Planning estimate from TruthCore's San Diego County ADU rent table for a ${primarySizeSqFt.toLocaleString()} sq ft ${layout} unit — not a market quote for this address (live market rent was unavailable)`;
 
   const loanAmount = Math.round(totalCost * LOAN_TO_COST);
   const monthlyPayment = calculateMonthlyPayment(loanAmount, INTEREST_RATE, TERM_YEARS);
@@ -210,9 +210,9 @@ export async function generateUnifiedRecommendation(
   const paybackYears = annualNetCashFlow > 0 ? Math.round((totalCost / annualNetCashFlow) * 10) / 10 : 99;
   const valueAdd = roundToNearest(totalCost * VALUE_ADD_MULTIPLE, 1000);
   const financialAssumptions = [
-    `Project cost = DCS turnkey price for this plan (${formatPriceRange(pricing.low, pricing.high)}, midpoint used)${siteAdder ? `, incl. $${siteAdder.toLocaleString()} measured-slope foundation allowance` : ""}; ${Math.round(SOFT_COST_SHARE * 100)}% of it shown as soft costs (design, permits, fees)`,
+    `Project cost = TruthCore turnkey price for this plan (${formatPriceRange(pricing.low, pricing.high)}, midpoint used)${siteAdder ? `, incl. $${siteAdder.toLocaleString()} measured-slope foundation allowance` : ""}; ${Math.round(SOFT_COST_SHARE * 100)}% of it shown as soft costs (design, permits, fees)`,
     `Financing: ${Math.round(LOAN_TO_COST * 100)}% of project cost at ${(INTEREST_RATE * 100).toFixed(2)}% for ${TERM_YEARS} years, ${Math.round((1 - LOAN_TO_COST) * 100)}% down`,
-    `Rent: ${market ? "RentCast market estimate for this address" : "DCS rent-table planning estimate"}; cash flow nets ${Math.round(VACANCY * 100)}% vacancy and reserves of ${Math.round(RESERVES_PCT_OF_RENT * 100)}% of rent + $${RESERVES_FIXED_MONTHLY}/mo`,
+    `Rent: ${market ? "RentCast market estimate for this address" : "TruthCore rent-table planning estimate"}; cash flow nets ${Math.round(VACANCY * 100)}% vacancy and reserves of ${Math.round(RESERVES_PCT_OF_RENT * 100)}% of rent + $${RESERVES_FIXED_MONTHLY}/mo`,
     "ROI = annual net cash flow ÷ total project cost",
     `Value add = ${VALUE_ADD_MULTIPLE}× project cost (cost-based rule of thumb, not an appraisal)`,
   ];
@@ -245,7 +245,7 @@ export async function generateUnifiedRecommendation(
       basePricing.low === basePricing.matchedPlan.priceLow &&
       basePricing.high === basePricing.matchedPlan.priceHigh &&
       Math.abs(basePricing.matchedPlan.sqFt - primarySizeSqFt) >= 100
-        ? `${formatPriceRange(pricing.low, pricing.high)} (priced from DCS's ${basePricing.matchedPlan.sqFt.toLocaleString()} sq ft ${basePricing.matchedPlan.name} plan)`
+        ? `${formatPriceRange(pricing.low, pricing.high)} (priced from TruthCore's ${basePricing.matchedPlan.sqFt.toLocaleString()} sq ft ${basePricing.matchedPlan.name} plan)`
         : formatPriceRange(pricing.low, pricing.high),
     primaryRentEstimate: {
       monthlyRent,
@@ -305,7 +305,7 @@ function generateSmartBannerText(
 
   return {
     bannerRecommendation: `Best fit for this property: ${planName} at ${sizeLabel} sq ft`,
-    bannerDetails: `${primaryType} recommendation aligned to the current parcel allowance${sizeIsCappedByRules ? " and city size cap" : ""}. Recommended configuration: ${layoutLabel}. Estimated project investment (DCS plan pricing): ${formatPriceRange(priceLow, priceHigh)}. ${rentKind === "market" ? "Market rent estimate for this address (RentCast)" : "Planning rent estimate (DCS rent table; live market rent unavailable)"}: $${rentLow.toLocaleString()}-$${rentHigh.toLocaleString()}/month.`,
+    bannerDetails: `${primaryType} recommendation aligned to the current parcel allowance${sizeIsCappedByRules ? " and city size cap" : ""}. Recommended configuration: ${layoutLabel}. Estimated project investment (TruthCore plan pricing): ${formatPriceRange(priceLow, priceHigh)}. ${rentKind === "market" ? "Market rent estimate for this address (RentCast)" : "Planning rent estimate (TruthCore rent table; live market rent unavailable)"}: $${rentLow.toLocaleString()}\u00A0– $${rentHigh.toLocaleString()}/month.`,
   };
 }
 

@@ -5,6 +5,16 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { ArrowRight, ChefHat } from "lucide-react";
+import {
+  calcSectionClass,
+  checkboxClass,
+  controlLabelClass,
+  inputPanelClass,
+  optionClass,
+  ResultIcon,
+  resultCardClass,
+} from "@/components/calculators/calculator-ui";
+import { KITCHEN_ADD_ONS } from "@/components/calculators/pricing";
 import { LeadGate } from "@/components/lead-gate/lead-gate";
 import { LEAD_GATE_INTERESTS } from "@/lib/lead-gate-interests";
 
@@ -42,14 +52,13 @@ const finishLevels = [
   },
 ];
 
-const addOns = [
-  { label: "Island Addition", cost: 5000 },
-  { label: "Open Floor Plan Conversion", cost: 8000 },
-  { label: "New Lighting Design", cost: 3000 },
-  { label: "Plumbing Relocation", cost: 4000 },
-];
+const addOns = KITCHEN_ADD_ONS;
 
-export function KitchenCalculatorInline() {
+/**
+ * Rendered on the service page (dark band with its own heading) and, with
+ * `standalone`, as the body of the /tools page (the page hero carries the title).
+ */
+export function KitchenCalculatorInline({ standalone = false }: { standalone?: boolean }) {
   const [sizeIndex, setSizeIndex] = useState(1);
   const [finishIndex, setFinishIndex] = useState(0);
   const [selectedAddOns, setSelectedAddOns] = useState<number[]>([]);
@@ -70,31 +79,30 @@ export function KitchenCalculatorInline() {
   return (
     <div id="calculator">
       <LeadGate
+        className={calcSectionClass}
         interest={LEAD_GATE_INTERESTS.kitchenCalculator}
         headline="Unlock your kitchen remodel estimate"
         subhead="See your kitchen remodel price range based on size, finish level and upgrades."
         ctaLabel="Unlock My Kitchen Estimate"
       >
-        <section className="py-16 bg-muted">
+        <section className={`py-20 ${calcSectionClass}`}>
           <div className="container mx-auto px-4 max-w-5xl">
-            <div className="text-center mb-10">
-              <h2 className="text-3xl md:text-4xl font-bold text-secondary mb-3">Kitchen Remodel Estimator</h2>
-              <p className="text-muted-foreground">Estimate your kitchen remodel cost based on size, finish level, and upgrades.</p>
-            </div>
-            <div className="grid md:grid-cols-2 gap-8">
-              <div className="space-y-8">
+            {!standalone && (
+              <div className="text-center mb-12">
+                <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">Kitchen Remodel Estimator</h2>
+                <p className="text-lg text-white/80">Estimate your kitchen remodel cost based on size, finish level, and upgrades.</p>
+              </div>
+            )}
+            <div className="grid md:grid-cols-2 gap-8 [&>*]:min-w-0">
+              <div className={`space-y-8 ${inputPanelClass}`}>
                 <div>
-                  <label className="block text-sm font-semibold text-secondary mb-3">Kitchen Size</label>
+                  <label className={controlLabelClass}>Kitchen Size</label>
                   <div className="space-y-2">
                     {kitchenSizes.map((s, i) => (
                       <button
                         key={s.label}
                         onClick={() => setSizeIndex(i)}
-                        className={`w-full text-left px-4 py-3 rounded-lg border transition-all ${
-                          sizeIndex === i
-                            ? "border-primary bg-primary/5 text-secondary font-medium"
-                            : "border-gray-200 text-muted-foreground hover:border-primary/30"
-                        }`}
+                        className={optionClass(sizeIndex === i)}
                       >
                         {s.label} — {s.sqFt} sq ft
                       </button>
@@ -103,66 +111,58 @@ export function KitchenCalculatorInline() {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-semibold text-secondary mb-3">Finish Level</label>
+                  <label className={controlLabelClass}>Finish Level</label>
                   <div className="space-y-2">
                     {finishLevels.map((f, i) => (
                       <button
                         key={f.label}
                         onClick={() => setFinishIndex(i)}
-                        className={`w-full text-left px-4 py-3 rounded-lg border transition-all ${
-                          finishIndex === i
-                            ? "border-primary bg-primary/5 text-secondary font-medium"
-                            : "border-gray-200 text-muted-foreground hover:border-primary/30"
-                        }`}
+                        className={optionClass(finishIndex === i)}
                       >
                         <span className="font-medium">{f.label}</span>
-                        <span className="block text-xs text-muted-foreground mt-1">{f.description}</span>
+                        <span className="block text-xs text-white/80 font-normal mt-1">{f.description}</span>
                       </button>
                     ))}
                   </div>
                 </div>
 
                 <div>
-                  <label className="block text-sm font-semibold text-secondary mb-3">Optional Upgrades</label>
+                  <label className={controlLabelClass}>Optional Upgrades</label>
                   <div className="space-y-2">
                     {addOns.map((a, i) => (
                       <label
                         key={a.label}
-                        className={`flex items-center gap-3 px-4 py-3 rounded-lg border cursor-pointer transition-all ${
-                          selectedAddOns.includes(i)
-                            ? "border-primary bg-primary/5"
-                            : "border-gray-200 hover:border-primary/30"
-                        }`}
+                        className={optionClass(selectedAddOns.includes(i), "flex items-center gap-3 px-4 py-3 cursor-pointer")}
                       >
                         <input
                           type="checkbox"
                           checked={selectedAddOns.includes(i)}
                           onChange={() => toggleAddOn(i)}
-                          className="w-4 h-4 accent-primary"
+                          className={checkboxClass}
                         />
-                        <span className="text-sm text-secondary">{a.label}</span>
-                        <span className="text-sm text-muted-foreground ml-auto">Starting at ${a.cost.toLocaleString()}</span>
+                        <span className="text-sm">{a.label}</span>
+                        <span className="text-sm ml-auto tabular-nums">+${a.cost.toLocaleString()}</span>
                       </label>
                     ))}
                   </div>
                 </div>
               </div>
 
-              <Card className="bg-secondary text-white">
-                <CardContent className="p-8 flex flex-col justify-center h-full">
+              <Card className={resultCardClass}>
+                <CardContent className="p-6 md:p-8 flex flex-col justify-center h-full">
                   <div className="text-center">
-                    <ChefHat className="h-12 w-12 text-primary mx-auto mb-4" />
-                    <p className="text-white/70 text-sm mb-2">Estimated Kitchen Remodel</p>
-                    <p className="text-3xl md:text-4xl font-bold text-primary mb-1">
-                      ${totalLow.toLocaleString()} &ndash; ${totalHigh.toLocaleString()}
+                    <ResultIcon icon={ChefHat} />
+                    <p className="text-white/75 text-sm mb-2">Estimated Kitchen Remodel</p>
+                    <p className="text-3xl md:text-4xl font-bold text-accent mb-1 text-balance">
+                      ${totalLow.toLocaleString()}&nbsp;&ndash; ${totalHigh.toLocaleString()}
                     </p>
-                    <p className="text-white/50 text-sm mb-6">
+                    <p className="text-white/75 text-sm mb-6">
                       {size.label} &bull; {finish.label} Finish
                     </p>
 
                     <div className="border-t border-white/10 pt-6 space-y-3 text-left mb-6">
-                      <p className="text-white/70 text-sm font-semibold">Base scope includes:</p>
-                      <ul className="text-white/60 text-sm space-y-1">
+                      <p className="text-white text-sm font-semibold">Base scope includes:</p>
+                      <ul className="text-white/80 text-sm space-y-1">
                         <li>&bull; Demolition &amp; removal</li>
                         <li>&bull; New cabinets &amp; countertops</li>
                         <li>&bull; Backsplash tile</li>
@@ -172,15 +172,15 @@ export function KitchenCalculatorInline() {
                       </ul>
                     </div>
 
-                    <p className="text-xs text-white/40 mb-6">
+                    <p className="text-xs text-white/70 mb-6">
                       * Estimate only. Final pricing depends on material selections, site conditions, and design scope.
                     </p>
 
-                    <Link href="/contact">
-                      <Button size="lg" className="w-full bg-primary hover:bg-primary-dark text-secondary font-semibold">
+                    <Button asChild size="lg" rounded="full" className="w-full">
+                      <Link href="/contact">
                         Design Your Kitchen <ArrowRight className="h-5 w-5 ml-2" />
-                      </Button>
-                    </Link>
+                      </Link>
+                    </Button>
                   </div>
                 </CardContent>
               </Card>

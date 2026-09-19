@@ -52,30 +52,30 @@ export function PropertyScanLoading({ address, onComplete }: PropertyScanLoading
     <div className="flex flex-col items-center justify-center py-20 animate-fade-in">
       {/* Scanner animation */}
       <div className="relative w-32 h-32 mb-10">
-        <div className="absolute inset-0 rounded-full border-4 border-primary/20" />
+        <div className="absolute inset-0 rounded-full border-4 border-white/10" />
         <div
-          className="absolute inset-0 rounded-full border-4 border-primary border-t-transparent animate-spin"
+          className="absolute inset-0 rounded-full border-4 border-accent border-t-transparent animate-spin"
           style={{ animationDuration: "1.5s" }}
         />
-        <div className="absolute inset-4 rounded-full bg-primary/5 flex items-center justify-center">
+        <div className="absolute inset-4 rounded-full bg-primary flex items-center justify-center">
           {(() => {
             const step = scanSteps[currentStep];
             if (!step) return null;
             const Icon = step.icon;
-            return <Icon className="h-10 w-10 text-primary" />;
+            return <Icon className="h-10 w-10 text-white" />;
           })()}
         </div>
       </div>
 
       {/* Address being scanned */}
-      <p className="text-sm text-muted-foreground mb-2">Analyzing</p>
-      <p className="text-lg font-semibold text-secondary mb-8">{address}</p>
+      <p className="text-sm text-accent-light font-semibold uppercase tracking-wider mb-2">Analyzing</p>
+      <p className="text-lg font-semibold text-white mb-8">{address}</p>
 
       {/* Progress bar */}
       <div className="w-full max-w-md mb-8">
-        <div className="h-2 bg-muted rounded-full overflow-hidden">
+        <div className="h-2 bg-white/10 rounded-full overflow-hidden">
           <div
-            className="h-full bg-gradient-to-r from-primary to-primary-light rounded-full transition-all duration-100 ease-linear"
+            className="h-full bg-gradient-to-r from-primary-light to-accent rounded-full transition-all duration-100 ease-linear"
             style={{ width: `${progress}%` }}
           />
         </div>
@@ -93,26 +93,26 @@ export function PropertyScanLoading({ address, onComplete }: PropertyScanLoading
               key={index}
               className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-300 ${
                 isActive
-                  ? "bg-primary/5 border border-primary/20"
+                  ? "bg-secondary border border-accent/40"
                   : isComplete
-                  ? "opacity-60"
-                  : "opacity-30"
+                  ? "opacity-80"
+                  : "opacity-40"
               }`}
             >
               <StepIcon
                 className={`h-5 w-5 flex-shrink-0 ${
-                  isActive ? "text-primary" : isComplete ? "text-success" : "text-muted-foreground"
+                  isActive ? "text-accent" : isComplete ? "text-primary-light" : "text-white/60"
                 }`}
               />
               <span
                 className={`text-sm font-medium ${
-                  isActive ? "text-secondary" : "text-muted-foreground"
+                  isActive ? "text-white" : "text-white/75"
                 }`}
               >
                 {step.label}
               </span>
               {isComplete && (
-                <CheckCircle2 className="h-4 w-4 text-success ml-auto" />
+                <CheckCircle2 className="h-4 w-4 text-accent ml-auto" />
               )}
             </div>
           );

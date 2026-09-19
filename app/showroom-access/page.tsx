@@ -8,9 +8,9 @@ import { safeShowroomNext } from "@/lib/showroom-access";
 import { ShowroomRedirect } from "./showroom-redirect";
 
 export const metadata: Metadata = {
-  title: "Shop the Showroom — Unlock up to 30% off | Distinct Construction Solutions",
+  title: "Shop the Showroom — Unlock up to 30% off",
   description:
-    "Shop cabinetry, countertops, flooring, fixtures and finishes in the Distinct Construction Solutions showroom. Unlock up to 30% off.",
+    "Shop cabinetry, countertops, flooring, fixtures and finishes in the TruthCore showroom. Unlock up to 30% off.",
   alternates: { canonical: "/showroom-access" },
 };
 
@@ -38,30 +38,32 @@ export default async function ShowroomAccessPage({
 
   return (
     <div className="min-h-screen">
-      <section className="bg-secondary text-white py-16 md:py-20">
+      <section className="bg-secondary bg-[radial-gradient(ellipse_at_top,rgba(51,102,102,0.35),transparent_60%)] text-white pt-40 pb-20">
         <div className="container mx-auto px-4">
           <div className="max-w-3xl">
-            <span className="inline-block text-primary font-semibold text-sm uppercase tracking-wider mb-4">
-              DCS SHOWROOM
+            <span className="inline-block text-accent font-semibold text-sm uppercase tracking-wider mb-4">
+              TRUTHCORE SHOWROOM
             </span>
             <h1 className="text-4xl md:text-5xl font-bold mb-6">Shop the Showroom</h1>
             <div className="mb-6">
-              <span className="inline-flex items-center gap-2 rounded-full bg-primary px-5 py-2 text-base md:text-lg font-bold text-secondary shadow-lg shadow-primary/30">
+              <span className="inline-flex items-center gap-2 rounded-full border border-accent/40 bg-accent/10 px-5 py-2 text-base md:text-lg font-bold text-accent-light">
                 <Tag className="h-5 w-5" />
                 {SHOWROOM_OFFER}
               </span>
             </div>
-            <p className="text-lg md:text-xl text-white/80">
+            <p className="text-xl text-white/80">
               Browse the cabinetry, countertops, flooring, fixtures and finishes we install every day —
               and unlock up to 30% off your selections when you register below.
             </p>
           </div>
-          <div className="mt-10 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="mt-12 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
             {highlights.map(({ icon: Icon, title, text }) => (
-              <div key={title} className="rounded-xl bg-white/5 border border-white/10 p-4">
-                <Icon className="h-5 w-5 text-primary mb-2" />
+              <div key={title} className="h-full rounded-2xl bg-secondary-light border border-white/10 p-6 shadow-lg shadow-black/20">
+                <div className="w-10 h-10 rounded-lg bg-primary flex items-center justify-center mb-4">
+                  <Icon className="h-5 w-5 text-white" aria-hidden="true" />
+                </div>
                 <p className="font-semibold">{title}</p>
-                <p className="text-sm text-white/70">{text}</p>
+                <p className="text-sm text-white/80">{text}</p>
               </div>
             ))}
           </div>

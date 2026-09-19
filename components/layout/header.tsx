@@ -1,190 +1,401 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef, type MouseEvent } from "react";
 import Link from "next/link";
-import Image from "next/image";
-import { Menu, X, ChevronDown } from "lucide-react";
+import { usePathname } from "next/navigation";
+import { Menu, X, ChevronDown, ArrowRight, ArrowUpRight, Phone, Store } from "lucide-react";
+import { COMPANY_INFO } from "@/lib/data/site-data";
+import { Logo } from "@/components/layout/logo";
+import { isLandingPage } from "@/components/layout/site-chrome";
 
-// Logo configuration
-const USE_IMAGE_LOGO = true;
-const LOGO_LIGHT = "/images/logo-light.png"; // White/light version for dark backgrounds
-const LOGO_DARK = "/images/logo-dark.png";   // Dark version for light/white backgrounds
+const SHOWROOM_HREF = "/showroom";
+const AI_DESIGN_HREF = "https://www.distinctcsolutions.com/showroom/design-ai";
 
-const navigation = [
+type NavLink = { name: string; href: string; description?: string };
+type NavGroup = { name: string; href?: string; children?: NavLink[]; columns?: 1 | 2 };
+
+const navigation: NavGroup[] = [
   { name: "Home", href: "/" },
   {
     name: "Services",
     href: "/services",
+    columns: 2,
     children: [
       { name: "ADU Solutions", href: "/services/adu-solutions" },
       { name: "Custom Homes", href: "/services/new-construction" },
       { name: "Remodeling", href: "/services/remodeling" },
-      { name: "All Services", href: "/services" },
+      { name: "Kitchen Remodeling", href: "/services/kitchen" },
+      { name: "Bathroom Renovation", href: "/services/bathroom" },
+      { name: "Roofing", href: "/services/roofing" },
+      { name: "Windows", href: "/services/windows" },
+      { name: "Concrete", href: "/services/concrete" },
+      { name: "Exterior Improvements", href: "/services/exterior" },
+      { name: "General Construction", href: "/services/general-construction" },
     ],
   },
-  { name: "Floor Plans", href: "/floor-plans" },
-  { name: "Build Your ADU", href: "/build-your-adu" },
+  {
+    name: "Plan & Design",
+    children: [
+      { name: "Build Your ADU", href: "/build-your-adu", description: "See what fits on your lot" },
+      { name: "Floor Plans", href: "/floor-plans", description: "Browse ready-to-adapt layouts" },
+      { name: "Planning Tools", href: "/planning-tools", description: "Calculators and estimators" },
+      { name: "Showroom", href: SHOWROOM_HREF, description: "Finishes and materials" },
+      { name: "AI 3D Design", href: AI_DESIGN_HREF, description: "Visualize your project" },
+    ],
+  },
   { name: "Gallery", href: "/gallery" },
-  { name: "Process", href: "/process" },
-  { name: "About", href: "/about" },
-  { name: "Tools", href: "/planning-tools" },
-  { name: "Contact", href: "/contact" },
+  {
+    name: "Company",
+    children: [
+      { name: "Our Story", href: "/our-story" },
+      { name: "About", href: "/about" },
+      { name: "Our Process", href: "/process" },
+      { name: "Contact", href: "/contact" },
+    ],
+  },
 ];
 
+function isActive(pathname: string, href?: string) {
+  if (!href || href.startsWith("http")) return false;
+  if (href === "/") return pathname === "/";
+  return pathname === href || pathname.startsWith(href + "/");
+}
+
+function groupActive(pathname: string, item: NavGroup) {
+  return isActive(pathname, item.href) || !!item.children?.some((c) => isActive(pathname, c.href));
+}
+
 export function Header() {
+  const pathname = usePathname() || "/";
   const [isOpen, setIsOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
+  const closeTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
-    const handleScroll = () => {
-      setScrolled(window.scrollY > 20);
-    };
-    window.addEventListener("scroll", handleScroll);
+    const handleScroll = () => setScrolled(window.scrollY > 20);
+    handleScroll();
+    window.addEventListener("scroll", handleScroll, { passive: true });
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
+  // Close menus whenever the route changes (derived-state pattern, no effect needed)
+  const [lastPath, setLastPath] = useState(pathname);
+  if (lastPath !== pathname) {
+    setLastPath(pathname);
+    setIsOpen(false);
+    setActiveDropdown(null);
+  }
+
+  // Any link click inside a menu closes it (covers links to the current page)
+  const closeOnLinkClick = (e: MouseEvent) => {
+    if ((e.target as HTMLElement).closest("a")) {
+      setIsOpen(false);
+      setActiveDropdown(null);
+    }
+  };
+
+  // Lock page scroll behind the mobile menu; Escape closes everything
+  useEffect(() => {
+    document.body.style.overflow = isOpen ? "hidden" : "";
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        setIsOpen(false);
+        setActiveDropdown(null);
+      }
+    };
+    window.addEventListener("keydown", onKey);
+    return () => {
+      document.body.style.overflow = "";
+      window.removeEventListener("keydown", onKey);
+    };
+  }, [isOpen]);
+
+  const openMenu = (name: string) => {
+    if (closeTimer.current) clearTimeout(closeTimer.current);
+    setActiveDropdown(name);
+  };
+  const scheduleClose = () => {
+    if (closeTimer.current) clearTimeout(closeTimer.current);
+    closeTimer.current = setTimeout(() => setActiveDropdown(null), 120);
+  };
+
+  // Light (white) header when scrolled or when the mobile sheet is open
+  const light = scrolled || isOpen;
+
+  const linkTone = light
+    ? "text-secondary/70 hover:text-secondary"
+    : "text-white/75 hover:text-white";
+  const activeTone = light ? "text-secondary" : "text-white";
+
+  // Ad landing pages (/lp/*) render their own minimal header
+  if (isLandingPage(pathname)) return null;
+
   return (
     <header
-      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
-        scrolled
-          ? "bg-white/95 backdrop-blur-md shadow-lg"
-          : "bg-secondary/90 backdrop-blur-sm"
+      className={`fixed top-0 left-0 right-0 transition-colors duration-300 ${isOpen ? "z-[60]" : "z-50"} ${
+        isOpen
+          ? "bg-white border-b border-secondary/8"
+          : light
+            ? "bg-white/95 backdrop-blur-md border-b border-secondary/8"
+            : "bg-secondary/90 backdrop-blur-md border-b border-white/6"
       }`}
     >
-      <nav className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div className="flex h-20 items-center justify-between">
-          {/* Logo - Robust container that handles any logo size */}
-          <Link href="/" className="flex items-center shrink-0">
-            {USE_IMAGE_LOGO ? (
-              // Image logo with automatic sizing
-              <div className="relative h-16 sm:h-[72px] w-auto max-w-[280px]">
-                <Image
-                  src={scrolled ? LOGO_DARK : LOGO_LIGHT}
-                  alt="Distinct Construction Solutions"
-                  width={250}
-                  height={64}
-                  className="h-full w-auto object-contain"
-                  priority
-                />
-              </div>
-            ) : (
-              // Text fallback logo
-              <div>
-                <span className={`text-lg font-bold tracking-tight ${scrolled ? "text-secondary" : "text-white"}`}>
-                  DISTINCT
-                </span>
-                <span className={`block text-xs tracking-widest ${scrolled ? "text-muted-foreground" : "text-white/80"}`}>
-                  CONSTRUCTION SOLUTIONS
-                </span>
-              </div>
-            )}
+      <nav className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8" aria-label="Main">
+        <div className="flex h-20 items-center justify-between gap-6">
+          {/* Logo */}
+          <Link href="/" className="flex items-center shrink-0" aria-label="TruthCore — Home">
+            {/* TruthCore wordmark: emerald + gold on white, white + gold on the dark bar */}
+            <Logo variant={light ? "color" : "light"} className="h-[22px] sm:h-[26px] w-auto" />
           </Link>
 
-          {/* Desktop Navigation */}
+          {/* Desktop navigation */}
           <div className="hidden lg:flex lg:items-center lg:gap-1">
-            {navigation.map((item) => (
-              <div
-                key={item.name}
-                className="relative"
-                onMouseEnter={() => item.children && setActiveDropdown(item.name)}
-                onMouseLeave={() => setActiveDropdown(null)}
-              >
-                <Link
-                  href={item.href}
-                  className={`flex items-center gap-1 px-4 py-2 text-sm font-medium rounded-lg transition-colors ${
-                    scrolled
-                      ? "text-secondary hover:text-primary hover:bg-primary/10"
-                      : "text-white hover:text-primary-light hover:bg-white/10"
-                  }`}
+            {navigation.map((item) => {
+              const active = groupActive(pathname, item);
+              if (!item.children) {
+                return (
+                  <Link
+                    key={item.name}
+                    href={item.href!}
+                    aria-current={active ? "page" : undefined}
+                    className={`relative px-2.5 xl:px-3.5 py-2 text-[14px] font-medium tracking-[-0.005em] whitespace-nowrap transition-colors ${
+                      active ? activeTone : linkTone
+                    }`}
+                  >
+                    {item.name}
+                    {active && (
+                      <span className={`absolute left-2.5 right-2.5 xl:left-3.5 xl:right-3.5 -bottom-0.5 h-px ${light ? "bg-primary" : "bg-primary-light"}`} aria-hidden />
+                    )}
+                  </Link>
+                );
+              }
+              const open = activeDropdown === item.name;
+              return (
+                <div
+                  key={item.name}
+                  className="relative"
+                  data-nav={item.name}
+                  onMouseEnter={() => openMenu(item.name)}
+                  onMouseLeave={scheduleClose}
                 >
-                  {item.name}
-                  {item.children && <ChevronDown className="h-4 w-4" />}
-                </Link>
+                  <button
+                    type="button"
+                    aria-expanded={open}
+                    aria-haspopup="true"
+                    onClick={() => (open ? setActiveDropdown(null) : openMenu(item.name))}
+                    className={`relative flex items-center gap-1 px-2.5 xl:px-3.5 py-2 text-[14px] font-medium tracking-[-0.005em] whitespace-nowrap transition-colors ${
+                      active || open ? activeTone : linkTone
+                    }`}
+                  >
+                    {item.name}
+                    <ChevronDown
+                      className={`h-3.5 w-3.5 opacity-60 transition-transform duration-200 ${open ? "rotate-180" : ""}`}
+                      aria-hidden
+                    />
+                    {active && (
+                      <span className={`absolute left-2.5 right-6 xl:left-3.5 xl:right-7 -bottom-0.5 h-px ${light ? "bg-primary" : "bg-primary-light"}`} aria-hidden />
+                    )}
+                  </button>
 
-                {/* Dropdown */}
-                {item.children && activeDropdown === item.name && (
-                  <div className="absolute left-0 top-full pt-2 w-56">
-                    <div className="bg-white rounded-xl shadow-xl border border-border overflow-hidden">
-                      {item.children.map((child) => (
-                        <Link
-                          key={child.name}
-                          href={child.href}
-                          className="block px-4 py-3 text-sm text-secondary hover:bg-primary/10 hover:text-primary transition-colors"
-                        >
-                          {child.name}
-                        </Link>
-                      ))}
+                  {open && (
+                    <div className="absolute left-1/2 top-full -translate-x-1/2 pt-3" onClick={closeOnLinkClick}>
+                      <div
+                        className={`rounded-2xl bg-white p-2 shadow-[0_12px_40px_-12px_rgba(26,43,43,0.25)] ring-1 ring-secondary/8 ${
+                          item.columns === 2 ? "w-[30rem]" : item.children.some((c) => c.description) ? "w-72" : "w-56"
+                        }`}
+                      >
+                        <div className={item.columns === 2 ? "grid grid-cols-2 gap-x-1" : ""}>
+                          {item.children.map((child) => {
+                            const external = child.href.startsWith("http");
+                            const childActive = isActive(pathname, child.href);
+                            return (
+                              <Link
+                                key={child.name}
+                                href={child.href}
+                                {...(external ? { target: "_blank", rel: "noopener noreferrer" } : {})}
+                                className={`group flex items-start justify-between gap-3 rounded-xl px-3.5 py-2.5 transition-colors hover:bg-muted ${
+                                  childActive ? "bg-muted" : ""
+                                }`}
+                              >
+                                <span>
+                                  <span className="block text-[14px] font-medium text-secondary">{child.name}</span>
+                                  {child.description && (
+                                    <span className="mt-0.5 block text-[13px] text-muted-foreground">
+                                      {child.description}
+                                    </span>
+                                  )}
+                                </span>
+                                {external && (
+                                  <ArrowUpRight className="mt-0.5 h-3.5 w-3.5 shrink-0 text-muted-foreground" aria-hidden />
+                                )}
+                              </Link>
+                            );
+                          })}
+                        </div>
+                        {item.href && (
+                          <div className="mt-2 border-t border-secondary/6 pt-2">
+                            <Link
+                              href={item.href}
+                              className="flex items-center justify-between rounded-xl px-3.5 py-2.5 text-[13px] font-medium text-secondary/70 hover:bg-muted hover:text-secondary transition-colors"
+                            >
+                              View all {item.name.toLowerCase()}
+                              <ArrowRight className="h-3.5 w-3.5" aria-hidden />
+                            </Link>
+                          </div>
+                        )}
+                      </div>
                     </div>
-                  </div>
-                )}
-              </div>
-            ))}
+                  )}
+                </div>
+              );
+            })}
           </div>
 
-          {/* CTA Buttons */}
-          <div className="hidden lg:flex lg:items-center gap-3">
+          {/* Desktop actions */}
+          <div className="hidden lg:flex lg:items-center lg:gap-2 xl:gap-3 shrink-0">
             <Link
-              href="/showroom"
-              className="inline-flex items-center justify-center text-center rounded-full bg-primary px-6 py-2.5 text-sm font-semibold text-white shadow-lg shadow-primary/25 hover:bg-primary-dark transition-all hover:scale-105"
+              href={SHOWROOM_HREF}
+              className={`group inline-flex items-center gap-2 whitespace-nowrap rounded-full border px-3.5 xl:px-4 py-2.5 text-[14px] font-semibold transition-colors ${
+                light
+                  ? "border-accent text-secondary hover:bg-accent/10"
+                  : "border-accent/80 text-white hover:bg-white/10"
+              }`}
             >
-              Visit Our Showroom
+              <Store className="h-4 w-4 text-accent" aria-hidden />
+              Showroom
+              <span
+                className={`hidden xl:inline rounded-full px-2 py-0.5 text-[11px] font-semibold tracking-wide ${
+                  light ? "bg-accent/15 text-secondary" : "bg-accent/25 text-accent-light"
+                }`}
+              >
+                Up to 30% off
+              </span>
             </Link>
             <Link
-              href="https://www.distinctcsolutions.com/showroom/design-ai"
-              className="inline-flex items-center justify-center text-center rounded-full bg-primary px-6 py-2.5 text-sm font-semibold text-white shadow-lg shadow-primary/25 hover:bg-primary-dark transition-all hover:scale-105"
+              href="/contact"
+              className={`inline-flex items-center gap-1.5 whitespace-nowrap rounded-full px-4 xl:px-5 py-2.5 text-[14px] font-semibold transition-colors ${
+                light
+                  ? "bg-secondary text-white hover:bg-secondary-light"
+                  : "bg-white text-secondary hover:bg-white/90"
+              }`}
             >
-              Ai 3D Design
+              Start a Project
+              <ArrowRight className="hidden xl:block h-4 w-4" aria-hidden />
             </Link>
           </div>
 
           {/* Mobile menu button */}
           <button
             type="button"
-            className="lg:hidden rounded-lg p-2"
+            className={`lg:hidden -mr-2.5 rounded-full p-2.5 transition-colors ${
+              light ? "text-secondary hover:bg-secondary/5" : "text-white hover:bg-white/10"
+            }`}
+            aria-label={isOpen ? "Close menu" : "Open menu"}
+            aria-expanded={isOpen}
+            aria-controls="mobile-menu"
             onClick={() => setIsOpen(!isOpen)}
           >
-            {isOpen ? (
-              <X className={`h-6 w-6 ${scrolled ? "text-secondary" : "text-white"}`} />
-            ) : (
-              <Menu className={`h-6 w-6 ${scrolled ? "text-secondary" : "text-white"}`} />
-            )}
+            {isOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
           </button>
         </div>
+      </nav>
 
-        {/* Mobile menu */}
-        {isOpen && (
-          <div className="lg:hidden bg-white rounded-2xl shadow-xl mt-2 p-4 border border-border">
-            <div className="space-y-1">
-              {navigation.map((item) => (
-                <div key={item.name}>
+      {/* Mobile menu — full-height sheet below the bar */}
+      {isOpen && (
+        <div
+          id="mobile-menu"
+          onClick={closeOnLinkClick}
+          className="lg:hidden absolute inset-x-0 top-full h-[calc(100dvh-5rem)] overflow-y-auto overscroll-contain bg-white"
+        >
+          <div className="mx-auto max-w-7xl px-4 sm:px-6 pt-2 pb-10">
+            <div className="py-4">
+              <Link
+                href="/"
+                className={`flex min-h-11 items-center text-[17px] font-medium ${pathname === "/" ? "text-secondary" : "text-secondary/80"}`}
+              >
+                Home
+              </Link>
+            </div>
+
+            {navigation.filter((item) => item.href !== "/").map((item) => (
+              <div key={item.name} className="border-t border-secondary/8 py-4">
+                {item.children ? (
+                  <>
+                    <p className="mb-1 text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">
+                      {item.name}
+                    </p>
+                    <div className={item.columns === 2 ? "grid grid-cols-2 gap-x-4" : ""}>
+                      {item.children.map((child) => {
+                        const external = child.href.startsWith("http");
+                        const childActive = isActive(pathname, child.href);
+                        return (
+                          <Link
+                            key={child.name}
+                            href={child.href}
+                            {...(external ? { target: "_blank", rel: "noopener noreferrer" } : {})}
+                            className={`flex min-h-11 items-center gap-1 text-[15px] ${
+                              childActive ? "font-medium text-primary-dark" : "text-secondary/85"
+                            }`}
+                          >
+                            {child.name}
+                            {external && <ArrowUpRight className="h-3.5 w-3.5 text-muted-foreground" aria-hidden />}
+                          </Link>
+                        );
+                      })}
+                    </div>
+                    {item.href && (
+                      <Link
+                        href={item.href}
+                        className="inline-flex min-h-11 items-center gap-1 text-[14px] font-medium text-secondary"
+                      >
+                        View all {item.name.toLowerCase()}
+                        <ArrowRight className="h-3.5 w-3.5" aria-hidden />
+                      </Link>
+                    )}
+                  </>
+                ) : (
                   <Link
-                    href={item.href}
-                    className="block px-4 py-3 text-base font-medium text-secondary hover:bg-primary/10 hover:text-primary rounded-lg transition-colors"
-                    onClick={() => setIsOpen(false)}
+                    href={item.href!}
+                    className={`flex min-h-11 items-center text-[17px] font-medium ${
+                      isActive(pathname, item.href) ? "text-secondary" : "text-secondary/80"
+                    }`}
                   >
                     {item.name}
                   </Link>
-                  {item.children && (
-                    <div className="pl-4 space-y-1">
-                      {item.children.map((child) => (
-                        <Link
-                          key={child.name}
-                          href={child.href}
-                          className="block px-4 py-2 text-sm text-muted-foreground hover:text-primary transition-colors"
-                          onClick={() => setIsOpen(false)}
-                        >
-                          {child.name}
-                        </Link>
-                      ))}
-                    </div>
-                  )}
-                </div>
-              ))}
+                )}
+              </div>
+            ))}
+
+            <div className="border-t border-secondary/8 pt-6 space-y-3">
+              <Link
+                href="/contact"
+                className="flex w-full items-center justify-center gap-2 rounded-full bg-secondary px-6 py-3.5 text-[15px] font-semibold text-white"
+              >
+                Start a Project
+                <ArrowRight className="h-4 w-4" aria-hidden />
+              </Link>
+              <Link
+                href={SHOWROOM_HREF}
+                className="flex w-full items-center justify-center gap-2 rounded-full border border-accent px-6 py-3.5 text-[15px] font-semibold text-secondary"
+              >
+                <Store className="h-4 w-4 text-accent" aria-hidden />
+                Visit the Showroom
+                <span className="rounded-full bg-accent/15 px-2 py-0.5 text-[11px] font-semibold tracking-wide text-secondary">
+                  Up to 30% off
+                </span>
+              </Link>
+              <a
+                href={`tel:${COMPANY_INFO.phoneHref}`}
+                className="flex w-full items-center justify-center gap-2 rounded-full border border-secondary/15 px-6 py-3.5 text-[15px] font-medium text-secondary"
+              >
+                <Phone className="h-4 w-4" aria-hidden />
+                {COMPANY_INFO.phone}
+              </a>
             </div>
           </div>
-        )}
-      </nav>
+        </div>
+      )}
     </header>
   );
 }

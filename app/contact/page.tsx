@@ -3,15 +3,17 @@
 import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { 
   Phone, 
   Mail, 
   MapPin, 
   Clock,
   Send,
-  CheckCircle
 } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Select } from "@/components/ui/select";
+import { FormField, FormAlert } from "@/components/ui/form";
 import { trackContactFormSubmitted } from "@/lib/analytics";
 import { COMPANY_INFO } from "@/lib/data/site-data";
 
@@ -62,200 +64,203 @@ export default function ContactPage() {
 
   if (submitted) {
     return (
-      <div className="min-h-screen bg-muted pt-28 pb-20">
-        <div className="container mx-auto px-4">
-          <Card className="max-w-lg mx-auto text-center p-12">
-            <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-6">
-              <CheckCircle className="h-8 w-8 text-primary" />
+      <div className="min-h-screen bg-secondary">
+        <section className="bg-secondary bg-[radial-gradient(ellipse_at_top,rgba(51,102,102,0.35),transparent_60%)] text-white pt-40 pb-20">
+          <div className="container mx-auto px-4">
+            <div className="max-w-3xl">
+              <span className="inline-block text-accent font-semibold text-sm uppercase tracking-wider mb-4">
+                CONTACT
+              </span>
+              <h1 className="text-4xl md:text-5xl font-bold mb-6">
+                Thank You!
+              </h1>
+              <p className="text-xl text-white/80 mb-8">
+                We&apos;ve received your message and will get back to you within 24 hours.
+              </p>
+              <Button onClick={() => setSubmitted(false)} size="lg" variant="outlineWhite" rounded="full" className="w-full sm:w-auto">
+                Send Another Message
+              </Button>
             </div>
-            <h1 className="text-2xl font-bold text-secondary mb-4">
-              Thank You!
-            </h1>
-            <p className="text-muted-foreground mb-6">
-              We&apos;ve received your message and will get back to you within 24 hours.
-            </p>
-            <Button onClick={() => setSubmitted(false)} variant="outline">
-              Send Another Message
-            </Button>
-          </Card>
-        </div>
+          </div>
+        </section>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-muted pt-28 pb-12">
-      <div className="container mx-auto px-4">
-        {/* Header */}
-        <div className="text-center mb-12">
-          <h1 className="text-4xl md:text-5xl font-bold text-secondary mb-4">
-            Contact Us
-          </h1>
-          <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-            Ready to start your project? Have questions? We&apos;re here to help.
-          </p>
+    <div className="min-h-screen bg-secondary">
+      <section className="bg-secondary bg-[radial-gradient(ellipse_at_top,rgba(51,102,102,0.35),transparent_60%)] text-white pt-40 pb-20">
+        <div className="container mx-auto px-4">
+          <div className="max-w-3xl">
+            <span className="inline-block text-accent font-semibold text-sm uppercase tracking-wider mb-4">
+              CONTACT
+            </span>
+            <h1 className="text-4xl md:text-5xl font-bold mb-6">
+              Contact Us
+            </h1>
+            <p className="text-xl text-white/80">
+              Ready to start your project? Have questions? We&apos;re here to help.
+            </p>
+          </div>
         </div>
+      </section>
 
-        <div className="grid lg:grid-cols-3 gap-8 max-w-6xl mx-auto">
-          {/* Contact Info */}
-          <div className="space-y-6">
-            <Card>
-              <CardContent className="p-6">
-                <div className="flex items-start gap-4">
-                  <div className="w-10 h-10 bg-primary/10 rounded-lg flex items-center justify-center shrink-0">
-                    <Phone className="h-5 w-5 text-primary" />
+      <section className="py-20 bg-secondary bg-[radial-gradient(ellipse_at_bottom,rgba(51,102,102,0.35),transparent_60%)] border-t border-white/10">
+        <div className="container mx-auto px-4">
+          <div className="grid lg:grid-cols-3 gap-6">
+            {/* Contact Info */}
+            <div className="space-y-6">
+              <Card tone="dark" className="transition-colors hover:border-accent/50">
+                <CardContent className="p-6">
+                  <div className="flex items-start gap-4">
+                    <div className="w-10 h-10 bg-primary rounded-lg flex items-center justify-center shrink-0">
+                      <Phone className="h-5 w-5 text-white" />
+                    </div>
+                    <div>
+                      <h3 className="font-semibold text-white">Phone</h3>
+                      <a href={`tel:${COMPANY_INFO.phoneHref}`} className="block text-accent-light hover:text-white transition-colors">{COMPANY_INFO.phone}</a>
+                      <p className="text-sm text-white/75">Monday – Friday, 8:00 AM – 4:30 PM</p>
+                    </div>
                   </div>
-                  <div>
-                    <h3 className="font-semibold text-secondary">Phone</h3>
-                    <p className="text-muted-foreground">{COMPANY_INFO.phone}</p>
-                    <p className="text-sm text-muted-foreground">Monday-Friday 8:00 AM-4:30 PM</p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
+                </CardContent>
+              </Card>
 
-            <Card>
-              <CardContent className="p-6">
-                <div className="flex items-start gap-4">
-                  <div className="w-10 h-10 bg-primary/10 rounded-lg flex items-center justify-center shrink-0">
-                    <Mail className="h-5 w-5 text-primary" />
+              <Card tone="dark" className="transition-colors hover:border-accent/50">
+                <CardContent className="p-6">
+                  <div className="flex items-start gap-4">
+                    <div className="w-10 h-10 bg-primary rounded-lg flex items-center justify-center shrink-0">
+                      <Mail className="h-5 w-5 text-white" />
+                    </div>
+                    <div className="min-w-0">
+                      <h3 className="font-semibold text-white">Email</h3>
+                      <a href={`mailto:${COMPANY_INFO.email}`} className="block break-all text-accent-light hover:text-white transition-colors">{COMPANY_INFO.email}</a>
+                      <p className="text-sm text-white/75">We reply within 24 hours</p>
+                    </div>
                   </div>
-                  <div>
-                    <h3 className="font-semibold text-secondary">Email</h3>
-                    <p className="text-muted-foreground">{COMPANY_INFO.email}</p>
-                    <p className="text-sm text-muted-foreground">We reply within 24 hours</p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
+                </CardContent>
+              </Card>
 
-            <Card>
-              <CardContent className="p-6">
-                <div className="flex items-start gap-4">
-                  <div className="w-10 h-10 bg-primary/10 rounded-lg flex items-center justify-center shrink-0">
-                    <MapPin className="h-5 w-5 text-primary" />
+              <Card tone="dark" className="transition-colors hover:border-accent/50">
+                <CardContent className="p-6">
+                  <div className="flex items-start gap-4">
+                    <div className="w-10 h-10 bg-primary rounded-lg flex items-center justify-center shrink-0">
+                      <MapPin className="h-5 w-5 text-white" />
+                    </div>
+                    <div>
+                      <h3 className="font-semibold text-white">Office</h3>
+                      <p className="text-white/80">{COMPANY_INFO.office}</p>
+                      <p className="text-sm text-white/75">Serving all of San Diego County</p>
+                    </div>
                   </div>
-                  <div>
-                    <h3 className="font-semibold text-secondary">Office</h3>
-                    <p className="text-muted-foreground">{COMPANY_INFO.office}</p>
-                    <p className="text-sm text-muted-foreground">Serving all of San Diego County</p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
+                </CardContent>
+              </Card>
 
-            <Card>
-              <CardContent className="p-6">
-                <div className="flex items-start gap-4">
-                  <div className="w-10 h-10 bg-primary/10 rounded-lg flex items-center justify-center shrink-0">
-                    <Clock className="h-5 w-5 text-primary" />
+              <Card tone="dark" className="transition-colors hover:border-accent/50">
+                <CardContent className="p-6">
+                  <div className="flex items-start gap-4">
+                    <div className="w-10 h-10 bg-primary rounded-lg flex items-center justify-center shrink-0">
+                      <Clock className="h-5 w-5 text-white" />
+                    </div>
+                    <div>
+                      <h3 className="font-semibold text-white">Business Hours</h3>
+                      <p className="text-white/80">Monday – Friday</p>
+                      <p className="text-white/80">8:00 AM – 4:30 PM</p>
+                      <p className="text-sm text-white/75">Saturday by appointment</p>
+                    </div>
                   </div>
-                  <div>
-                    <h3 className="font-semibold text-secondary">Business Hours</h3>
-                    <p className="text-muted-foreground">Monday - Friday</p>
-                    <p className="text-muted-foreground">8:00 AM - 4:30 PM</p>
-                    <p className="text-sm text-muted-foreground">Saturday by appointment</p>
+                </CardContent>
+              </Card>
+            </div>
+
+            {/* Contact Form */}
+            <Card tone="dark" className="lg:col-span-2">
+              <CardHeader>
+                <CardTitle className="text-2xl">Send Us a Message</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <form onSubmit={handleSubmit} className="space-y-4">
+                  <div className="grid md:grid-cols-2 gap-4">
+                    <FormField tone="dark" label="Full Name *" htmlFor="contact-name">
+                      <Input
+                        tone="dark"
+                        id="contact-name"
+                        required
+                        autoComplete="name"
+                        value={formData.name}
+                        onChange={(e) => setFormData({...formData, name: e.target.value})}
+                        placeholder="John Smith"
+                      />
+                    </FormField>
+                    <FormField tone="dark" label="Email *" htmlFor="contact-email">
+                      <Input
+                        tone="dark"
+                        id="contact-email"
+                        type="email"
+                        required
+                        autoComplete="email"
+                        value={formData.email}
+                        onChange={(e) => setFormData({...formData, email: e.target.value})}
+                        placeholder="john@example.com"
+                      />
+                    </FormField>
                   </div>
-                </div>
+
+                  <div className="grid md:grid-cols-2 gap-4">
+                    <FormField tone="dark" label="Phone Number" htmlFor="contact-phone">
+                      <Input
+                        tone="dark"
+                        id="contact-phone"
+                        type="tel"
+                        autoComplete="tel"
+                        value={formData.phone}
+                        onChange={(e) => setFormData({...formData, phone: e.target.value})}
+                        placeholder="(619) 555-0123"
+                      />
+                    </FormField>
+                    <FormField tone="dark" label="Service Interested In" htmlFor="contact-service">
+                      <Select
+                        tone="dark"
+                        id="contact-service"
+                        placeholder="Select a service..."
+                        value={formData.service}
+                        onChange={(e) => setFormData({...formData, service: e.target.value})}
+                      >
+                        {serviceTypes.map((service) => (
+                          <option key={service} value={service}>{service}</option>
+                        ))}
+                      </Select>
+                    </FormField>
+                  </div>
+
+                  <FormField tone="dark" label="Message *" htmlFor="contact-message">
+                    <Textarea
+                      tone="dark"
+                      id="contact-message"
+                      required
+                      rows={5}
+                      value={formData.message}
+                      onChange={(e) => setFormData({...formData, message: e.target.value})}
+                      placeholder="Tell us about your project..."
+                    />
+                  </FormField>
+
+                  <FormAlert tone="dark">{submitError}</FormAlert>
+
+                  <Button type="submit" size="lg" rounded="full" className="w-full" disabled={isSubmitting}>
+                    <Send className="h-4 w-4" />
+                    {isSubmitting ? "Sending..." : "Send Message"}
+                  </Button>
+
+                  <p className="text-xs text-center text-white/75">
+                    By submitting this form, you agree to our{" "}
+                    <a href="/privacy" className="text-accent-light underline underline-offset-2 hover:text-white">privacy policy</a>. We&apos;ll never share your information.
+                  </p>
+                </form>
               </CardContent>
             </Card>
           </div>
-
-          {/* Contact Form */}
-          <Card className="lg:col-span-2">
-            <CardHeader>
-              <CardTitle className="text-2xl">Send Us a Message</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <form onSubmit={handleSubmit} className="space-y-6">
-                <div className="grid md:grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-sm font-medium text-secondary mb-2">
-                      Full Name *
-                    </label>
-                    <Input
-                      required
-                      value={formData.name}
-                      onChange={(e) => setFormData({...formData, name: e.target.value})}
-                      placeholder="John Smith"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-secondary mb-2">
-                      Email *
-                    </label>
-                    <Input
-                      type="email"
-                      required
-                      value={formData.email}
-                      onChange={(e) => setFormData({...formData, email: e.target.value})}
-                      placeholder="john@example.com"
-                    />
-                  </div>
-                </div>
-
-                <div className="grid md:grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-sm font-medium text-secondary mb-2">
-                      Phone Number
-                    </label>
-                    <Input
-                      type="tel"
-                      value={formData.phone}
-                      onChange={(e) => setFormData({...formData, phone: e.target.value})}
-                      placeholder="(619) 555-0123"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-secondary mb-2">
-                      Service Interested In
-                    </label>
-                    <select
-                      value={formData.service}
-                      onChange={(e) => setFormData({...formData, service: e.target.value})}
-                      className="w-full h-10 px-3 rounded-lg border border-input bg-background text-sm"
-                    >
-                      <option value="">Select a service...</option>
-                      {serviceTypes.map((service) => (
-                        <option key={service} value={service}>{service}</option>
-                      ))}
-                    </select>
-                  </div>
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-secondary mb-2">
-                    Message *
-                  </label>
-                  <textarea
-                    required
-                    rows={5}
-                    value={formData.message}
-                    onChange={(e) => setFormData({...formData, message: e.target.value})}
-                    placeholder="Tell us about your project..."
-                    className="w-full px-3 py-2 rounded-lg border border-input bg-background text-sm resize-none"
-                  />
-                </div>
-
-                {submitError && (
-                  <div className="rounded-lg border border-destructive/20 bg-destructive/5 px-4 py-3 text-sm text-destructive">
-                    {submitError}
-                  </div>
-                )}
-
-                <Button type="submit" size="lg" className="w-full bg-primary hover:bg-primary-dark text-secondary font-semibold" disabled={isSubmitting}>
-                  <Send className="h-4 w-4 mr-2" />
-                  {isSubmitting ? "Sending..." : "Send Message"}
-                </Button>
-
-                <p className="text-xs text-center text-muted-foreground">
-                  By submitting this form, you agree to our privacy policy. We&apos;ll never share your information.
-                </p>
-              </form>
-            </CardContent>
-          </Card>
         </div>
-      </div>
+      </section>
     </div>
   );
 }

@@ -5,6 +5,8 @@ import { X, Download, Printer, FileText, Building, DollarSign, MapPin, Shield, T
 import { Button } from "@/components/ui/button";
 import type { PropertyAnalysisResult } from "@/lib/property-intelligence";
 import { displayFieldValue } from "@/lib/property-intelligence/types";
+import { COMPANY_INFO } from "@/lib/data/site-data";
+import { logoSvgMarkup } from "@/components/layout/logo";
 import { ShowSourcesPanel } from "./show-sources-panel";
 
 interface PropertyReportModalProps {
@@ -31,7 +33,7 @@ export function PropertyReportModal({
     setDownloading(true);
 
     try {
-      // Generate PDF-styled HTML content with Distinct Construction Solutions branding
+      // Generate PDF-styled HTML content with TruthCore branding
       const pdfContent = generateReportHtml(analysisData);
       
       // Create a new window for the PDF content
@@ -55,7 +57,7 @@ export function PropertyReportModal({
   };
 
   const handlePrint = () => {
-    // Generate print-friendly content with Distinct Construction Solutions branding
+    // Generate print-friendly content with TruthCore branding
     const printContent = generateReportHtml(analysisData);
     
     const printWindow = window.open("", "_blank");
@@ -74,26 +76,28 @@ export function PropertyReportModal({
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
       {/* Backdrop */}
-      <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={onClose} />
+      <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" onClick={onClose} />
 
       {/* Modal */}
-      <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[85vh] overflow-hidden animate-fade-in">
+      <div className="relative bg-secondary-light border border-white/10 text-white rounded-2xl shadow-2xl shadow-black/40 w-full max-w-2xl max-h-[85vh] overflow-hidden animate-fade-in">
         {/* Header */}
-        <div className="bg-gradient-to-r from-secondary to-secondary-light text-white p-6 flex items-center justify-between">
+        <div className="bg-secondary bg-[radial-gradient(ellipse_at_top,rgba(51,102,102,0.35),transparent_60%)] border-b border-white/10 text-white p-6 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <FileText className="h-6 w-6" />
+            <FileText className="h-6 w-6 text-accent" />
             <div>
               <h2 className="text-lg font-bold">Property Development Report</h2>
-              <p className="text-sm text-white/70">
+              <p className="text-sm text-white/75">
                 {analysisData.property.address.value}
               </p>
             </div>
           </div>
           <button
+            type="button"
             onClick={onClose}
-            className="w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center transition-colors"
+            aria-label="Close report"
+            className="w-11 h-11 shrink-0 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center transition-colors"
           >
-            <X className="h-4 w-4" />
+            <X className="h-5 w-5" />
           </button>
         </div>
 
@@ -147,7 +151,7 @@ export function PropertyReportModal({
             <ReportSection icon={DollarSign} title="Financial Snapshot">
               {analysisData.financialScenarios.slice(0, 3).map((scenario) => (
                 <div key={scenario.scenarioName} className="mb-3 last:mb-0">
-                  <p className="text-xs font-semibold text-secondary mb-1">{scenario.scenarioName}</p>
+                  <p className="text-xs font-semibold text-white mb-1">{scenario.scenarioName}</p>
                   <div className="grid grid-cols-2 gap-1">
                     <ReportRow label="Est. Cost" value={`$${scenario.estimatedTotalCost.toLocaleString()}`} />
                     <ReportRow label="Est. Rent" value={`$${scenario.estimatedMonthlyIncome.toLocaleString()}/mo`} />
@@ -164,8 +168,8 @@ export function PropertyReportModal({
             <ReportSection icon={TrendingUp} title="Opportunity Analysis">
               {analysisData.upsideOpportunities.map((opp) => (
                 <div key={opp.title} className="mb-2 last:mb-0">
-                  <p className="text-xs font-semibold text-secondary">{opp.title}</p>
-                  <p className="text-[11px] text-muted-foreground">{opp.summary}</p>
+                  <p className="text-xs font-semibold text-white">{opp.title}</p>
+                  <p className="text-xs text-white/75">{opp.summary}</p>
                 </div>
               ))}
             </ReportSection>
@@ -176,7 +180,7 @@ export function PropertyReportModal({
             <ReportSection icon={DollarSign} title="Rent Scenarios">
               {analysisData.rentScenarios.map((rs) => (
                 <div key={rs.aduType} className="mb-3 last:mb-0">
-                  <p className="text-xs font-semibold text-secondary mb-1 capitalize">{rs.aduType.replace(/-/g, " ")}</p>
+                  <p className="text-xs font-semibold text-white mb-1 capitalize">{rs.aduType.replace(/-/g, " ")}</p>
                   <div className="grid grid-cols-3 gap-1">
                     <ReportRow label="Conservative" value={`$${rs.conservative.monthlyRent.toLocaleString()}/mo`} />
                     <ReportRow label="Market" value={`$${rs.market.monthlyRent.toLocaleString()}/mo`} />
@@ -191,11 +195,11 @@ export function PropertyReportModal({
           {analysisData.siteConstraints && (
             <ReportSection icon={Shield} title="Site Conditions">
               <div className="flex items-center justify-between mb-2">
-                <span className="text-xs text-muted-foreground">Constraint Risk</span>
+                <span className="text-xs text-white/75">Constraint Risk</span>
                 <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${
-                  analysisData.siteConstraints.overallRiskLevel === "Low" ? "bg-emerald-50 text-emerald-700" :
-                  analysisData.siteConstraints.overallRiskLevel === "Moderate" ? "bg-amber-50 text-amber-700" :
-                  "bg-red-50 text-red-700"
+                  analysisData.siteConstraints.overallRiskLevel === "Low" ? "bg-emerald-500/10 text-emerald-300" :
+                  analysisData.siteConstraints.overallRiskLevel === "Moderate" ? "bg-amber-500/10 text-amber-200" :
+                  "bg-red-500/10 text-red-300"
                 }`}>
                   {analysisData.siteConstraints.overallRiskLevel}
                 </span>
@@ -222,7 +226,7 @@ export function PropertyReportModal({
               <ReportRow label="Score" value={`${analysisData.confidenceScore}%`} />
               <ReportRow label="Band" value={analysisData.confidenceBand || "\u2014"} />
               {analysisData.manualReviewRequired && (
-                <p className="text-[11px] text-amber-600 mt-1">Manual review recommended</p>
+                <p className="text-xs text-amber-200 mt-1">Manual review recommended</p>
               )}
             </ReportSection>
           )}
@@ -234,8 +238,8 @@ export function PropertyReportModal({
                 .filter((c) => !c.passed)
                 .map((c) => (
                   <div key={c.name} className="flex items-start gap-1.5 mb-1 last:mb-0">
-                    <span className={`text-[10px] mt-0.5 ${c.severity === "error" ? "text-red-500" : "text-amber-500"}`}>{"\u25CF"}</span>
-                    <p className="text-[11px] text-muted-foreground">{c.message}</p>
+                    <span className={`text-xs mt-0.5 ${c.severity === "error" ? "text-red-400" : "text-amber-400"}`}>{"\u25CF"}</span>
+                    <p className="text-xs text-white/75">{c.message}</p>
                   </div>
                 ))}
             </ReportSection>
@@ -247,12 +251,12 @@ export function PropertyReportModal({
           )}
 
           {/* Disclaimers */}
-          <div className="bg-slate-50 rounded-xl p-4">
-            <p className="text-[10px] text-muted-foreground leading-relaxed">
+          <div className="bg-secondary border border-white/10 rounded-xl p-4">
+            <p className="text-xs text-white/75 leading-relaxed">
               {analysisData.disclaimer}
             </p>
             {analysisData.financialDisclaimer && (
-              <p className="text-[10px] text-muted-foreground leading-relaxed mt-2">
+              <p className="text-xs text-white/75 leading-relaxed mt-2">
                 {analysisData.financialDisclaimer}
               </p>
             )}
@@ -260,12 +264,12 @@ export function PropertyReportModal({
         </div>
 
         {/* Footer */}
-        <div className="border-t border-border p-4 flex items-center justify-between bg-slate-50/50">
-          <p className="text-[10px] text-muted-foreground">
-            Prepared for planning review by Distinct Construction Solutions
+        <div className="border-t border-white/10 p-4 flex items-center justify-between bg-secondary">
+          <p className="text-xs text-white/75">
+            Prepared for planning review by TruthCore
           </p>
           <div className="flex items-center gap-2">
-            <Button size="sm" variant="outline" rounded="full" onClick={handlePrint}>
+            <Button size="sm" variant="outlineWhite" rounded="full" onClick={handlePrint}>
               <Printer className="h-3.5 w-3.5" />
               Print
             </Button>
@@ -290,10 +294,10 @@ function ReportSection({
   children: React.ReactNode;
 }) {
   return (
-    <div className="border border-border rounded-xl overflow-hidden">
-      <div className="bg-slate-50 px-4 py-2.5 flex items-center gap-2 border-b border-border">
-        <Icon className="h-4 w-4 text-primary" />
-        <h3 className="text-sm font-semibold text-secondary">{title}</h3>
+    <div className="border border-white/10 rounded-xl overflow-hidden bg-secondary">
+      <div className="bg-white/5 px-4 py-2.5 flex items-center gap-2 border-b border-white/10">
+        <Icon className="h-4 w-4 text-accent" />
+        <h3 className="text-sm font-semibold text-white">{title}</h3>
       </div>
       <div className="p-4 space-y-1.5">{children}</div>
     </div>
@@ -303,16 +307,16 @@ function ReportSection({
 function ReportRow({ label, value }: { label: string; value: string }) {
   return (
     <div className="flex justify-between items-center text-xs">
-      <span className="text-muted-foreground">{label}</span>
-      <span className="font-medium text-secondary">{value}</span>
+      <span className="text-white/75">{label}</span>
+      <span className="font-medium text-white">{value}</span>
     </div>
   );
 }
 
 /**
- * Generate PDF/Print content with Distinct Construction Solutions branding
- * Colors: Dark green (primary), Gold (accent), neutral light tones
- * Typography: Clean architectural font (Bahnschrift style)
+ * Generate PDF/Print content with TruthCore branding
+ * Colors: site design tokens — Misty Emerald (primary), Antique Gold hairlines
+ * Typography: Red Hat Display (site font)
  * Layout: Minimal, high-end, structured, no clutter
  */
 function generateReportHtml(data: PropertyAnalysisResult): string {
@@ -329,7 +333,7 @@ function generateReportHtml(data: PropertyAnalysisResult): string {
   <meta charset="UTF-8">
   <title>ADU Feasibility Report - ${data.property.address.value}</title>
   <style>
-    @import url('https://fonts.googleapis.com/css2?family=Barlow:wght@300;400;500;600;700&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Red+Hat+Display:wght@400;500;600;700&display=swap');
     
     * {
       margin: 0;
@@ -338,8 +342,8 @@ function generateReportHtml(data: PropertyAnalysisResult): string {
     }
     
     body {
-      font-family: 'Barlow', 'Bahnschrift', 'Segoe UI', sans-serif;
-      color: #1a1a1a;
+      font-family: 'Red Hat Display', system-ui, -apple-system, 'Segoe UI', sans-serif;
+      color: #1A2B2B;
       background: #fff;
       line-height: 1.6;
       font-size: 11pt;
@@ -360,7 +364,7 @@ function generateReportHtml(data: PropertyAnalysisResult): string {
       left: 50%;
       transform: translate(-50%, -50%) rotate(-45deg);
       font-size: 48pt;
-      color: rgba(26, 77, 46, 0.04);
+      color: rgba(51, 102, 102, 0.04);
       font-weight: 700;
       letter-spacing: 4px;
       white-space: nowrap;
@@ -373,7 +377,7 @@ function generateReportHtml(data: PropertyAnalysisResult): string {
       display: flex;
       justify-content: space-between;
       align-items: flex-start;
-      border-bottom: 2px solid #1a4d2e;
+      border-bottom: 2px solid #336666;
       padding-bottom: 20px;
       margin-bottom: 30px;
     }
@@ -383,21 +387,10 @@ function generateReportHtml(data: PropertyAnalysisResult): string {
       flex-direction: column;
     }
     
-    .logo-main {
-      font-size: 18pt;
-      font-weight: 700;
-      color: #1a4d2e;
-      letter-spacing: 1px;
-      text-transform: uppercase;
-    }
-    
     .logo-sub {
-      font-size: 10pt;
-      font-weight: 300;
-      color: #c9a227;
-      letter-spacing: 6px;
-      text-transform: uppercase;
-      margin-top: 2px;
+      font-size: 8pt;
+      color: #5C6B6B;
+      margin-top: 6px;
     }
     
     .report-info {
@@ -407,7 +400,7 @@ function generateReportHtml(data: PropertyAnalysisResult): string {
     }
     
     .report-info strong {
-      color: #1a4d2e;
+      color: #336666;
     }
     
     /* Title */
@@ -419,7 +412,7 @@ function generateReportHtml(data: PropertyAnalysisResult): string {
     .report-title h1 {
       font-size: 18pt;
       font-weight: 600;
-      color: #1a4d2e;
+      color: #336666;
       margin-bottom: 8px;
       letter-spacing: 1px;
     }
@@ -432,7 +425,7 @@ function generateReportHtml(data: PropertyAnalysisResult): string {
     
     .report-title .confidential {
       font-size: 8pt;
-      color: #c9a227;
+      color: #5C6B6B;
       text-transform: uppercase;
       letter-spacing: 2px;
       margin-top: 8px;
@@ -446,17 +439,17 @@ function generateReportHtml(data: PropertyAnalysisResult): string {
     .section-title {
       font-size: 11pt;
       font-weight: 600;
-      color: #1a4d2e;
+      color: #336666;
       text-transform: uppercase;
       letter-spacing: 2px;
-      border-bottom: 1px solid #c9a227;
+      border-bottom: 1px solid #B99A5A;
       padding-bottom: 6px;
       margin-bottom: 15px;
     }
     
     .section-content {
-      background: #fafafa;
-      border-left: 3px solid #1a4d2e;
+      background: #F5F7F7;
+      border-left: 3px solid #336666;
       padding: 15px 20px;
     }
     
@@ -477,13 +470,13 @@ function generateReportHtml(data: PropertyAnalysisResult): string {
     }
     
     .data-value {
-      color: #1a1a1a;
+      color: #1A2B2B;
       font-weight: 500;
       text-align: right;
     }
     
     .data-value.highlight {
-      color: #1a4d2e;
+      color: #336666;
       font-weight: 600;
     }
     
@@ -496,7 +489,7 @@ function generateReportHtml(data: PropertyAnalysisResult): string {
     
     /* Recommendations */
     .recommendation-card {
-      background: #f5f5f5;
+      background: #F5F7F7;
       border: 1px solid #ddd;
       padding: 12px 15px;
       margin-bottom: 10px;
@@ -505,7 +498,7 @@ function generateReportHtml(data: PropertyAnalysisResult): string {
     .recommendation-card h4 {
       font-size: 10pt;
       font-weight: 600;
-      color: #1a4d2e;
+      color: #336666;
       margin-bottom: 5px;
     }
     
@@ -529,7 +522,7 @@ function generateReportHtml(data: PropertyAnalysisResult): string {
     }
     
     .footer-brand {
-      color: #1a4d2e;
+      color: #336666;
       font-weight: 500;
     }
     
@@ -537,7 +530,7 @@ function generateReportHtml(data: PropertyAnalysisResult): string {
     .disclaimer {
       margin-top: 30px;
       padding: 15px;
-      background: #f9f9f9;
+      background: #F5F7F7;
       border: 1px solid #eee;
       font-size: 8pt;
       color: #888;
@@ -561,8 +554,8 @@ function generateReportHtml(data: PropertyAnalysisResult): string {
   <div class="page">
     <header class="header">
       <div class="logo">
-        <div class="logo-main">Distinct Construction</div>
-        <div class="logo-sub">Solutions</div>
+        ${logoSvgMarkup("color", 28)}
+        <div class="logo-sub">TruthCore is a DBA of ${COMPANY_INFO.name}</div>
       </div>
       <div class="report-info">
         <div><strong>Report Generated:</strong> ${generatedDate}</div>
@@ -640,7 +633,7 @@ function generateReportHtml(data: PropertyAnalysisResult): string {
       <div class="section-content">
         ${data.financialScenarios.slice(0, 3).map(scenario => `
         <div style="margin-bottom: 12px;">
-          <div style="font-weight: 600; color: #1a4d2e; margin-bottom: 5px;">${scenario.scenarioName}</div>
+          <div style="font-weight: 600; color: #336666; margin-bottom: 5px;">${scenario.scenarioName}</div>
           <div class="data-row">
             <span class="data-label">Estimated Cost</span>
             <span class="data-value">$${scenario.estimatedTotalCost.toLocaleString()}</span>
@@ -687,8 +680,8 @@ function generateReportHtml(data: PropertyAnalysisResult): string {
     </div>
     
     <footer class="footer">
-      <div class="footer-brand">Prepared by Distinct Construction Solutions</div>
-      <div>jtalavera@distinctcsolutions.com | (858) 833-0705</div>
+      <div class="footer-brand">Prepared by TruthCore</div>
+      <div>${COMPANY_INFO.email} | ${COMPANY_INFO.phone}</div>
     </footer>
   </div>
 </body>

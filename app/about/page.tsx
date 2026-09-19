@@ -1,14 +1,23 @@
-import { Card, CardContent } from "@/components/ui/card";
+import type { Metadata } from "next";
 import { Button } from "@/components/ui/button";
+import { ReviewCards } from "@/components/google-reviews";
 import { 
-  Award, 
-  Users, 
+  Award,
+  Users,
   Clock, 
   Shield,
   CheckCircle,
 } from "lucide-react";
 import Link from "next/link";
 import { COMPANY_INFO, getYearsExperience } from "@/lib/data/site-data";
+import { CLIENT_REVIEWS } from "@/lib/data/reviews";
+
+export const metadata: Metadata = {
+  title: "About Us",
+};
+
+// Real Google/Yelp reviews (verbatim): an ADU client, a roofing client, a repeat-referral client.
+const aboutReviews = [CLIENT_REVIEWS[0], CLIENT_REVIEWS[1], CLIENT_REVIEWS[3]];
 
 const stats = [
   { value: COMPANY_INFO.stats.projectsCompleted, label: "Projects Completed" },
@@ -44,29 +53,39 @@ export default function AboutPage() {
   return (
     <div className="min-h-screen">
       {/* Hero */}
-      <section className="bg-secondary text-white py-20">
+      <section className="bg-secondary bg-[radial-gradient(ellipse_at_top,rgba(51,102,102,0.35),transparent_60%)] text-white pt-40 pb-20">
         <div className="container mx-auto px-4">
           <div className="max-w-3xl">
+            <span className="inline-block text-accent font-semibold text-sm uppercase tracking-wider mb-4">
+              ABOUT US
+            </span>
             <h1 className="text-4xl md:text-5xl font-bold mb-6">
               {getYearsExperience()}+ years of field experience, design-build discipline, and premium residential execution.
             </h1>
-            <p className="text-xl text-white/80 mb-8">
-              Distinct Construction Solutions is a Lemon Grove-based design-build firm shaped by hands-on construction experience that began in 2014 and matured into a more disciplined way to deliver residential projects across San Diego County.
+            <p className="text-xl text-white/80">
+              Distinct Construction Solutions is a Lemon Grove-based design-build firm shaped by hands-on construction experience that began in 2014 and matured into a more disciplined way to deliver residential projects across San Diego County. Today we do business as TruthCore, our DBA &mdash; the same licensed team and the same standards.
             </p>
+            <Link
+              href="/our-story"
+              className="mt-6 inline-flex items-center gap-2 text-sm font-semibold text-accent hover:text-accent-light transition-colors"
+            >
+              Read how TruthCore was born
+              <span aria-hidden="true">&rarr;</span>
+            </Link>
           </div>
         </div>
       </section>
 
       {/* Stats */}
-      <section className="py-12 bg-primary">
+      <section className="py-12 bg-secondary-light border-y border-white/10 shadow-lg shadow-black/20">
         <div className="container mx-auto px-4">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-8 md:divide-x md:divide-white/10">
             {stats.map((stat) => (
               <div key={stat.label} className="text-center">
-                <div className="text-4xl md:text-5xl font-bold text-secondary mb-2">
+                <div className="text-4xl md:text-5xl font-bold text-accent mb-2">
                   {stat.value}
                 </div>
-                <div className="text-secondary/80">{stat.label}</div>
+                <div className="text-sm font-semibold uppercase tracking-wider text-white/75">{stat.label}</div>
               </div>
             ))}
           </div>
@@ -74,13 +93,13 @@ export default function AboutPage() {
       </section>
 
       {/* Our Story */}
-      <section className="py-20">
+      <section className="py-20 bg-secondary">
         <div className="container mx-auto px-4">
           <div className="max-w-3xl mx-auto">
-            <h2 className="text-3xl md:text-4xl font-bold text-secondary mb-6 text-center">
+            <h2 className="text-3xl md:text-4xl font-bold text-white mb-12 text-center">
               Our Story
             </h2>
-            <div className="space-y-5 text-lg text-muted-foreground">
+            <div className="space-y-5 text-lg leading-relaxed text-white/80">
               <p>
                 Jordan Talavera started in construction in 2014. Not behind a desk &mdash; on job sites, 
                 framing walls, pouring foundations, learning the trade from the ground up. Over the next 
@@ -105,7 +124,7 @@ export default function AboutPage() {
                 before a single nail was driven.
               </p>
               <p>
-                Today, DCS is one of San Diego&apos;s most trusted ADU and residential construction firms. 
+                Today, TruthCore is one of San Diego&apos;s most trusted ADU and residential construction firms. 
                 We&apos;ve helped homeowners add income-generating units to their properties, build custom homes 
                 from scratch, and renovate spaces that had been neglected for years. Our clients don&apos;t just 
                 hire us &mdash; they refer us. That&apos;s the standard we hold ourselves to.
@@ -116,21 +135,21 @@ export default function AboutPage() {
       </section>
 
       {/* Values */}
-      <section className="py-20 bg-muted">
+      <section className="py-20 bg-secondary bg-[radial-gradient(ellipse_at_top,rgba(51,102,102,0.35),transparent_60%)] border-t border-white/10">
         <div className="container mx-auto px-4">
-          <h2 className="text-3xl md:text-4xl font-bold text-secondary text-center mb-12">
+          <h2 className="text-3xl md:text-4xl font-bold text-white text-center mb-12">
             What Sets Us Apart
           </h2>
-          <div className="grid md:grid-cols-4 gap-8">
+          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
             {values.map((value) => {
               const Icon = value.icon;
               return (
-                <div key={value.title} className="text-center">
-                  <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4">
-                    <Icon className="h-8 w-8 text-primary" />
+                <div key={value.title} className="h-full text-center rounded-2xl bg-secondary-light border border-white/10 shadow-lg shadow-black/20 p-6 hover:border-accent/50 transition-colors">
+                  <div className="w-16 h-16 bg-primary rounded-full flex items-center justify-center mx-auto mb-4 shadow-lg shadow-black/20">
+                    <Icon className="h-8 w-8 text-white" aria-hidden="true" />
                   </div>
-                  <h3 className="font-semibold text-secondary mb-2">{value.title}</h3>
-                  <p className="text-sm text-muted-foreground">{value.description}</p>
+                  <h3 className="text-xl font-semibold text-white mb-2">{value.title}</h3>
+                  <p className="text-sm text-white/80">{value.description}</p>
                 </div>
               );
             })}
@@ -139,64 +158,41 @@ export default function AboutPage() {
       </section>
 
       {/* Why Choose Us */}
-      <section className="py-20">
+      <section className="py-20 bg-secondary border-t border-white/10">
         <div className="container mx-auto px-4">
-          <div className="grid md:grid-cols-2 gap-12 items-center">
-            <div>
-              <h2 className="text-3xl md:text-4xl font-bold text-secondary mb-6">
-                Why Homeowners Choose Us
-              </h2>
-              <ul className="space-y-4">
-                {[
-                  "Design-build model: One team from concept to completion",
-                  "Transparent pricing with no hidden costs",
-                  "Dedicated project manager for every job",
-                  "3D visualization before construction begins",
-                  "Warranty on all workmanship",
-                  "Financing options available",
-                ].map((item) => (
-                  <li key={item} className="flex items-start gap-3">
-                    <CheckCircle className="h-5 w-5 text-primary shrink-0 mt-0.5" />
-                    <span className="text-muted-foreground">{item}</span>
-                  </li>
-                ))}
-              </ul>
-            </div>
-            <div className="bg-gradient-to-br from-primary/20 to-secondary/20 rounded-2xl h-80 flex items-center justify-center">
-              <div className="text-center">
-                <Award className="h-16 w-16 text-primary/50 mx-auto mb-4" />
-                <p className="text-muted-foreground">Team Photo</p>
-              </div>
-            </div>
-          </div>
+          <h2 className="text-3xl md:text-4xl font-bold text-white text-center mb-12">
+            Why Homeowners Choose Us
+          </h2>
+          <ul className="grid gap-x-12 gap-y-4 sm:grid-cols-2 lg:grid-cols-3">
+            {[
+              "Design-build model: One team from concept to completion",
+              "Transparent pricing with no hidden costs",
+              "Dedicated project manager for every job",
+              "3D visualization before construction begins",
+              "Warranty on all workmanship",
+              "Financing options available",
+            ].map((item) => (
+              <li key={item} className="flex items-start gap-3">
+                <CheckCircle className="h-5 w-5 text-accent shrink-0 mt-0.5" aria-hidden="true" />
+                <span className="text-white/80">{item}</span>
+              </li>
+            ))}
+          </ul>
         </div>
       </section>
 
-      {/* Testimonials */}
-      <section className="py-20 bg-muted">
+      {/* Testimonials — real Google & Yelp reviews, verbatim */}
+      <section className="py-20 bg-secondary bg-[radial-gradient(ellipse_at_top,rgba(51,102,102,0.35),transparent_60%)] border-t border-white/10">
         <div className="container mx-auto px-4">
-          <h2 className="text-3xl md:text-4xl font-bold text-secondary text-center mb-12">
+          <h2 className="text-3xl md:text-4xl font-bold text-white text-center mb-12">
             Verified Reviews
           </h2>
-          <Card className="max-w-4xl mx-auto">
-            <CardContent className="p-8 md:p-10 text-center">
-              <p className="text-sm font-semibold uppercase tracking-[0.24em] text-primary mb-3">
-                Manual approval required
-              </p>
-              <p className="text-lg text-secondary font-semibold mb-3">
-                Curated Google and Yelp review excerpts are still awaiting final approved copy.
-              </p>
-              <p className="text-muted-foreground max-w-2xl mx-auto">
-                This site does not publish fabricated testimonials. Once approved review text is supplied,
-                it can be inserted here and across the rest of the site in a consistent format.
-              </p>
-            </CardContent>
-          </Card>
+          <ReviewCards reviews={aboutReviews} />
         </div>
       </section>
 
       {/* CTA */}
-      <section className="py-20 bg-secondary text-white">
+      <section className="py-20 bg-secondary bg-[radial-gradient(ellipse_at_bottom,rgba(51,102,102,0.35),transparent_60%)] border-t border-white/10 text-white">
         <div className="container mx-auto px-4 text-center">
           <h2 className="text-3xl md:text-4xl font-bold mb-4">
             Let&apos;s Build Something Great Together
@@ -206,13 +202,13 @@ export default function AboutPage() {
             your vision a reality.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Link href="/contact">
-              <Button size="lg" className="bg-primary hover:bg-primary-dark text-secondary font-semibold">
+            <Link href="/contact" className="w-full sm:w-auto">
+              <Button size="lg" rounded="full" className="w-full sm:w-auto">
                 Get Free Consultation
               </Button>
             </Link>
-            <Link href="/services/adu-solutions">
-              <Button size="lg" variant="outline" className="border-white text-white hover:bg-white/10">
+            <Link href="/services/adu-solutions" className="w-full sm:w-auto">
+              <Button size="lg" variant="outlineWhite" rounded="full" className="w-full sm:w-auto">
                 Explore Our Services
               </Button>
             </Link>

@@ -40,6 +40,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
 
     // Informational pages
     { url: `${SITE_URL}/about`, lastModified: now, changeFrequency: "monthly", priority: 0.7 },
+    { url: `${SITE_URL}/our-story`, lastModified: now, changeFrequency: "monthly", priority: 0.7 },
     { url: `${SITE_URL}/process`, lastModified: now, changeFrequency: "monthly", priority: 0.7 },
     { url: `${SITE_URL}/gallery`, lastModified: now, changeFrequency: "weekly", priority: 0.7 },
     { url: `${SITE_URL}/floor-plans`, lastModified: now, changeFrequency: "monthly", priority: 0.7 },

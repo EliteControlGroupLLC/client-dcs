@@ -33,106 +33,120 @@ export default function GalleryPage() {
     : GALLERY_PROJECTS.filter((project) => project.category === activeCategory);
 
   return (
-    <div className="min-h-screen bg-muted pt-28 pb-12">
-      <div className="container mx-auto px-4">
-        {/* Header */}
-        <div className="text-center mb-12">
-          <h1 className="text-4xl md:text-5xl font-bold text-secondary mb-4">
-            Our Work
-          </h1>
-          <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-            A tighter look at the projects that define our design-build work across ADUs, remodels, and custom residential construction.
-          </p>
+    <div className="min-h-screen">
+      <section className="bg-secondary bg-[radial-gradient(ellipse_at_top,rgba(51,102,102,0.35),transparent_60%)] text-white pt-40 pb-20">
+        <div className="container mx-auto px-4">
+          <div className="max-w-3xl">
+            <span className="inline-block text-accent font-semibold text-sm uppercase tracking-wider mb-4">
+              GALLERY
+            </span>
+            <h1 className="text-4xl md:text-5xl font-bold mb-6">
+              Our Work
+            </h1>
+            <p className="text-xl text-white/80">
+              A tighter look at the projects that define our design-build work across ADUs, remodels, and custom residential construction.
+            </p>
+          </div>
         </div>
+      </section>
 
-        {/* Category Filters */}
-        <div className="flex flex-wrap justify-center gap-3 mb-12">
-          {categories.map((cat) => {
-            const Icon = cat.icon;
-            return (
-              <button
-                key={cat.id}
-                onClick={() => setActiveCategory(cat.id)}
-                className={`flex items-center gap-2 px-4 py-2 rounded-full transition-all ${
-                  activeCategory === cat.id
-                    ? "bg-primary text-white"
-                    : "bg-white text-secondary hover:bg-primary/10"
-                }`}
-              >
-                <Icon className="h-4 w-4" />
-                {cat.name}
-              </button>
-            );
-          })}
-        </div>
+      <section className="py-20 bg-secondary border-t border-white/10">
+        <div className="container mx-auto px-4">
+          {/* Category Filters */}
+          <div className="flex flex-wrap gap-3 mb-12">
+            {categories.map((cat) => {
+              const Icon = cat.icon;
+              const active = activeCategory === cat.id;
+              return (
+                <button
+                  key={cat.id}
+                  type="button"
+                  aria-pressed={active}
+                  onClick={() => setActiveCategory(cat.id)}
+                  className={`flex items-center gap-2 h-11 px-5 rounded-full border text-sm font-medium transition-all ${
+                    active
+                      ? "bg-primary border-accent/60 text-white ring-1 ring-accent/30 shadow-lg shadow-black/20"
+                      : "bg-secondary-light border-white/15 text-white/80 hover:border-accent/50 hover:text-white"
+                  }`}
+                >
+                  <Icon className="h-4 w-4" />
+                  {cat.name}
+                </button>
+              );
+            })}
+          </div>
 
-        {/* Project Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {filteredProjects.map((project) => (
-            <Link key={project.id} href={`/gallery/${project.id}`} className="group">
-              <Card className="overflow-hidden border-0 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-xl">
-                <div className="relative aspect-[4/3] overflow-hidden">
-                  <Image
-                    src={project.image}
-                    alt={project.title}
-                    fill
-                    className="object-cover transition-transform duration-500 group-hover:scale-105"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-secondary/85 via-secondary/15 to-transparent" />
-                  <div className="absolute left-4 right-4 top-4 flex flex-wrap gap-2">
-                    <span className="rounded-full bg-white/12 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-white backdrop-blur-sm">
-                      {project.type}
-                    </span>
-                    {project.imageStatus === "pending-replacement" && (
-                      <span className="rounded-full bg-secondary/70 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-white backdrop-blur-sm">
-                        Replacement image pending
+          {/* Project Grid */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {filteredProjects.map((project) => (
+              <Link key={project.id} href={`/gallery/${project.id}`} className="group block h-full">
+                <Card className="h-full flex flex-col overflow-hidden bg-secondary-light border-white/10 shadow-lg shadow-black/20 transition-all duration-300 hover:-translate-y-1 hover:border-accent/50">
+                  <div className="relative aspect-[4/3] overflow-hidden">
+                    <Image
+                      src={project.image}
+                      alt={project.title}
+                      fill
+                      sizes="(min-width: 1024px) 33vw, (min-width: 768px) 50vw, 100vw"
+                      className="object-cover transition-transform duration-500 group-hover:scale-105"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-secondary/85 via-secondary/15 to-transparent" />
+                    <div className="absolute left-4 right-4 top-4 flex flex-wrap gap-2">
+                      <span className="rounded-full bg-secondary/60 px-3 py-1 text-xs font-semibold uppercase tracking-wider text-white backdrop-blur-sm">
+                        {project.type}
                       </span>
+                      {project.imageStatus === "pending-replacement" && (
+                        <span className="rounded-full bg-secondary/60 px-3 py-1 text-xs font-semibold uppercase tracking-wider text-white backdrop-blur-sm">
+                          Replacement image pending
+                        </span>
+                      )}
+                    </div>
+                    <div className="absolute bottom-0 left-0 right-0 p-6">
+                      <h3 className="text-xl font-semibold text-white text-balance">{project.title}</h3>
+                      <p className="text-sm text-white/80">
+                        {project.location} • {project.sqft}
+                      </p>
+                    </div>
+                  </div>
+                  <div className="p-6 flex-1 flex flex-col">
+                    <p className="text-sm leading-relaxed text-white/80">{project.description}</p>
+                    {project.imageNote && (
+                      <p className="mt-3 text-xs font-medium text-accent-light">{project.imageNote}</p>
                     )}
+                    <span className="mt-auto pt-4 self-start inline-flex items-center gap-2 text-sm font-semibold text-accent-light group-hover:text-white transition-colors">
+                      View project details
+                      <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
+                    </span>
                   </div>
-                  <div className="absolute bottom-0 left-0 right-0 p-5">
-                    <h3 className="font-semibold text-white text-lg">{project.title}</h3>
-                    <p className="text-sm text-white/70">
-                      {project.location} • {project.sqft}
-                    </p>
-                  </div>
-                </div>
-                <div className="p-5">
-                  <p className="text-sm leading-relaxed text-muted-foreground">{project.description}</p>
-                  {project.imageNote && (
-                    <p className="mt-3 text-xs font-medium text-primary">{project.imageNote}</p>
-                  )}
-                  <span className="mt-4 inline-flex items-center gap-2 text-sm font-semibold text-primary">
-                    View project details
-                    <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
-                  </span>
-                </div>
-              </Card>
-            </Link>
-          ))}
+                </Card>
+              </Link>
+            ))}
+          </div>
         </div>
+      </section>
 
-        {/* CTA */}
-        <div className="mt-16 bg-secondary rounded-2xl p-8 md:p-12 text-center text-white">
-          <h2 className="text-2xl md:text-3xl font-bold mb-4">
+      {/* CTA */}
+      <section className="py-20 bg-secondary bg-[radial-gradient(ellipse_at_top,rgba(51,102,102,0.35),transparent_60%)] border-t border-white/10 text-white">
+        <div className="container mx-auto px-4 text-center">
+          <h2 className="text-3xl md:text-4xl font-bold mb-4">
             Ready to Start Your Project?
           </h2>
-          <p className="text-lg text-white/80 mb-6 max-w-2xl mx-auto">
+          <p className="text-lg text-white/80 mb-8 max-w-2xl mx-auto">
             Let us help you create something amazing. Schedule a free consultation to discuss your ideas.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Link href="/contact">
-              <Button size="lg" className="bg-primary hover:bg-primary-dark text-secondary font-semibold">
-                Get Free Consultation
+            <Link href="/contact" className="w-full sm:w-auto">
+              <Button size="lg" rounded="full" className="w-full sm:w-auto">
+                Get Free Consultation <ArrowRight className="h-5 w-5" />
               </Button>
             </Link>
-            <Link href="/build-your-adu">
-              <Button size="lg" variant="outline" className="border-white text-white hover:bg-white/10">
+            <Link href="/build-your-adu" className="w-full sm:w-auto">
+              <Button size="lg" rounded="full" variant="outlineWhite" className="w-full sm:w-auto">
                 Design Your ADU
               </Button>
             </Link>
           </div>
         </div>
-      </div>
+      </section>
     </div>
   );
 }
