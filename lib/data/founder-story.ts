@@ -48,9 +48,12 @@ export const FOUNDER_STORY: StorySection[] = [
   {
     heading: "The turning point",
     paragraphs: [
+      "What finally pushed me to act was what I saw behind the scenes. You would be amazed at how many construction businesses in San Diego actually run their operations. Over the years I've worked with hundreds of licensed subcontractors and companies, and I kept seeing the same thing: disorganization, poor communication, missing paperwork, and a culture that accepts \u201Cgood enough.\u201D The best tradespeople I know deserve better than that — and so do homeowners.",
+      "I was tired of it. Something needed to change, and I decided it would start with my own company.",
       "I spent months asking one question: how do I build a general contractor that people can actually trust? The answer became TruthCore.",
       "Distinct Construction Solutions was simply the name I needed the day I filed for my license. TruthCore is who we really are — the roots, the soul and the foundation of this company.",
     ],
+    pullQuote: "Something needed to change — and it started with my own company.",
   },
   {
     heading: "Good work is only the beginning",
