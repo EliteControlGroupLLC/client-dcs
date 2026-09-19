@@ -83,7 +83,7 @@ export default async function ProjectPage({ params }: { params: Promise<{ id: st
 
           <div className="flex flex-col sm:flex-row gap-4">
             <Link href="/contact">
-              <Button size="lg" className="bg-primary hover:bg-primary-dark text-secondary font-semibold">
+              <Button size="lg" className="bg-primary hover:bg-primary-dark text-white font-semibold">
                 Start a Similar Project <ArrowRight className="h-5 w-5 ml-2" />
               </Button>
             </Link>

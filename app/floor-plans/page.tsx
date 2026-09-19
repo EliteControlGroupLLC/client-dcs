@@ -315,7 +315,7 @@ export default function FloorPlansPage() {
                       <Eye className="h-4 w-4 mr-1" />
                       View Details
                     </Button>
-                    <Button size="sm" className="bg-primary hover:bg-primary-dark text-secondary" onClick={() => handleOpenPlan(index, "customize")}>
+                    <Button size="sm" className="bg-primary hover:bg-primary-dark text-white" onClick={() => handleOpenPlan(index, "customize")}>
                         Customize
                       </Button>
                   </div>
@@ -332,7 +332,7 @@ export default function FloorPlansPage() {
                       <Eye className="h-4 w-4 mr-1" />
                       Details
                     </Button>
-                    <Button size="sm" className="flex-1 bg-primary hover:bg-primary-dark text-secondary" onClick={() => handleOpenPlan(index, "customize")}>
+                    <Button size="sm" className="flex-1 bg-primary hover:bg-primary-dark text-white" onClick={() => handleOpenPlan(index, "customize")}>
                         Customize
                       </Button>
                   </div>
@@ -352,7 +352,7 @@ export default function FloorPlansPage() {
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link href="/build-your-adu">
-              <Button size="lg" className="bg-primary hover:bg-primary-dark text-secondary font-semibold">
+              <Button size="lg" className="bg-primary hover:bg-primary-dark text-white font-semibold">
                 Design Custom ADU
               </Button>
             </Link>

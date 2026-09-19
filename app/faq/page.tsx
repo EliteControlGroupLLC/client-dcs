@@ -49,7 +49,7 @@ const faqs = [
     questions: [
       {
         q: "Are you licensed and insured?",
-        a: "Yes. Distinct Construction Solutions is a fully licensed California General Contractor (CSLB License #1098531), bonded, and insured. Your property is fully protected throughout the project.",
+        a: "Yes. Distinct Construction Solutions (dba TruthCore) is a fully licensed California General Contractor (CSLB License #1098531), bonded, and insured. Your property is fully protected throughout the project.",
       },
       {
         q: "Will I have a dedicated project manager?",
@@ -89,7 +89,7 @@ export default function FAQPage() {
       <section className="bg-secondary text-white py-20">
         <div className="container mx-auto px-4">
           <div className="max-w-3xl">
-            <span className="inline-block text-primary font-semibold text-sm uppercase tracking-wider mb-4">
+            <span className="inline-block text-primary-light font-semibold text-sm uppercase tracking-wider mb-4">
               FAQ
             </span>
             <h1 className="text-4xl md:text-5xl font-bold mb-6">
@@ -124,7 +124,7 @@ export default function FAQPage() {
             Our team is happy to answer any questions about your project.
           </p>
           <Link href="/contact">
-            <Button size="lg" className="bg-primary hover:bg-primary-dark text-secondary font-semibold">
+            <Button size="lg" className="bg-primary hover:bg-primary-dark text-white font-semibold">
               Contact Us <ArrowRight className="h-5 w-5 ml-2" />
             </Button>
           </Link>

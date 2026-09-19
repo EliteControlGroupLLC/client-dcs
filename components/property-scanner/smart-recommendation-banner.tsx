@@ -15,7 +15,7 @@ export function SmartRecommendationBanner({ recommendation, details }: SmartReco
       <div className="relative">
         <div className="flex items-center gap-2 mb-3">
           <div className="w-10 h-10 rounded-xl bg-primary/20 flex items-center justify-center">
-            <Sparkles className="h-5 w-5 text-primary" />
+            <Sparkles className="h-5 w-5 text-primary-light" />
           </div>
           <div>
             <p className="text-xs font-medium text-white/60 uppercase tracking-wider">Smart Recommendation</p>

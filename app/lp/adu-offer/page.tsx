@@ -27,33 +27,33 @@ export default function ADUOfferLP() {
           <div className="grid lg:grid-cols-2 gap-12 items-center max-w-6xl mx-auto">
             <div className="text-white">
               <div className="inline-flex items-center gap-2 bg-primary/20 backdrop-blur-sm rounded-full px-4 py-2 mb-6">
-                <Star className="h-4 w-4 text-primary fill-primary" />
+                <Star className="h-4 w-4 text-primary-light fill-primary" />
                 <span className="text-sm font-medium">Limited Time Offer</span>
               </div>
 
               <h1 className="text-4xl md:text-5xl font-bold leading-tight mb-4">
                 Your Backyard Could Be
-                <span className="text-primary block">Earning You $2,500/mo</span>
+                <span className="text-primary-light block">Earning You $2,500/mo</span>
               </h1>
 
               <p className="text-xl text-white/80 mb-6">
-                Build an ADU in your San Diego backyard. We handle design, permits, and construction — all for a fixed price starting at <span className="text-primary font-bold">$175K</span>.
+                Build an ADU in your San Diego backyard. We handle design, permits, and construction — all for a fixed price starting at <span className="text-primary-light font-bold">$175K</span>.
               </p>
 
               <div className="grid grid-cols-2 gap-4 mb-8">
                 <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 text-center">
-                  <div className="text-2xl font-bold text-primary">$2,500+</div>
+                  <div className="text-2xl font-bold text-primary-light">$2,500+</div>
                   <div className="text-sm text-white/70">Monthly Rental Income</div>
                 </div>
                 <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 text-center">
-                  <div className="text-2xl font-bold text-primary">30%+</div>
+                  <div className="text-2xl font-bold text-primary-light">30%+</div>
                   <div className="text-sm text-white/70">Property Value Increase</div>
                 </div>
               </div>
 
               <a
                 href={`tel:${COMPANY_INFO.phoneHref}`}
-                className="inline-flex items-center gap-2 text-white/80 hover:text-primary transition-colors"
+                className="inline-flex items-center gap-2 text-white/80 hover:text-primary-light transition-colors"
               >
                 <Phone className="h-5 w-5" />
                 <span>Or call us: {COMPANY_INFO.phone}</span>
@@ -180,10 +180,10 @@ export default function ADUOfferLP() {
       {/* Final CTA */}
       <section className="py-16 bg-primary text-center">
         <div className="container mx-auto px-4 max-w-2xl">
-          <h2 className="text-3xl font-bold text-secondary mb-4">
+          <h2 className="text-3xl font-bold text-white mb-4">
             Start Building Your ADU Today
           </h2>
-          <p className="text-secondary/70 mb-8">
+          <p className="text-white/85 mb-8">
             Join 500+ San Diego homeowners. Free consultation, fixed-price quotes, and a team that handles everything.
           </p>
           <div className="flex flex-wrap justify-center gap-4">

@@ -125,14 +125,14 @@ export function Hero() {
           <div className="text-white">
             {/* Trust badge */}
             <div className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-sm rounded-full px-4 py-2 mb-8">
-              <Shield className="h-4 w-4 text-primary" />
-              <span className="text-sm">San Diego Design-Build &middot; Restoring Truth to Construction</span>
+              <Shield className="h-4 w-4 text-primary-light" />
+              <span className="text-sm">TruthCore &middot; a DBA of {COMPANY_INFO.name}</span>
             </div>
 
             <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold leading-tight mb-6">
               Your Home.
               <span className="block">Every Project.</span>
-              <span className="block text-primary">One Honest Team.</span>
+              <span className="block text-accent">One Honest Team.</span>
             </h1>
 
             <p className="text-lg text-white/80 max-w-xl mb-8 leading-relaxed">
@@ -144,15 +144,15 @@ export function Hero() {
             {/* Key benefits */}
             <div className="flex flex-wrap gap-6 mb-8">
               <div className="flex items-center gap-2 text-sm text-white/70">
-                <div className="w-2 h-2 rounded-full bg-primary" />
+                <div className="w-2 h-2 rounded-full bg-primary-light" />
                 Fixed-Price Contracts
               </div>
               <div className="flex items-center gap-2 text-sm text-white/70">
-                <div className="w-2 h-2 rounded-full bg-primary" />
+                <div className="w-2 h-2 rounded-full bg-primary-light" />
                 In-House Design Team
               </div>
               <div className="flex items-center gap-2 text-sm text-white/70">
-                <BadgeCheck className="h-4 w-4 text-primary" />
+                <BadgeCheck className="h-4 w-4 text-primary-light" />
                 Design, Permits &amp; Construction
               </div>
             </div>
@@ -188,7 +188,7 @@ export function Hero() {
           {/* Right Content - Featured Info Card */}
           <div className="relative">
             <div className="relative rounded-3xl overflow-hidden shadow-2xl bg-white/10 backdrop-blur-md border border-white/20 p-6 sm:p-8">
-              <p className="text-xs font-semibold uppercase tracking-[0.2em] text-primary mb-4">
+              <p className="text-xs font-semibold uppercase tracking-[0.2em] text-accent mb-4">
                 The Standard We Build By
               </p>
 
@@ -209,7 +209,7 @@ export function Hero() {
                 {pillars.map((pillar) => (
                   <div key={pillar.title} className="flex items-start gap-3">
                     <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center flex-shrink-0 mt-0.5">
-                      <pillar.icon className="h-4 w-4 text-primary" />
+                      <pillar.icon className="h-4 w-4 text-primary-light" />
                     </div>
                     <div>
                       <p className="font-semibold text-white">{pillar.title}</p>
@@ -220,8 +220,8 @@ export function Hero() {
               </div>
             </div>
 
-            {/* Real client reviews pop up one at a time, overlapping the card's corner */}
-            <div className="relative z-10 -mt-6 sm:mx-6 lg:-ml-12 lg:mr-16">
+            {/* Real client reviews glide in one at a time, set off to the side of the standard */}
+            <div className="relative z-10 mt-6">
               <HeroReviewTicker />
             </div>
           </div>

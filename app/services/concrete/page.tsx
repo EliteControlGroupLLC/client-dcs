@@ -65,7 +65,7 @@ export default function ConcretePage() {
       <section className="bg-secondary text-white py-20">
         <div className="container mx-auto px-4">
           <div className="max-w-3xl">
-            <span className="inline-block text-primary font-semibold text-sm uppercase tracking-wider mb-4">
+            <span className="inline-block text-primary-light font-semibold text-sm uppercase tracking-wider mb-4">
               CONCRETE SERVICES
             </span>
             <h1 className="text-4xl md:text-5xl font-bold mb-6">
@@ -75,7 +75,7 @@ export default function ConcretePage() {
               Driveways, patios, retaining walls, and foundations — built to last with quality materials
               and expert craftsmanship. Serving San Diego homeowners with transparent pricing.
             </p>
-            <p className="text-2xl font-bold text-primary">Starting at $17.50/sq ft</p>
+            <p className="text-2xl font-bold text-primary-light">Starting at $17.50/sq ft</p>
           </div>
         </div>
       </section>

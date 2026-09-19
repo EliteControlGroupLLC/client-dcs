@@ -18,7 +18,7 @@ export default function BathroomPage() {
       <section className="bg-secondary text-white py-20">
         <div className="container mx-auto px-4">
           <div className="max-w-3xl">
-            <span className="inline-block text-primary font-semibold text-sm uppercase tracking-wider mb-4">
+            <span className="inline-block text-primary-light font-semibold text-sm uppercase tracking-wider mb-4">
               BATHROOM RENOVATION
             </span>
             <h1 className="text-4xl md:text-5xl font-bold mb-6">
@@ -28,7 +28,7 @@ export default function BathroomPage() {
               Modern bathroom renovations with premium materials, expert craftsmanship, and transparent pricing.
               From simple updates to full renovations.
             </p>
-            <p className="text-2xl font-bold text-primary">$12,000 – $60,000+</p>
+            <p className="text-2xl font-bold text-primary-light">$12,000 – $60,000+</p>
           </div>
         </div>
       </section>

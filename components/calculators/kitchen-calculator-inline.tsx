@@ -151,9 +151,9 @@ export function KitchenCalculatorInline() {
               <Card className="bg-secondary text-white">
                 <CardContent className="p-8 flex flex-col justify-center h-full">
                   <div className="text-center">
-                    <ChefHat className="h-12 w-12 text-primary mx-auto mb-4" />
+                    <ChefHat className="h-12 w-12 text-primary-light mx-auto mb-4" />
                     <p className="text-white/70 text-sm mb-2">Estimated Kitchen Remodel</p>
-                    <p className="text-3xl md:text-4xl font-bold text-primary mb-1">
+                    <p className="text-3xl md:text-4xl font-bold text-primary-light mb-1">
                       ${totalLow.toLocaleString()} &ndash; ${totalHigh.toLocaleString()}
                     </p>
                     <p className="text-white/50 text-sm mb-6">
@@ -177,7 +177,7 @@ export function KitchenCalculatorInline() {
                     </p>
 
                     <Link href="/contact">
-                      <Button size="lg" className="w-full bg-primary hover:bg-primary-dark text-secondary font-semibold">
+                      <Button size="lg" className="w-full bg-primary hover:bg-primary-dark text-white font-semibold">
                         Design Your Kitchen <ArrowRight className="h-5 w-5 ml-2" />
                       </Button>
                     </Link>

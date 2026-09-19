@@ -40,7 +40,7 @@ export default function ADUGuidePage() {
       <section className="bg-secondary text-white py-20">
         <div className="container mx-auto px-4">
           <div className="max-w-3xl">
-            <span className="inline-block text-primary font-semibold text-sm uppercase tracking-wider mb-4">
+            <span className="inline-block text-primary-light font-semibold text-sm uppercase tracking-wider mb-4">
               ADU GUIDE
             </span>
             <h1 className="text-4xl md:text-5xl font-bold mb-6">
@@ -50,7 +50,7 @@ export default function ADUGuidePage() {
               Everything you need to know about ADU costs, timelines, permits, and financing in San Diego County.
             </p>
             <Link href="/build-your-adu">
-              <Button size="lg" className="bg-primary hover:bg-primary-dark text-secondary font-semibold">
+              <Button size="lg" className="bg-primary hover:bg-primary-dark text-white font-semibold">
                 Design Your ADU <ArrowRight className="h-5 w-5 ml-2" />
               </Button>
             </Link>
@@ -105,7 +105,7 @@ export default function ADUGuidePage() {
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link href="/build-your-adu">
-              <Button size="lg" className="bg-primary hover:bg-primary-dark text-secondary font-semibold">
+              <Button size="lg" className="bg-primary hover:bg-primary-dark text-white font-semibold">
                 Start Building Your ADU <ArrowRight className="h-5 w-5 ml-2" />
               </Button>
             </Link>

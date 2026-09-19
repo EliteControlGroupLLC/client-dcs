@@ -1,6 +1,6 @@
 {
-  "name": "Distinct Construction Solutions",
-  "short_name": "DCS",
+  "name": "TruthCore",
+  "short_name": "TruthCore",
   "icons": [
     {
       "src": "/web-app-manifest-192x192.png",
@@ -15,7 +15,7 @@
       "purpose": "maskable"
     }
   ],
-  "theme_color": "#3ECDA2",
+  "theme_color": "#336666",
   "background_color": "#ffffff",
   "display": "standalone"
 }

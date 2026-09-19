@@ -48,7 +48,7 @@ export default function TermsPage() {
 
           <h2 className="text-2xl font-bold text-secondary mb-4">Licensing</h2>
           <p className="text-muted-foreground mb-6">
-            Distinct Construction Solutions is a licensed California General Contractor. CSLB License #1098531.
+            Distinct Construction Solutions, dba TruthCore, is a licensed California General Contractor. CSLB License #1098531.
             Bonded and insured. Serving San Diego County.
           </p>
 

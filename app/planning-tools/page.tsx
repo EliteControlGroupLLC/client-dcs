@@ -130,7 +130,7 @@ function ToolCard({ tool, isPrimary = false }: { tool: ToolItem; isPrimary?: boo
         <p className="text-muted-foreground mb-6">{tool.description}</p>
         <Link href={tool.href}>
           <Button
-            className={isPrimary ? "bg-primary hover:bg-primary-dark text-secondary font-semibold" : ""}
+            className={isPrimary ? "bg-primary hover:bg-primary-dark text-white font-semibold" : ""}
             variant={isPrimary ? "default" : "outline"}
           >
             {tool.cta}
@@ -149,7 +149,7 @@ export default function PlanningToolsPage() {
       <section className="bg-secondary text-white py-20">
         <div className="container mx-auto px-4">
           <div className="max-w-3xl">
-            <span className="inline-block text-primary font-semibold text-sm uppercase tracking-wider mb-4">
+            <span className="inline-block text-primary-light font-semibold text-sm uppercase tracking-wider mb-4">
               PLANNING TOOLS
             </span>
             <h1 className="text-4xl md:text-5xl font-bold mb-6">
@@ -218,7 +218,7 @@ export default function PlanningToolsPage() {
             Our team is ready to help you explore your options and find the best path forward for your project.
           </p>
           <Link href="/contact">
-            <Button size="lg" className="bg-primary hover:bg-primary-dark text-secondary font-semibold">
+            <Button size="lg" className="bg-primary hover:bg-primary-dark text-white font-semibold">
               Schedule a Consultation
               <ArrowRight className="h-5 w-5 ml-2" />
             </Button>

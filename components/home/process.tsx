@@ -40,7 +40,7 @@ export function Process() {
           ref={headerRef}
           className={`text-center max-w-3xl mx-auto mb-16 transition-all duration-700 ${headerVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"}`}
         >
-          <span className="inline-block text-primary font-semibold text-sm uppercase tracking-wider mb-4">
+          <span className="inline-block text-primary-light font-semibold text-sm uppercase tracking-wider mb-4">
             OUR PROCESS
           </span>
           <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-white mb-6 text-balance">
@@ -71,12 +71,12 @@ export function Process() {
                 <div className={`bg-white/10 backdrop-blur-lg border border-white/20 rounded-2xl p-6 h-full hover:bg-white/15 hover:border-white/30 transition-all duration-500 ${stepsVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"}`}>
                   {/* Icon circle */}
                   <div className="relative z-10 w-14 h-14 rounded-full bg-primary/20 border-2 border-primary flex items-center justify-center mb-5 mx-auto">
-                    <Icon className="h-6 w-6 text-primary" />
+                    <Icon className="h-6 w-6 text-primary-light" />
                   </div>
 
                   <div className="text-center">
                     {/* Step number */}
-                    <span className="text-xs font-semibold text-primary/60 uppercase tracking-wider">
+                    <span className="text-xs font-semibold text-primary-light/60 uppercase tracking-wider">
                       Step {step.number}
                     </span>
 
@@ -91,7 +91,7 @@ export function Process() {
                     </p>
 
                     {/* Timeline badge */}
-                    <span className="inline-flex items-center text-xs font-medium text-primary bg-primary/10 border border-primary/20 px-3 py-1.5 rounded-full">
+                    <span className="inline-flex items-center text-xs font-medium text-primary-light bg-primary/10 border border-primary/20 px-3 py-1.5 rounded-full">
                       {step.timeline}
                     </span>
                   </div>
@@ -100,7 +100,7 @@ export function Process() {
                 {/* Arrow connector - mobile/tablet */}
                 {index < PROCESS_STEPS.length - 1 && (
                   <div className="flex justify-center py-4 lg:hidden">
-                    <ArrowRight className="h-5 w-5 text-primary/50 rotate-90 md:rotate-0" />
+                    <ArrowRight className="h-5 w-5 text-primary-light/50 rotate-90 md:rotate-0" />
                   </div>
                 )}
               </div>

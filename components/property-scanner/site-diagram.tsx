@@ -315,7 +315,7 @@ function RealGeometryDiagram({
         <path
           d={parcelPath}
           fill="none"
-          stroke="#0F2A4A"
+          stroke="#1A2B2B"
           strokeWidth="2"
           strokeDasharray="6 3"
         />
@@ -348,9 +348,9 @@ function RealGeometryDiagram({
         {buildingPath && (
           <path
             d={buildingPath}
-            fill="#0F2A4A"
+            fill="#1A2B2B"
             fillOpacity="0.15"
-            stroke="#0F2A4A"
+            stroke="#1A2B2B"
             strokeWidth="1.5"
           />
         )}
@@ -359,9 +359,9 @@ function RealGeometryDiagram({
         {buildablePath && (
           <path
             d={buildablePath}
-            fill="#3ECDA2"
+            fill="#336666"
             fillOpacity="0.15"
-            stroke="#3ECDA2"
+            stroke="#336666"
             strokeWidth="1.5"
           />
         )}
@@ -410,7 +410,7 @@ function RealGeometryDiagram({
               y={buildableLabelY - 6}
               textAnchor="middle"
               className="text-[11px] font-bold"
-              fill="#2BA87F"
+              fill="#25514F"
             >
               ADU Buildable Area
             </text>
@@ -419,7 +419,7 @@ function RealGeometryDiagram({
               y={buildableLabelY + 8}
               textAnchor="middle"
               className="text-[9px]"
-              fill="#2BA87F"
+              fill="#25514F"
             >
               After setbacks & separation
             </text>
@@ -428,10 +428,10 @@ function RealGeometryDiagram({
 
         {/* Legend */}
         <g transform={`translate(12, ${SVG_HEIGHT - 72})`}>
-          <rect x={0} y={0} width={10} height={10} fill="#0F2A4A" fillOpacity="0.15" stroke="#0F2A4A" strokeWidth="1" />
+          <rect x={0} y={0} width={10} height={10} fill="#1A2B2B" fillOpacity="0.15" stroke="#1A2B2B" strokeWidth="1" />
           <text x={14} y={8} className="text-[8px] fill-muted-foreground">Main Residence</text>
 
-          <rect x={0} y={14} width={10} height={10} fill="#3ECDA2" fillOpacity="0.15" stroke="#3ECDA2" strokeWidth="1" />
+          <rect x={0} y={14} width={10} height={10} fill="#336666" fillOpacity="0.15" stroke="#336666" strokeWidth="1" />
           <text x={14} y={22} className="text-[8px] fill-muted-foreground">ADU Buildable Area</text>
 
           <line x1={0} y1={32} x2={10} y2={32} stroke="#F59E0B" strokeWidth="1" strokeDasharray="3 3" />
@@ -443,8 +443,8 @@ function RealGeometryDiagram({
 
         {/* North arrow (plan is drawn north-up) */}
         <g transform={`translate(${SVG_WIDTH - 18}, 18)`}>
-          <line x1={0} y1={10} x2={0} y2={-6} stroke="#0F2A4A" strokeWidth="1" />
-          <path d="M -3 -2 L 0 -8 L 3 -2 Z" fill="#0F2A4A" />
+          <line x1={0} y1={10} x2={0} y2={-6} stroke="#1A2B2B" strokeWidth="1" />
+          <path d="M -3 -2 L 0 -8 L 3 -2 Z" fill="#1A2B2B" />
           <text x={0} y={20} textAnchor="middle" className="text-[8px] fill-muted-foreground">N</text>
         </g>
       </svg>
@@ -527,7 +527,7 @@ function EstimatedDiagram({
           width={lotW}
           height={lotH}
           fill="none"
-          stroke="#0F2A4A"
+          stroke="#1A2B2B"
           strokeWidth="2"
           strokeDasharray="6 3"
           rx="2"
@@ -553,9 +553,9 @@ function EstimatedDiagram({
           y={homeY}
           width={homeW}
           height={homeH}
-          fill="#0F2A4A"
+          fill="#1A2B2B"
           opacity="0.15"
-          stroke="#0F2A4A"
+          stroke="#1A2B2B"
           strokeWidth="1.5"
           rx="3"
         />
@@ -597,9 +597,9 @@ function EstimatedDiagram({
               y={aduZoneY}
               width={aduZoneW}
               height={Math.max(aduZoneH, 0)}
-              fill="#3ECDA2"
+              fill="#336666"
               opacity="0.12"
-              stroke="#3ECDA2"
+              stroke="#336666"
               strokeWidth="1.5"
               rx="3"
             />
@@ -608,7 +608,7 @@ function EstimatedDiagram({
               y={aduZoneY + Math.max(aduZoneH, 20) / 2 - 4}
               textAnchor="middle"
               className="text-[11px] font-bold"
-              fill="#2BA87F"
+              fill="#25514F"
             >
               ADU Build Zone
             </text>
@@ -617,7 +617,7 @@ function EstimatedDiagram({
               y={aduZoneY + Math.max(aduZoneH, 20) / 2 + 10}
               textAnchor="middle"
               className="text-[9px]"
-              fill="#2BA87F"
+              fill="#25514F"
             >
               Estimated buildable area
             </text>
@@ -638,10 +638,10 @@ function EstimatedDiagram({
         </text>
 
         {/* Legend */}
-        <rect x={12} y={SVG_HEIGHT - 60} width={10} height={10} fill="#0F2A4A" opacity="0.15" stroke="#0F2A4A" strokeWidth="1" rx="1" />
+        <rect x={12} y={SVG_HEIGHT - 60} width={10} height={10} fill="#1A2B2B" opacity="0.15" stroke="#1A2B2B" strokeWidth="1" rx="1" />
         <text x={26} y={SVG_HEIGHT - 52} className="text-[8px] fill-muted-foreground">Main Home</text>
 
-        <rect x={12} y={SVG_HEIGHT - 44} width={10} height={10} fill="#3ECDA2" opacity="0.15" stroke="#3ECDA2" strokeWidth="1" rx="1" />
+        <rect x={12} y={SVG_HEIGHT - 44} width={10} height={10} fill="#336666" opacity="0.15" stroke="#336666" strokeWidth="1" rx="1" />
         <text x={26} y={SVG_HEIGHT - 36} className="text-[8px] fill-muted-foreground">ADU Build Zone</text>
 
         <line x1={12} y1={SVG_HEIGHT - 24} x2={22} y2={SVG_HEIGHT - 24} stroke="#F59E0B" strokeWidth="1" strokeDasharray="3 3" />

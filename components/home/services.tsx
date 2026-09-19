@@ -59,7 +59,7 @@ export function Services() {
           ref={headerRef}
           className={`text-center max-w-3xl mx-auto mb-16 transition-all duration-700 ${headerVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"}`}
         >
-          <span className="inline-block text-primary font-semibold text-sm uppercase tracking-wider mb-4">
+          <span className="inline-block text-primary-light font-semibold text-sm uppercase tracking-wider mb-4">
             OUR SERVICES
           </span>
           <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-white mb-6 text-balance">
@@ -101,7 +101,7 @@ export function Services() {
                   className={`w-14 h-14 rounded-xl flex items-center justify-center mb-6 transition-colors ${
                     service.id === "adu-solutions"
                       ? "bg-primary text-white"
-                      : "bg-white/10 text-primary group-hover:bg-primary/20"
+                      : "bg-white/10 text-primary-light group-hover:bg-primary/30"
                   }`}
                 >
                   <Icon className="h-7 w-7" />
@@ -124,7 +124,7 @@ export function Services() {
                       key={feature}
                       className="flex items-center gap-3 text-sm text-white/80"
                     >
-                      <Check className="h-4 w-4 text-primary flex-shrink-0" />
+                      <Check className="h-4 w-4 text-primary-light flex-shrink-0" />
                       {feature}
                     </li>
                   ))}
@@ -132,7 +132,7 @@ export function Services() {
 
                 {/* Price */}
                 <div className="mb-6 pb-6 border-b border-white/10">
-                  <span className="text-lg font-bold text-primary">
+                  <span className="text-lg font-bold text-primary-light">
                     {service.priceLabel}
                   </span>
                 </div>
@@ -164,10 +164,10 @@ export function Services() {
               return (
               <Link key={service.title} href={service.href} className="group">
                 <div className="bg-white/5 backdrop-blur-lg border border-white/10 rounded-xl p-4 hover:bg-white/10 hover:border-white/20 transition-all duration-300 text-center h-full">
-                  <div className="w-10 h-10 rounded-lg bg-white/10 flex items-center justify-center mx-auto mb-3 group-hover:bg-primary/20 transition-colors">
-                    <Icon className="h-5 w-5 text-primary" />
+                  <div className="w-10 h-10 rounded-lg bg-white/10 flex items-center justify-center mx-auto mb-3 group-hover:bg-primary/30 transition-colors">
+                    <Icon className="h-5 w-5 text-primary-light" />
                   </div>
-                  <h4 className="text-sm font-bold text-white group-hover:text-primary transition-colors mb-1">{service.title}</h4>
+                  <h4 className="text-sm font-bold text-white group-hover:text-primary-light transition-colors mb-1">{service.title}</h4>
                   <p className="text-xs text-white/40">{service.priceLabel}</p>
                 </div>
               </Link>

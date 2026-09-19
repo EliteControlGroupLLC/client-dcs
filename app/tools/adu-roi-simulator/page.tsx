@@ -89,7 +89,7 @@ export default function ADUROISimulatorPage() {
       <section className="bg-secondary text-white py-20">
         <div className="container mx-auto px-4">
           <div className="max-w-3xl">
-            <span className="inline-block text-primary font-semibold text-sm uppercase tracking-wider mb-4">
+            <span className="inline-block text-primary-light font-semibold text-sm uppercase tracking-wider mb-4">
               ROI SIMULATOR
             </span>
             <h1 className="text-4xl md:text-5xl font-bold mb-6">
@@ -215,7 +215,7 @@ export default function ADUROISimulatorPage() {
 
               <Card className="bg-secondary text-white">
                 <CardContent className="p-8">
-                  <BarChart3 className="h-10 w-10 text-primary mx-auto mb-4" />
+                  <BarChart3 className="h-10 w-10 text-primary-light mx-auto mb-4" />
                   <h3 className="text-lg font-bold text-center text-white mb-6">Investment Projection</h3>
 
                   <div className="space-y-4 mb-6">
@@ -225,24 +225,24 @@ export default function ADUROISimulatorPage() {
                     </div>
                     <div className="flex justify-between items-center border-b border-white/10 pb-3">
                       <span className="text-white/70 text-sm">Monthly Rental Income</span>
-                      <span className="font-bold text-primary">${monthlyRent.toLocaleString()}</span>
+                      <span className="font-bold text-primary-light">${monthlyRent.toLocaleString()}</span>
                     </div>
                     <div className="flex justify-between items-center border-b border-white/10 pb-3">
                       <span className="text-white/70 text-sm">Monthly Cash Flow</span>
-                      <span className={`font-bold text-lg ${monthlyCashFlow >= 0 ? "text-primary" : "text-red-400"}`}>
+                      <span className={`font-bold text-lg ${monthlyCashFlow >= 0 ? "text-primary-light" : "text-red-400"}`}>
                         {monthlyCashFlow >= 0 ? "+" : ""}${monthlyCashFlow.toLocaleString()}
                       </span>
                     </div>
                     <div className="flex justify-between items-center border-b border-white/10 pb-3">
                       <span className="text-white/70 text-sm">Annual Cash Flow</span>
-                      <span className={`font-bold ${annualCashFlow >= 0 ? "text-primary" : "text-red-400"}`}>
+                      <span className={`font-bold ${annualCashFlow >= 0 ? "text-primary-light" : "text-red-400"}`}>
                         {annualCashFlow >= 0 ? "+" : ""}${annualCashFlow.toLocaleString()}
                       </span>
                     </div>
                     {downPayment > 0 && (
                       <div className="flex justify-between items-center border-b border-white/10 pb-3">
                         <span className="text-white/70 text-sm">Cash-on-Cash Return</span>
-                        <span className={`font-bold ${cashOnCashReturn >= 0 ? "text-primary" : "text-red-400"}`}>
+                        <span className={`font-bold ${cashOnCashReturn >= 0 ? "text-primary-light" : "text-red-400"}`}>
                           {cashOnCashReturn}%
                         </span>
                       </div>
@@ -257,10 +257,10 @@ export default function ADUROISimulatorPage() {
 
                   <div className="bg-primary/10 border border-primary/20 rounded-xl p-4 mb-6">
                     <p className="text-sm text-white/80">
-                      <strong className="text-primary">10-Year Outlook:</strong>{" "}
+                      <strong className="text-primary-light">10-Year Outlook:</strong>{" "}
                       ${tenYearIncome.toLocaleString()} gross rental income
                       {loanAmount > 0 && <> minus ${tenYearPayments.toLocaleString()} in loan payments</>}
-                      {" "}= <strong className="text-primary">${tenYearNetCashFlow.toLocaleString()} net</strong>
+                      {" "}= <strong className="text-primary-light">${tenYearNetCashFlow.toLocaleString()} net</strong>
                     </p>
                   </div>
 
@@ -269,7 +269,7 @@ export default function ADUROISimulatorPage() {
                   </p>
 
                   <Link href="/contact">
-                    <Button size="lg" className="w-full bg-primary hover:bg-primary-dark text-secondary font-semibold">
+                    <Button size="lg" className="w-full bg-primary hover:bg-primary-dark text-white font-semibold">
                       Explore Your ADU Investment <ArrowRight className="h-5 w-5 ml-2" />
                     </Button>
                   </Link>
@@ -289,7 +289,7 @@ export default function ADUROISimulatorPage() {
             Our team can provide a detailed feasibility analysis and financing guidance specific to your property.
           </p>
           <Link href="/build-your-adu">
-            <Button size="lg" className="bg-primary hover:bg-primary-dark text-secondary font-semibold">
+            <Button size="lg" className="bg-primary hover:bg-primary-dark text-white font-semibold">
               Scan Your Property <ArrowRight className="h-5 w-5 ml-2" />
             </Button>
           </Link>

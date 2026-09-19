@@ -42,29 +42,29 @@ export default function ADUSanDiegoLP() {
             {/* Left — Copy */}
             <div>
               <div className="inline-flex items-center gap-2 bg-primary/20 rounded-full px-4 py-2 mb-6">
-                <Shield className="h-4 w-4 text-primary" />
-                <span className="text-sm text-primary font-medium">
+                <Shield className="h-4 w-4 text-primary-light" />
+                <span className="text-sm text-primary-light font-medium">
                   San Diego&apos;s #1 ADU Builder
                 </span>
               </div>
 
               <h1 className="text-4xl md:text-5xl font-bold leading-tight mb-6">
                 Build Your Dream
-                <span className="text-primary"> ADU in San Diego</span>
+                <span className="text-primary-light"> ADU in San Diego</span>
               </h1>
 
               <p className="text-lg text-white/80 mb-6">
-                Detached ADUs starting at <span className="text-primary font-bold text-2xl">{SERVICE_PRICING.adu.detachedStartingPrice}</span>. Garage conversions from <span className="text-primary font-bold text-2xl">{SERVICE_PRICING.adu.startingPrice}</span>.
+                Detached ADUs starting at <span className="text-primary-light font-bold text-2xl">{SERVICE_PRICING.adu.detachedStartingPrice}</span>. Garage conversions from <span className="text-primary-light font-bold text-2xl">{SERVICE_PRICING.adu.startingPrice}</span>.
                 We handle everything — design, permits, and construction. One team, one price, zero stress.
               </p>
 
               <div className="flex flex-wrap gap-4 mb-8">
                 <div className="flex items-center gap-2 text-sm text-white/70">
-                  <Clock className="h-4 w-4 text-primary" />
+                  <Clock className="h-4 w-4 text-primary-light" />
                   4-Month Average Build
                 </div>
                 <div className="flex items-center gap-2 text-sm text-white/70">
-                  <Star className="h-4 w-4 text-primary" />
+                  <Star className="h-4 w-4 text-primary-light" />
                   500+ Projects Completed
                 </div>
               </div>
@@ -72,7 +72,7 @@ export default function ADUSanDiegoLP() {
               <ul className="space-y-3 mb-8">
                 {benefits.map((b) => (
                   <li key={b} className="flex items-center gap-3 text-white/90">
-                    <CheckCircle className="h-5 w-5 text-primary shrink-0" />
+                    <CheckCircle className="h-5 w-5 text-primary-light shrink-0" />
                     {b}
                   </li>
                 ))}
@@ -94,7 +94,7 @@ export default function ADUSanDiegoLP() {
       {/* Social Proof Strip */}
       <section className="bg-primary py-4">
         <div className="container mx-auto px-4">
-          <div className="flex flex-wrap justify-center gap-8 text-secondary font-semibold text-sm md:text-base">
+          <div className="flex flex-wrap justify-center gap-8 text-white font-semibold text-sm md:text-base">
             <span>500+ Projects</span>
             <span>•</span>
             <span>{getYearsExperience()}+ Years Experience</span>

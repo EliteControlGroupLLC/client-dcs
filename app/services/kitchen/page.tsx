@@ -18,7 +18,7 @@ export default function KitchenPage() {
       <section className="bg-secondary text-white py-20">
         <div className="container mx-auto px-4">
           <div className="max-w-3xl">
-            <span className="inline-block text-primary font-semibold text-sm uppercase tracking-wider mb-4">
+            <span className="inline-block text-primary-light font-semibold text-sm uppercase tracking-wider mb-4">
               KITCHEN REMODELING
             </span>
             <h1 className="text-4xl md:text-5xl font-bold mb-6">
@@ -28,7 +28,7 @@ export default function KitchenPage() {
               From layout redesign to premium finishes, we build kitchens that are beautiful,
               functional, and built to last. Transparent pricing with no hidden costs.
             </p>
-            <p className="text-2xl font-bold text-primary">$18,000 – $75,000+</p>
+            <p className="text-2xl font-bold text-primary-light">$18,000 – $75,000+</p>
           </div>
         </div>
       </section>

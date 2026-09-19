@@ -243,7 +243,7 @@ export default function ContactPage() {
                   </div>
                 )}
 
-                <Button type="submit" size="lg" className="w-full bg-primary hover:bg-primary-dark text-secondary font-semibold" disabled={isSubmitting}>
+                <Button type="submit" size="lg" className="w-full bg-primary hover:bg-primary-dark text-white font-semibold" disabled={isSubmitting}>
                   <Send className="h-4 w-4 mr-2" />
                   {isSubmitting ? "Sending..." : "Send Message"}
                 </Button>

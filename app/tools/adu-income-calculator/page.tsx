@@ -39,7 +39,7 @@ export default function ADUIncomeCalculatorPage() {
       <section className="bg-secondary text-white py-20">
         <div className="container mx-auto px-4">
           <div className="max-w-3xl">
-            <span className="inline-block text-primary font-semibold text-sm uppercase tracking-wider mb-4">
+            <span className="inline-block text-primary-light font-semibold text-sm uppercase tracking-wider mb-4">
               ADU INCOME CALCULATOR
             </span>
             <h1 className="text-4xl md:text-5xl font-bold mb-6">
@@ -132,9 +132,9 @@ export default function ADUIncomeCalculatorPage() {
                 <Card className="bg-secondary text-white">
                   <CardContent className="p-8">
                     <div className="text-center mb-6">
-                      <DollarSign className="h-12 w-12 text-primary mx-auto mb-3" />
+                      <DollarSign className="h-12 w-12 text-primary-light mx-auto mb-3" />
                       <p className="text-white/70 text-sm">Projected Monthly Income</p>
-                      <p className="text-4xl font-bold text-primary">${monthlyRent.toLocaleString()}</p>
+                      <p className="text-4xl font-bold text-primary-light">${monthlyRent.toLocaleString()}</p>
                       <p className="text-white/50 text-sm">per month</p>
                     </div>
 
@@ -149,20 +149,20 @@ export default function ADUIncomeCalculatorPage() {
                       </div>
                       <div className="bg-white/5 rounded-xl p-4 text-center">
                         <p className="text-white/60 text-xs mb-1">5-Year Income</p>
-                        <p className="text-xl font-bold text-primary">${fiveYearIncome.toLocaleString()}</p>
+                        <p className="text-xl font-bold text-primary-light">${fiveYearIncome.toLocaleString()}</p>
                       </div>
                       <div className="bg-white/5 rounded-xl p-4 text-center">
                         <p className="text-white/60 text-xs mb-1">10-Year Income</p>
-                        <p className="text-xl font-bold text-primary">${tenYearIncome.toLocaleString()}</p>
+                        <p className="text-xl font-bold text-primary-light">${tenYearIncome.toLocaleString()}</p>
                       </div>
                     </div>
 
                     <div className="bg-primary/10 border border-primary/20 rounded-xl p-4 mb-6">
-                      <TrendingUp className="h-5 w-5 text-primary mb-2" />
+                      <TrendingUp className="h-5 w-5 text-primary-light mb-2" />
                       <p className="text-sm text-white/80">
                         Based on the approved DCS rent assumptions, your {size.sqFt} sq ft ADU could generate
-                        <strong className="text-primary"> ${tenYearIncome.toLocaleString()}</strong> over 10 years,
-                        potentially paying for itself in <strong className="text-primary">~{yearsToBreakeven} years</strong>.
+                        <strong className="text-primary-light"> ${tenYearIncome.toLocaleString()}</strong> over 10 years,
+                        potentially paying for itself in <strong className="text-primary-light">~{yearsToBreakeven} years</strong>.
                       </p>
                     </div>
 
@@ -171,7 +171,7 @@ export default function ADUIncomeCalculatorPage() {
                     </p>
 
                     <Link href="/contact">
-                      <Button size="lg" className="w-full bg-primary hover:bg-primary-dark text-secondary font-semibold">
+                      <Button size="lg" className="w-full bg-primary hover:bg-primary-dark text-white font-semibold">
                         Explore Your ADU Options <ArrowRight className="h-5 w-5 ml-2" />
                       </Button>
                     </Link>
@@ -193,7 +193,7 @@ export default function ADUIncomeCalculatorPage() {
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link href="/build-your-adu">
-              <Button size="lg" className="bg-primary hover:bg-primary-dark text-secondary font-semibold">
+              <Button size="lg" className="bg-primary hover:bg-primary-dark text-white font-semibold">
                 Scan Your Property <ArrowRight className="h-5 w-5 ml-2" />
               </Button>
             </Link>

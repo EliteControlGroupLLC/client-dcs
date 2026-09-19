@@ -76,11 +76,11 @@ export default function CustomHomesPage() {
       <section className="bg-secondary text-white py-24">
         <div className="container mx-auto px-4">
           <div className="max-w-3xl">
-            <span className="inline-block text-primary font-semibold text-sm uppercase tracking-wider mb-4">
+            <span className="inline-block text-primary-light font-semibold text-sm uppercase tracking-wider mb-4">
               CUSTOM HOMES
             </span>
             <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-6 leading-tight">
-              A Home Designed Around <span className="text-primary">Your Life</span>
+              A Home Designed Around <span className="text-primary-light">Your Life</span>
             </h1>
             <p className="text-xl text-white/80 mb-4 leading-relaxed max-w-2xl">
               Building a custom home is one of the most personal things you will ever do.
@@ -93,7 +93,7 @@ export default function CustomHomesPage() {
               collaboration — shaped by how you live, not by a template.
             </p>
             <Link href="/contact">
-              <Button size="lg" className="bg-primary hover:bg-primary-dark text-secondary font-semibold group">
+              <Button size="lg" className="bg-primary hover:bg-primary-dark text-white font-semibold group">
                 Start Your Custom Home Journey <ArrowRight className="h-5 w-5 ml-2 group-hover:translate-x-1 transition-transform" />
               </Button>
             </Link>
@@ -182,7 +182,7 @@ export default function CustomHomesPage() {
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Link href="/contact">
-                <Button size="lg" className="bg-primary hover:bg-primary-dark text-secondary font-semibold group">
+                <Button size="lg" className="bg-primary hover:bg-primary-dark text-white font-semibold group">
                   Start Your Custom Home Journey <ArrowRight className="h-5 w-5 ml-2 group-hover:translate-x-1 transition-transform" />
                 </Button>
               </Link>

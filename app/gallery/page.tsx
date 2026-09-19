@@ -121,7 +121,7 @@ export default function GalleryPage() {
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link href="/contact">
-              <Button size="lg" className="bg-primary hover:bg-primary-dark text-secondary font-semibold">
+              <Button size="lg" className="bg-primary hover:bg-primary-dark text-white font-semibold">
                 Get Free Consultation
               </Button>
             </Link>

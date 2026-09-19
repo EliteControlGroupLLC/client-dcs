@@ -2,14 +2,10 @@
 
 import { useState, useEffect, useRef, type MouseEvent } from "react";
 import Link from "next/link";
-import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { Menu, X, ChevronDown, ArrowRight, ArrowUpRight, Phone } from "lucide-react";
 import { COMPANY_INFO } from "@/lib/data/site-data";
-
-// Trimmed logo assets (the originals carry large transparent padding)
-const LOGO_LIGHT = "/images/logo-on-dark.png"; // for dark backgrounds
-const LOGO_DARK = "/images/logo-on-light.png"; // for light backgrounds
+import { Logo } from "@/components/layout/logo";
 
 const SHOWROOM_HREF = "/showroom";
 const AI_DESIGN_HREF = "https://www.distinctcsolutions.com/showroom/design-ai";
@@ -142,15 +138,9 @@ export function Header() {
       <nav className="mx-auto max-w-7xl px-5 sm:px-6 lg:px-8" aria-label="Main">
         <div className="flex h-20 items-center justify-between gap-6">
           {/* Logo */}
-          <Link href="/" className="flex items-center shrink-0" aria-label="Distinct Construction Solutions — Home">
-            <Image
-              src={light ? LOGO_DARK : LOGO_LIGHT}
-              alt="Distinct Construction Solutions"
-              width={1200}
-              height={521}
-              className="h-11 w-auto"
-              priority
-            />
+          <Link href="/" className="flex items-center shrink-0" aria-label="TruthCore — Home">
+            {/* TruthCore wordmark: emerald + gold on white, white + gold on the dark bar */}
+            <Logo variant={light ? "color" : "light"} className="h-[22px] sm:h-[26px] w-auto" />
           </Link>
 
           {/* Desktop navigation */}
@@ -169,7 +159,7 @@ export function Header() {
                   >
                     {item.name}
                     {active && (
-                      <span className="absolute left-3.5 right-3.5 -bottom-0.5 h-px bg-primary" aria-hidden />
+                      <span className={`absolute left-3.5 right-3.5 -bottom-0.5 h-px ${light ? "bg-primary" : "bg-primary-light"}`} aria-hidden />
                     )}
                   </Link>
                 );
@@ -198,14 +188,14 @@ export function Header() {
                       aria-hidden
                     />
                     {active && (
-                      <span className="absolute left-3.5 right-7 -bottom-0.5 h-px bg-primary" aria-hidden />
+                      <span className={`absolute left-3.5 right-7 -bottom-0.5 h-px ${light ? "bg-primary" : "bg-primary-light"}`} aria-hidden />
                     )}
                   </button>
 
                   {open && (
                     <div className="absolute left-1/2 top-full -translate-x-1/2 pt-3" onClick={closeOnLinkClick}>
                       <div
-                        className={`rounded-2xl bg-white p-2 shadow-[0_12px_40px_-12px_rgba(15,42,74,0.25)] ring-1 ring-secondary/8 ${
+                        className={`rounded-2xl bg-white p-2 shadow-[0_12px_40px_-12px_rgba(26,43,43,0.25)] ring-1 ring-secondary/8 ${
                           item.columns === 2 ? "w-[30rem]" : item.children.some((c) => c.description) ? "w-72" : "w-56"
                         }`}
                       >

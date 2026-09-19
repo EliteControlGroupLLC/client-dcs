@@ -119,7 +119,7 @@ export default function InstantADUEstimatorPage() {
       <section className="bg-secondary text-white py-20">
         <div className="container mx-auto px-4">
           <div className="max-w-3xl">
-            <span className="inline-block text-primary font-semibold text-sm uppercase tracking-wider mb-4">
+            <span className="inline-block text-primary-light font-semibold text-sm uppercase tracking-wider mb-4">
               INSTANT ESTIMATOR
             </span>
             <h1 className="text-4xl md:text-5xl font-bold mb-6">
@@ -245,9 +245,9 @@ export default function InstantADUEstimatorPage() {
               <Card className="bg-secondary text-white">
                 <CardContent className="p-8">
                   <div className="text-center mb-6">
-                    <Zap className="h-12 w-12 text-primary mx-auto mb-3" />
+                    <Zap className="h-12 w-12 text-primary-light mx-auto mb-3" />
                     <p className="text-white/70 text-sm mb-1">Estimated Price Range</p>
-                    <p className="text-3xl md:text-4xl font-bold text-primary mb-1">
+                    <p className="text-3xl md:text-4xl font-bold text-primary-light mb-1">
                       ${lowEstimate.toLocaleString()} &ndash; ${highEstimate.toLocaleString()}
                     </p>
                     <p className="text-white/50 text-sm">
@@ -271,7 +271,7 @@ export default function InstantADUEstimatorPage() {
                       <ul className="space-y-1.5">
                         {included.map((item) => (
                           <li key={item} className="flex items-start gap-2 text-sm text-white/60">
-                            <Check className="h-4 w-4 text-primary shrink-0 mt-0.5" />
+                            <Check className="h-4 w-4 text-primary-light shrink-0 mt-0.5" />
                             {item}
                           </li>
                         ))}
@@ -296,7 +296,7 @@ export default function InstantADUEstimatorPage() {
 
                   <div className="space-y-3">
                     <Link href="/contact">
-                      <Button size="lg" className="w-full bg-primary hover:bg-primary-dark text-secondary font-semibold">
+                      <Button size="lg" className="w-full bg-primary hover:bg-primary-dark text-white font-semibold">
                         Request Exact Pricing <ArrowRight className="h-5 w-5 ml-2" />
                       </Button>
                     </Link>
@@ -323,7 +323,7 @@ export default function InstantADUEstimatorPage() {
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link href="/tools/compare-adu-sizes">
-              <Button size="lg" className="bg-primary hover:bg-primary-dark text-secondary font-semibold">
+              <Button size="lg" className="bg-primary hover:bg-primary-dark text-white font-semibold">
                 Compare ADU Sizes <ArrowRight className="h-5 w-5 ml-2" />
               </Button>
             </Link>

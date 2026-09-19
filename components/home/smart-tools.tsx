@@ -75,7 +75,7 @@ export function SmartTools() {
           ref={headerRef}
           className={`text-center max-w-3xl mx-auto mb-16 transition-all duration-700 ${headerVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"}`}
         >
-          <span className="inline-block text-primary font-semibold text-sm uppercase tracking-wider mb-4">
+          <span className="inline-block text-primary-light font-semibold text-sm uppercase tracking-wider mb-4">
             SMART PLANNING TOOLS
           </span>
           <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-white mb-6 text-balance">
@@ -110,7 +110,7 @@ export function SmartTools() {
                       className="flex items-center gap-3 text-white/80"
                     >
                       <div className="w-9 h-9 rounded-lg bg-primary/20 border border-primary/30 flex items-center justify-center">
-                        <feature.icon className="h-4 w-4 text-primary" />
+                        <feature.icon className="h-4 w-4 text-primary-light" />
                       </div>
                       <span className="text-sm font-medium">
                         {feature.label}
@@ -158,10 +158,10 @@ export function SmartTools() {
             <div className="bg-white/10 backdrop-blur-lg border border-white/20 rounded-2xl p-6 lg:p-8 hover:bg-white/15 hover:border-white/30 transition-all duration-300">
               <div className="flex flex-col md:flex-row items-center gap-6">
                 <div className="w-16 h-16 rounded-xl bg-primary/20 border border-primary/30 flex items-center justify-center shrink-0">
-                  <LayoutGrid className="h-8 w-8 text-primary" />
+                  <LayoutGrid className="h-8 w-8 text-primary-light" />
                 </div>
                 <div className="flex-1 text-center md:text-left">
-                  <h3 className="text-xl font-bold text-white mb-2 group-hover:text-primary transition-colors">
+                  <h3 className="text-xl font-bold text-white mb-2 group-hover:text-primary-light transition-colors">
                     Floor Plans Library
                   </h3>
                   <p className="text-white/60">
@@ -169,7 +169,7 @@ export function SmartTools() {
                     detailed specifications and pricing guidance.
                   </p>
                 </div>
-                <span className="inline-flex items-center text-sm font-semibold text-primary shrink-0">
+                <span className="inline-flex items-center text-sm font-semibold text-primary-light shrink-0">
                   Browse Plans
                   <ArrowRight className="h-4 w-4 ml-2 group-hover:translate-x-1 transition-transform" />
                 </span>
@@ -195,10 +195,10 @@ export function SmartTools() {
               <div className="bg-white/10 backdrop-blur-lg border border-white/20 rounded-xl p-5 hover:bg-white/15 hover:border-white/30 transition-all duration-300 h-full">
                 <div className="flex items-center gap-4">
                   <div className="w-10 h-10 rounded-lg bg-primary/20 border border-primary/30 flex items-center justify-center shrink-0">
-                    <tool.icon className="h-5 w-5 text-primary" />
+                    <tool.icon className="h-5 w-5 text-primary-light" />
                   </div>
                   <div>
-                    <h4 className="text-sm font-bold text-white group-hover:text-primary transition-colors">{tool.title}</h4>
+                    <h4 className="text-sm font-bold text-white group-hover:text-primary-light transition-colors">{tool.title}</h4>
                     <p className="text-xs text-white/50">{tool.desc}</p>
                   </div>
                 </div>
@@ -229,7 +229,7 @@ export function SmartTools() {
                 }`}
               >
                 <div className="w-14 h-14 rounded-full bg-primary/20 border border-primary/30 flex items-center justify-center mx-auto mb-4">
-                  <metric.icon className="h-7 w-7 text-primary" />
+                  <metric.icon className="h-7 w-7 text-primary-light" />
                 </div>
                 <div className="text-3xl lg:text-4xl font-bold text-white mb-2">
                   {metric.value}

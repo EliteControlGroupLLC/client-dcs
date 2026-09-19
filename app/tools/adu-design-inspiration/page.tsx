@@ -370,7 +370,7 @@ export default function ADUDesignInspirationPage() {
       <section className="bg-secondary text-white py-20">
         <div className="container mx-auto px-4">
           <div className="max-w-3xl">
-            <span className="inline-block text-primary font-semibold text-sm uppercase tracking-wider mb-4">
+            <span className="inline-block text-primary-light font-semibold text-sm uppercase tracking-wider mb-4">
               DESIGN INSPIRATION
             </span>
             <h1 className="text-4xl md:text-5xl font-bold mb-6">
@@ -443,7 +443,7 @@ export default function ADUDesignInspirationPage() {
                   <Button
                     onClick={() => setStep(step + 1)}
                     disabled={!selections[currentStep.key]}
-                    className="bg-primary hover:bg-primary-dark text-secondary font-semibold"
+                    className="bg-primary hover:bg-primary-dark text-white font-semibold"
                   >
                     {step === steps.length - 1 ? "Generate Concepts" : "Next"}
                     <ArrowRight className="h-4 w-4 ml-2" />
@@ -494,7 +494,7 @@ export default function ADUDesignInspirationPage() {
 
                 <Card className="bg-secondary text-white mb-8">
                   <CardContent className="p-8 text-center">
-                    <Palette className="h-12 w-12 text-primary mx-auto mb-4" />
+                    <Palette className="h-12 w-12 text-primary-light mx-auto mb-4" />
                     <h3 className="text-xl font-bold mb-3">Use These Concepts to Start a Real Design Conversation</h3>
                     <p className="text-white/70 mb-6">
                       Bring this direction into a consultation and we can turn it into floor-plan refinements,
@@ -502,7 +502,7 @@ export default function ADUDesignInspirationPage() {
                     </p>
                     <div className="flex flex-col sm:flex-row gap-3 justify-center">
                       <Link href="/build-your-adu">
-                        <Button size="lg" className="bg-primary hover:bg-primary-dark text-secondary font-semibold">
+                        <Button size="lg" className="bg-primary hover:bg-primary-dark text-white font-semibold">
                           Start Building Your ADU <ArrowRight className="h-5 w-5 ml-2" />
                         </Button>
                       </Link>

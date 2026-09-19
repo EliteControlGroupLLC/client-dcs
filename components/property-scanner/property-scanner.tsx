@@ -274,7 +274,7 @@ export function PropertyScanner() {
 
         <div className="relative mx-auto max-w-4xl px-4 sm:px-6 lg:px-8 text-center">
           <div className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-sm rounded-full px-4 py-2 mb-6">
-            <Shield className="h-4 w-4 text-primary" />
+            <Shield className="h-4 w-4 text-primary-light" />
             <span className="text-sm">San Diego ADU Eligibility Scanner</span>
           </div>
 

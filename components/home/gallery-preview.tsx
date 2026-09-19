@@ -86,7 +86,7 @@ export function GalleryPreview() {
               {/* Project info with glass effect */}
               <div className="absolute inset-0 p-6 flex flex-col justify-end">
                 {/* Type badge */}
-                  <span className="text-xs font-semibold text-primary bg-white/10 backdrop-blur-sm w-fit px-3 py-1.5 rounded-full mb-3 border border-white/10">
+                  <span className="text-xs font-semibold text-primary-light bg-white/10 backdrop-blur-sm w-fit px-3 py-1.5 rounded-full mb-3 border border-white/10">
                     {project.type}
                   </span>
                   {project.imageStatus === "pending-replacement" && (
@@ -95,7 +95,7 @@ export function GalleryPreview() {
                     </span>
                   )}
                 
-                <h3 className="text-lg font-bold text-white mb-1 group-hover:text-primary transition-colors">
+                <h3 className="text-lg font-bold text-white mb-1 group-hover:text-primary-light transition-colors">
                   {project.title}
                 </h3>
                 
@@ -104,7 +104,7 @@ export function GalleryPreview() {
                     {project.location} • {project.sqft}
                   </p>
                   <div className="w-8 h-8 rounded-full bg-white/10 backdrop-blur-sm flex items-center justify-center border border-white/10 opacity-0 group-hover:opacity-100 transition-opacity">
-                    <ExternalLink className="h-4 w-4 text-white group-hover:text-primary transition-colors" />
+                    <ExternalLink className="h-4 w-4 text-white group-hover:text-primary-light transition-colors" />
                   </div>
                 </div>
                 {project.imageNote && (

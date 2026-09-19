@@ -51,7 +51,7 @@ export default function AboutPage() {
               {getYearsExperience()}+ years of field experience, design-build discipline, and premium residential execution.
             </h1>
             <p className="text-xl text-white/80 mb-8">
-              Distinct Construction Solutions is a Lemon Grove-based design-build firm shaped by hands-on construction experience that began in 2014 and matured into a more disciplined way to deliver residential projects across San Diego County.
+              Distinct Construction Solutions is a Lemon Grove-based design-build firm shaped by hands-on construction experience that began in 2014 and matured into a more disciplined way to deliver residential projects across San Diego County. Today we do business as TruthCore, our DBA &mdash; the same licensed team and the same standards.
             </p>
           </div>
         </div>
@@ -63,10 +63,10 @@ export default function AboutPage() {
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
             {stats.map((stat) => (
               <div key={stat.label} className="text-center">
-                <div className="text-4xl md:text-5xl font-bold text-secondary mb-2">
+                <div className="text-4xl md:text-5xl font-bold text-white mb-2">
                   {stat.value}
                 </div>
-                <div className="text-secondary/80">{stat.label}</div>
+                <div className="text-white/85">{stat.label}</div>
               </div>
             ))}
           </div>
@@ -207,7 +207,7 @@ export default function AboutPage() {
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link href="/contact">
-              <Button size="lg" className="bg-primary hover:bg-primary-dark text-secondary font-semibold">
+              <Button size="lg" className="bg-primary hover:bg-primary-dark text-white font-semibold">
                 Get Free Consultation
               </Button>
             </Link>

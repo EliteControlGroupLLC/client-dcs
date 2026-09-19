@@ -65,7 +65,7 @@ export default function RoofingPage() {
       <section className="bg-secondary text-white py-20">
         <div className="container mx-auto px-4">
           <div className="max-w-3xl">
-            <span className="inline-block text-primary font-semibold text-sm uppercase tracking-wider mb-4">
+            <span className="inline-block text-primary-light font-semibold text-sm uppercase tracking-wider mb-4">
               ROOFING SERVICES
             </span>
             <h1 className="text-4xl md:text-5xl font-bold mb-6">
@@ -75,7 +75,7 @@ export default function RoofingPage() {
               Complete roof replacement, repairs, and new installations for San Diego homes.
               From composition shingles to tile and metal — quality materials and expert installation.
             </p>
-            <p className="text-2xl font-bold text-primary">Starting at $12,500</p>
+            <p className="text-2xl font-bold text-primary-light">Starting at $12,500</p>
           </div>
         </div>
       </section>

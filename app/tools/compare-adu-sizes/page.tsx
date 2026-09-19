@@ -92,7 +92,7 @@ export default function CompareADUSizesPage() {
       <section className="bg-secondary text-white py-20">
         <div className="container mx-auto px-4">
           <div className="max-w-3xl">
-            <span className="inline-block text-primary font-semibold text-sm uppercase tracking-wider mb-4">
+            <span className="inline-block text-primary-light font-semibold text-sm uppercase tracking-wider mb-4">
               COMPARE ADU SIZES
             </span>
             <h1 className="text-4xl md:text-5xl font-bold mb-6">
@@ -151,10 +151,10 @@ export default function CompareADUSizesPage() {
               <div className="grid grid-cols-3 bg-secondary text-white">
                 <div className="p-4 text-sm font-semibold">Category</div>
                 <div className="p-4 text-center border-l border-white/10">
-                  <span className="text-primary font-bold text-lg">{left.label}</span>
+                  <span className="text-primary-light font-bold text-lg">{left.label}</span>
                 </div>
                 <div className="p-4 text-center border-l border-white/10">
-                  <span className="text-primary font-bold text-lg">{right.label}</span>
+                  <span className="text-primary-light font-bold text-lg">{right.label}</span>
                 </div>
               </div>
 
@@ -184,7 +184,7 @@ export default function CompareADUSizesPage() {
                     </li>
                   </ul>
                   <Link href="/build-your-adu">
-                    <Button className="w-full bg-primary hover:bg-primary-dark text-secondary font-semibold">
+                    <Button className="w-full bg-primary hover:bg-primary-dark text-white font-semibold">
                       Build a {left.label} ADU <ArrowRight className="h-4 w-4 ml-2" />
                     </Button>
                   </Link>
@@ -200,7 +200,7 @@ export default function CompareADUSizesPage() {
                     </li>
                   </ul>
                   <Link href="/build-your-adu">
-                    <Button className="w-full bg-primary hover:bg-primary-dark text-secondary font-semibold">
+                    <Button className="w-full bg-primary hover:bg-primary-dark text-white font-semibold">
                       Build a {right.label} ADU <ArrowRight className="h-4 w-4 ml-2" />
                     </Button>
                   </Link>
@@ -220,7 +220,7 @@ export default function CompareADUSizesPage() {
             Our team can evaluate your property and recommend the best ADU size and type for your goals.
           </p>
           <Link href="/contact">
-            <Button size="lg" className="bg-primary hover:bg-primary-dark text-secondary font-semibold">
+            <Button size="lg" className="bg-primary hover:bg-primary-dark text-white font-semibold">
               Schedule Free Consultation <ArrowRight className="h-5 w-5 ml-2" />
             </Button>
           </Link>

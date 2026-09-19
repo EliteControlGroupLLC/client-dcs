@@ -1,14 +1,24 @@
 import type { Metadata, Viewport } from "next";
-import { Inter, Geist_Mono } from "next/font/google";
+import { Red_Hat_Display, Crimson_Text, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { Header } from "@/components/layout/header";
 import { Footer } from "@/components/layout/footer";
 import { FloatingEstimateButton } from "@/components/instant-estimate/floating-estimate-button";
 import { SITE_URL } from "@/lib/site-url";
 
-const inter = Inter({
-  variable: "--font-inter",
+// TruthCore brand typefaces: Red Hat Display (primary) + Crimson Text (secondary)
+const redHat = Red_Hat_Display({
+  variable: "--font-redhat",
   subsets: ["latin"],
+  weight: ["400", "500", "600", "700", "900"],
+  display: "swap",
+});
+
+const crimson = Crimson_Text({
+  variable: "--font-crimson",
+  subsets: ["latin"],
+  weight: ["400", "600", "700"],
+  style: ["normal", "italic"],
   display: "swap",
 });
 
@@ -19,9 +29,9 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
-  title: "Distinct Construction Solutions | San Diego ADU & Home Construction",
+  title: "TruthCore | San Diego ADU & Home Construction",
   description:
-    "San Diego's premier design-build construction company specializing in ADUs, custom homes, remodeling, and renovations. Get your free consultation today.",
+    "TruthCore, a DBA of Distinct Construction Solutions, is San Diego's premier design-build construction company specializing in ADUs, custom homes, remodeling, and renovations. Get your free consultation today.",
   keywords: [
     "ADU San Diego",
     "home construction",
@@ -30,7 +40,7 @@ export const metadata: Metadata = {
     "custom homes",
     "accessory dwelling units",
   ],
-  authors: [{ name: "Distinct Construction Solutions" }],
+  authors: [{ name: "TruthCore (Distinct Construction Solutions)" }],
   icons: {
     icon: [
       { url: "/favicon.ico", sizes: "48x48" },
@@ -46,11 +56,11 @@ export const metadata: Metadata = {
     canonical: SITE_URL,
   },
   openGraph: {
-    title: "Distinct Construction Solutions | San Diego ADU & Home Construction",
+    title: "TruthCore | San Diego ADU & Home Construction",
     description:
-      "San Diego's premier design-build construction company specializing in ADUs, custom homes, remodeling, and renovations.",
+      "TruthCore, a DBA of Distinct Construction Solutions, is San Diego's premier design-build construction company specializing in ADUs, custom homes, remodeling, and renovations.",
     url: SITE_URL,
-    siteName: "Distinct Construction Solutions",
+    siteName: "TruthCore",
     locale: "en_US",
     type: "website",
     images: [
@@ -58,14 +68,14 @@ export const metadata: Metadata = {
         url: `${SITE_URL}/og-image.jpg`,
         width: 1200,
         height: 630,
-        alt: "Distinct Construction Solutions - San Diego ADU & Home Builder",
+        alt: "TruthCore - San Diego ADU & Home Builder",
       },
     ],
   },
   twitter: {
     card: "summary_large_image",
-    title: "Distinct Construction Solutions",
-    description: "San Diego's premier design-build construction company",
+    title: "TruthCore | San Diego ADU & Home Construction",
+    description: "San Diego's premier design-build construction company. TruthCore is a DBA of Distinct Construction Solutions.",
     images: [`${SITE_URL}/og-image.jpg`],
   },
   robots: {
@@ -75,7 +85,7 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: "#3ECDA2",
+  themeColor: "#336666",
   width: "device-width",
   initialScale: 1,
 };
@@ -83,12 +93,14 @@ export const viewport: Viewport = {
 const jsonLd = {
   "@context": "https://schema.org",
   "@type": "LocalBusiness",
-  name: "Distinct Construction Solutions",
+  name: "TruthCore",
+  legalName: "Distinct Construction Solutions",
+  alternateName: "Distinct Construction Solutions",
   description:
     "San Diego's premier design-build construction company specializing in ADUs, custom homes, remodeling, and renovations.",
   url: SITE_URL,
-  logo: `${SITE_URL}/images/logo-light.png`,
-  image: `${SITE_URL}/images/logo-light.png`,
+  logo: `${SITE_URL}/images/truthcore-logo.png`,
+  image: `${SITE_URL}/og-image.jpg`,
   telephone: "+1-858-833-0705",
   address: {
     "@type": "PostalAddress",
@@ -164,7 +176,7 @@ export default function RootLayout({
       </head>
 
       <body
-        className={`${inter.variable} ${geistMono.variable} font-sans antialiased`}
+        className={`${redHat.variable} ${crimson.variable} ${geistMono.variable} font-sans antialiased`}
       >
         <noscript>
           <iframe

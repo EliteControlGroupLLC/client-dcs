@@ -279,11 +279,11 @@ export function LeadGate({
           {/* Value panel */}
           <div className="lg:col-span-2 bg-gradient-to-br from-secondary to-secondary-light text-white p-6 md:p-8">
             <div className="inline-flex items-center justify-center w-12 h-12 bg-white/10 rounded-full mb-5">
-              <Lock className="h-6 w-6 text-primary" />
+              <Lock className="h-6 w-6 text-primary-light" />
             </div>
             {offerBadge && (
               <div className="mb-4">
-                <span className="inline-flex items-center gap-2 rounded-full bg-primary px-4 py-1.5 text-sm font-bold text-secondary shadow-lg shadow-primary/30">
+                <span className="inline-flex items-center gap-2 rounded-full bg-primary px-4 py-1.5 text-sm font-bold text-white shadow-lg shadow-primary/30">
                   <Sparkles className="h-4 w-4" />
                   {offerBadge}
                 </span>
@@ -294,7 +294,7 @@ export function LeadGate({
             <ul className="space-y-3">
               {bullets.map((b) => (
                 <li key={b} className="flex items-start gap-2.5 text-sm text-white/90">
-                  <CheckCircle className="h-4 w-4 text-primary mt-0.5 shrink-0" />
+                  <CheckCircle className="h-4 w-4 text-primary-light mt-0.5 shrink-0" />
                   <span>{b}</span>
                 </li>
               ))}

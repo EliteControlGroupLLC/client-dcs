@@ -275,7 +275,7 @@ export function FloorPlanDetailModal({
                   href={`/build-your-adu?plan=${plan.id}&bedrooms=${selectedVariation.bedrooms}&bathrooms=${selectedVariation.bathrooms}&stories=${selectedVariation.stories}`}
                   className="flex-1"
                 >
-                  <Button className="w-full bg-primary hover:bg-primary-dark text-secondary">
+                  <Button className="w-full bg-primary hover:bg-primary-dark text-white">
                     Use This Configuration
                   </Button>
                 </Link>

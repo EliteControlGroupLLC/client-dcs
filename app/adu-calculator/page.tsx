@@ -60,7 +60,7 @@ export default function ADUCalculatorPage() {
       <section className="bg-secondary text-white py-20">
         <div className="container mx-auto px-4">
           <div className="max-w-3xl">
-            <span className="inline-block text-primary font-semibold text-sm uppercase tracking-wider mb-4">
+            <span className="inline-block text-primary-light font-semibold text-sm uppercase tracking-wider mb-4">
               COST CALCULATOR
             </span>
             <h1 className="text-4xl md:text-5xl font-bold mb-6">
@@ -148,9 +148,9 @@ export default function ADUCalculatorPage() {
               <Card className="bg-secondary text-white">
                 <CardContent className="p-8 flex flex-col justify-center h-full">
                   <div className="text-center">
-                    <Calculator className="h-12 w-12 text-primary mx-auto mb-4" />
+                    <Calculator className="h-12 w-12 text-primary-light mx-auto mb-4" />
                     <p className="text-white/70 text-sm mb-2">Estimated Project Cost</p>
-                    <p className="text-4xl md:text-5xl font-bold text-primary mb-2">
+                    <p className="text-4xl md:text-5xl font-bold text-primary-light mb-2">
                       ${estimateLow.toLocaleString()}-${estimateHigh.toLocaleString()}
                     </p>
                     <p className="text-white/50 text-sm mb-6">
@@ -169,7 +169,7 @@ export default function ADUCalculatorPage() {
                     </p>
 
                     <Link href="/contact">
-                      <Button size="lg" className="w-full bg-primary hover:bg-primary-dark text-secondary font-semibold">
+                      <Button size="lg" className="w-full bg-primary hover:bg-primary-dark text-white font-semibold">
                         Get Accurate Quote <ArrowRight className="h-5 w-5 ml-2" />
                       </Button>
                     </Link>
@@ -191,7 +191,7 @@ export default function ADUCalculatorPage() {
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link href="/build-your-adu">
-              <Button size="lg" className="bg-primary hover:bg-primary-dark text-secondary font-semibold">
+              <Button size="lg" className="bg-primary hover:bg-primary-dark text-white font-semibold">
                 Design Your ADU <ArrowRight className="h-5 w-5 ml-2" />
               </Button>
             </Link>

@@ -71,7 +71,7 @@ export default function ExteriorPage() {
       <section className="bg-secondary text-white py-20">
         <div className="container mx-auto px-4">
           <div className="max-w-3xl">
-            <span className="inline-block text-primary font-semibold text-sm uppercase tracking-wider mb-4">
+            <span className="inline-block text-primary-light font-semibold text-sm uppercase tracking-wider mb-4">
               EXTERIOR IMPROVEMENTS
             </span>
             <h1 className="text-4xl md:text-5xl font-bold mb-6">
@@ -81,9 +81,9 @@ export default function ExteriorPage() {
               From exterior painting and siding to pergolas, hardscaping, and full outdoor living
               environments, we design and build exteriors that feel cohesive, higher-value, and ready for daily use.
             </p>
-            <p className="text-2xl font-bold text-primary mb-8">Starting at $12,000</p>
+            <p className="text-2xl font-bold text-primary-light mb-8">Starting at $12,000</p>
             <Link href="/contact">
-              <Button size="lg" className="bg-primary hover:bg-primary-dark text-secondary font-semibold">
+              <Button size="lg" className="bg-primary hover:bg-primary-dark text-white font-semibold">
                 Schedule On-Site Consultation <ArrowRight className="h-5 w-5 ml-2" />
               </Button>
             </Link>
@@ -162,7 +162,7 @@ export default function ExteriorPage() {
             Let&apos;s discuss your vision. Free consultation and detailed estimates with no obligation.
           </p>
           <Link href="/contact">
-            <Button size="lg" className="bg-primary hover:bg-primary-dark text-secondary font-semibold">
+            <Button size="lg" className="bg-primary hover:bg-primary-dark text-white font-semibold">
               Schedule On-Site Consultation <ArrowRight className="h-5 w-5 ml-2" />
             </Button>
           </Link>

@@ -1,8 +1,8 @@
 import Link from "next/link";
-import Image from "next/image";
 import { Mail, Phone, MapPin, Star, ArrowRight, Shield, CheckCircle2, Building2, CreditCard } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { COMPANY_INFO } from "@/lib/data/site-data";
+import { Logo } from "@/components/layout/logo";
 
 const footerLinks = {
   services: [
@@ -78,7 +78,7 @@ export function Footer() {
             {trustBadges.map((badge) => (
               <div key={badge.label} className="flex items-center gap-3 text-sm text-white/80">
                 <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center shrink-0">
-                  <badge.icon className="h-4 w-4 text-primary" />
+                  <badge.icon className="h-4 w-4 text-primary-light" />
                 </div>
                 <span>{badge.label}</span>
               </div>
@@ -92,17 +92,13 @@ export function Footer() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-12">
           {/* Brand Column */}
           <div className="lg:col-span-2">
-            <Link href="/" className="flex items-center gap-3 mb-6">
-              <div className="relative h-12 w-auto">
-                <Image
-                  src="/images/logo-light.png"
-                  alt="Distinct Construction Solutions"
-                  width={200}
-                  height={48}
-                  className="h-full w-auto object-contain"
-                />
-              </div>
+            <Link href="/" className="flex items-center gap-3 mb-3" aria-label="TruthCore — Home">
+              {/* TruthCore wordmark, two-color version for dark backgrounds */}
+              <Logo variant="light" className="h-7 w-auto" />
             </Link>
+            <p className="text-xs text-white/60 mb-6">
+              TruthCore is a DBA of {COMPANY_INFO.name}
+            </p>
             <p className="text-white/70 text-sm leading-relaxed mb-6 max-w-sm">
               A boutique design-build firm rooted in San Diego, specializing in ADUs, custom homes, 
               and full-scale renovations. We combine organized systems, transparent pricing, and 
@@ -114,16 +110,16 @@ export function Footer() {
               <div className="flex items-center gap-3 text-sm">
                 <Phone className="h-4 w-4 text-white/70" />
                 <div className="flex items-center gap-2">
-                  <a href={`tel:${COMPANY_INFO.phoneHref}`} className="text-white/70 hover:text-primary transition-colors">
+                  <a href={`tel:${COMPANY_INFO.phoneHref}`} className="text-white/70 hover:text-primary-light transition-colors">
                     {COMPANY_INFO.phone}
                   </a>
                   <span className="text-white/30">|</span>
-                  <a href={`sms:${COMPANY_INFO.phoneHref}`} className="text-white/70 hover:text-primary transition-colors text-xs">
+                  <a href={`sms:${COMPANY_INFO.phoneHref}`} className="text-white/70 hover:text-primary-light transition-colors text-xs">
                     Text
                   </a>
                 </div>
               </div>
-              <a href={`mailto:${COMPANY_INFO.email}`} className="flex items-center gap-3 text-sm text-white/70 hover:text-primary transition-colors">
+              <a href={`mailto:${COMPANY_INFO.email}`} className="flex items-center gap-3 text-sm text-white/70 hover:text-primary-light transition-colors">
                 <Mail className="h-4 w-4" />
                 {COMPANY_INFO.email}
               </a>
@@ -156,7 +152,7 @@ export function Footer() {
             <ul className="space-y-3">
               {footerLinks.services.map((link) => (
                 <li key={link.name}>
-                  <Link href={link.href} className="text-sm text-white/70 hover:text-primary transition-colors">
+                  <Link href={link.href} className="text-sm text-white/70 hover:text-primary-light transition-colors">
                     {link.name}
                   </Link>
                 </li>
@@ -170,7 +166,7 @@ export function Footer() {
             <ul className="space-y-3">
               {footerLinks.tools.map((link) => (
                 <li key={link.name}>
-                  <Link href={link.href} className="text-sm text-white/70 hover:text-primary transition-colors">
+                  <Link href={link.href} className="text-sm text-white/70 hover:text-primary-light transition-colors">
                     {link.name}
                   </Link>
                 </li>
@@ -184,7 +180,7 @@ export function Footer() {
             <ul className="space-y-3">
               {footerLinks.company.map((link) => (
                 <li key={link.name}>
-                  <Link href={link.href} className="text-sm text-white/70 hover:text-primary transition-colors">
+                  <Link href={link.href} className="text-sm text-white/70 hover:text-primary-light transition-colors">
                     {link.name}
                   </Link>
                 </li>
@@ -198,7 +194,7 @@ export function Footer() {
             <ul className="space-y-3">
               {footerLinks.resources.map((link) => (
                 <li key={link.name}>
-                  <Link href={link.href} className="text-sm text-white/70 hover:text-primary transition-colors">
+                  <Link href={link.href} className="text-sm text-white/70 hover:text-primary-light transition-colors">
                     {link.name}
                   </Link>
                 </li>
@@ -208,12 +204,12 @@ export function Footer() {
             <div className="mt-6 pt-4 border-t border-white/10">
               <ul className="space-y-3">
                 <li>
-                  <Link href="/privacy" className="text-xs text-white/50 hover:text-primary transition-colors">
+                  <Link href="/privacy" className="text-xs text-white/50 hover:text-primary-light transition-colors">
                     Privacy Policy
                   </Link>
                 </li>
                 <li>
-                  <Link href="/terms" className="text-xs text-white/50 hover:text-primary transition-colors">
+                  <Link href="/terms" className="text-xs text-white/50 hover:text-primary-light transition-colors">
                     Terms of Service
                   </Link>
                 </li>
@@ -229,10 +225,10 @@ export function Footer() {
           <div className="flex flex-col md:flex-row justify-between items-center gap-4 text-center md:text-left">
             <div className="space-y-1">
               <p className="text-sm text-white/70">
-                © {new Date().getFullYear()} Distinct Construction Solutions
+                © {new Date().getFullYear()} TruthCore
               </p>
               <p className="text-xs text-white/50">
-                California CSLB License #1098531 • Bonded & Insured
+                {COMPANY_INFO.name} dba TruthCore • California CSLB License #1098531 • Bonded & Insured
               </p>
             </div>
             <p className="text-xs text-white/40">
@@ -241,7 +237,7 @@ export function Footer() {
                 href="https://www.ikingdom.org"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-white/60 hover:text-primary transition-colors"
+                className="text-white/60 hover:text-primary-light transition-colors"
               >
                 iKingdom
               </a>

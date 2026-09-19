@@ -66,7 +66,7 @@ export default function WindowsPage() {
       <section className="bg-secondary text-white py-20">
         <div className="container mx-auto px-4">
           <div className="max-w-3xl">
-            <span className="inline-block text-primary font-semibold text-sm uppercase tracking-wider mb-4">
+            <span className="inline-block text-primary-light font-semibold text-sm uppercase tracking-wider mb-4">
               WINDOW SERVICES
             </span>
             <h1 className="text-4xl md:text-5xl font-bold mb-6">
@@ -78,9 +78,9 @@ export default function WindowsPage() {
               coordination, waterproofing, trim work, and final tuning so the finished result looks
               architectural, not pieced together.
             </p>
-            <p className="text-2xl font-bold text-primary mb-8">Starting at $750/window installed</p>
+            <p className="text-2xl font-bold text-primary-light mb-8">Starting at $750/window installed</p>
             <Link href="/contact">
-              <Button size="lg" className="bg-primary hover:bg-primary-dark text-secondary font-semibold">
+              <Button size="lg" className="bg-primary hover:bg-primary-dark text-white font-semibold">
                 Schedule On-Site Consultation <ArrowRight className="h-5 w-5 ml-2" />
               </Button>
             </Link>
@@ -159,7 +159,7 @@ export default function WindowsPage() {
             Schedule a free in-home consultation. We&apos;ll measure, recommend, and provide a detailed quote.
           </p>
           <Link href="/contact">
-            <Button size="lg" className="bg-primary hover:bg-primary-dark text-secondary font-semibold">
+            <Button size="lg" className="bg-primary hover:bg-primary-dark text-white font-semibold">
               Schedule On-Site Consultation <ArrowRight className="h-5 w-5 ml-2" />
             </Button>
           </Link>

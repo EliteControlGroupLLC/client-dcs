@@ -71,7 +71,7 @@ export default function GeneralConstructionPage() {
       <section className="bg-secondary text-white py-20">
         <div className="container mx-auto px-4">
           <div className="max-w-3xl">
-            <span className="inline-block text-primary font-semibold text-sm uppercase tracking-wider mb-4">
+            <span className="inline-block text-primary-light font-semibold text-sm uppercase tracking-wider mb-4">
               GENERAL CONSTRUCTION
             </span>
             <h1 className="text-4xl md:text-5xl font-bold mb-6">
@@ -81,9 +81,9 @@ export default function GeneralConstructionPage() {
               Full-service residential construction for San Diego homeowners. Room additions, structural work,
               system upgrades, and general repairs — all handled by licensed professionals under one roof.
             </p>
-            <p className="text-2xl font-bold text-primary mb-8">Projects Starting at $800</p>
+            <p className="text-2xl font-bold text-primary-light mb-8">Projects Starting at $800</p>
             <Link href="/contact">
-              <Button size="lg" className="bg-primary hover:bg-primary-dark text-secondary font-semibold">
+              <Button size="lg" className="bg-primary hover:bg-primary-dark text-white font-semibold">
                 Schedule On-Site Consultation <ArrowRight className="h-5 w-5 ml-2" />
               </Button>
             </Link>
@@ -163,7 +163,7 @@ export default function GeneralConstructionPage() {
             Tell us about your project and get a free, detailed estimate. No obligation, no pressure.
           </p>
           <Link href="/contact">
-            <Button size="lg" className="bg-primary hover:bg-primary-dark text-secondary font-semibold">
+            <Button size="lg" className="bg-primary hover:bg-primary-dark text-white font-semibold">
               Schedule On-Site Consultation <ArrowRight className="h-5 w-5 ml-2" />
             </Button>
           </Link>

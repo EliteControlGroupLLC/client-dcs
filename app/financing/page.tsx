@@ -32,7 +32,7 @@ export default function FinancingPage() {
       <section className="bg-secondary text-white py-20">
         <div className="container mx-auto px-4">
           <div className="max-w-3xl">
-            <span className="inline-block text-primary font-semibold text-sm uppercase tracking-wider mb-4">
+            <span className="inline-block text-primary-light font-semibold text-sm uppercase tracking-wider mb-4">
               FINANCING
             </span>
             <h1 className="text-4xl md:text-5xl font-bold mb-6">
@@ -105,7 +105,7 @@ export default function FinancingPage() {
             Let&apos;s discuss your project and find the best financing solution for you.
           </p>
           <Link href="/contact">
-            <Button size="lg" className="bg-primary hover:bg-primary-dark text-secondary font-semibold">
+            <Button size="lg" className="bg-primary hover:bg-primary-dark text-white font-semibold">
               Schedule Consultation <ArrowRight className="h-5 w-5 ml-2" />
             </Button>
           </Link>

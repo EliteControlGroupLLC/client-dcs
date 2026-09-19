@@ -60,8 +60,8 @@ export function WhyChooseUs() {
       {/* Subtle premium grid pattern */}
       <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.03)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.03)_1px,transparent_1px)] bg-[size:40px_40px]" />
       {/* Subtle lighting texture overlay */}
-      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,rgba(62,205,162,0.08),transparent_50%)]" />
-      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom_right,rgba(62,205,162,0.05),transparent_50%)]" />
+      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,rgba(111,163,163,0.08),transparent_50%)]" />
+      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom_right,rgba(111,163,163,0.05),transparent_50%)]" />
       
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 relative z-10">
         {/* Header */}
@@ -69,7 +69,7 @@ export function WhyChooseUs() {
           ref={headerRef}
           className={`text-center max-w-3xl mx-auto mb-16 transition-all duration-700 ${headerVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"}`}
         >
-          <span className="inline-flex items-center gap-2 text-primary font-semibold text-sm uppercase tracking-wider mb-4">
+          <span className="inline-flex items-center gap-2 text-primary-light font-semibold text-sm uppercase tracking-wider mb-4">
             Why Choose Us
           </span>
           <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold mb-6 text-balance">
@@ -90,7 +90,7 @@ export function WhyChooseUs() {
               className={`bg-white/5 backdrop-blur-sm rounded-2xl p-6 border border-white/10 hover:bg-white/10 hover:border-white/20 transition-all duration-500 group ${gridVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"}`}
             >
               <div className="w-12 h-12 rounded-xl bg-primary/20 flex items-center justify-center mb-4 group-hover:bg-primary/30 transition-colors shadow-lg shadow-primary/10">
-                <feature.icon className="h-6 w-6 text-primary" />
+                <feature.icon className="h-6 w-6 text-primary-light" />
               </div>
               <h3 className="text-lg font-bold mb-2">{feature.title}</h3>
               <p className="text-white/70 text-sm leading-relaxed">{feature.description}</p>
@@ -101,7 +101,7 @@ export function WhyChooseUs() {
         <div className="bg-white/10 backdrop-blur-sm rounded-3xl p-8 lg:p-12 border border-white/10">
           <div className="grid gap-8 lg:grid-cols-[1.4fr_1fr]">
             <div>
-              <p className="text-xs font-semibold uppercase tracking-[0.24em] text-primary mb-3">
+              <p className="text-xs font-semibold uppercase tracking-[0.24em] text-primary-light mb-3">
                 Client Experience Standard
               </p>
               <h3 className="text-2xl lg:text-3xl font-bold mb-4">
@@ -123,7 +123,7 @@ export function WhyChooseUs() {
                 href="https://www.google.com/search?q=Distinct+Construction+Solutions+Chula+Vista+reviews"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="mt-5 inline-flex items-center gap-2 text-sm font-semibold text-primary hover:text-primary-light transition-colors"
+                className="mt-5 inline-flex items-center gap-2 text-sm font-semibold text-primary-light hover:text-white transition-colors"
               >
                 View public review profiles
               </a>
@@ -135,7 +135,7 @@ export function WhyChooseUs() {
         <div className="flex flex-wrap justify-center gap-8 mt-12">
           {bottomMetrics.map((badge) => (
             <div key={badge} className="flex items-center gap-2 text-white/60">
-              <CheckCircle className="h-5 w-5 text-primary" />
+              <CheckCircle className="h-5 w-5 text-primary-light" />
               <span className="font-medium">{badge}</span>
             </div>
           ))}

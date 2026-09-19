@@ -69,12 +69,12 @@ export default function ADUSolutionsPage() {
               We design and build detached ADUs, attached ADUs, and garage conversions for homeowners
               who want better use of their lot, stronger rental performance, or flexible family living.
             </p>
-            <p className="text-2xl font-bold text-primary mb-8">
+            <p className="text-2xl font-bold text-primary-light mb-8">
               Starting at {SERVICE_PRICING.adu.startingPrice}
             </p>
             <div className="flex flex-col sm:flex-row gap-4">
               <Link href="/build-your-adu">
-                <Button size="lg" className="bg-primary hover:bg-primary-dark text-secondary font-semibold">
+                <Button size="lg" className="bg-primary hover:bg-primary-dark text-white font-semibold">
                   Open ADU Calculator
                 </Button>
               </Link>
@@ -221,7 +221,7 @@ export default function ADUSolutionsPage() {
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link href="/build-your-adu">
-              <Button size="lg" className="bg-primary hover:bg-primary-dark text-secondary font-semibold">
+              <Button size="lg" className="bg-primary hover:bg-primary-dark text-white font-semibold">
                 Design Your ADU
               </Button>
             </Link>
