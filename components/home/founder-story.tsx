@@ -7,7 +7,7 @@ import { Logo } from "@/components/layout/logo";
 /** Homepage teaser for the founder's story (/our-story). */
 export function FounderStory() {
   return (
-    <section className="py-20 relative overflow-hidden bg-secondary">
+    <section className="py-20 relative overflow-hidden bg-secondary border-t border-white/10">
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,rgba(51,102,102,0.35),transparent_60%)]" />
       <div className="relative z-10 mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="grid lg:grid-cols-2 gap-12 items-center">

@@ -23,18 +23,18 @@ export function Newsletter() {
   };
 
   return (
-    <section className="py-16 bg-white border-t border-border">
+    <section className="py-16 bg-secondary border-t border-white/10">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div className="bg-muted rounded-3xl p-8 lg:p-12">
+        <div className="bg-secondary-light border border-white/10 shadow-lg shadow-black/20 rounded-2xl p-8 lg:p-12">
           <div className="grid lg:grid-cols-2 gap-8 items-center">
             <div>
-              <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center mb-4">
-                <Mail className="h-6 w-6 text-primary" />
+              <div className="w-12 h-12 rounded-full bg-primary flex items-center justify-center mb-4">
+                <Mail className="h-6 w-6 text-white" />
               </div>
-              <h3 className="text-2xl font-bold text-secondary mb-2">
+              <h3 className="text-2xl font-bold text-white mb-2">
                 Stay Updated
               </h3>
-              <p className="text-muted-foreground">
+              <p className="text-white/80">
                 Get the latest on ADU regulations, design trends, and exclusive offers. 
                 No spam, unsubscribe anytime.
               </p>
@@ -42,7 +42,7 @@ export function Newsletter() {
 
             <div>
               {status === "success" ? (
-                <div className="flex items-center gap-3 text-success bg-success/10 rounded-xl p-4">
+                <div className="flex items-center gap-3 text-accent-light bg-accent/10 border border-accent/30 rounded-xl p-4">
                   <CheckCircle className="h-5 w-5" />
                   <span className="font-medium">Thanks for subscribing! Check your inbox soon.</span>
                 </div>
@@ -53,6 +53,7 @@ export function Newsletter() {
                     placeholder="Enter your email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
+                    tone="dark"
                     className="flex-1"
                     required
                   />
@@ -73,7 +74,7 @@ export function Newsletter() {
                   </Button>
                 </form>
               )}
-              <p className="text-xs text-muted-foreground mt-3">
+              <p className="text-xs text-white/65 mt-3">
                 By subscribing, you agree to our Privacy Policy.
               </p>
             </div>

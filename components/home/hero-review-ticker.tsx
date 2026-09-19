@@ -54,7 +54,7 @@ export function HeroReviewTicker() {
         {/* Header: label · counter · stars */}
         <div className="flex items-center justify-between gap-4">
           <span className="text-xs font-semibold uppercase tracking-[0.2em] text-accent">
-            Client Review <span className="ml-2 text-white/40">{counter}</span>
+            Client Review <span className="ml-2 text-white/65">{counter}</span>
           </span>
           <span className="flex gap-0.5" role="img" aria-label={`${review.rating} out of 5 stars`}>
             {Array.from({ length: review.rating }).map((_, i) => (

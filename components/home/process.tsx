@@ -19,7 +19,7 @@ export function Process() {
   const { ref: stepsRef, isVisible: stepsVisible, getDelay } = useStaggeredAnimation(120);
 
   return (
-    <section className="relative py-20 overflow-hidden">
+    <section className="relative py-20 overflow-hidden border-t border-white/10">
       {/* Background Image */}
       <div className="absolute inset-0">
         <Image
@@ -75,7 +75,7 @@ export function Process() {
 
                   <div className="flex flex-1 flex-col items-center text-center">
                     {/* Step number */}
-                    <span className="text-xs font-semibold text-accent uppercase tracking-wider">
+                    <span className="text-xs font-semibold text-accent-light uppercase tracking-wider">
                       Step {step.number}
                     </span>
 

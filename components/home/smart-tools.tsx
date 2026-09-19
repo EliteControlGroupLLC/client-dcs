@@ -54,7 +54,7 @@ export function SmartTools() {
   const { ref: metricsRef, isVisible: metricsVisible } = useScrollAnimation();
 
   return (
-    <section className="relative py-20 overflow-hidden">
+    <section className="relative py-20 overflow-hidden border-t border-white/10">
       {/* Background Image */}
       <div className="absolute inset-0">
         <Image
@@ -169,7 +169,7 @@ export function SmartTools() {
                     detailed specifications and pricing guidance.
                   </p>
                 </div>
-                <span className="inline-flex items-center text-sm font-semibold text-accent shrink-0">
+                <span className="inline-flex items-center text-sm font-semibold text-accent-light shrink-0">
                   Browse Plans
                   <ArrowRight className="h-4 w-4 ml-2 group-hover:translate-x-1 transition-transform" />
                 </span>

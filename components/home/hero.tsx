@@ -187,7 +187,7 @@ export function Hero() {
           {/* Right Content - Featured Info Card */}
           <div className="relative">
             <div className="relative rounded-2xl overflow-hidden shadow-2xl bg-white/10 backdrop-blur-md border border-white/20 p-6 sm:p-8">
-              <p className="text-xs font-semibold uppercase tracking-[0.2em] text-accent mb-4">
+              <p className="text-xs font-semibold uppercase tracking-[0.2em] text-accent-light mb-4">
                 The Standard We Build By
               </p>
 

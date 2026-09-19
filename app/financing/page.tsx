@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
 import { ArrowRight, DollarSign, Home, Shield, Calculator } from "lucide-react";
 
 export const metadata: Metadata = {
@@ -51,11 +50,11 @@ export default function FinancingPage() {
         </div>
       </section>
 
-      <section className="py-20">
+      <section className="py-20 bg-secondary border-t border-white/10">
         <div className="container mx-auto px-4">
           <div className="text-center mb-12">
-            <h2 className="text-3xl md:text-4xl font-bold text-secondary mb-4">Financing Options</h2>
-            <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+            <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">Financing Options</h2>
+            <p className="text-lg text-white/80 max-w-2xl mx-auto">
               We&apos;ll help you explore the best financing path for your project during our consultation.
             </p>
           </div>
@@ -63,39 +62,39 @@ export default function FinancingPage() {
             {options.map((option) => {
               const Icon = option.icon;
               return (
-                <Card key={option.title} className="h-full hover:shadow-lg transition-shadow">
-                  <CardContent className="p-8">
-                    <div className="w-14 h-14 rounded-xl bg-primary/10 flex items-center justify-center mb-6">
-                      <Icon className="h-7 w-7 text-primary" />
+                <div key={option.title} className="h-full rounded-2xl border border-white/10 bg-secondary-light text-white shadow-lg shadow-black/20 transition-colors hover:border-accent/50">
+                  <div className="p-8">
+                    <div className="w-14 h-14 rounded-xl bg-primary flex items-center justify-center mb-6 shadow-lg shadow-black/20">
+                      <Icon className="h-7 w-7 text-white" aria-hidden="true" />
                     </div>
-                    <h3 className="text-xl font-semibold text-secondary mb-2">{option.title}</h3>
-                    <p className="text-muted-foreground">{option.description}</p>
-                  </CardContent>
-                </Card>
+                    <h3 className="text-xl font-semibold text-white mb-2">{option.title}</h3>
+                    <p className="text-white/80">{option.description}</p>
+                  </div>
+                </div>
               );
             })}
           </div>
         </div>
       </section>
 
-      <section className="py-20 bg-muted">
+      <section className="py-20 bg-secondary bg-[radial-gradient(ellipse_at_top,rgba(51,102,102,0.35),transparent_60%)] border-t border-white/10">
         <div className="container mx-auto px-4">
           <div className="max-w-3xl mx-auto text-center">
-            <h2 className="text-3xl md:text-4xl font-bold text-secondary mb-12">
+            <h2 className="text-3xl md:text-4xl font-bold text-white mb-12">
               How It Works
             </h2>
-            <div className="space-y-6 text-left">
+            <div className="space-y-4 text-left">
               {[
                 "Schedule a free consultation to discuss your project scope and budget.",
                 "We provide a detailed project estimate with transparent pricing.",
                 "Our financing partners review your options and present the best terms.",
                 "Once approved, construction begins with your approved financing in place.",
               ].map((step, i) => (
-                <div key={i} className="flex items-start gap-4">
+                <div key={i} className="flex items-start gap-4 rounded-2xl bg-secondary-light border border-white/10 shadow-lg shadow-black/20 p-5">
                   <div className="w-8 h-8 bg-primary text-white rounded-full flex items-center justify-center font-bold shrink-0 text-sm">
                     {i + 1}
                   </div>
-                  <p className="text-muted-foreground pt-1">{step}</p>
+                  <p className="text-white/80 pt-1">{step}</p>
                 </div>
               ))}
             </div>
@@ -103,7 +102,7 @@ export default function FinancingPage() {
         </div>
       </section>
 
-      <section className="py-20 bg-secondary bg-[radial-gradient(ellipse_at_top,rgba(51,102,102,0.35),transparent_60%)] text-white">
+      <section className="py-20 bg-secondary bg-[radial-gradient(ellipse_at_bottom,rgba(51,102,102,0.35),transparent_60%)] border-t border-white/10 text-white">
         <div className="container mx-auto px-4 text-center">
           <h2 className="text-3xl md:text-4xl font-bold mb-4">Ready to Explore Financing?</h2>
           <p className="text-lg text-white/80 mb-8 max-w-2xl mx-auto">

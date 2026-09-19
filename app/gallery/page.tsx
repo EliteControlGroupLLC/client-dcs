@@ -50,7 +50,7 @@ export default function GalleryPage() {
         </div>
       </section>
 
-      <section className="py-20 bg-muted">
+      <section className="py-20 bg-secondary border-t border-white/10">
         <div className="container mx-auto px-4">
           {/* Category Filters */}
           <div className="flex flex-wrap gap-3 mb-12">
@@ -65,8 +65,8 @@ export default function GalleryPage() {
                   onClick={() => setActiveCategory(cat.id)}
                   className={`flex items-center gap-2 h-11 px-5 rounded-full border text-sm font-medium transition-all ${
                     active
-                      ? "bg-primary border-primary text-white"
-                      : "bg-white border-border text-secondary hover:bg-primary/10"
+                      ? "bg-primary border-accent/60 text-white ring-1 ring-accent/30 shadow-lg shadow-black/20"
+                      : "bg-secondary-light border-white/15 text-white/80 hover:border-accent/50 hover:text-white"
                   }`}
                 >
                   <Icon className="h-4 w-4" />
@@ -80,7 +80,7 @@ export default function GalleryPage() {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {filteredProjects.map((project) => (
               <Link key={project.id} href={`/gallery/${project.id}`} className="group block h-full">
-                <Card className="h-full flex flex-col overflow-hidden transition-all duration-300 hover:-translate-y-1 hover:shadow-xl">
+                <Card className="h-full flex flex-col overflow-hidden bg-secondary-light border-white/10 shadow-lg shadow-black/20 transition-all duration-300 hover:-translate-y-1 hover:border-accent/50">
                   <div className="relative aspect-[4/3] overflow-hidden">
                     <Image
                       src={project.image}
@@ -108,11 +108,11 @@ export default function GalleryPage() {
                     </div>
                   </div>
                   <div className="p-6 flex-1 flex flex-col">
-                    <p className="text-sm leading-relaxed text-muted-foreground">{project.description}</p>
+                    <p className="text-sm leading-relaxed text-white/80">{project.description}</p>
                     {project.imageNote && (
-                      <p className="mt-3 text-xs font-medium text-primary">{project.imageNote}</p>
+                      <p className="mt-3 text-xs font-medium text-accent-light">{project.imageNote}</p>
                     )}
-                    <span className="mt-auto pt-4 self-start inline-flex items-center gap-2 text-sm font-semibold text-primary">
+                    <span className="mt-auto pt-4 self-start inline-flex items-center gap-2 text-sm font-semibold text-accent-light group-hover:text-white transition-colors">
                       View project details
                       <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
                     </span>
@@ -125,7 +125,7 @@ export default function GalleryPage() {
       </section>
 
       {/* CTA */}
-      <section className="py-20 bg-secondary bg-[radial-gradient(ellipse_at_top,rgba(51,102,102,0.35),transparent_60%)] text-white">
+      <section className="py-20 bg-secondary bg-[radial-gradient(ellipse_at_top,rgba(51,102,102,0.35),transparent_60%)] border-t border-white/10 text-white">
         <div className="container mx-auto px-4 text-center">
           <h2 className="text-3xl md:text-4xl font-bold mb-4">
             Ready to Start Your Project?

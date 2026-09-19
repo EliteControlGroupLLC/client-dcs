@@ -51,7 +51,7 @@ export default async function ProjectPage({ params }: { params: Promise<{ id: st
   return (
     <div className="min-h-screen">
       {/* Hero Image */}
-      <section className="relative h-[50vh] md:h-[60vh]">
+      <section className="relative h-[50vh] md:h-[60vh] bg-secondary">
         <Image
           src={project.image}
           alt={project.title}
@@ -86,16 +86,16 @@ export default async function ProjectPage({ params }: { params: Promise<{ id: st
       </section>
 
       {/* Project Details */}
-      <section className="py-20">
+      <section className="py-20 bg-secondary bg-[radial-gradient(ellipse_at_top,rgba(51,102,102,0.35),transparent_60%)]">
         <div className="container mx-auto px-4 max-w-3xl">
           {project.imageStatus === "pending-replacement" && project.imageNote && (
-            <div className="mb-8 rounded-2xl border border-primary/20 bg-primary/5 p-5">
-              <p className="text-sm font-semibold text-secondary">Visual asset pending</p>
-              <p className="mt-1 text-sm text-muted-foreground">{project.imageNote}</p>
+            <div className="mb-8 rounded-2xl border border-accent/30 bg-secondary-light p-5 shadow-lg shadow-black/20">
+              <p className="text-sm font-semibold text-accent-light">Visual asset pending</p>
+              <p className="mt-1 text-sm text-white/75">{project.imageNote}</p>
             </div>
           )}
-          <h2 className="text-3xl md:text-4xl font-bold text-secondary mb-4">About This Project</h2>
-          <p className="text-lg text-muted-foreground leading-relaxed mb-8">
+          <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">About This Project</h2>
+          <p className="text-lg text-white/80 leading-relaxed mb-8">
             {project.description}
           </p>
 
@@ -106,7 +106,7 @@ export default async function ProjectPage({ params }: { params: Promise<{ id: st
               </Button>
             </Link>
             <Link href="/build-your-adu" className="w-full sm:w-auto">
-              <Button size="lg" rounded="full" variant="outline" className="w-full sm:w-auto">
+              <Button size="lg" rounded="full" variant="outlineWhite" className="w-full sm:w-auto">
                 Design Your ADU
               </Button>
             </Link>
@@ -115,17 +115,17 @@ export default async function ProjectPage({ params }: { params: Promise<{ id: st
       </section>
 
       {/* Navigation */}
-      <section className="py-8 border-t border-border">
+      <section className="py-8 bg-secondary border-t border-white/10">
         <div className="container mx-auto px-4">
           <div className="flex justify-between items-center gap-6">
             {prevProject ? (
-              <Link href={`/gallery/${prevProject.id}`} className="flex items-center gap-2 min-h-11 text-muted-foreground hover:text-secondary transition-colors">
+              <Link href={`/gallery/${prevProject.id}`} className="flex items-center gap-2 min-h-11 text-white/75 hover:text-accent-light transition-colors">
                 <ArrowLeft className="h-4 w-4 shrink-0" />
                 <span className="text-sm">{prevProject.title}</span>
               </Link>
             ) : <div />}
             {nextProject ? (
-              <Link href={`/gallery/${nextProject.id}`} className="flex items-center gap-2 min-h-11 text-right ml-auto text-muted-foreground hover:text-secondary transition-colors">
+              <Link href={`/gallery/${nextProject.id}`} className="flex items-center gap-2 min-h-11 text-right ml-auto text-white/75 hover:text-accent-light transition-colors">
                 <span className="text-sm">{nextProject.title}</span>
                 <ArrowRight className="h-4 w-4 shrink-0" />
               </Link>

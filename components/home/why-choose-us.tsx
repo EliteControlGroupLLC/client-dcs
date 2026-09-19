@@ -57,7 +57,7 @@ export function WhyChooseUs() {
   const { ref: gridRef, isVisible: gridVisible, getDelay } = useStaggeredAnimation(100);
 
   return (
-    <section className="py-20 bg-secondary text-white relative overflow-hidden">
+    <section className="py-20 bg-secondary text-white relative overflow-hidden border-t border-white/10">
       {/* Subtle lighting texture overlay */}
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,rgba(111,163,163,0.08),transparent_50%)]" />
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom_right,rgba(111,163,163,0.05),transparent_50%)]" />
@@ -100,7 +100,7 @@ export function WhyChooseUs() {
         <div className="bg-secondary-light rounded-2xl p-6 sm:p-8 lg:p-12 border border-white/10 shadow-lg shadow-black/20">
           <div className="grid gap-8 lg:grid-cols-[1.4fr_1fr]">
             <div>
-              <p className="text-xs font-semibold uppercase tracking-[0.2em] text-accent mb-4">
+              <p className="text-xs font-semibold uppercase tracking-[0.2em] text-accent-light mb-4">
                 Client Experience Standard
               </p>
               <h3 className="text-2xl lg:text-3xl font-bold mb-4">

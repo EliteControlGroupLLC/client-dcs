@@ -143,21 +143,21 @@ export default function FloorPlansPage() {
         </div>
       </section>
 
-      <section className="py-20 bg-muted">
+      <section className="py-20 bg-secondary border-t border-white/10">
         <div className="container mx-auto px-4">
           {/* Filters */}
-          <div className="bg-white rounded-2xl border border-border p-6 shadow-sm mb-8">
+          <div className="bg-secondary-light rounded-2xl border border-white/10 p-6 shadow-lg shadow-black/20 mb-8">
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:flex lg:flex-row gap-4 lg:items-center">
               {/* Search */}
               <div className="relative sm:col-span-2 lg:flex-1">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" aria-hidden />
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-white/60" aria-hidden />
                 <input
                   type="search"
                   aria-label="Search floor plans"
                   placeholder="Search floor plans..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className={fieldClass({}, "pl-10")}
+                  className={fieldClass({ tone: "dark" }, "pl-10")}
                 />
               </div>
 
@@ -166,7 +166,7 @@ export default function FloorPlansPage() {
                 aria-label="Filter by style"
                 value={selectedStyle}
                 onChange={(e) => setSelectedStyle(e.target.value)}
-                className={fieldClass({}, "lg:w-auto")}
+                className={fieldClass({ tone: "dark" }, "lg:w-auto")}
               >
                 {styles.map(style => (
                   <option key={style} value={style}>{style}</option>
@@ -178,7 +178,7 @@ export default function FloorPlansPage() {
                 aria-label="Filter by type"
                 value={selectedType}
                 onChange={(e) => setSelectedType(e.target.value)}
-                className={fieldClass({}, "lg:w-auto")}
+                className={fieldClass({ tone: "dark" }, "lg:w-auto")}
               >
                 {types.map(type => (
                   <option key={type} value={type}>{type}</option>
@@ -190,7 +190,7 @@ export default function FloorPlansPage() {
                 aria-label="Filter by bedrooms"
                 value={selectedBedrooms}
                 onChange={(e) => setSelectedBedrooms(e.target.value)}
-                className={fieldClass({}, "lg:w-auto")}
+                className={fieldClass({ tone: "dark" }, "lg:w-auto")}
               >
                 {bedroomOptions.map(opt => (
                   <option key={opt} value={opt}>{opt === "Any" ? "Any Beds" : opt === "Studio" ? "Studio" : `${opt} Bed`}</option>
@@ -202,7 +202,7 @@ export default function FloorPlansPage() {
                 aria-label="Sort floor plans"
                 value={sortBy}
                 onChange={(e) => setSortBy(e.target.value as SortOption)}
-                className={fieldClass({}, "lg:w-auto")}
+                className={fieldClass({ tone: "dark" }, "lg:w-auto")}
               >
                 <option value="size-asc">Size: Small to Large</option>
                 <option value="size-desc">Size: Large to Small</option>
@@ -211,13 +211,13 @@ export default function FloorPlansPage() {
               </select>
 
               {/* View Toggle */}
-              <div className="flex w-fit rounded-lg border border-border overflow-hidden sm:col-span-2 lg:col-span-1">
+              <div className="flex w-fit rounded-lg border border-white/15 overflow-hidden sm:col-span-2 lg:col-span-1">
                 <button
                   type="button"
                   aria-label="Grid view"
                   aria-pressed={viewMode === "grid"}
                   onClick={() => setViewMode("grid")}
-                  className={`h-11 w-11 flex items-center justify-center transition-colors ${viewMode === "grid" ? "bg-primary text-white" : "bg-white text-secondary hover:bg-muted"}`}
+                  className={`h-11 w-11 flex items-center justify-center transition-colors ${viewMode === "grid" ? "bg-primary text-white" : "bg-secondary text-white/80 hover:bg-white/10 hover:text-white"}`}
                 >
                   <Grid3x3 className="h-5 w-5" />
                 </button>
@@ -226,7 +226,7 @@ export default function FloorPlansPage() {
                   aria-label="List view"
                   aria-pressed={viewMode === "list"}
                   onClick={() => setViewMode("list")}
-                  className={`h-11 w-11 flex items-center justify-center transition-colors ${viewMode === "list" ? "bg-primary text-white" : "bg-white text-secondary hover:bg-muted"}`}
+                  className={`h-11 w-11 flex items-center justify-center transition-colors ${viewMode === "list" ? "bg-primary text-white" : "bg-secondary text-white/80 hover:bg-white/10 hover:text-white"}`}
                 >
                   <List className="h-5 w-5" />
                 </button>
@@ -235,8 +235,8 @@ export default function FloorPlansPage() {
           </div>
 
           {/* Results Count */}
-          <p className="text-muted-foreground mb-6">
-            Showing <span className="font-semibold text-secondary">{filteredPlans.length}</span> floor plans
+          <p className="text-white/75 mb-6">
+            Showing <span className="font-semibold text-accent">{filteredPlans.length}</span> floor plans
           </p>
 
           {/* Floor Plans Grid/List */}
@@ -245,7 +245,7 @@ export default function FloorPlansPage() {
             : "flex flex-col gap-6"
           }>
             {filteredPlans.map((plan, index) => (
-              <Card key={plan.id} className={`h-full overflow-hidden hover:shadow-lg transition-shadow flex ${viewMode === "list" ? "flex-col md:flex-row" : "flex-col"}`}>
+              <Card key={plan.id} className={`h-full overflow-hidden bg-secondary-light border-white/10 shadow-lg shadow-black/20 hover:border-accent/50 transition-colors flex ${viewMode === "list" ? "flex-col md:flex-row" : "flex-col"}`}>
                 {/* Floor Plan Preview */}
                 <div className={`relative ${viewMode === "list" ? "md:w-72 shrink-0" : ""}`}>
                   {/* Exterior Image */}
@@ -277,9 +277,9 @@ export default function FloorPlansPage() {
 
                 <CardContent className="p-6 flex-1 flex flex-col">
                   <div className="flex-1">
-                    <h3 className="text-xl font-semibold text-secondary mb-3">{plan.name}</h3>
+                    <h3 className="text-xl font-semibold text-white mb-3">{plan.name}</h3>
                   
-                    <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-sm text-muted-foreground mb-3">
+                    <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-sm text-white/75 mb-3">
                       <span className="flex items-center gap-1">
                         <Bed className="h-4 w-4" />
                         {formatBedroomLabel(plan.bedrooms, plan.maxBedrooms)}
@@ -298,16 +298,16 @@ export default function FloorPlansPage() {
                       </span>
                     </div>
                     <div className="flex flex-wrap gap-2 mb-3">
-                      <span className="text-xs font-medium text-secondary bg-muted px-3 py-1 rounded-full">{plan.style}</span>
-                      <span className="text-xs font-medium text-secondary bg-muted px-3 py-1 rounded-full">{plan.type}</span>
+                      <span className="text-xs font-medium text-accent-light bg-accent/10 border border-accent/30 px-3 py-1 rounded-full">{plan.style}</span>
+                      <span className="text-xs font-medium text-accent-light bg-accent/10 border border-accent/30 px-3 py-1 rounded-full">{plan.type}</span>
                     </div>
-                    <p className="text-sm text-muted-foreground mb-3">{plan.summary}</p>
-                    <p className="font-semibold text-primary">{plan.priceRange}</p>
+                    <p className="text-sm text-white/80 mb-3">{plan.summary}</p>
+                    <p className="font-semibold text-accent-light">{plan.priceRange}</p>
                   </div>
 
                   <div className={`flex gap-3 mt-6 ${viewMode === "list" ? "flex-col sm:flex-row" : ""}`}>
                     <Button
-                      variant="outline"
+                      variant="outlineWhite"
                       rounded="full"
                       className={viewMode === "grid" ? "flex-1" : ""}
                       onClick={() => handleOpenPlan(index, "layout")}
@@ -331,7 +331,7 @@ export default function FloorPlansPage() {
       </section>
 
       {/* CTA Section */}
-      <section className="py-20 bg-secondary bg-[radial-gradient(ellipse_at_top,rgba(51,102,102,0.35),transparent_60%)] text-white">
+      <section className="py-20 bg-secondary bg-[radial-gradient(ellipse_at_top,rgba(51,102,102,0.35),transparent_60%)] border-t border-white/10 text-white">
         <div className="container mx-auto px-4 text-center">
           <h2 className="text-3xl md:text-4xl font-bold mb-4">
             Don&apos;t See What You&apos;re Looking For?

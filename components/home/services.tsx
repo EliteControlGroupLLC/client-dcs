@@ -38,7 +38,7 @@ export function Services() {
   const { ref: ctaRef, isVisible: ctaVisible } = useScrollAnimation();
 
   return (
-    <section className="relative py-20 overflow-hidden">
+    <section className="relative py-20 overflow-hidden border-t border-white/10">
       {/* Background Image */}
       <div className="absolute inset-0">
         <Image
@@ -132,7 +132,7 @@ export function Services() {
 
                 {/* Price — pinned to the card bottom so sibling CTAs line up */}
                 <div className="mt-auto mb-6 pb-6 border-b border-white/10">
-                  <span className="text-lg font-bold text-accent">
+                  <span className="text-lg font-bold text-accent-light">
                     {service.priceLabel}
                   </span>
                 </div>

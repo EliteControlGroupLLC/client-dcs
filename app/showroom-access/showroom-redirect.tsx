@@ -11,13 +11,13 @@ export function ShowroomRedirect({ to }: { to: string }) {
   }, [to]);
 
   return (
-    <section className="py-20" data-lead-gate="unlocked">
+    <section className="py-20 bg-secondary border-t border-white/10" data-lead-gate="unlocked">
       <div className="container mx-auto px-4 max-w-xl text-center">
-        <Loader2 className="h-8 w-8 text-primary animate-spin mx-auto mb-4" />
-        <h2 className="text-2xl font-bold text-secondary mb-2">You&apos;re in — opening the showroom…</h2>
-        <p className="text-muted-foreground">
+        <Loader2 className="h-8 w-8 text-accent animate-spin mx-auto mb-4" />
+        <h2 className="text-2xl font-bold text-white mb-2">You&apos;re in — opening the showroom…</h2>
+        <p className="text-white/80">
           Not redirected?{" "}
-          <a href={to} className="text-primary-dark font-semibold underline underline-offset-4">
+          <a href={to} className="text-accent hover:text-accent-light font-semibold underline underline-offset-4">
             Enter the showroom
           </a>
         </p>

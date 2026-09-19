@@ -22,7 +22,7 @@ export function GalleryPreview() {
   const { ref: statsRef, isVisible: statsVisible } = useScrollAnimation();
 
   return (
-    <section className="py-20 relative overflow-hidden bg-secondary">
+    <section className="py-20 relative overflow-hidden bg-secondary border-t border-white/10">
       {/* Subtle architectural background on the brand's emerald-charcoal */}
       <div className="absolute inset-0">
         <Image

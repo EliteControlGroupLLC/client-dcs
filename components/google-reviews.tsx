@@ -9,20 +9,18 @@ const reviews = CLIENT_REVIEWS;
 
 const GOOGLE_REVIEWS_URL = "https://www.google.com/search?q=Distinct+Construction+Solutions+Chula+Vista+reviews";
 
-function ReviewText({ text, light = false }: { text: string; light?: boolean }) {
+function ReviewText({ text }: { text: string }) {
   const [expanded, setExpanded] = useState(false);
   return (
     <div>
-      <p className={`font-serif text-lg italic leading-relaxed ${light ? "text-secondary" : "text-white/85"} ${expanded ? "" : "line-clamp-5"}`}>
+      <p className={`font-serif text-lg italic leading-relaxed text-white/85 ${expanded ? "" : "line-clamp-5"}`}>
         &ldquo;{text}&rdquo;
       </p>
       {text.length > 200 && (
         <button
           type="button"
           onClick={() => setExpanded((v) => !v)}
-          className={`mt-3 text-xs font-semibold uppercase tracking-[0.2em] transition-colors ${
-            light ? "text-primary hover:text-primary-dark" : "text-accent hover:text-accent-light"
-          }`}
+          className="mt-3 text-xs font-semibold uppercase tracking-[0.2em] text-accent-light underline-offset-4 transition-colors hover:underline"
         >
           {expanded ? "Show less" : "Read full review"}
         </button>
@@ -42,9 +40,9 @@ function GoldStars({ className = "h-3.5 w-3.5" }: { className?: string }) {
 }
 
 /**
- * Light-surface version of the review cards (same structure as the homepage
- * section: stars · source/date, serif quote, gold hairline, name, project) for
- * white/muted sections on interior and landing pages. Real reviews, verbatim.
+ * Review cards for interior and landing pages — same dark "life" card as the
+ * homepage section (stars · source/date, serif quote, gold hairline, name,
+ * project), for use inside a bg-secondary section. Real reviews, verbatim.
  */
 export function ReviewCards({ reviews: items }: { reviews: typeof CLIENT_REVIEWS }) {
   return (
@@ -53,22 +51,22 @@ export function ReviewCards({ reviews: items }: { reviews: typeof CLIENT_REVIEWS
         {items.map((review, index) => (
           <figure
             key={`${review.author}-${index}`}
-            className="flex h-full flex-col rounded-2xl border border-border bg-white p-6 shadow-sm sm:p-8"
+            className="flex h-full flex-col rounded-2xl border border-accent/30 bg-secondary-light p-6 shadow-lg shadow-black/20 transition-colors duration-300 hover:border-accent/50 sm:p-8"
           >
             <div className="mb-5 flex items-center justify-between gap-4">
               <GoldStars />
-              <span className="text-xs font-semibold uppercase tracking-[0.2em] text-muted-foreground">
+              <span className="text-xs font-semibold uppercase tracking-[0.2em] text-white/65">
                 {review.source}
                 {review.date ? ` · ${review.date}` : ""}
               </span>
             </div>
             <blockquote className="flex-1">
-              <ReviewText text={review.text} light />
+              <ReviewText text={review.text} />
             </blockquote>
-            <div className="mt-6 h-px w-12 bg-accent/60" aria-hidden="true" />
+            <div className="mt-6 h-px w-12 bg-accent/50" aria-hidden="true" />
             <figcaption className="mt-4">
-              <p className="text-xs font-semibold uppercase tracking-[0.2em] text-secondary">{review.author}</p>
-              <p className="mt-1 text-xs text-muted-foreground">{review.project}</p>
+              <p className="text-xs font-semibold uppercase tracking-[0.2em] text-accent-light">{review.author}</p>
+              <p className="mt-1 text-xs text-white/75">{review.project}</p>
             </figcaption>
           </figure>
         ))}
@@ -78,7 +76,7 @@ export function ReviewCards({ reviews: items }: { reviews: typeof CLIENT_REVIEWS
           href={GOOGLE_REVIEWS_URL}
           target="_blank"
           rel="noopener noreferrer"
-          className="inline-flex items-center gap-2 border-b border-primary/40 pb-1 text-xs font-semibold uppercase tracking-[0.2em] text-primary transition-colors hover:text-primary-dark"
+          className="inline-flex items-center gap-2 border-b border-accent/50 pb-1 text-xs font-semibold uppercase tracking-[0.2em] text-accent transition-colors hover:text-accent-light"
         >
           See all reviews on Google
           <ExternalLink className="h-3.5 w-3.5" aria-hidden="true" />
@@ -95,7 +93,7 @@ export function GoogleReviews() {
   // If all reviews are pending, show a simplified CTA section instead
   if (hasPendingReviews) {
     return (
-      <section className="py-20 bg-muted">
+      <section className="relative py-20 bg-secondary bg-[radial-gradient(ellipse_at_top,rgba(51,102,102,0.35),transparent_60%)]">
         <div className="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8 text-center">
           <div className="flex items-center justify-center gap-2 mb-4">
             <svg className="h-8 w-8" viewBox="0 0 24 24">
@@ -104,16 +102,16 @@ export function GoogleReviews() {
               <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
               <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
             </svg>
-            <span className="text-lg font-semibold text-secondary">Find Us on Google</span>
+            <span className="text-lg font-semibold text-white">Find Us on Google</span>
           </div>
-          <p className="text-muted-foreground mb-6">
+          <p className="text-white/80 mb-6">
             See what our clients are saying about their experience working with Distinct Construction Solutions.
           </p>
           <a
             href={GOOGLE_REVIEWS_URL}
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex items-center gap-2 bg-white text-secondary font-semibold px-6 py-3 rounded-full shadow-sm hover:shadow-md transition-shadow"
+            className="inline-flex items-center gap-2 bg-primary text-white font-semibold px-6 py-3 rounded-full shadow-lg shadow-black/20 hover:bg-primary-dark transition-colors"
           >
             Read Our Google Reviews
             <ExternalLink className="h-4 w-4" />
@@ -124,7 +122,7 @@ export function GoogleReviews() {
   }
 
   return (
-    <section id="reviews" className="relative scroll-mt-20 overflow-hidden bg-secondary py-20">
+    <section id="reviews" className="relative scroll-mt-20 overflow-hidden border-t border-white/10 bg-secondary py-20">
       {/* Soft emerald wash for depth */}
       <div
         aria-hidden="true"

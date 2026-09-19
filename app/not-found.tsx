@@ -44,21 +44,21 @@ export default function NotFound() {
         </div>
       </section>
 
-      <section className="py-20">
+      <section className="py-20 bg-secondary border-t border-white/10">
         <div className="container mx-auto px-4">
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6 max-w-6xl mx-auto">
             {links.map(({ href, icon: Icon, title, text }) => (
               <Link
                 key={href}
                 href={href}
-                className="group flex h-full flex-col rounded-2xl border border-border bg-white p-6 shadow-sm hover:shadow-lg hover:border-primary/20 transition-all"
+                className="group flex h-full flex-col rounded-2xl border border-white/10 bg-secondary-light p-6 shadow-lg shadow-black/20 hover:border-accent/50 transition-all"
               >
-                <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center mb-4">
-                  <Icon className="h-5 w-5 text-primary" />
+                <div className="w-12 h-12 rounded-xl bg-primary flex items-center justify-center mb-4 shadow-lg shadow-black/20">
+                  <Icon className="h-5 w-5 text-white" aria-hidden="true" />
                 </div>
-                <h2 className="text-xl font-semibold text-secondary mb-2">{title}</h2>
-                <p className="text-muted-foreground mb-4">{text}</p>
-                <span className="mt-auto inline-flex items-center gap-1 text-sm font-semibold text-primary">
+                <h2 className="text-xl font-semibold text-white mb-2">{title}</h2>
+                <p className="text-white/80 mb-4">{text}</p>
+                <span className="mt-auto inline-flex items-center gap-1 text-sm font-semibold text-accent-light group-hover:underline underline-offset-4">
                   Visit <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
                 </span>
               </Link>
