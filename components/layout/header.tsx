@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef, type MouseEvent } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Menu, X, ChevronDown, ArrowRight, ArrowUpRight, Phone } from "lucide-react";
+import { Menu, X, ChevronDown, ArrowRight, ArrowUpRight, Phone, Store } from "lucide-react";
 import { COMPANY_INFO } from "@/lib/data/site-data";
 import { Logo } from "@/components/layout/logo";
 
@@ -14,6 +14,7 @@ type NavLink = { name: string; href: string; description?: string };
 type NavGroup = { name: string; href?: string; children?: NavLink[]; columns?: 1 | 2 };
 
 const navigation: NavGroup[] = [
+  { name: "Home", href: "/" },
   {
     name: "Services",
     href: "/services",
@@ -153,13 +154,13 @@ export function Header() {
                     key={item.name}
                     href={item.href!}
                     aria-current={active ? "page" : undefined}
-                    className={`relative px-3.5 py-2 text-[14px] font-medium tracking-[-0.005em] whitespace-nowrap transition-colors ${
+                    className={`relative px-2.5 xl:px-3.5 py-2 text-[14px] font-medium tracking-[-0.005em] whitespace-nowrap transition-colors ${
                       active ? activeTone : linkTone
                     }`}
                   >
                     {item.name}
                     {active && (
-                      <span className={`absolute left-3.5 right-3.5 -bottom-0.5 h-px ${light ? "bg-primary" : "bg-primary-light"}`} aria-hidden />
+                      <span className={`absolute left-2.5 right-2.5 xl:left-3.5 xl:right-3.5 -bottom-0.5 h-px ${light ? "bg-primary" : "bg-primary-light"}`} aria-hidden />
                     )}
                   </Link>
                 );
@@ -178,7 +179,7 @@ export function Header() {
                     aria-expanded={open}
                     aria-haspopup="true"
                     onClick={() => (open ? setActiveDropdown(null) : openMenu(item.name))}
-                    className={`relative flex items-center gap-1 px-3.5 py-2 text-[14px] font-medium tracking-[-0.005em] whitespace-nowrap transition-colors ${
+                    className={`relative flex items-center gap-1 px-2.5 xl:px-3.5 py-2 text-[14px] font-medium tracking-[-0.005em] whitespace-nowrap transition-colors ${
                       active || open ? activeTone : linkTone
                     }`}
                   >
@@ -188,7 +189,7 @@ export function Header() {
                       aria-hidden
                     />
                     {active && (
-                      <span className={`absolute left-3.5 right-7 -bottom-0.5 h-px ${light ? "bg-primary" : "bg-primary-light"}`} aria-hidden />
+                      <span className={`absolute left-2.5 right-6 xl:left-3.5 xl:right-7 -bottom-0.5 h-px ${light ? "bg-primary" : "bg-primary-light"}`} aria-hidden />
                     )}
                   </button>
 
@@ -247,23 +248,35 @@ export function Header() {
           </div>
 
           {/* Desktop actions */}
-          <div className="hidden lg:flex lg:items-center lg:gap-5 shrink-0">
+          <div className="hidden lg:flex lg:items-center lg:gap-2 xl:gap-3 shrink-0">
             <Link
               href={SHOWROOM_HREF}
-              className={`hidden xl:inline text-[14px] font-medium whitespace-nowrap transition-colors ${linkTone}`}
+              className={`group inline-flex items-center gap-2 whitespace-nowrap rounded-full border px-3.5 xl:px-4 py-2.5 text-[14px] font-semibold transition-colors ${
+                light
+                  ? "border-accent text-secondary hover:bg-accent/10"
+                  : "border-accent/80 text-white hover:bg-white/10"
+              }`}
             >
+              <Store className="h-4 w-4 text-accent" aria-hidden />
               Showroom
+              <span
+                className={`hidden xl:inline rounded-full px-2 py-0.5 text-[11px] font-semibold tracking-wide ${
+                  light ? "bg-accent/15 text-secondary" : "bg-accent/25 text-accent-light"
+                }`}
+              >
+                Up to 30% off
+              </span>
             </Link>
             <Link
               href="/contact"
-              className={`inline-flex items-center gap-1.5 whitespace-nowrap rounded-full px-5 py-2.5 text-[14px] font-semibold transition-colors ${
+              className={`inline-flex items-center gap-1.5 whitespace-nowrap rounded-full px-4 xl:px-5 py-2.5 text-[14px] font-semibold transition-colors ${
                 light
                   ? "bg-secondary text-white hover:bg-secondary-light"
                   : "bg-white text-secondary hover:bg-white/90"
               }`}
             >
               Start a Project
-              <ArrowRight className="h-4 w-4" aria-hidden />
+              <ArrowRight className="hidden xl:block h-4 w-4" aria-hidden />
             </Link>
           </div>
 
@@ -300,7 +313,7 @@ export function Header() {
               </Link>
             </div>
 
-            {navigation.map((item) => (
+            {navigation.filter((item) => item.href !== "/").map((item) => (
               <div key={item.name} className="border-t border-secondary/8 py-4">
                 {item.children ? (
                   <>
@@ -356,6 +369,16 @@ export function Header() {
               >
                 Start a Project
                 <ArrowRight className="h-4 w-4" aria-hidden />
+              </Link>
+              <Link
+                href={SHOWROOM_HREF}
+                className="flex w-full items-center justify-center gap-2 rounded-full border border-accent px-6 py-3.5 text-[15px] font-semibold text-secondary"
+              >
+                <Store className="h-4 w-4 text-accent" aria-hidden />
+                Visit the Showroom
+                <span className="rounded-full bg-accent/15 px-2 py-0.5 text-[11px] font-semibold tracking-wide text-secondary">
+                  Up to 30% off
+                </span>
               </Link>
               <a
                 href={`tel:${COMPANY_INFO.phoneHref}`}
