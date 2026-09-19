@@ -42,11 +42,11 @@ const categoryLabels: Record<string, string> = {
 };
 
 const severityColors: Record<string, { bg: string; text: string; dot: string }> = {
-  none: { bg: "bg-primary/5", text: "text-primary", dot: "bg-primary" },
-  low: { bg: "bg-primary/5", text: "text-primary", dot: "bg-primary" },
-  moderate: { bg: "bg-amber-50", text: "text-amber-700", dot: "bg-amber-500" },
-  high: { bg: "bg-orange-50", text: "text-orange-700", dot: "bg-orange-500" },
-  "very-high": { bg: "bg-red-50", text: "text-red-700", dot: "bg-red-500" },
+  none: { bg: "bg-emerald-500/10", text: "text-emerald-300", dot: "bg-emerald-400" },
+  low: { bg: "bg-emerald-500/10", text: "text-emerald-300", dot: "bg-emerald-400" },
+  moderate: { bg: "bg-amber-500/10", text: "text-amber-200", dot: "bg-amber-500" },
+  high: { bg: "bg-orange-500/10", text: "text-orange-300", dot: "bg-orange-500" },
+  "very-high": { bg: "bg-red-500/10", text: "text-red-300", dot: "bg-red-500" },
 };
 
 const severityLabels: Record<string, string> = {
@@ -58,9 +58,9 @@ const severityLabels: Record<string, string> = {
 };
 
 const riskLevelStyles: Record<string, { bg: string; text: string }> = {
-  Low: { bg: "bg-primary/5", text: "text-primary" },
-  Moderate: { bg: "bg-amber-50", text: "text-amber-700" },
-  High: { bg: "bg-red-50", text: "text-red-700" },
+  Low: { bg: "bg-emerald-500/10", text: "text-emerald-300" },
+  Moderate: { bg: "bg-amber-500/10", text: "text-amber-200" },
+  High: { bg: "bg-red-500/10", text: "text-red-300" },
 };
 
 export function SiteConstraintsCard({ data }: SiteConstraintsCardProps) {
@@ -68,16 +68,16 @@ export function SiteConstraintsCard({ data }: SiteConstraintsCardProps) {
   const activeConstraints = data.constraints.filter((c) => c.severity !== "none");
 
   return (
-    <div className="bg-white rounded-2xl border border-border p-6">
+    <div className="bg-secondary-light rounded-2xl border border-white/10 shadow-lg shadow-black/20 p-6">
       {/* Header */}
       <div className="flex flex-wrap items-center justify-between gap-3 mb-5">
         <div className="flex items-center gap-3 min-w-0">
-          <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
-            <Shield className="h-5 w-5 text-primary" />
+          <div className="w-10 h-10 rounded-xl bg-primary flex items-center justify-center shrink-0">
+            <Shield className="h-5 w-5 text-white" />
           </div>
           <div>
-            <h3 className="text-xl font-semibold text-secondary">Site Conditions</h3>
-            <p className="text-sm text-muted-foreground">
+            <h3 className="text-xl font-semibold text-white">Site Conditions</h3>
+            <p className="text-sm text-white/75">
               Environmental &amp; regulatory constraint analysis
             </p>
           </div>
@@ -96,7 +96,7 @@ export function SiteConstraintsCard({ data }: SiteConstraintsCardProps) {
           // confidence 0 = the map/service couldn't be checked for this parcel
           const notChecked = constraint.confidence === 0;
           const colors = notChecked
-            ? { bg: "bg-muted", text: "text-muted-foreground", dot: "bg-muted-foreground" }
+            ? { bg: "bg-white/5", text: "text-white/75", dot: "bg-white/40" }
             : severityColors[constraint.severity] || severityColors.none;
           const label = categoryLabels[constraint.category] || constraint.category;
           const severityLabel = notChecked ? "Not checked" : severityLabels[constraint.severity] || constraint.severity;
@@ -104,17 +104,17 @@ export function SiteConstraintsCard({ data }: SiteConstraintsCardProps) {
           return (
             <div
               key={constraint.category}
-              className="flex items-center justify-between bg-muted rounded-lg px-3 py-2.5"
+              className="flex items-center justify-between bg-secondary border border-white/10 rounded-lg px-3 py-2.5"
             >
               <div className="flex items-center gap-2 flex-1 min-w-0">
-                <Icon className="h-4 w-4 text-muted-foreground shrink-0" />
+                <Icon className="h-4 w-4 text-white/75 shrink-0" />
                 <div className="min-w-0">
-                  <span className="text-xs font-medium text-secondary block">{label}</span>
-                  <span className="text-xs text-muted-foreground block">
+                  <span className="text-xs font-medium text-white block">{label}</span>
+                  <span className="text-xs text-white/75 block">
                     {constraint.classification}
                   </span>
                   {constraint.source && (
-                    <span className="text-xs text-muted-foreground/80 block">Source: {constraint.source}</span>
+                    <span className="text-xs text-white/70 block">Source: {constraint.source}</span>
                   )}
                 </div>
               </div>
@@ -131,16 +131,16 @@ export function SiteConstraintsCard({ data }: SiteConstraintsCardProps) {
 
       {/* Impact Summary */}
       {(data.costAdjustmentPercent > 0 || data.timelineAdjustmentMonths > 0) && (
-        <div className="bg-amber-50 border border-amber-200 rounded-lg px-3 py-2 mb-3">
-          <p className="text-xs font-medium text-amber-800 mb-1">Estimated Impact (planning estimate)</p>
+        <div className="bg-amber-500/10 border border-amber-400/30 rounded-lg px-3 py-2 mb-3">
+          <p className="text-xs font-medium text-amber-200 mb-1">Estimated Impact (planning estimate)</p>
           <div className="flex gap-4">
             {data.costAdjustmentPercent > 0 && (
-              <span className="text-xs text-amber-700">
+              <span className="text-xs text-amber-200">
                 +{data.costAdjustmentPercent}% est. cost increase
               </span>
             )}
             {data.timelineAdjustmentMonths > 0 && (
-              <span className="text-xs text-amber-700">
+              <span className="text-xs text-amber-200">
                 +{data.timelineAdjustmentMonths} mo. timeline
               </span>
             )}
@@ -152,8 +152,8 @@ export function SiteConstraintsCard({ data }: SiteConstraintsCardProps) {
       {activeConstraints.length > 0 && (
         <div className="space-y-1.5 mb-3">
           {activeConstraints.map((c) => (
-            <p key={c.category} className="text-xs text-muted-foreground">
-              <span className="font-medium text-secondary capitalize">{categoryLabels[c.category] ?? c.category}:</span>{" "}
+            <p key={c.category} className="text-xs text-white/75">
+              <span className="font-medium text-white capitalize">{categoryLabels[c.category] ?? c.category}:</span>{" "}
               {c.constructionImpact}
             </p>
           ))}
@@ -161,7 +161,7 @@ export function SiteConstraintsCard({ data }: SiteConstraintsCardProps) {
       )}
 
       {/* Footer */}
-      <p className="text-xs text-muted-foreground">
+      <p className="text-xs text-white/75">
         {data.summary}
       </p>
     </div>

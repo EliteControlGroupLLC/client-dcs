@@ -35,7 +35,7 @@ const steps = [
 
 export default function ADUSanDiegoLP() {
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen bg-secondary">
       {/* Hero — No Navigation, focused on conversion */}
       <section className="bg-secondary bg-[radial-gradient(ellipse_at_top,rgba(51,102,102,0.35),transparent_60%)] text-white pt-40 pb-20">
         <div className="container mx-auto px-4">
@@ -81,7 +81,7 @@ export default function ADUSanDiegoLP() {
             </div>
 
             {/* Right — Lead Form */}
-            <div id="lead-form" className="bg-white rounded-2xl p-8 shadow-2xl">
+            <div id="lead-form" className="bg-secondary-light border border-accent/60 ring-1 ring-accent/30 rounded-2xl p-8 shadow-2xl shadow-black/40">
               <LeadForm
                 source="google-ads-adu-san-diego"
                 heading="Get Your Free ADU Quote"
@@ -107,9 +107,9 @@ export default function ADUSanDiegoLP() {
       </section>
 
       {/* How It Works */}
-      <section className="py-20 bg-muted">
+      <section className="py-20 bg-secondary">
         <div className="container mx-auto px-4 max-w-4xl">
-          <h2 className="text-3xl md:text-4xl font-bold text-center text-secondary mb-12">
+          <h2 className="text-3xl md:text-4xl font-bold text-center text-white mb-12">
             How It Works
           </h2>
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -118,8 +118,8 @@ export default function ADUSanDiegoLP() {
                 <div className="w-14 h-14 bg-primary rounded-full flex items-center justify-center mx-auto mb-4 text-white text-xl font-bold">
                   {s.step}
                 </div>
-                <h3 className="font-semibold text-secondary mb-1">{s.title}</h3>
-                <p className="text-sm text-muted-foreground">{s.desc}</p>
+                <h3 className="font-semibold text-white mb-1">{s.title}</h3>
+                <p className="text-sm text-white/75">{s.desc}</p>
               </div>
             ))}
           </div>
@@ -127,13 +127,13 @@ export default function ADUSanDiegoLP() {
       </section>
 
       {/* Project Image */}
-      <section className="py-20">
+      <section className="py-20 bg-secondary bg-[radial-gradient(ellipse_at_top,rgba(51,102,102,0.35),transparent_60%)] border-t border-white/10">
         <div className="container mx-auto px-4 max-w-6xl">
-          <h2 className="text-3xl md:text-4xl font-bold text-center text-secondary mb-12">
+          <h2 className="text-3xl md:text-4xl font-bold text-center text-white mb-12">
             Our Recent Work
           </h2>
           <div className="grid sm:grid-cols-3 gap-6">
-            <div className="relative aspect-[4/3] rounded-2xl overflow-hidden">
+            <div className="relative aspect-[4/3] rounded-2xl overflow-hidden border border-white/10 shadow-lg shadow-black/20">
               <Image
                 src="/images/projects/adu-exterior-balcony.webp"
                 alt="Modern ADU with balcony in San Diego"
@@ -142,7 +142,7 @@ export default function ADUSanDiegoLP() {
                 className="object-cover"
               />
             </div>
-            <div className="relative aspect-[4/3] rounded-2xl overflow-hidden">
+            <div className="relative aspect-[4/3] rounded-2xl overflow-hidden border border-white/10 shadow-lg shadow-black/20">
               <Image
                 src="/images/projects/adu-exterior-yard.webp"
                 alt="Two-bedroom ADU with yard"
@@ -151,7 +151,7 @@ export default function ADUSanDiegoLP() {
                 className="object-cover"
               />
             </div>
-            <div className="relative aspect-[4/3] rounded-2xl overflow-hidden">
+            <div className="relative aspect-[4/3] rounded-2xl overflow-hidden border border-white/10 shadow-lg shadow-black/20">
               <Image
                 src="/images/projects/kitchen-remodel.webp"
                 alt="Modern kitchen remodel"
@@ -165,7 +165,7 @@ export default function ADUSanDiegoLP() {
       </section>
 
       {/* Final CTA */}
-      <section className="bg-secondary bg-[radial-gradient(ellipse_at_top,rgba(51,102,102,0.35),transparent_60%)] py-20 text-center">
+      <section className="bg-secondary bg-[radial-gradient(ellipse_at_bottom,rgba(51,102,102,0.35),transparent_60%)] border-t border-white/10 py-20 text-center">
         <div className="container mx-auto px-4 max-w-2xl">
           <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">
             Ready to Build Your ADU?

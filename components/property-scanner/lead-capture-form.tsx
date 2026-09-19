@@ -412,9 +412,9 @@ export function LeadCaptureForm({
   // Render phone verification step
   if (step === "phone-verify") {
     return (
-      <div className="bg-white rounded-2xl border-2 border-primary/30 shadow-2xl overflow-hidden">
+      <div className="bg-secondary-light rounded-2xl border border-accent/60 ring-1 ring-accent/30 shadow-2xl shadow-black/40 overflow-hidden">
         {/* Header */}
-        <div className="bg-gradient-to-r from-secondary to-secondary-light text-white p-6 text-center">
+        <div className="bg-secondary bg-[radial-gradient(ellipse_at_top,rgba(51,102,102,0.35),transparent_60%)] border-b border-white/10 text-white p-6 text-center">
           <div className="inline-flex items-center justify-center w-12 h-12 bg-primary border-2 border-accent/60 rounded-full mb-4">
             <Phone className="h-6 w-6 text-white" />
           </div>
@@ -426,8 +426,9 @@ export function LeadCaptureForm({
 
         {/* OTP Form */}
         <div className="p-6 space-y-4">
-          <FormField label="Verification Code" htmlFor="lcf-code" error={errors.otp}>
+          <FormField tone="dark" label="Verification Code" htmlFor="lcf-code" error={errors.otp}>
             <Input
+              tone="dark"
               id="lcf-code"
               type="text"
               autoComplete="one-time-code"
@@ -442,7 +443,7 @@ export function LeadCaptureForm({
             />
           </FormField>
 
-          <FormAlert>{errors.form}</FormAlert>
+          <FormAlert tone="dark">{errors.form}</FormAlert>
 
           <Button
             type="button"
@@ -468,7 +469,7 @@ export function LeadCaptureForm({
           {/* Resend option */}
           <div className="text-center">
             {resendCooldown > 0 ? (
-              <p className="text-xs text-muted-foreground">
+              <p className="text-xs text-white/75">
                 Resend code in {resendCooldown}s
               </p>
             ) : (
@@ -476,7 +477,7 @@ export function LeadCaptureForm({
                 type="button"
                 onClick={sendOtpCode}
                 disabled={sendingOtp}
-                className="min-h-11 px-2 text-xs text-primary hover:underline disabled:opacity-50"
+                className="min-h-11 px-2 text-xs text-accent-light hover:text-white hover:underline disabled:opacity-50"
               >
                 {sendingOtp ? "Sending..." : "Didn't receive the code? Resend"}
               </button>
@@ -491,7 +492,7 @@ export function LeadCaptureForm({
               setOtpCode("");
               setPhoneVerification({ codeSent: false, verified: false });
             }}
-            className="w-full min-h-11 text-xs text-muted-foreground hover:text-secondary transition-colors"
+            className="w-full min-h-11 text-xs text-white/75 hover:text-white transition-colors"
           >
             Use a different phone number
           </button>
@@ -502,9 +503,9 @@ export function LeadCaptureForm({
 
   // Render initial form
   return (
-    <div className="bg-white rounded-2xl border-2 border-primary/30 shadow-2xl overflow-hidden">
+    <div className="bg-secondary-light rounded-2xl border border-accent/60 ring-1 ring-accent/30 shadow-2xl shadow-black/40 overflow-hidden">
       {/* Header */}
-      <div className="bg-gradient-to-r from-secondary to-secondary-light text-white p-6 text-center">
+      <div className="bg-secondary bg-[radial-gradient(ellipse_at_top,rgba(51,102,102,0.35),transparent_60%)] border-b border-white/10 text-white p-6 text-center">
         <div className="inline-flex items-center justify-center w-12 h-12 bg-primary border-2 border-accent/60 rounded-full mb-4">
           <Lock className="h-6 w-6 text-white" />
         </div>
@@ -517,8 +518,9 @@ export function LeadCaptureForm({
       {/* Form */}
       <form onSubmit={handleFormSubmit} className="p-6 space-y-4" noValidate>
         <div className="grid sm:grid-cols-2 gap-4">
-          <FormField label="First Name *" htmlFor="lcf-first" icon={User} error={errors.firstName}>
+          <FormField tone="dark" label="First Name *" htmlFor="lcf-first" icon={User} error={errors.firstName}>
             <Input
+              tone="dark"
               id="lcf-first"
               type="text"
               autoComplete="given-name"
@@ -528,8 +530,9 @@ export function LeadCaptureForm({
               invalid={!!errors.firstName}
             />
           </FormField>
-          <FormField label="Last Name *" htmlFor="lcf-last" icon={User} error={errors.lastName}>
+          <FormField tone="dark" label="Last Name *" htmlFor="lcf-last" icon={User} error={errors.lastName}>
             <Input
+              tone="dark"
               id="lcf-last"
               type="text"
               autoComplete="family-name"
@@ -541,9 +544,10 @@ export function LeadCaptureForm({
           </FormField>
         </div>
 
-        <FormField label="Email Address *" htmlFor="lcf-email" icon={Mail} error={errors.email}>
+        <FormField tone="dark" label="Email Address *" htmlFor="lcf-email" icon={Mail} error={errors.email}>
           <div className="relative">
             <Input
+              tone="dark"
               id="lcf-email"
               type="email"
               autoComplete="email"
@@ -559,16 +563,17 @@ export function LeadCaptureForm({
               valid={!!emailValidation?.valid}
             />
             {emailValidation?.valid && (
-              <CheckCircle className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-primary" />
+              <CheckCircle className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-primary-light" />
             )}
           </div>
         </FormField>
 
         <FormField
+          tone="dark"
           label={
             <>
               Phone Number *
-              <span className="font-normal text-muted-foreground/80 ml-1">(for verification)</span>
+              <span className="font-normal text-white/65 ml-1">(for verification)</span>
             </>
           }
           htmlFor="lcf-phone"
@@ -576,6 +581,7 @@ export function LeadCaptureForm({
           error={errors.phone}
         >
           <Input
+              tone="dark"
             id="lcf-phone"
             type="tel"
             autoComplete="tel"
@@ -587,8 +593,9 @@ export function LeadCaptureForm({
           />
         </FormField>
 
-        <FormField label="Property Address *" htmlFor="lcf-address" icon={MapPin} error={errors.address}>
+        <FormField tone="dark" label="Property Address *" htmlFor="lcf-address" icon={MapPin} error={errors.address}>
           <Input
+              tone="dark"
             id="lcf-address"
             type="text"
             autoComplete="street-address"
@@ -599,7 +606,7 @@ export function LeadCaptureForm({
           />
         </FormField>
 
-        <FormAlert>{errors.form}</FormAlert>
+        <FormAlert tone="dark">{errors.form}</FormAlert>
 
         <Button
           type="submit"
@@ -632,17 +639,17 @@ export function LeadCaptureForm({
         </Button>
 
         {/* Trust indicators */}
-        <div className="flex flex-wrap items-center justify-center gap-x-4 gap-y-2 pt-1 text-xs text-muted-foreground">
+        <div className="flex flex-wrap items-center justify-center gap-x-4 gap-y-2 pt-1 text-xs text-white/75">
           <span className="flex items-center gap-1.5">
-            <Shield className="h-3.5 w-3.5 text-primary" />
+            <Shield className="h-3.5 w-3.5 text-accent" />
             Secure verification
           </span>
           <span className="flex items-center gap-1.5">
-            <CheckCircle className="h-3.5 w-3.5 text-primary" />
+            <CheckCircle className="h-3.5 w-3.5 text-accent" />
             No spam, ever
           </span>
           <span className="flex items-center gap-1.5">
-            <Lock className="h-3.5 w-3.5 text-primary" />
+            <Lock className="h-3.5 w-3.5 text-accent" />
             Your info stays with TruthCore
           </span>
         </div>

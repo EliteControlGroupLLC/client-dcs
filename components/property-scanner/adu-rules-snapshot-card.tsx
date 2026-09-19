@@ -65,14 +65,14 @@ export function AduRulesSnapshotCard({ data, jurisdictionName }: AduRulesSnapsho
   ];
 
   return (
-    <div className="bg-white rounded-2xl border border-border p-6 animate-slide-up">
+    <div className="bg-secondary-light rounded-2xl border border-white/10 shadow-lg shadow-black/20 p-6 animate-slide-up">
       <div className="flex items-center gap-3 mb-5">
-        <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
-          <Scale className="h-5 w-5 text-primary" />
+        <div className="w-10 h-10 rounded-xl bg-primary flex items-center justify-center shrink-0">
+          <Scale className="h-5 w-5 text-white" />
         </div>
         <div>
-          <h3 className="text-xl font-semibold text-secondary">Local ADU Rules</h3>
-          <p className="text-sm text-muted-foreground">{jurisdictionName}</p>
+          <h3 className="text-xl font-semibold text-white">Local ADU Rules</h3>
+          <p className="text-sm text-white/75">{jurisdictionName}</p>
         </div>
       </div>
 
@@ -82,12 +82,12 @@ export function AduRulesSnapshotCard({ data, jurisdictionName }: AduRulesSnapsho
           return (
             <div
               key={rule.label}
-              className="flex items-start gap-2 py-2 px-3 rounded-xl bg-muted/30 border border-border/30"
+              className="flex items-start gap-2 py-2 px-3 rounded-xl bg-secondary border border-white/10"
             >
-              <Icon className="h-3.5 w-3.5 text-muted-foreground mt-0.5 flex-shrink-0" />
+              <Icon className="h-3.5 w-3.5 text-white/75 mt-0.5 flex-shrink-0" />
               <div>
-                <p className="text-xs text-muted-foreground leading-tight">{rule.label}</p>
-                <p className="text-sm font-semibold text-secondary">{rule.value}</p>
+                <p className="text-xs text-white/75 leading-tight">{rule.label}</p>
+                <p className="text-sm font-semibold text-white">{rule.value}</p>
               </div>
             </div>
           );
@@ -95,27 +95,27 @@ export function AduRulesSnapshotCard({ data, jurisdictionName }: AduRulesSnapsho
       </div>
 
       {data.ownerOccupancyNotes && (
-        <div className="mt-3 flex items-start gap-2 py-2 px-3 rounded-xl bg-muted/50 border border-border">
-          <Users className="h-3.5 w-3.5 text-primary mt-0.5 flex-shrink-0" />
+        <div className="mt-3 flex items-start gap-2 py-2 px-3 rounded-xl bg-secondary border border-white/10">
+          <Users className="h-3.5 w-3.5 text-accent mt-0.5 flex-shrink-0" />
           <div>
-            <p className="text-xs text-secondary font-semibold">Owner Occupancy</p>
-            <p className="text-xs text-muted-foreground">{data.ownerOccupancyNotes}</p>
+            <p className="text-xs text-white font-semibold">Owner Occupancy</p>
+            <p className="text-xs text-white/75">{data.ownerOccupancyNotes}</p>
           </div>
         </div>
       )}
 
       {data.bonusProgramNotes && data.bonusProgramNotes.toLowerCase().includes("bonus") && (
-        <div className="mt-2 flex items-start gap-2 py-2 px-3 rounded-xl bg-muted/50 border border-border">
-          <Sparkles className="h-3.5 w-3.5 text-primary mt-0.5 flex-shrink-0" />
+        <div className="mt-2 flex items-start gap-2 py-2 px-3 rounded-xl bg-secondary border border-white/10">
+          <Sparkles className="h-3.5 w-3.5 text-accent mt-0.5 flex-shrink-0" />
           <div>
-            <p className="text-xs text-secondary font-semibold">Bonus Program</p>
-            <p className="text-xs text-muted-foreground">{data.bonusProgramNotes}</p>
+            <p className="text-xs text-white font-semibold">Bonus Program</p>
+            <p className="text-xs text-white/75">{data.bonusProgramNotes}</p>
           </div>
         </div>
       )}
 
-      <div className="mt-3 pt-2 border-t border-border/50">
-        <p className="text-xs text-muted-foreground leading-relaxed">
+      <div className="mt-3 pt-2 border-t border-white/10">
+        <p className="text-xs text-white/75 leading-relaxed">
           Rules reflect current jurisdiction standards. Actual requirements may vary based on
           specific lot conditions, overlays, and local amendments. Always verify with the planning department.
         </p>

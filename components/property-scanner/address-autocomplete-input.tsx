@@ -265,7 +265,7 @@ export function AddressAutocompleteInput({
     <div ref={wrapperRef} className="relative w-full">
       <div className="relative group">
         <MapPin
-          className={`absolute top-1/2 -translate-y-1/2 text-muted-foreground group-focus-within:text-primary transition-colors ${
+          className={`absolute top-1/2 -translate-y-1/2 text-white/60 group-focus-within:text-accent transition-colors ${
             compact ? "left-3 h-4 w-4" : "left-5 h-5 w-5"
           }`}
         />
@@ -281,23 +281,23 @@ export function AddressAutocompleteInput({
           aria-invalid={invalid || undefined}
           className={
             compact
-              ? fieldClass({ invalid }, "pl-9 pr-9")
-              : "w-full h-16 pl-14 pr-14 rounded-lg border-2 border-border bg-white text-lg font-medium text-secondary placeholder:text-muted-foreground/70 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all shadow-sm hover:shadow-md"
+              ? fieldClass({ invalid, tone: "dark" }, "pl-9 pr-9")
+              : "w-full h-16 pl-14 pr-14 rounded-lg border-2 border-white/15 bg-secondary-light text-lg font-medium text-white placeholder:text-white/50 [color-scheme:dark] focus:outline-none focus:ring-2 focus:ring-accent/30 focus:border-accent hover:border-white/25 transition-all shadow-lg shadow-black/20"
           }
           autoComplete="off"
         />
         <div className={`absolute top-1/2 -translate-y-1/2 ${compact ? "right-3" : "right-5"}`}>
           {isSearching ? (
-            <Loader2 className={`${compact ? "h-4 w-4" : "h-5 w-5"} text-primary animate-spin`} />
+            <Loader2 className={`${compact ? "h-4 w-4" : "h-5 w-5"} text-accent animate-spin`} />
           ) : (
-            <Search className={`${compact ? "h-4 w-4" : "h-5 w-5"} text-muted-foreground`} />
+            <Search className={`${compact ? "h-4 w-4" : "h-5 w-5"} text-white/60`} />
           )}
         </div>
       </div>
 
       {/* Suggestions dropdown */}
       {isOpen && suggestions.length > 0 && (
-        <div className="absolute z-50 w-full mt-2 bg-white rounded-lg shadow-xl border border-border overflow-hidden animate-fade-in">
+        <div className="absolute z-50 w-full mt-2 bg-secondary-light rounded-lg shadow-xl shadow-black/40 border border-white/15 overflow-hidden animate-fade-in">
           {suggestions.map((suggestion, index) => (
             <button
               type="button"
@@ -306,12 +306,12 @@ export function AddressAutocompleteInput({
               onMouseEnter={() => setHighlightedIndex(index)}
               className={`w-full flex items-center gap-3 px-5 py-4 text-left transition-colors ${
                 index === highlightedIndex
-                  ? "bg-primary/5 text-primary"
-                  : "text-secondary hover:bg-muted"
-              } ${index !== suggestions.length - 1 ? "border-b border-border/50" : ""}`}
+                  ? "bg-white/10 text-white"
+                  : "text-white/85 hover:bg-white/5"
+              } ${index !== suggestions.length - 1 ? "border-b border-white/10" : ""}`}
             >
               <MapPin className={`h-4 w-4 flex-shrink-0 ${
-                index === highlightedIndex ? "text-primary" : "text-muted-foreground"
+                index === highlightedIndex ? "text-accent" : "text-white/60"
               }`} />
               <span className="text-sm font-medium">{suggestion}</span>
             </button>

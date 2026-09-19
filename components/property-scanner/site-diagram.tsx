@@ -138,29 +138,29 @@ function FallbackDiagram({
   sourceAudit?: StrictGeometryResult["sourceAudit"];
 }) {
   return (
-    <div className="bg-white rounded-2xl border border-border p-6">
+    <div className="bg-secondary-light rounded-2xl border border-white/10 shadow-lg shadow-black/20 p-6">
       <div className="flex items-center gap-3 mb-3">
-        <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
-          <LandPlot className="h-5 w-5 text-primary" />
+        <div className="w-10 h-10 rounded-xl bg-primary flex items-center justify-center shrink-0">
+          <LandPlot className="h-5 w-5 text-white" />
         </div>
-        <h3 className="text-xl font-semibold text-secondary">Site Layout Diagram</h3>
+        <h3 className="text-xl font-semibold text-white">Site Layout Diagram</h3>
       </div>
-      <p className="text-sm text-muted-foreground mb-4">
+      <p className="text-sm text-white/75 mb-4">
         Real geometry data required
       </p>
 
-      <div className="bg-amber-50 border border-amber-200 rounded-xl p-4">
+      <div className="bg-amber-500/10 border border-amber-400/30 rounded-xl p-4">
         <div className="flex items-start gap-3">
-          <AlertTriangle className="h-5 w-5 text-amber-600 flex-shrink-0 mt-0.5" />
+          <AlertTriangle className="h-5 w-5 text-amber-300 flex-shrink-0 mt-0.5" />
           <div>
-            <p className="text-sm font-medium text-amber-800 mb-1">
+            <p className="text-sm font-medium text-amber-200 mb-1">
               Unable to Verify Geometry
             </p>
-            <p className="text-xs text-amber-700 mb-3">
+            <p className="text-xs text-amber-200 mb-3">
               {message}
             </p>
             {sourceAudit && (
-              <div className="text-xs text-amber-700 space-y-1">
+              <div className="text-xs text-amber-200 space-y-1">
                 {sourceAudit.parcelGISReason && (
                   <p>Parcel data: {sourceAudit.parcelGISReason}</p>
                 )}
@@ -173,7 +173,7 @@ function FallbackDiagram({
         </div>
       </div>
 
-      <p className="text-xs text-muted-foreground mt-3 text-center">
+      <p className="text-xs text-white/75 mt-3 text-center">
         Contact us for a verified site analysis with accurate measurements.
       </p>
     </div>
@@ -298,23 +298,23 @@ function RealGeometryDiagram({
   }
 
   return (
-    <div className="bg-white rounded-2xl border border-border p-6">
+    <div className="bg-secondary-light rounded-2xl border border-white/10 shadow-lg shadow-black/20 p-6">
       <div className="flex flex-wrap items-center justify-between gap-3 mb-3">
         <div className="flex items-center gap-3 min-w-0">
-          <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
-            <LandPlot className="h-5 w-5 text-primary" />
+          <div className="w-10 h-10 rounded-xl bg-primary flex items-center justify-center shrink-0">
+            <LandPlot className="h-5 w-5 text-white" />
           </div>
-          <h3 className="text-xl font-semibold text-secondary">Site Layout Diagram</h3>
+          <h3 className="text-xl font-semibold text-white">Site Layout Diagram</h3>
         </div>
         <span className={`inline-flex items-center gap-1.5 text-xs font-medium px-2.5 py-1 rounded-full whitespace-nowrap ${
-          confidence >= 80 ? "bg-primary/5 text-primary" :
-          confidence >= 60 ? "bg-amber-50 text-amber-700" :
-          "bg-red-50 text-red-700"
+          confidence >= 80 ? "bg-emerald-500/10 text-emerald-300" :
+          confidence >= 60 ? "bg-amber-500/10 text-amber-200" :
+          "bg-red-500/10 text-red-300"
         }`}>
           {confidence}% geometry confidence
         </span>
       </div>
-      <p className="text-sm text-muted-foreground mb-4">
+      <p className="text-sm text-white/75 mb-4">
         {status === "geometry-verified"
           ? "Drawn to scale from the County parcel map and traced building outlines (north is up)"
           : "Partial geometry data - some elements estimated"}
@@ -325,7 +325,8 @@ function RealGeometryDiagram({
         <path
           d={parcelPath}
           fill="none"
-          stroke="#1A2B2B"
+          stroke="#FFFFFF"
+          strokeOpacity="0.55"
           strokeWidth="2"
           strokeDasharray="6 3"
         />
@@ -346,9 +347,9 @@ function RealGeometryDiagram({
         {separationPath && (
           <path
             d={separationPath}
-            fill="#EF4444"
+            fill="#F87171"
             fillOpacity="0.08"
-            stroke="#EF4444"
+            stroke="#F87171"
             strokeWidth="0.5"
             strokeDasharray="3 3"
           />
@@ -358,9 +359,9 @@ function RealGeometryDiagram({
         {buildingPath && (
           <path
             d={buildingPath}
-            fill="#1A2B2B"
-            fillOpacity="0.15"
-            stroke="#1A2B2B"
+            fill="#D8C49A"
+            fillOpacity="0.2"
+            stroke="#B99A5A"
             strokeWidth="1.5"
           />
         )}
@@ -369,9 +370,9 @@ function RealGeometryDiagram({
         {buildablePath && (
           <path
             d={buildablePath}
-            fill="#336666"
-            fillOpacity="0.15"
-            stroke="#336666"
+            fill="#6FA3A3"
+            fillOpacity="0.25"
+            stroke="#6FA3A3"
             strokeWidth="1.5"
           />
         )}
@@ -382,7 +383,7 @@ function RealGeometryDiagram({
           x={SVG_WIDTH / 2}
           y={PADDING - 4}
           textAnchor="middle"
-          className="text-[9px] font-medium fill-secondary"
+          className="text-[9px] font-medium fill-white"
         >
           Property Boundary
           {metrics && ` (${metrics.parcelWidthFt}ft x ${metrics.parcelDepthFt}ft)`}
@@ -395,7 +396,7 @@ function RealGeometryDiagram({
               x={buildingLabelX}
               y={buildingLabelY - 8}
               textAnchor="middle"
-              className="text-[10px] font-semibold fill-secondary"
+              className="text-[10px] font-semibold fill-white"
             >
               Main Residence
             </text>
@@ -404,7 +405,7 @@ function RealGeometryDiagram({
                 x={buildingLabelX}
                 y={buildingLabelY + 6}
                 textAnchor="middle"
-                className="text-[9px] fill-muted-foreground"
+                className="text-[9px] fill-white/80"
               >
                 {metrics.buildingWidthFt}ft x {metrics.buildingDepthFt}ft
               </text>
@@ -419,8 +420,7 @@ function RealGeometryDiagram({
               x={buildableLabelX}
               y={buildableLabelY - 6}
               textAnchor="middle"
-              className="text-xs font-bold"
-              fill="#25514F"
+              className="text-xs font-bold fill-white"
             >
               ADU Buildable Area
             </text>
@@ -428,8 +428,7 @@ function RealGeometryDiagram({
               x={buildableLabelX}
               y={buildableLabelY + 8}
               textAnchor="middle"
-              className="text-xs"
-              fill="#25514F"
+              className="text-xs fill-white/80"
             >
               After setbacks & separation
             </text>
@@ -438,37 +437,37 @@ function RealGeometryDiagram({
 
         {/* Legend */}
         <g transform={`translate(12, ${SVG_HEIGHT - 72})`}>
-          <rect x={0} y={0} width={10} height={10} fill="#1A2B2B" fillOpacity="0.15" stroke="#1A2B2B" strokeWidth="1" />
-          <text x={14} y={8} className="text-[8px] fill-muted-foreground">Main Residence</text>
+          <rect x={0} y={0} width={10} height={10} fill="#D8C49A" fillOpacity="0.2" stroke="#B99A5A" strokeWidth="1" />
+          <text x={14} y={8} className="text-[8px] fill-white/80">Main Residence</text>
 
-          <rect x={0} y={14} width={10} height={10} fill="#336666" fillOpacity="0.15" stroke="#336666" strokeWidth="1" />
-          <text x={14} y={22} className="text-[8px] fill-muted-foreground">ADU Buildable Area</text>
+          <rect x={0} y={14} width={10} height={10} fill="#6FA3A3" fillOpacity="0.25" stroke="#6FA3A3" strokeWidth="1" />
+          <text x={14} y={22} className="text-[8px] fill-white/80">ADU Buildable Area</text>
 
           <line x1={0} y1={32} x2={10} y2={32} stroke="#F59E0B" strokeWidth="1" strokeDasharray="3 3" />
-          <text x={14} y={36} className="text-[8px] fill-muted-foreground">{setbackFt != null ? `${setbackFt} ft` : "ADU"} Property Setback</text>
+          <text x={14} y={36} className="text-[8px] fill-white/80">{setbackFt != null ? `${setbackFt} ft` : "ADU"} Property Setback</text>
 
-          <line x1={0} y1={46} x2={10} y2={46} stroke="#EF4444" strokeWidth="1" strokeDasharray="3 3" />
-          <text x={14} y={50} className="text-[8px] fill-muted-foreground">{separationFt != null ? `${separationFt} ft` : "Required"} Residence Separation</text>
+          <line x1={0} y1={46} x2={10} y2={46} stroke="#F87171" strokeWidth="1" strokeDasharray="3 3" />
+          <text x={14} y={50} className="text-[8px] fill-white/80">{separationFt != null ? `${separationFt} ft` : "Required"} Residence Separation</text>
         </g>
 
         {/* North arrow (plan is drawn north-up) */}
         <g transform={`translate(${SVG_WIDTH - 18}, 18)`}>
-          <line x1={0} y1={10} x2={0} y2={-6} stroke="#1A2B2B" strokeWidth="1" />
-          <path d="M -3 -2 L 0 -8 L 3 -2 Z" fill="#1A2B2B" />
-          <text x={0} y={20} textAnchor="middle" className="text-[8px] fill-muted-foreground">N</text>
+          <line x1={0} y1={10} x2={0} y2={-6} stroke="#FFFFFF" strokeOpacity="0.8" strokeWidth="1" />
+          <path d="M -3 -2 L 0 -8 L 3 -2 Z" fill="#FFFFFF" fillOpacity="0.8" />
+          <text x={0} y={20} textAnchor="middle" className="text-[8px] fill-white/80">N</text>
         </g>
       </svg>
 
       {metrics && (
-        <p className="mt-2 text-xs text-muted-foreground text-center">
+        <p className="mt-2 text-xs text-white/75 text-center">
           Measured yards around the home (street side = front): front {metrics.frontYardDepthFt} ft · rear{" "}
           {metrics.rearYardDepthFt} ft · sides {metrics.leftSideYardFt} ft / {metrics.rightSideYardFt} ft
         </p>
       )}
 
       {/* Data source attribution */}
-      <div className="mt-3 pt-3 border-t border-border/50">
-        <p className="text-xs text-muted-foreground text-center">
+      <div className="mt-3 pt-3 border-t border-white/10">
+        <p className="text-xs text-white/75 text-center">
           Parcel: {parcelSource === "regrid-parcel-api" ? "Regrid Parcel API" : parcelSource === "provided" ? "Polygon Engine" : parcelSource || "Polygon Engine"} | Building: {buildingSource === "microsoft-footprints" ? "Microsoft Building Footprints" : buildingSource === "provided" ? "Polygon Engine" : buildingSource || "Polygon Engine"}
         </p>
       </div>
@@ -518,19 +517,19 @@ function EstimatedDiagram({
   const aduZoneH = lotY + lotH - setback - aduZoneY;
 
   return (
-    <div className="bg-white rounded-2xl border border-border p-6">
+    <div className="bg-secondary-light rounded-2xl border border-white/10 shadow-lg shadow-black/20 p-6">
       <div className="flex flex-wrap items-center justify-between gap-3 mb-3">
         <div className="flex items-center gap-3 min-w-0">
-          <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
-            <LandPlot className="h-5 w-5 text-primary" />
+          <div className="w-10 h-10 rounded-xl bg-primary flex items-center justify-center shrink-0">
+            <LandPlot className="h-5 w-5 text-white" />
           </div>
-          <h3 className="text-xl font-semibold text-secondary">Site Layout Diagram</h3>
+          <h3 className="text-xl font-semibold text-white">Site Layout Diagram</h3>
         </div>
-        <span className="inline-flex items-center gap-1.5 text-xs font-medium px-2.5 py-1 rounded-full whitespace-nowrap bg-amber-50 text-amber-700">
+        <span className="inline-flex items-center gap-1.5 text-xs font-medium px-2.5 py-1 rounded-full whitespace-nowrap bg-amber-500/10 text-amber-200">
           Estimated
         </span>
       </div>
-      <p className="text-sm text-muted-foreground mb-4">
+      <p className="text-sm text-white/75 mb-4">
         Estimated property layout - dimensions are approximate
       </p>
 
@@ -542,7 +541,8 @@ function EstimatedDiagram({
           width={lotW}
           height={lotH}
           fill="none"
-          stroke="#1A2B2B"
+          stroke="#FFFFFF"
+          strokeOpacity="0.55"
           strokeWidth="2"
           strokeDasharray="6 3"
           rx="2"
@@ -568,9 +568,9 @@ function EstimatedDiagram({
           y={homeY}
           width={homeW}
           height={homeH}
-          fill="#1A2B2B"
-          opacity="0.15"
-          stroke="#1A2B2B"
+          fill="#D8C49A"
+          fillOpacity="0.2"
+          stroke="#B99A5A"
           strokeWidth="1.5"
           rx="3"
         />
@@ -578,7 +578,7 @@ function EstimatedDiagram({
           x={homeX + homeW / 2}
           y={homeY + homeH / 2 - 6}
           textAnchor="middle"
-          className="text-[10px] font-semibold fill-secondary"
+          className="text-[10px] font-semibold fill-white"
         >
           Main Residence
         </text>
@@ -586,7 +586,7 @@ function EstimatedDiagram({
           x={homeX + homeW / 2}
           y={homeY + homeH / 2 + 8}
           textAnchor="middle"
-          className="text-[9px] fill-muted-foreground"
+          className="text-[9px] fill-white/80"
         >
           ~{mainHomeWidth}ft x {mainHomeDepth}ft
         </text>
@@ -597,9 +597,9 @@ function EstimatedDiagram({
           y={homeY + homeH}
           width={homeW + 8}
           height={separation}
-          fill="#EF4444"
+          fill="#F87171"
           opacity="0.08"
-          stroke="#EF4444"
+          stroke="#F87171"
           strokeWidth="0.5"
           strokeDasharray="3 3"
         />
@@ -612,9 +612,9 @@ function EstimatedDiagram({
               y={aduZoneY}
               width={aduZoneW}
               height={Math.max(aduZoneH, 0)}
-              fill="#336666"
-              opacity="0.12"
-              stroke="#336666"
+              fill="#6FA3A3"
+              fillOpacity="0.25"
+              stroke="#6FA3A3"
               strokeWidth="1.5"
               rx="3"
             />
@@ -622,8 +622,7 @@ function EstimatedDiagram({
               x={aduZoneX + aduZoneW / 2}
               y={aduZoneY + Math.max(aduZoneH, 20) / 2 - 4}
               textAnchor="middle"
-              className="text-xs font-bold"
-              fill="#25514F"
+              className="text-xs font-bold fill-white"
             >
               ADU Build Zone
             </text>
@@ -631,8 +630,7 @@ function EstimatedDiagram({
               x={aduZoneX + aduZoneW / 2}
               y={aduZoneY + Math.max(aduZoneH, 20) / 2 + 10}
               textAnchor="middle"
-              className="text-xs"
-              fill="#25514F"
+              className="text-xs fill-white/80"
             >
               Estimated buildable area
             </text>
@@ -640,35 +638,35 @@ function EstimatedDiagram({
         )}
 
         {/* Labels */}
-        <text x={lotX + lotW / 2} y={lotY - 6} textAnchor="middle" className="text-[9px] font-medium fill-secondary">
+        <text x={lotX + lotW / 2} y={lotY - 6} textAnchor="middle" className="text-[9px] font-medium fill-white">
           Property Boundary (~{lotWidth}ft x {lotDepth}ft)
         </text>
 
-        <text x={lotX + lotW + 4} y={lotY + setback + 10} className="text-[8px] fill-warning" textAnchor="start">
+        <text x={lotX + lotW + 4} y={lotY + setback + 10} className="text-[8px] fill-amber-300" textAnchor="start">
           3ft setback
         </text>
 
-        <text x={homeX + homeW + 8} y={homeY + homeH + separation / 2 + 3} className="text-[8px] fill-destructive" textAnchor="start">
+        <text x={homeX + homeW + 8} y={homeY + homeH + separation / 2 + 3} className="text-[8px] fill-red-300" textAnchor="start">
           6ft min.
         </text>
 
         {/* Legend */}
-        <rect x={12} y={SVG_HEIGHT - 60} width={10} height={10} fill="#1A2B2B" opacity="0.15" stroke="#1A2B2B" strokeWidth="1" rx="1" />
-        <text x={26} y={SVG_HEIGHT - 52} className="text-[8px] fill-muted-foreground">Main Home</text>
+        <rect x={12} y={SVG_HEIGHT - 60} width={10} height={10} fill="#D8C49A" fillOpacity="0.2" stroke="#B99A5A" strokeWidth="1" rx="1" />
+        <text x={26} y={SVG_HEIGHT - 52} className="text-[8px] fill-white/80">Main Home</text>
 
-        <rect x={12} y={SVG_HEIGHT - 44} width={10} height={10} fill="#336666" opacity="0.15" stroke="#336666" strokeWidth="1" rx="1" />
-        <text x={26} y={SVG_HEIGHT - 36} className="text-[8px] fill-muted-foreground">ADU Build Zone</text>
+        <rect x={12} y={SVG_HEIGHT - 44} width={10} height={10} fill="#6FA3A3" fillOpacity="0.25" stroke="#6FA3A3" strokeWidth="1" rx="1" />
+        <text x={26} y={SVG_HEIGHT - 36} className="text-[8px] fill-white/80">ADU Build Zone</text>
 
         <line x1={12} y1={SVG_HEIGHT - 24} x2={22} y2={SVG_HEIGHT - 24} stroke="#F59E0B" strokeWidth="1" strokeDasharray="3 3" />
-        <text x={26} y={SVG_HEIGHT - 20} className="text-[8px] fill-muted-foreground">3ft Setbacks</text>
+        <text x={26} y={SVG_HEIGHT - 20} className="text-[8px] fill-white/80">3ft Setbacks</text>
 
-        <line x1={12} y1={SVG_HEIGHT - 10} x2={22} y2={SVG_HEIGHT - 10} stroke="#EF4444" strokeWidth="1" strokeDasharray="3 3" />
-        <text x={26} y={SVG_HEIGHT - 6} className="text-[8px] fill-muted-foreground">6ft Separation</text>
+        <line x1={12} y1={SVG_HEIGHT - 10} x2={22} y2={SVG_HEIGHT - 10} stroke="#F87171" strokeWidth="1" strokeDasharray="3 3" />
+        <text x={26} y={SVG_HEIGHT - 6} className="text-[8px] fill-white/80">6ft Separation</text>
       </svg>
 
       {/* Estimated data warning */}
-      <div className="mt-3 pt-3 border-t border-border/50">
-        <p className="text-xs text-amber-700 text-center">
+      <div className="mt-3 pt-3 border-t border-white/10">
+        <p className="text-xs text-amber-200 text-center">
           This diagram uses estimated dimensions. Real geometry data unavailable.
         </p>
       </div>

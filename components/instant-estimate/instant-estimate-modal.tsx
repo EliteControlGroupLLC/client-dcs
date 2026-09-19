@@ -71,7 +71,7 @@ export function InstantEstimateModal({ isOpen, onClose }: { isOpen: boolean; onC
     <>
       {/* Backdrop */}
       <div
-        className="fixed inset-0 bg-secondary/60 backdrop-blur-sm z-[60] transition-opacity"
+        className="fixed inset-0 bg-black/70 backdrop-blur-sm z-[60] transition-opacity"
         onClick={onClose}
         aria-hidden="true"
       />
@@ -82,19 +82,19 @@ export function InstantEstimateModal({ isOpen, onClose }: { isOpen: boolean; onC
           role="dialog"
           aria-modal="true"
           aria-labelledby="instant-estimate-title"
-          className="pointer-events-auto flex w-full max-w-lg max-h-[85vh] flex-col overflow-hidden rounded-2xl bg-white shadow-2xl animate-fade-in"
+          className="pointer-events-auto flex w-full max-w-lg max-h-[85vh] flex-col overflow-hidden rounded-2xl border border-white/10 bg-secondary-light text-white shadow-2xl shadow-black/40 [color-scheme:dark] animate-fade-in"
         >
           {/* Header */}
-          <div className="shrink-0 border-b border-border px-6 py-4 flex items-center justify-between gap-4">
+          <div className="shrink-0 border-b border-white/10 bg-secondary bg-[radial-gradient(ellipse_at_top,rgba(51,102,102,0.35),transparent_60%)] px-6 py-4 flex items-center justify-between gap-4">
             <div className="min-w-0">
-              <h2 id="instant-estimate-title" className="text-xl font-bold text-secondary">Calculate Your Project</h2>
-              <p className="text-sm text-muted-foreground">Select the type of project you&apos;d like to estimate.</p>
+              <h2 id="instant-estimate-title" className="text-xl font-bold text-white">Calculate Your Project</h2>
+              <p className="text-sm text-white/75">Select the type of project you&apos;d like to estimate.</p>
             </div>
             <button
               type="button"
               onClick={onClose}
               aria-label="Close"
-              className="w-11 h-11 shrink-0 rounded-full bg-muted text-muted-foreground hover:bg-border hover:text-secondary flex items-center justify-center transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+              className="w-11 h-11 shrink-0 rounded-full bg-white/10 text-white/80 hover:bg-white/20 hover:text-white flex items-center justify-center transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
             >
               <X className="h-5 w-5" aria-hidden="true" />
             </button>
@@ -109,27 +109,27 @@ export function InstantEstimateModal({ isOpen, onClose }: { isOpen: boolean; onC
                   key={option.title}
                   href={option.href}
                   onClick={onClose}
-                  className="flex items-center gap-4 p-4 rounded-xl hover:bg-primary/5 border border-transparent hover:border-primary/20 transition-all group"
+                  className="flex items-center gap-4 p-4 rounded-xl hover:bg-white/5 border border-transparent hover:border-accent/50 transition-all group"
                 >
-                  <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center shrink-0 group-hover:bg-primary/20 transition-colors">
-                    <Icon className="h-6 w-6 text-primary" aria-hidden="true" />
+                  <div className="w-12 h-12 rounded-xl bg-primary flex items-center justify-center shrink-0 group-hover:bg-primary-dark transition-colors">
+                    <Icon className="h-6 w-6 text-white" aria-hidden="true" />
                   </div>
                   <div className="flex-1 min-w-0">
-                    <h3 className="font-semibold text-secondary group-hover:text-primary transition-colors">{option.title}</h3>
-                    <p className="text-sm text-muted-foreground">{option.description}</p>
+                    <h3 className="font-semibold text-white group-hover:text-accent-light transition-colors">{option.title}</h3>
+                    <p className="text-sm text-white/75">{option.description}</p>
                   </div>
-                  <ChevronRight className="h-5 w-5 text-muted-foreground/60 group-hover:text-primary group-hover:translate-x-0.5 transition-all shrink-0" aria-hidden="true" />
+                  <ChevronRight className="h-5 w-5 text-white/50 group-hover:text-accent group-hover:translate-x-0.5 transition-all shrink-0" aria-hidden="true" />
                 </Link>
               );
             })}
           </div>
 
           {/* Footer */}
-          <div className="shrink-0 border-t border-border px-6 py-2 text-center">
+          <div className="shrink-0 border-t border-white/10 px-6 py-2 text-center">
             <Link
               href="/planning-tools"
               onClick={onClose}
-              className="inline-flex min-h-11 items-center gap-1 text-sm font-semibold text-primary hover:text-primary-dark transition-colors"
+              className="inline-flex min-h-11 items-center gap-1 text-sm font-semibold text-accent-light hover:text-white transition-colors"
             >
               View All Planning Tools
               <ChevronRight className="h-4 w-4" aria-hidden="true" />

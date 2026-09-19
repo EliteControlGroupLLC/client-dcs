@@ -43,7 +43,7 @@ export interface LeadGateProps {
   details?: unknown;
   /** Called once the gate opens (new submit or existing pass) */
   onUnlocked?: () => void;
-  /** Extra classes for the locked/checking <section> (e.g. "bg-muted" so the
+  /** Extra classes for the locked/checking <section> (e.g. "bg-secondary border-t border-white/10" so the
    *  gate sits on the same band color as the tool it unlocks) */
   className?: string;
   children: ReactNode;
@@ -66,13 +66,13 @@ function GateSkeleton({ className = "" }: { className?: string }) {
   return (
     <section className={`py-20 ${className}`} data-lead-gate="checking" aria-busy="true">
       <div className="container mx-auto px-4 max-w-5xl">
-        <div className="rounded-2xl border border-border bg-white shadow-sm p-6 md:p-8 animate-pulse">
-          <div className="h-5 w-40 rounded bg-muted mb-4" />
-          <div className="h-8 w-3/4 max-w-md rounded bg-muted mb-6" />
+        <div className="rounded-2xl border border-white/10 bg-secondary-light shadow-lg shadow-black/20 p-6 md:p-8 animate-pulse">
+          <div className="h-5 w-40 rounded bg-white/10 mb-4" />
+          <div className="h-8 w-3/4 max-w-md rounded bg-white/10 mb-6" />
           <div className="grid sm:grid-cols-2 gap-4">
-            <div className="h-11 rounded-lg bg-muted" />
-            <div className="h-11 rounded-lg bg-muted" />
-            <div className="h-11 rounded-lg bg-muted sm:col-span-2" />
+            <div className="h-11 rounded-lg bg-white/10" />
+            <div className="h-11 rounded-lg bg-white/10" />
+            <div className="h-11 rounded-lg bg-white/10 sm:col-span-2" />
           </div>
           <span className="sr-only">Loading…</span>
         </div>
@@ -265,9 +265,9 @@ export function LeadGate({
   return (
     <section className={`py-20 ${className}`} data-lead-gate="locked">
       <div className="container mx-auto px-4 max-w-5xl">
-        <div className="rounded-2xl border-2 border-primary/30 bg-white shadow-2xl overflow-hidden grid lg:grid-cols-5">
+        <div className="rounded-2xl border border-accent/60 ring-1 ring-accent/30 bg-secondary-light shadow-2xl shadow-black/40 overflow-hidden grid lg:grid-cols-5">
           {/* Value panel */}
-          <div className="lg:col-span-2 bg-gradient-to-br from-secondary to-secondary-light text-white p-6 md:p-8">
+          <div className="lg:col-span-2 bg-secondary bg-[radial-gradient(ellipse_at_top,rgba(51,102,102,0.35),transparent_60%)] border-b lg:border-b-0 lg:border-r border-white/10 text-white p-6 md:p-8">
             <div className="inline-flex items-center justify-center w-12 h-12 bg-primary border-2 border-accent/60 rounded-full mb-5">
               <Lock className="h-6 w-6 text-white" />
             </div>
@@ -297,15 +297,16 @@ export function LeadGate({
             {step === "details" ? (
               <form onSubmit={handleDetailsSubmit} className="space-y-4" noValidate>
                 <div>
-                  <p className="text-sm font-semibold uppercase tracking-wider text-primary mb-1">Step 1 of 2</p>
-                  <h3 className="text-xl font-semibold text-secondary">Tell us where to send your results</h3>
+                  <p className="text-sm font-semibold uppercase tracking-wider text-accent-light mb-1">Step 1 of 2</p>
+                  <h3 className="text-xl font-semibold text-white">Tell us where to send your results</h3>
                 </div>
                 <div className="grid sm:grid-cols-2 gap-4">
                   <div>
-                    <Label htmlFor="lg-first" icon={User}>
+                    <Label tone="dark" htmlFor="lg-first" icon={User}>
                       First Name *
                     </Label>
                     <Input
+                      tone="dark"
                       id="lg-first"
                       type="text"
                       autoComplete="given-name"
@@ -314,13 +315,14 @@ export function LeadGate({
                       placeholder="John"
                       invalid={!!errors.firstName}
                     />
-                    <FieldError message={errors.firstName} />
+                    <FieldError tone="dark" message={errors.firstName} />
                   </div>
                   <div>
-                    <Label htmlFor="lg-last" icon={User}>
+                    <Label tone="dark" htmlFor="lg-last" icon={User}>
                       Last Name *
                     </Label>
                     <Input
+                      tone="dark"
                       id="lg-last"
                       type="text"
                       autoComplete="family-name"
@@ -329,15 +331,16 @@ export function LeadGate({
                       placeholder="Smith"
                       invalid={!!errors.lastName}
                     />
-                    <FieldError message={errors.lastName} />
+                    <FieldError tone="dark" message={errors.lastName} />
                   </div>
                 </div>
                 <div className="grid sm:grid-cols-2 gap-4">
                   <div>
-                    <Label htmlFor="lg-email" icon={Mail}>
+                    <Label tone="dark" htmlFor="lg-email" icon={Mail}>
                       Email *
                     </Label>
                     <Input
+                      tone="dark"
                       id="lg-email"
                       type="email"
                       autoComplete="email"
@@ -347,13 +350,14 @@ export function LeadGate({
                       placeholder="john@example.com"
                       invalid={!!errors.email}
                     />
-                    <FieldError message={errors.email} />
+                    <FieldError tone="dark" message={errors.email} />
                   </div>
                   <div>
-                    <Label htmlFor="lg-phone" icon={Phone}>
+                    <Label tone="dark" htmlFor="lg-phone" icon={Phone}>
                       Mobile Phone *
                     </Label>
                     <Input
+                      tone="dark"
                       id="lg-phone"
                       type="tel"
                       autoComplete="tel"
@@ -363,11 +367,11 @@ export function LeadGate({
                       placeholder="(619) 555-0123"
                       invalid={!!errors.phone}
                     />
-                    <FieldError message={errors.phone} />
+                    <FieldError tone="dark" message={errors.phone} />
                   </div>
                 </div>
                 <div>
-                  <Label htmlFor="lg-address" icon={MapPin}>
+                  <Label tone="dark" htmlFor="lg-address" icon={MapPin}>
                     Property Address *
                   </Label>
                   <AddressAutocompleteInput
@@ -379,10 +383,10 @@ export function LeadGate({
                     onSelect={setAddress}
                     placeholder="123 Main St, San Diego, CA"
                   />
-                  <FieldError message={errors.address} />
+                  <FieldError tone="dark" message={errors.address} />
                 </div>
 
-                <FormAlert>{errors.form}</FormAlert>
+                <FormAlert tone="dark">{errors.form}</FormAlert>
 
                 <Button type="submit" size="lg" rounded="full" className="w-full" disabled={busyDetails}>
                   {busyDetails ? (
@@ -398,17 +402,17 @@ export function LeadGate({
                   )}
                 </Button>
 
-                <div className="flex flex-wrap items-center justify-center gap-x-4 gap-y-2 pt-1 text-xs text-muted-foreground">
+                <div className="flex flex-wrap items-center justify-center gap-x-4 gap-y-2 pt-1 text-xs text-white/75">
                   <span className="flex items-center gap-1.5">
-                    <Shield className="h-3.5 w-3.5 text-primary" />
+                    <Shield className="h-3.5 w-3.5 text-accent" />
                     Secure SMS verification
                   </span>
                   <span className="flex items-center gap-1.5">
-                    <CheckCircle className="h-3.5 w-3.5 text-primary" />
+                    <CheckCircle className="h-3.5 w-3.5 text-accent" />
                     No spam, ever
                   </span>
                   <span className="flex items-center gap-1.5">
-                    <Lock className="h-3.5 w-3.5 text-primary" />
+                    <Lock className="h-3.5 w-3.5 text-accent" />
                     Your info stays with TruthCore
                   </span>
                 </div>
@@ -416,14 +420,14 @@ export function LeadGate({
             ) : (
               <form onSubmit={handleVerify} className="space-y-4" noValidate>
                 <div>
-                  <p className="text-sm font-semibold uppercase tracking-wider text-primary mb-1">Step 2 of 2</p>
-                  <h3 className="text-xl font-semibold text-secondary">Enter the code we texted you</h3>
-                  <p className="text-sm text-muted-foreground mt-1">
-                    Sent to <strong className="text-secondary">{phone}</strong>
+                  <p className="text-sm font-semibold uppercase tracking-wider text-accent-light mb-1">Step 2 of 2</p>
+                  <h3 className="text-xl font-semibold text-white">Enter the code we texted you</h3>
+                  <p className="text-sm text-white/75 mt-1">
+                    Sent to <strong className="text-white">{phone}</strong>
                   </p>
                 </div>
                 <div>
-                  <Label htmlFor="lg-code">Verification Code</Label>
+                  <Label tone="dark" htmlFor="lg-code">Verification Code</Label>
                   <input
                     id="lg-code"
                     type="text"
@@ -435,12 +439,12 @@ export function LeadGate({
                     value={code}
                     onChange={(e) => setCode(e.target.value.replace(/\D/g, ""))}
                     placeholder="6-digit code"
-                    className={fieldClass({ invalid: !!errors.code }, "h-12 text-lg text-center tracking-widest tabular-nums")}
+                    className={fieldClass({ invalid: !!errors.code, tone: "dark" }, "h-12 text-lg text-center tracking-widest tabular-nums")}
                   />
-                  <FieldError message={errors.code} />
+                  <FieldError tone="dark" message={errors.code} />
                 </div>
 
-                <FormAlert>{errors.form}</FormAlert>
+                <FormAlert tone="dark">{errors.form}</FormAlert>
 
                 <Button
                   type="submit"
@@ -470,19 +474,19 @@ export function LeadGate({
                       setCode("");
                       setErrors({});
                     }}
-                    className="inline-flex items-center gap-1 min-h-11 text-muted-foreground hover:text-secondary transition-colors"
+                    className="inline-flex items-center gap-1 min-h-11 text-white/75 hover:text-white transition-colors"
                   >
                     <ArrowLeft className="h-3 w-3" />
                     Use a different number
                   </button>
                   {resendCooldown > 0 ? (
-                    <span className="inline-flex items-center min-h-11 text-muted-foreground">Resend code in {resendCooldown}s</span>
+                    <span className="inline-flex items-center min-h-11 text-white/75">Resend code in {resendCooldown}s</span>
                   ) : (
                     <button
                       type="button"
                       onClick={handleResend}
                       disabled={sending}
-                      className="inline-flex items-center min-h-11 text-primary-dark font-medium hover:underline disabled:opacity-50"
+                      className="inline-flex items-center min-h-11 text-accent-light font-medium hover:text-white hover:underline disabled:opacity-50"
                     >
                       {sending ? "Sending…" : "Didn't get it? Resend code"}
                     </button>

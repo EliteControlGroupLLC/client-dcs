@@ -54,8 +54,8 @@ export function fieldClass({ invalid, valid, tone = "light" }: FieldState = {}, 
     dark ? FIELD_DARK : FIELD_LIGHT,
     invalid
       ? dark
-        ? // Keep the dark fill; tint it with a thin red wash (no muddy grey).
-          "border-red-400/80 bg-[linear-gradient(rgba(248,113,113,0.10),rgba(248,113,113,0.10))]"
+        ? // Keep the dark fill; tint it with a dark-red wash (a light red wash turns grey on emerald-charcoal).
+          "border-red-400/80 bg-[linear-gradient(rgba(127,29,29,0.35),rgba(127,29,29,0.35))]"
         : "border-destructive-border bg-destructive-soft"
       : valid
         ? dark

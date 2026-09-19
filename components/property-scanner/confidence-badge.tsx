@@ -17,27 +17,27 @@ const config: Record<ConfidenceStatus, {
 }> = {
   Verified: {
     icon: CheckCircle2,
-    bg: "bg-primary/5",
-    text: "text-primary",
-    border: "border-primary/20",
+    bg: "bg-emerald-500/10",
+    text: "text-emerald-300",
+    border: "border-emerald-400/30",
   },
   "Cross-checked": {
     icon: RefreshCw,
-    bg: "bg-primary-light/10",
-    text: "text-secondary-light",
-    border: "border-primary-light/40",
+    bg: "bg-white/5",
+    text: "text-white/80",
+    border: "border-white/20",
   },
   Estimated: {
     icon: HelpCircle,
-    bg: "bg-amber-50",
-    text: "text-amber-700",
-    border: "border-amber-200",
+    bg: "bg-amber-500/10",
+    text: "text-amber-200",
+    border: "border-amber-400/30",
   },
   Unavailable: {
     icon: AlertTriangle,
-    bg: "bg-red-50",
-    text: "text-red-700",
-    border: "border-red-200",
+    bg: "bg-red-500/10",
+    text: "text-red-300",
+    border: "border-red-400/30",
   },
 };
 
@@ -62,14 +62,14 @@ export function ConfidenceBadge({ status, confidence, sources, size = "sm" }: Co
       </button>
 
       {showTooltip && (
-        <div className="absolute z-50 bottom-full left-0 mb-2 w-56 bg-white rounded-lg shadow-xl border border-border p-3 text-left animate-fade-in">
+        <div className="absolute z-50 bottom-full left-0 mb-2 w-56 bg-secondary rounded-lg shadow-xl border border-white/10 p-3 text-left animate-fade-in">
           <div className="flex items-center justify-between mb-1.5">
             <span className={`text-xs font-semibold ${c.text}`}>{status}</span>
-            <span className="text-xs tabular-nums text-muted-foreground">
+            <span className="text-xs tabular-nums text-white/75">
               {confidence}%
             </span>
           </div>
-          <div className="w-full bg-muted rounded-full h-1.5 mb-2">
+          <div className="w-full bg-white/10 rounded-full h-1.5 mb-2">
             <div
               className={`h-1.5 rounded-full transition-all ${
                 confidence >= 90
@@ -83,11 +83,11 @@ export function ConfidenceBadge({ status, confidence, sources, size = "sm" }: Co
               style={{ width: `${confidence}%` }}
             />
           </div>
-          <p className="text-xs text-muted-foreground">
+          <p className="text-xs text-white/75">
             Confidence reflects how strongly this field was cross-checked across available records and property signals.
           </p>
           <div className="absolute top-full left-4 -mt-px">
-            <div className="w-2 h-2 bg-white border-r border-b border-border transform rotate-45 -translate-y-1" />
+            <div className="w-2 h-2 bg-secondary border-r border-b border-white/10 transform rotate-45 -translate-y-1" />
           </div>
         </div>
       )}

@@ -28,10 +28,10 @@ export function DataSourcesBadge({ data }: DataSourcesBadgeProps) {
   const activeCount = sources.filter((s) => s.active).length;
 
   return (
-    <div className="bg-white rounded-2xl border border-border p-4">
+    <div className="bg-secondary-light rounded-2xl border border-white/10 shadow-lg shadow-black/20 p-4">
       <div className="flex items-center gap-2 mb-3">
-        <Database className="h-4 w-4 text-primary" />
-        <h4 className="text-xs font-semibold text-secondary">
+        <Database className="h-4 w-4 text-accent" />
+        <h4 className="text-xs font-semibold text-white">
           Data Sources ({activeCount}/{sources.length} active)
         </h4>
       </div>
@@ -41,8 +41,8 @@ export function DataSourcesBadge({ data }: DataSourcesBadgeProps) {
             key={source.key}
             className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium ${
               source.active
-                ? "bg-primary/5 text-primary border border-primary/20"
-                : "bg-muted text-muted-foreground border border-border"
+                ? "bg-emerald-500/10 text-emerald-300 border border-emerald-400/30"
+                : "bg-white/5 text-white/70 border border-white/10"
             }`}
           >
             {source.active ? (

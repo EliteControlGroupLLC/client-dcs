@@ -22,18 +22,18 @@ export function JurisdictionSnapshotCard({ data }: JurisdictionSnapshotCardProps
   const isHighConfidence = data.confidence >= 90 && !data.uncertain;
 
   return (
-    <div className="bg-white rounded-2xl border border-border p-6 animate-slide-up">
+    <div className="bg-secondary-light rounded-2xl border border-white/10 shadow-lg shadow-black/20 p-6 animate-slide-up">
       <div className="flex flex-wrap items-center justify-between gap-3 mb-5">
         <div className="flex items-center gap-3 min-w-0">
-          <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
-            <Building className="h-5 w-5 text-primary" />
+          <div className="w-10 h-10 rounded-xl bg-primary flex items-center justify-center shrink-0">
+            <Building className="h-5 w-5 text-white" />
           </div>
-          <h3 className="text-xl font-semibold text-secondary">Jurisdiction</h3>
+          <h3 className="text-xl font-semibold text-white">Jurisdiction</h3>
         </div>
         <div className={`inline-flex items-center gap-1.5 text-xs font-medium px-2.5 py-1 rounded-full whitespace-nowrap ${
           isHighConfidence
-            ? "bg-primary/5 text-primary"
-            : "bg-amber-50 text-amber-700"
+            ? "bg-emerald-500/10 text-emerald-300"
+            : "bg-amber-500/10 text-amber-200"
         }`}>
           {isHighConfidence ? (
             <CheckCircle className="h-3 w-3" />
@@ -45,27 +45,27 @@ export function JurisdictionSnapshotCard({ data }: JurisdictionSnapshotCardProps
       </div>
 
       <div className="space-y-3">
-        <div className="flex items-start justify-between py-2 px-3 rounded-xl bg-muted/30 border border-border/30">
+        <div className="flex items-start justify-between py-2 px-3 rounded-xl bg-secondary border border-white/10">
           <div>
-            <p className="text-xs text-muted-foreground">Jurisdiction</p>
-            <p className="text-sm font-semibold text-secondary">{data.name}</p>
+            <p className="text-xs text-white/75">Jurisdiction</p>
+            <p className="text-sm font-semibold text-white">{data.name}</p>
           </div>
-          <span className="text-xs text-muted-foreground capitalize bg-muted px-2 py-0.5 rounded-full">
+          <span className="text-xs text-white/75 capitalize bg-white/10 px-2 py-0.5 rounded-full">
             {data.type}
           </span>
         </div>
 
-        <div className="flex items-center justify-between py-2 px-3 rounded-xl bg-muted/30 border border-border/30">
+        <div className="flex items-center justify-between py-2 px-3 rounded-xl bg-secondary border border-white/10">
           <div>
-            <p className="text-xs text-muted-foreground">Rules Version</p>
-            <p className="text-sm font-semibold text-secondary">{data.rulesVersion}</p>
+            <p className="text-xs text-white/75">Rules Version</p>
+            <p className="text-sm font-semibold text-white">{data.rulesVersion}</p>
           </div>
         </div>
 
         {data.uncertain && (
-          <div className="flex items-start gap-2 py-2.5 px-3 rounded-xl bg-amber-50 border border-amber-200">
-            <AlertTriangle className="h-4 w-4 text-amber-600 mt-0.5 flex-shrink-0" />
-            <p className="text-xs text-amber-800">
+          <div className="flex items-start gap-2 py-2.5 px-3 rounded-xl bg-amber-500/10 border border-amber-400/30">
+            <AlertTriangle className="h-4 w-4 text-amber-300 mt-0.5 flex-shrink-0" />
+            <p className="text-xs text-amber-200">
               Jurisdiction boundary could not be precisely determined. Rules shown are our best
               match but should be confirmed with the local planning department.
             </p>
@@ -74,8 +74,8 @@ export function JurisdictionSnapshotCard({ data }: JurisdictionSnapshotCardProps
       </div>
 
       {data.sourceUrls.length > 0 && (
-        <div className="mt-4 pt-3 border-t border-border/50">
-          <p className="text-xs text-muted-foreground mb-1.5">Source References</p>
+        <div className="mt-4 pt-3 border-t border-white/10">
+          <p className="text-xs text-white/75 mb-1.5">Source References</p>
           <div className="flex flex-wrap gap-2">
             {data.sourceUrls.slice(0, 2).map((url, i) => (
               <a
@@ -83,7 +83,7 @@ export function JurisdictionSnapshotCard({ data }: JurisdictionSnapshotCardProps
                 href={url}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center gap-1 py-3.5 -my-3.5 text-xs text-primary hover:text-primary-dark hover:underline transition-colors"
+                className="inline-flex items-center gap-1 py-3.5 -my-3.5 text-xs text-accent-light hover:text-white hover:underline transition-colors"
               >
                 <ExternalLink className="h-3 w-3" />
                 {(() => {

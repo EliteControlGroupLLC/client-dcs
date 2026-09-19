@@ -287,13 +287,13 @@ export function MapboxMap({ analysisData }: MapboxMapProps) {
   // Fallback: static map or placeholder
   if (mapError || !token) {
     return (
-      <div className="bg-white rounded-2xl border border-border overflow-hidden">
-        <div className="p-6 border-b border-border">
+      <div className="bg-secondary-light rounded-2xl border border-white/10 shadow-lg shadow-black/20 overflow-hidden">
+        <div className="p-6 border-b border-white/10">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
-              <Map className="h-5 w-5 text-primary" />
+            <div className="w-10 h-10 rounded-xl bg-primary flex items-center justify-center shrink-0">
+              <Map className="h-5 w-5 text-white" />
             </div>
-            <h3 className="text-xl font-semibold text-secondary">Property Map</h3>
+            <h3 className="text-xl font-semibold text-white">Property Map</h3>
           </div>
         </div>
         {analysisData.staticMapUrl ? (
@@ -314,16 +314,16 @@ export function MapboxMap({ analysisData }: MapboxMapProps) {
             rel="noopener noreferrer"
             className="block"
           >
-            <div className="h-[300px] bg-gradient-to-br from-muted to-border flex items-center justify-center">
+            <div className="h-[300px] bg-gradient-to-br from-secondary to-secondary-light flex items-center justify-center">
               <div className="text-center">
-                <Map className="h-10 w-10 text-muted-foreground mx-auto mb-2" />
-                <p className="text-sm text-muted-foreground">Click to view on Google Maps</p>
+                <Map className="h-10 w-10 text-white/75 mx-auto mb-2" />
+                <p className="text-sm text-white/75">Click to view on Google Maps</p>
               </div>
             </div>
           </a>
         ) : (
-          <div className="h-[300px] bg-gradient-to-br from-muted to-border flex items-center justify-center">
-            <p className="text-sm text-muted-foreground">Map unavailable</p>
+          <div className="h-[300px] bg-gradient-to-br from-secondary to-secondary-light flex items-center justify-center">
+            <p className="text-sm text-white/75">Map unavailable</p>
           </div>
         )}
       </div>
@@ -331,18 +331,18 @@ export function MapboxMap({ analysisData }: MapboxMapProps) {
   }
 
   return (
-    <div className="bg-white rounded-2xl border border-border overflow-hidden">
+    <div className="bg-secondary-light rounded-2xl border border-white/10 shadow-lg shadow-black/20 overflow-hidden">
       {/* Header */}
-      <div className="p-6 border-b border-border">
+      <div className="p-6 border-b border-white/10">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div className="flex items-center gap-3 min-w-0">
-            <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
-              <Map className="h-5 w-5 text-primary" />
+            <div className="w-10 h-10 rounded-xl bg-primary flex items-center justify-center shrink-0">
+              <Map className="h-5 w-5 text-white" />
             </div>
-            <h3 className="text-xl font-semibold text-secondary">Parcel Visualization</h3>
+            <h3 className="text-xl font-semibold text-white">Parcel Visualization</h3>
           </div>
           {visualization && (
-            <span className="inline-flex items-center gap-1.5 text-xs font-medium px-2.5 py-1 rounded-full whitespace-nowrap bg-primary/5 text-primary">
+            <span className="inline-flex items-center gap-1.5 text-xs font-medium px-2.5 py-1 rounded-full whitespace-nowrap bg-emerald-500/10 text-emerald-300">
               {visualization.geometryConfidence}% geometry confidence
             </span>
           )}
@@ -354,10 +354,10 @@ export function MapboxMap({ analysisData }: MapboxMapProps) {
         <div ref={mapContainerRef} className="h-[350px] w-full" />
 
         {!mapLoaded && (
-          <div className="absolute inset-0 bg-muted flex items-center justify-center">
+          <div className="absolute inset-0 bg-secondary flex items-center justify-center">
             <div className="text-center">
-              <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-2" />
-              <p className="text-xs text-muted-foreground">Loading map...</p>
+              <div className="w-8 h-8 border-2 border-accent border-t-transparent rounded-full animate-spin mx-auto mb-2" />
+              <p className="text-xs text-white/75">Loading map...</p>
             </div>
           </div>
         )}
@@ -365,10 +365,10 @@ export function MapboxMap({ analysisData }: MapboxMapProps) {
 
       {/* Layer controls */}
       {visualization && mapLoaded && (
-        <div className="p-3 border-t border-border bg-muted/50">
+        <div className="p-3 border-t border-white/10 bg-secondary">
           <div className="flex items-center gap-1 mb-2">
-            <Layers className="h-3.5 w-3.5 text-muted-foreground" />
-            <span className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Layers</span>
+            <Layers className="h-3.5 w-3.5 text-white/75" />
+            <span className="text-xs font-medium text-white/75 uppercase tracking-wider">Layers</span>
           </div>
           <div className="flex flex-wrap gap-1.5">
             {[
@@ -383,13 +383,13 @@ export function MapboxMap({ analysisData }: MapboxMapProps) {
                 onClick={() => toggleLayer(key)}
                 className={`relative inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium transition-all before:absolute before:-inset-y-[10px] before:inset-x-0 before:content-[''] ${
                   layers[key]
-                    ? "bg-white border border-border shadow-sm"
-                    : "bg-muted border border-transparent text-muted-foreground"
+                    ? "bg-secondary-light border border-white/20 text-white shadow-sm"
+                    : "bg-white/5 border border-transparent text-white/65"
                 }`}
               >
                 <span
-                  className="w-2 h-2 rounded-full"
-                  style={{ backgroundColor: layers[key] ? color : "#E2E8E8" }}
+                  className="w-2 h-2 rounded-full ring-1 ring-white/40"
+                  style={{ backgroundColor: layers[key] ? color : "rgba(255,255,255,0.2)" }}
                 />
                 {label}
                 {layers[key] ? (

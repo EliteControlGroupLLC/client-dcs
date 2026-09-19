@@ -10,27 +10,27 @@ interface FeasibilityBadgeProps {
 const config: Record<FeasibilityLevel, { icon: typeof CheckCircle2; bg: string; text: string; border: string }> = {
   Likely: {
     icon: CheckCircle2,
-    bg: "bg-primary/5",
-    text: "text-primary",
-    border: "border-primary/20",
+    bg: "bg-emerald-500/10",
+    text: "text-emerald-300",
+    border: "border-emerald-400/30",
   },
   Possible: {
     icon: AlertCircle,
-    bg: "bg-primary-light/10",
-    text: "text-secondary-light",
-    border: "border-primary-light/40",
+    bg: "bg-white/5",
+    text: "text-white/80",
+    border: "border-white/20",
   },
   Limited: {
     icon: MinusCircle,
-    bg: "bg-amber-50",
-    text: "text-amber-700",
-    border: "border-amber-200",
+    bg: "bg-amber-500/10",
+    text: "text-amber-200",
+    border: "border-amber-400/30",
   },
   "Not Recommended": {
     icon: XCircle,
-    bg: "bg-red-50",
-    text: "text-red-700",
-    border: "border-red-200",
+    bg: "bg-red-500/10",
+    text: "text-red-300",
+    border: "border-red-400/30",
   },
 };
 

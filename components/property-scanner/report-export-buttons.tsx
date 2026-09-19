@@ -64,19 +64,19 @@ export function ReportExportButtons({ analysisData }: ReportExportButtonsProps) 
   };
 
   return (
-    <div className="bg-primary/5 rounded-2xl border border-primary/20 p-6">
+    <div className="bg-secondary-light rounded-2xl border border-accent/60 ring-1 ring-accent/30 shadow-lg shadow-black/20 p-6">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 bg-primary/10 rounded-xl flex items-center justify-center shrink-0">
-            <FileText className="h-5 w-5 text-primary" />
+          <div className="w-10 h-10 bg-primary rounded-xl flex items-center justify-center shrink-0">
+            <FileText className="h-5 w-5 text-white" />
           </div>
           <div>
-            <h3 className="text-xl font-semibold text-secondary">Your Report is Ready</h3>
-            <p className="text-sm text-muted-foreground">Download or print your ADU Feasibility Report</p>
+            <h3 className="text-xl font-semibold text-white">Your Report is Ready</h3>
+            <p className="text-sm text-white/75">Download or print your ADU Feasibility Report</p>
           </div>
         </div>
         <div className="flex flex-col sm:flex-row gap-3">
-          <Button variant="outline" size="lg" rounded="full" onClick={handlePrint}>
+          <Button variant="outlineWhite" size="lg" rounded="full" onClick={handlePrint}>
             <Printer className="h-4 w-4" />
             Print Report
           </Button>

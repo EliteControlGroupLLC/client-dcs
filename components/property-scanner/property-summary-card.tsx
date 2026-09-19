@@ -92,15 +92,15 @@ const fields: FieldDef[] = [
 
 export function PropertySummaryCard({ data }: PropertySummaryCardProps) {
   return (
-    <div className="bg-white rounded-2xl border border-border p-6 animate-slide-up">
+    <div className="bg-secondary-light rounded-2xl border border-white/10 shadow-lg shadow-black/20 p-6 animate-slide-up">
       <div className="flex flex-wrap items-center justify-between gap-3 mb-5">
         <div className="flex items-center gap-3 min-w-0">
-          <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
-            <Home className="h-5 w-5 text-primary" />
+          <div className="w-10 h-10 rounded-xl bg-primary flex items-center justify-center shrink-0">
+            <Home className="h-5 w-5 text-white" />
           </div>
-          <h3 className="text-xl font-semibold text-secondary">Property Summary</h3>
+          <h3 className="text-xl font-semibold text-white">Property Summary</h3>
         </div>
-        <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted-foreground">
+        <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-white/75">
           <span className="inline-flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-primary" />Verified</span>
           <span className="inline-flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-primary-light" />Cross-checked</span>
           <span className="inline-flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-amber-500" />Estimated</span>
@@ -114,23 +114,23 @@ export function PropertySummaryCard({ data }: PropertySummaryCardProps) {
           return (
             <div
               key={fieldDef.label}
-              className="flex items-start gap-3 py-2.5 px-3 rounded-xl bg-muted/30 border border-border/30 hover:bg-muted/50 transition-colors"
+              className="flex items-start gap-3 py-2.5 px-3 rounded-xl bg-secondary border border-white/10 hover:border-white/20 transition-colors"
             >
-              <Icon className="h-4 w-4 text-muted-foreground mt-0.5 flex-shrink-0" />
+              <Icon className="h-4 w-4 text-white/75 mt-0.5 flex-shrink-0" />
               <div className="flex-1 min-w-0">
                 <div className="flex flex-wrap items-center gap-x-2 gap-y-1 mb-0.5">
-                  <p className="text-xs text-muted-foreground">{fieldDef.label}</p>
+                  <p className="text-xs text-white/75">{fieldDef.label}</p>
                   <ConfidenceBadge
                     status={field.status}
                     confidence={field.confidence}
                     sources={field.sources}
                   />
                 </div>
-                <p className="text-sm font-semibold text-secondary">
+                <p className="text-sm font-semibold text-white">
                   {fieldDef.formatValue(field)}
                 </p>
                 {field.sources?.[0] && fieldDef.label !== "Address" && (
-                  <p className="text-xs text-muted-foreground mt-0.5">Source: {field.sources[0]}</p>
+                  <p className="text-xs text-white/75 mt-0.5">Source: {field.sources[0]}</p>
                 )}
               </div>
             </div>
@@ -138,8 +138,8 @@ export function PropertySummaryCard({ data }: PropertySummaryCardProps) {
         })}
       </div>
 
-      <div className="mt-4 pt-3 border-t border-border/50">
-        <p className="text-xs text-muted-foreground leading-relaxed">
+      <div className="mt-4 pt-3 border-t border-white/10">
+        <p className="text-xs text-white/75 leading-relaxed">
           Values marked &quot;Approx.&quot; should be treated as planning guidance until a site visit,
           survey, and permit-level review confirm the final build conditions.
         </p>

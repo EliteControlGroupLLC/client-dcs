@@ -266,7 +266,7 @@ export function PropertyScanner() {
   const homeAreaSqFt = homeAreaField && homeAreaField.status !== "Unavailable" ? homeAreaField.value : null;
 
   return (
-    <div className="min-h-screen bg-muted">
+    <div className="min-h-screen bg-secondary">
       {/* Hero header — same dark interior hero as the rest of the site
           (pt-40 clears the fixed 81px header with 80px of breathing room). */}
       <section className="bg-secondary bg-[radial-gradient(ellipse_at_top,rgba(51,102,102,0.35),transparent_60%)] text-white pt-40 pb-20">
@@ -322,7 +322,7 @@ export function PropertyScanner() {
                   <button
                     type="button"
                     onClick={handleRescan}
-                    className="inline-flex items-center min-h-11 -my-3 text-sm font-medium text-accent hover:text-accent-light underline underline-offset-4 whitespace-nowrap"
+                    className="inline-flex items-center min-h-11 -my-3 text-sm font-medium text-accent-light hover:text-white underline underline-offset-4 whitespace-nowrap"
                   >
                     Scan different address
                   </button>
@@ -337,7 +337,7 @@ export function PropertyScanner() {
       <div className="relative z-10 mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 -mt-8 pb-20">
         {/* Scanning phase */}
         {phase === "scanning" && (
-          <div className="bg-white rounded-2xl shadow-xl border border-border p-6 sm:p-8">
+          <div className="bg-secondary-light rounded-2xl shadow-lg shadow-black/20 border border-white/10 p-6 sm:p-8">
             <PropertyScanLoading
               address={selectedAddress}
               onComplete={handleScanComplete}
@@ -351,36 +351,36 @@ export function PropertyScanner() {
             role="alert"
             data-testid="scan-lookup-issue"
             data-issue-code={issue.code}
-            className="bg-white rounded-2xl shadow-xl border border-border p-6 sm:p-8 max-w-3xl mx-auto animate-fade-in"
+            className="bg-secondary-light rounded-2xl shadow-lg shadow-black/20 border border-white/10 p-6 sm:p-8 max-w-3xl mx-auto animate-fade-in"
           >
             <div className="flex items-start gap-4">
-              <div className="w-12 h-12 rounded-full bg-primary/10 text-primary flex items-center justify-center flex-shrink-0">
+              <div className="w-12 h-12 rounded-full bg-primary text-white flex items-center justify-center flex-shrink-0">
                 <MapPinOff className="h-6 w-6" />
               </div>
               <div className="min-w-0 flex-1">
-                <h2 className="text-xl font-bold text-secondary">{ISSUE_TITLES[issue.code]}</h2>
+                <h2 className="text-xl font-bold text-white">{ISSUE_TITLES[issue.code]}</h2>
                 {issue.message && (
-                  <p className="text-sm text-muted-foreground mt-2">{issue.message}</p>
+                  <p className="text-sm text-white/80 mt-2">{issue.message}</p>
                 )}
               </div>
             </div>
 
             {issue.candidates.length > 0 && (
               <div className="mt-6">
-                <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-2">
+                <p className="text-xs font-semibold uppercase tracking-wider text-accent-light mb-2">
                   {issue.candidates.length === 1 ? "Did you mean" : "Choose your property"}
                 </p>
-                <div className="rounded-lg border border-border overflow-hidden">
+                <div className="rounded-lg border border-white/10 bg-secondary overflow-hidden">
                   {issue.candidates.map((candidate, index) => (
                     <button
                       type="button"
                       key={candidate}
                       onClick={() => void runScan(candidate)}
-                      className={`w-full flex items-center gap-3 px-5 py-4 text-left text-secondary hover:bg-primary/5 hover:text-primary transition-colors ${
-                        index !== issue.candidates.length - 1 ? "border-b border-border/50" : ""
+                      className={`w-full flex items-center gap-3 px-5 py-4 text-left text-white hover:bg-white/5 hover:text-accent-light transition-colors ${
+                        index !== issue.candidates.length - 1 ? "border-b border-white/10" : ""
                       }`}
                     >
-                      <MapPin className="h-4 w-4 flex-shrink-0 text-muted-foreground" />
+                      <MapPin className="h-4 w-4 flex-shrink-0 text-accent" />
                       <span className="text-sm font-medium">{candidate}</span>
                     </button>
                   ))}
@@ -389,10 +389,10 @@ export function PropertyScanner() {
             )}
 
             <div className="mt-6 flex flex-wrap items-center gap-3">
-              <Button variant="outline" size="lg" rounded="full" onClick={handleEditAddress}>
+              <Button variant="outlineWhite" size="lg" rounded="full" onClick={handleEditAddress}>
                 Edit address
               </Button>
-              <p className="text-sm text-muted-foreground">
+              <p className="text-sm text-white/75">
                 {issue.code === "OUT_OF_AREA"
                   ? "We currently serve properties in San Diego County."
                   : "Tip: start typing and pick your address from the suggestions."}
@@ -498,8 +498,8 @@ export function PropertyScanner() {
             {/* Recommended ADU Paths */}
             <div>
               <div className="mb-6">
-                <h2 className="text-2xl font-bold text-secondary">Recommended ADU Paths</h2>
-                <p className="text-sm text-muted-foreground mt-1">Your property may qualify for the following options</p>
+                <h2 className="text-2xl font-bold text-white">Recommended ADU Paths</h2>
+                <p className="text-sm text-white/75 mt-1">Your property may qualify for the following options</p>
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
@@ -540,17 +540,17 @@ export function PropertyScanner() {
             {/* Data sources and debug info removed from client-facing view */}
 
             {/* Disclaimer */}
-            <div className="bg-muted/50 rounded-2xl border border-border/50 p-5">
-              <p className="text-xs text-muted-foreground text-center leading-relaxed">
+            <div className="bg-white/[0.04] rounded-2xl border border-white/10 p-5">
+              <p className="text-xs text-white/70 text-center leading-relaxed">
                 {analysisData.disclaimer}
               </p>
             </div>
 
             {/* Floor plans + pricing — every TruthCore option so clients can compare */}
-            <div className="bg-white rounded-2xl border border-border p-6 sm:p-8">
+            <div className="bg-secondary-light rounded-2xl border border-white/10 shadow-lg shadow-black/20 p-6 sm:p-8">
               <div className="text-center mb-8">
-                <h2 className="text-2xl font-bold text-secondary">Our ADU Floor Plans &amp; Pricing</h2>
-                <p className="text-sm text-muted-foreground mt-2">
+                <h2 className="text-2xl font-bold text-white">Our ADU Floor Plans &amp; Pricing</h2>
+                <p className="text-sm text-white/75 mt-2">
                   Every option we build, from garage conversions to full detached units. Prices are
                   turnkey estimates — your site review confirms the exact scope.
                 </p>
@@ -559,20 +559,20 @@ export function PropertyScanner() {
                 {FLOOR_PLANS.map((plan) => (
                   <div
                     key={plan.id}
-                    className="rounded-2xl border border-border p-6 flex flex-col h-full"
+                    className="rounded-2xl border border-white/10 bg-secondary p-6 flex flex-col h-full transition-colors hover:border-accent/50"
                   >
                     <div className="flex items-baseline justify-between gap-2">
-                      <h3 className="text-xl font-semibold text-secondary">{plan.name}</h3>
-                      <span className="text-sm text-muted-foreground whitespace-nowrap">
+                      <h3 className="text-xl font-semibold text-white">{plan.name}</h3>
+                      <span className="text-sm text-white/75 whitespace-nowrap">
                         {plan.sqFt.toLocaleString()} sq ft
                       </span>
                     </div>
-                    <p className="text-sm text-muted-foreground mt-1 mb-4">
+                    <p className="text-sm text-white/75 mt-1 mb-4">
                       {plan.bedrooms === 0 ? "Studio" : `${plan.bedrooms} bed`} · {plan.bathrooms} bath
                     </p>
-                    <div className="mt-auto pt-4 border-t border-border">
-                      <div className="text-lg font-bold text-primary">{plan.priceRange}</div>
-                      <div className="text-sm text-muted-foreground mt-1">
+                    <div className="mt-auto pt-4 border-t border-white/10">
+                      <div className="text-lg font-bold text-accent">{plan.priceRange}</div>
+                      <div className="text-sm text-white/75 mt-1">
                         Est. rent ${plan.rentEstimate.low.toLocaleString()}&nbsp;– $
                         {plan.rentEstimate.high.toLocaleString()}/mo
                       </div>
@@ -622,20 +622,20 @@ export function PropertyScanner() {
               ].map((item) => (
                 <div
                   key={item.title}
-                  className="bg-white rounded-2xl border border-border p-6 text-center h-full"
+                  className="bg-secondary-light rounded-2xl border border-white/10 shadow-lg shadow-black/20 p-6 text-center h-full transition-colors hover:border-accent/50"
                 >
-                  <div className="w-12 h-12 rounded-full bg-primary/10 text-primary flex items-center justify-center mx-auto mb-4">
+                  <div className="w-12 h-12 rounded-full bg-primary text-white flex items-center justify-center mx-auto mb-4">
                     <item.icon className="h-5 w-5" />
                   </div>
-                  <h3 className="text-xl font-semibold text-secondary mb-2">{item.title}</h3>
-                  <p className="text-sm text-muted-foreground text-pretty">{item.description}</p>
+                  <h3 className="text-xl font-semibold text-white mb-2">{item.title}</h3>
+                  <p className="text-sm text-white/75 text-pretty">{item.description}</p>
                 </div>
               ))}
             </div>
 
             {/* How it works */}
-            <div className="bg-white rounded-2xl border border-border p-6 sm:p-8">
-              <h2 className="text-2xl font-bold text-secondary text-center mb-8">How It Works</h2>
+            <div className="bg-secondary-light rounded-2xl border border-white/10 shadow-lg shadow-black/20 p-6 sm:p-8">
+              <h2 className="text-2xl font-bold text-white text-center mb-8">How It Works</h2>
               <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
                 {[
                   { step: "1", title: "Enter Address", desc: "Type your San Diego property address" },
@@ -644,11 +644,11 @@ export function PropertyScanner() {
                   { step: "4", title: "Book a Review", desc: "Schedule a free property verification" },
                 ].map((item) => (
                   <div key={item.step} className="text-center">
-                    <div className="w-12 h-12 rounded-full bg-primary/10 text-primary font-bold text-lg flex items-center justify-center mx-auto mb-3">
+                    <div className="w-12 h-12 rounded-full bg-primary text-white font-bold text-lg flex items-center justify-center mx-auto mb-3">
                       {item.step}
                     </div>
-                    <h3 className="text-lg font-semibold text-secondary mb-1">{item.title}</h3>
-                    <p className="text-sm text-muted-foreground">{item.desc}</p>
+                    <h3 className="text-lg font-semibold text-white mb-1">{item.title}</h3>
+                    <p className="text-sm text-white/75">{item.desc}</p>
                   </div>
                 ))}
               </div>

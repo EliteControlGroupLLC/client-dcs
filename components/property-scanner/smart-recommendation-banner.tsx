@@ -7,7 +7,7 @@ interface SmartRecommendationBannerProps {
 
 export function SmartRecommendationBanner({ recommendation, details }: SmartRecommendationBannerProps) {
   return (
-    <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-secondary to-secondary-light p-6 sm:p-8 text-white shadow-xl animate-slide-up" style={{ animationDelay: "0.3s" }}>
+    <div className="relative overflow-hidden rounded-2xl border border-accent/60 ring-1 ring-accent/30 bg-gradient-to-r from-secondary to-secondary-light p-6 sm:p-8 text-white shadow-lg shadow-black/20 animate-slide-up" style={{ animationDelay: "0.3s" }}>
       {/* Soft emerald glow — same wash as the dark sections sitewide */}
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,rgba(51,102,102,0.35),transparent_60%)]" />
 

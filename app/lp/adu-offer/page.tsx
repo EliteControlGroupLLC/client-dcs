@@ -13,7 +13,7 @@ const aduReviews = CLIENT_REVIEWS.filter((review) => review.project.startsWith("
 
 export default function ADUOfferLP() {
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-secondary">
       {/* Hero — Visual-first for Meta/Social */}
       <section className="relative">
         {/* Background Image */}
@@ -67,21 +67,21 @@ export default function ADUOfferLP() {
             </div>
 
             {/* Lead Form */}
-            <div id="lead-form" className="bg-white rounded-2xl p-8 shadow-2xl">
+            <div id="lead-form" className="bg-secondary-light border border-accent/60 ring-1 ring-accent/30 rounded-2xl p-8 shadow-2xl shadow-black/40">
               <LeadForm
                 source="meta-ads-adu-offer"
                 heading="Claim Your Free Design Consultation"
                 buttonText="Get Started — It's Free"
               />
 
-              <div className="mt-6 pt-6 border-t border-border">
+              <div className="mt-6 pt-6 border-t border-white/10">
                 <div className="flex items-center gap-2 mb-2">
                   {[1, 2, 3, 4, 5].map((i) => (
                     <Star key={i} className="h-4 w-4 text-accent fill-accent" />
                   ))}
-                  <span className="text-sm text-muted-foreground ml-1">5.0 rating</span>
+                  <span className="text-sm text-white/75 ml-1">5.0 rating</span>
                 </div>
-                <p className="text-xs text-muted-foreground">
+                <p className="text-xs text-white/75">
                   Join 500+ happy homeowners who built with us
                 </p>
               </div>
@@ -91,9 +91,9 @@ export default function ADUOfferLP() {
       </section>
 
       {/* Reviews — real Google & Yelp reviews from ADU clients, verbatim */}
-      <section className="py-20 bg-muted">
+      <section className="py-20 bg-secondary bg-[radial-gradient(ellipse_at_top,rgba(51,102,102,0.35),transparent_60%)] border-t border-white/10">
         <div className="container mx-auto px-4 max-w-6xl">
-          <h2 className="text-3xl md:text-4xl font-bold text-center text-secondary mb-12">
+          <h2 className="text-3xl md:text-4xl font-bold text-center text-white mb-12">
             What ADU Clients Say
           </h2>
           <ReviewCards reviews={aduReviews} />
@@ -101,12 +101,12 @@ export default function ADUOfferLP() {
       </section>
 
       {/* Why ADU Section */}
-      <section className="py-20">
+      <section className="py-20 bg-secondary border-t border-white/10">
         <div className="container mx-auto px-4 max-w-4xl">
-          <h2 className="text-3xl md:text-4xl font-bold text-center text-secondary mb-4">
+          <h2 className="text-3xl md:text-4xl font-bold text-center text-white mb-4">
             Why Build an ADU?
           </h2>
-          <p className="text-lg text-center text-muted-foreground mb-12 max-w-2xl mx-auto">
+          <p className="text-lg text-center text-white/80 mb-12 max-w-2xl mx-auto">
             San Diego homeowners are adding ADUs to generate income, house family, and increase property value.
           </p>
           <div className="grid sm:grid-cols-2 gap-6">
@@ -116,11 +116,11 @@ export default function ADUOfferLP() {
               { title: "Multi-Generational Living", desc: "Keep family close with private space" },
               { title: "Home Office", desc: "A dedicated workspace steps from your home" },
             ].map((item) => (
-              <div key={item.title} className="flex items-start gap-4 p-4">
-                <CheckCircle className="h-5 w-5 text-primary shrink-0 mt-0.5" />
+              <div key={item.title} className="flex h-full items-start gap-4 rounded-2xl border border-white/10 bg-secondary-light p-6 shadow-lg shadow-black/20 transition-colors hover:border-accent/50">
+                <CheckCircle className="h-5 w-5 text-accent shrink-0 mt-0.5" />
                 <div>
-                  <h3 className="font-semibold text-secondary">{item.title}</h3>
-                  <p className="text-sm text-muted-foreground">{item.desc}</p>
+                  <h3 className="font-semibold text-white">{item.title}</h3>
+                  <p className="text-sm text-white/75">{item.desc}</p>
                 </div>
               </div>
             ))}
@@ -129,13 +129,13 @@ export default function ADUOfferLP() {
       </section>
 
       {/* Before/After Gallery */}
-      <section className="py-20 bg-secondary">
+      <section className="py-20 bg-secondary bg-[radial-gradient(ellipse_at_top,rgba(51,102,102,0.35),transparent_60%)] border-t border-white/10">
         <div className="container mx-auto px-4 max-w-6xl">
           <h2 className="text-3xl md:text-4xl font-bold text-center text-white mb-12">
             Our Recent Projects
           </h2>
           <div className="grid sm:grid-cols-3 gap-6">
-            <div className="relative aspect-square rounded-2xl overflow-hidden">
+            <div className="relative aspect-square rounded-2xl overflow-hidden border border-white/10 shadow-lg shadow-black/20">
               <Image
                 src="/images/projects/adu-exterior-balcony.webp"
                 alt="Modern ADU with balcony"
@@ -144,7 +144,7 @@ export default function ADUOfferLP() {
                 className="object-cover hover:scale-105 transition-transform duration-500"
               />
             </div>
-            <div className="relative aspect-square rounded-2xl overflow-hidden">
+            <div className="relative aspect-square rounded-2xl overflow-hidden border border-white/10 shadow-lg shadow-black/20">
               <Image
                 src="/images/projects/adu-exterior-side.webp"
                 alt="Detached ADU exterior side view"
@@ -153,7 +153,7 @@ export default function ADUOfferLP() {
                 className="object-cover hover:scale-105 transition-transform duration-500"
               />
             </div>
-            <div className="relative aspect-square rounded-2xl overflow-hidden">
+            <div className="relative aspect-square rounded-2xl overflow-hidden border border-white/10 shadow-lg shadow-black/20">
               <Image
                 src="/images/projects/kitchen-remodel.webp"
                 alt="Premium kitchen remodel"
@@ -167,23 +167,23 @@ export default function ADUOfferLP() {
       </section>
 
       {/* Final CTA */}
-      <section className="py-20 bg-primary text-center">
+      <section className="py-20 bg-secondary bg-[radial-gradient(ellipse_at_bottom,rgba(51,102,102,0.35),transparent_60%)] border-t border-white/10 text-center">
         <div className="container mx-auto px-4 max-w-2xl">
           <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">
             Start Building Your ADU Today
           </h2>
-          <p className="text-lg text-white/85 mb-8">
+          <p className="text-lg text-white/80 mb-8">
             Join 500+ San Diego homeowners. Free consultation, fixed-price quotes, and a team that handles everything.
           </p>
           <div className="flex flex-col sm:flex-row justify-center gap-4">
             <a href={`tel:${COMPANY_INFO.phoneHref}`}>
-              <Button size="lg" rounded="full" variant="secondary" className="w-full sm:w-auto">
+              <Button size="lg" rounded="full" variant="outlineWhite" className="w-full sm:w-auto">
                 <Phone className="h-5 w-5" />
                 Call {COMPANY_INFO.phone}
               </Button>
             </a>
             <Link href="#lead-form">
-              <Button size="lg" rounded="full" className="w-full sm:w-auto bg-white text-secondary shadow-lg shadow-secondary/20 hover:bg-white/90">
+              <Button size="lg" rounded="full" className="w-full sm:w-auto">
                 Get Free Quote
                 <ArrowRight className="h-5 w-5" />
               </Button>

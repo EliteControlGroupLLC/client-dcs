@@ -94,11 +94,11 @@ export function LeadForm({
   if (submitted) {
     return (
       <div className="text-center py-8">
-        <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4">
-          <CheckCircle className="h-8 w-8 text-primary" />
+        <div className="w-16 h-16 bg-primary rounded-full flex items-center justify-center mx-auto mb-4">
+          <CheckCircle className="h-8 w-8 text-white" />
         </div>
-        <h3 className="text-xl font-semibold text-secondary mb-2">Thank You!</h3>
-        <p className="text-muted-foreground">
+        <h3 className="text-xl font-semibold text-white mb-2">Thank You!</h3>
+        <p className="text-white/80">
           We&apos;ll call you within 24 hours to discuss your project.
         </p>
       </div>
@@ -115,12 +115,13 @@ export function LeadForm({
   return (
     <form onSubmit={handleSubmit} noValidate className={compact ? "space-y-3" : "space-y-4"}>
       {heading && (
-        <h3 className={`font-semibold text-secondary ${compact ? "text-lg" : "text-xl"}`}>
+        <h3 className={`font-semibold text-white ${compact ? "text-lg" : "text-xl"}`}>
           {heading}
         </h3>
       )}
-      <FormField label="Full name" htmlFor={`${idPrefix}-name`} error={fieldErrors.name}>
+      <FormField tone="dark" label="Full name" htmlFor={`${idPrefix}-name`} error={fieldErrors.name}>
         <Input
+          tone="dark"
           id={`${idPrefix}-name`}
           autoComplete="name"
           value={formData.name}
@@ -129,8 +130,9 @@ export function LeadForm({
           invalid={!!fieldErrors.name}
         />
       </FormField>
-      <FormField label="Email" htmlFor={`${idPrefix}-email`} error={fieldErrors.email}>
+      <FormField tone="dark" label="Email" htmlFor={`${idPrefix}-email`} error={fieldErrors.email}>
         <Input
+          tone="dark"
           id={`${idPrefix}-email`}
           type="email"
           autoComplete="email"
@@ -140,8 +142,9 @@ export function LeadForm({
           invalid={!!fieldErrors.email}
         />
       </FormField>
-      <FormField label="Phone" htmlFor={`${idPrefix}-phone`} error={fieldErrors.phone}>
+      <FormField tone="dark" label="Phone" htmlFor={`${idPrefix}-phone`} error={fieldErrors.phone}>
         <Input
+          tone="dark"
           id={`${idPrefix}-phone`}
           type="tel"
           autoComplete="tel"
@@ -151,8 +154,9 @@ export function LeadForm({
           invalid={!!fieldErrors.phone}
         />
       </FormField>
-      <FormField label="Project type" htmlFor={`${idPrefix}-project`}>
+      <FormField tone="dark" label="Project type" htmlFor={`${idPrefix}-project`}>
         <Select
+          tone="dark"
           id={`${idPrefix}-project`}
           value={formData.project}
           onChange={(e) => update("project", e.target.value)}
@@ -164,12 +168,12 @@ export function LeadForm({
           <option value="Other">Other</option>
         </Select>
       </FormField>
-      <FormAlert>{error}</FormAlert>
+      <FormAlert tone="dark">{error}</FormAlert>
       <Button type="submit" size="lg" rounded="full" className="w-full group" disabled={isSubmitting}>
         {isSubmitting ? "Submitting..." : buttonText}
         <ArrowRight className="h-5 w-5 group-hover:translate-x-1 transition-transform" />
       </Button>
-      <p className="text-xs text-center text-muted-foreground">
+      <p className="text-xs text-center text-white/75">
         No obligation. We&apos;ll never share your info.
       </p>
     </form>
