@@ -9,7 +9,9 @@
   --primary-foreground: #FFFFFF;
   --secondary: #1A2B2B;      /* Deep emerald-charcoal (dark sections) */
   --secondary-light: #2C4747;
+  --secondary-foreground: #FFFFFF;
   --accent: #B99A5A;         /* Antique Gold — large/decorative or on dark only */
+  --accent-light: #D8C49A;   /* Pale gold — names/hover text on dark surfaces */
 
   /* Semantic Colors */
   --background: #ffffff;
@@ -37,7 +39,9 @@
   --color-primary-foreground: var(--primary-foreground);
   --color-secondary: var(--secondary);
   --color-secondary-light: var(--secondary-light);
+  --color-secondary-foreground: var(--secondary-foreground);
   --color-accent: var(--accent);
+  --color-accent-light: var(--accent-light);
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --color-muted: var(--muted);
@@ -60,8 +64,14 @@
   --radius-xl: calc(var(--radius) + 8px);
 }
 
-* {
-  border-color: var(--border);
+/* Default border color. Layered (not a bare rule) so border-color utilities
+   such as border-white/20 or border-accent/30 still win over it. */
+@layer base {
+  *,
+  ::before,
+  ::after {
+    border-color: var(--border);
+  }
 }
 
 body {
@@ -146,12 +156,4 @@ html {
   background: rgba(255, 255, 255, 0.08);
   backdrop-filter: blur(12px);
   border: 1px solid rgba(255, 255, 255, 0.15);
-}
-
-/* Architectural grid pattern */
-.architectural-grid {
-  background-image:
-    linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px);
-  background-size: 60px 60px;
 }

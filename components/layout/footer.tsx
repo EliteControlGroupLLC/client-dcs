@@ -49,7 +49,6 @@ const trustBadges = [
 export function Footer() {
   return (
     <footer className="relative bg-secondary text-white overflow-hidden">
-      {/* Architectural grid pattern */}
 
       {/* Soft CTA Section - Replaces Newsletter */}
       <div className="relative border-b border-white/10">
@@ -64,7 +63,7 @@ export function Footer() {
             <Link href="/build-your-adu">
               <Button variant="default" size="lg" rounded="full" className="group">
                 Start Building Your ADU
-                <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />
+                <ArrowRight className="h-5 w-5 group-hover:translate-x-1 transition-transform" aria-hidden="true" />
               </Button>
             </Link>
           </div>
@@ -78,7 +77,7 @@ export function Footer() {
             {trustBadges.map((badge) => (
               <div key={badge.label} className="flex items-center gap-3 text-sm text-white/80">
                 <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center shrink-0">
-                  <badge.icon className="h-4 w-4 text-primary-light" />
+                  <badge.icon className="h-4 w-4 text-primary-light" aria-hidden="true" />
                 </div>
                 <span>{badge.label}</span>
               </div>
@@ -89,9 +88,9 @@ export function Footer() {
 
       {/* Main Footer */}
       <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-16">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-12">
+        <div className="grid grid-cols-2 lg:grid-cols-6 gap-x-8 gap-y-12">
           {/* Brand Column */}
-          <div className="lg:col-span-2">
+          <div className="col-span-2">
             <Link href="/" className="flex items-center gap-3 mb-3" aria-label="TruthCore — Home">
               {/* TruthCore wordmark, two-color version for dark backgrounds */}
               <Logo variant="light" className="h-7 w-auto" />

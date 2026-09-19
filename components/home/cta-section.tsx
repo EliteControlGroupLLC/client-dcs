@@ -40,7 +40,7 @@ export function CTASection() {
   const { ref: cardsRef, isVisible: cardsVisible, getDelay } = useStaggeredAnimation(150);
 
   return (
-    <section className="py-24 relative overflow-hidden">
+    <section className="py-20 relative overflow-hidden">
       {/* Gradient background - green to deep blue */}
       <div className="absolute inset-0 bg-gradient-to-br from-primary via-primary-dark to-secondary" />
 
@@ -53,17 +53,14 @@ export function CTASection() {
         {/* Header */}
         <div
           ref={headerRef}
-          className={`text-center max-w-3xl mx-auto mb-16 transition-all duration-700 ${headerVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"}`}
+          className={`text-center max-w-3xl mx-auto mb-12 transition-all duration-700 ${headerVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"}`}
         >
-          <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold mb-6 text-white text-balance">
+          <h2 className="text-3xl md:text-4xl font-bold mb-4 text-white text-balance">
             Start Designing Your ADU Today
           </h2>
-          <p className="text-lg text-white/80 leading-relaxed mb-2">
+          <p className="text-lg text-white/80 leading-relaxed">
             Explore what you can build on your property, see real pricing, and
             design your future space in minutes.
-          </p>
-          <p className="text-white/60">
-            No pressure. No obligations. Just clarity.
           </p>
         </div>
 
@@ -73,30 +70,26 @@ export function CTASection() {
             <div
               key={option.title}
               style={{ transitionDelay: cardsVisible ? getDelay(index) : "0ms" }}
-              className={`group rounded-2xl p-8 transition-all duration-500 hover:-translate-y-2 ${cardsVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"} ${
+              className={`group flex h-full flex-col rounded-2xl p-8 transition-all duration-500 hover:-translate-y-2 ${cardsVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"} ${
                 option.primary
-                  ? "bg-white text-secondary shadow-2xl shadow-black/20 ring-2 ring-white/50"
+                  ? "bg-white text-secondary border border-white shadow-2xl shadow-black/20"
                   : "bg-white/10 backdrop-blur-md border border-white/20 hover:bg-white/15"
               }`}
             >
               {/* Icon */}
               <div
-                className={`w-16 h-16 rounded-2xl flex items-center justify-center mb-6 ${
+                className={`w-14 h-14 rounded-xl flex items-center justify-center mb-6 ${
                   option.primary
                     ? "bg-gradient-to-br from-primary to-primary-dark shadow-lg shadow-primary/30"
                     : "bg-white/10"
                 }`}
               >
-                <option.icon
-                  className={`h-8 w-8 ${
-                    option.primary ? "text-white" : "text-white"
-                  }`}
-                />
+                <option.icon className="h-7 w-7 text-white" aria-hidden="true" />
               </div>
 
               {/* Title */}
               <h3
-                className={`text-xl font-bold mb-3 ${
+                className={`text-xl font-semibold mb-3 ${
                   option.primary ? "text-secondary" : "text-white"
                 }`}
               >
@@ -113,7 +106,7 @@ export function CTASection() {
               </p>
 
               {/* Button */}
-              <Link href={option.href}>
+              <Link href={option.href} className="mt-auto">
                 <Button
                   variant={option.primary ? "default" : "outlineWhite"}
                   size="default"
@@ -131,7 +124,7 @@ export function CTASection() {
         </div>
 
         {/* Footer reassurance text */}
-        <p className="text-center text-white/50 text-sm mt-16">
+        <p className="text-center text-white/60 text-sm mt-12">
           No pressure. No obligations. Just expert guidance when you&apos;re ready.
         </p>
       </div>

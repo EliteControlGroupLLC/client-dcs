@@ -18,7 +18,7 @@ function ReviewText({ text }: { text: string }) {
         <button
           type="button"
           onClick={() => setExpanded((v) => !v)}
-          className="mt-3 text-[11px] font-semibold uppercase tracking-[0.2em] text-[#B99A5A] transition-colors hover:text-[#D8C49A]"
+          className="mt-3 text-xs font-semibold uppercase tracking-[0.2em] text-accent transition-colors hover:text-accent-light"
         >
           {expanded ? "Show less" : "Read full review"}
         </button>
@@ -31,7 +31,7 @@ function GoldStars({ className = "h-3.5 w-3.5" }: { className?: string }) {
   return (
     <span className="flex gap-0.5" role="img" aria-label="5 out of 5 stars">
       {[1, 2, 3, 4, 5].map((i) => (
-        <Star key={i} aria-hidden="true" className={`${className} fill-[#B99A5A] text-[#B99A5A]`} />
+        <Star key={i} aria-hidden="true" className={`${className} fill-accent text-accent`} />
       ))}
     </span>
   );
@@ -44,8 +44,8 @@ export function GoogleReviews() {
   // If all reviews are pending, show a simplified CTA section instead
   if (hasPendingReviews) {
     return (
-      <section className="py-16 bg-muted">
-        <div className="container mx-auto px-4 max-w-4xl text-center">
+      <section className="py-20 bg-muted">
+        <div className="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8 text-center">
           <div className="flex items-center justify-center gap-2 mb-4">
             <svg className="h-8 w-8" viewBox="0 0 24 24">
               <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 01-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z"/>
@@ -73,20 +73,20 @@ export function GoogleReviews() {
   }
 
   return (
-    <section id="reviews" className="relative scroll-mt-24 overflow-hidden bg-[#1A2B2B] py-24">
+    <section id="reviews" className="relative scroll-mt-20 overflow-hidden bg-secondary py-20">
       {/* Soft emerald wash for depth */}
       <div
         aria-hidden="true"
         className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_top,rgba(51,102,102,0.35),transparent_60%)]"
       />
-      <div className="container relative mx-auto max-w-6xl px-4">
+      <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         {/* Header */}
-        <div className="mb-14 text-center">
-          <p className="text-[11px] font-semibold uppercase tracking-[0.32em] text-[#B99A5A]">
+        <div className="mb-12 text-center">
+          <span className="inline-block mb-4 text-sm font-semibold uppercase tracking-wider text-accent">
             Client Reviews
-          </p>
-          <h2 className="mt-4 font-serif text-4xl text-white md:text-5xl">In their words</h2>
-          <div className="mx-auto mt-6 h-px w-16 bg-[#B99A5A]/60" aria-hidden="true" />
+          </span>
+          <h2 className="font-serif text-3xl font-semibold text-white md:text-4xl">In their words</h2>
+          <div className="mx-auto mt-6 h-px w-16 bg-accent/60" aria-hidden="true" />
           <div className="mt-6 flex items-center justify-center gap-3">
             <GoldStars className="h-4 w-4" />
             <span className="text-sm text-white/60">5.0 from homeowners on Google &amp; Yelp</span>
@@ -98,13 +98,11 @@ export function GoogleReviews() {
           {reviews.map((review, index) => (
             <figure
               key={`${review.author}-${index}`}
-              className={`flex h-full flex-col rounded-xl border bg-white/[0.04] p-7 ${index === 0 ? "md:col-span-2" : ""} backdrop-blur-sm transition-colors duration-300 hover:bg-white/[0.07]`}
-              // Inline so the site-wide `* { border-color }` rule can't override the gold hairline.
-              style={{ borderColor: "rgba(185, 154, 90, 0.3)" }}
+              className={`flex h-full flex-col rounded-2xl border border-accent/30 bg-white/[0.04] p-6 sm:p-8 ${index === 0 ? "md:col-span-2" : ""} backdrop-blur-sm transition-colors duration-300 hover:bg-white/[0.07]`}
             >
               <div className="mb-5 flex items-center justify-between">
                 <GoldStars />
-                <span className="text-[10px] font-semibold uppercase tracking-[0.24em] text-white/45">
+                <span className="text-xs font-semibold uppercase tracking-[0.2em] text-white/50">
                   {review.source}
                   {review.date ? ` · ${review.date}` : ""}
                 </span>
@@ -112,9 +110,9 @@ export function GoogleReviews() {
               <blockquote className="flex-1">
                 <ReviewText text={review.text} />
               </blockquote>
-              <div className="mt-6 h-px w-10 bg-[#B99A5A]/50" aria-hidden="true" />
+              <div className="mt-6 h-px w-12 bg-accent/50" aria-hidden="true" />
               <figcaption className="mt-4">
-                <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-[#D8C49A]">{review.author}</p>
+                <p className="text-xs font-semibold uppercase tracking-[0.2em] text-accent-light">{review.author}</p>
                 <p className="mt-1 text-xs text-white/50">{review.project}</p>
               </figcaption>
             </figure>
@@ -127,8 +125,7 @@ export function GoogleReviews() {
             href="https://www.google.com/search?q=Distinct+Construction+Solutions+Chula+Vista+reviews"
             target="_blank"
             rel="noopener noreferrer"
-            style={{ borderColor: "rgba(185, 154, 90, 0.5)" }}
-            className="inline-flex items-center gap-2 border-b pb-1 text-[11px] font-semibold uppercase tracking-[0.24em] text-[#B99A5A] transition-colors hover:text-[#D8C49A]"
+            className="inline-flex items-center gap-2 border-b border-accent/50 pb-1 text-xs font-semibold uppercase tracking-[0.2em] text-accent transition-colors hover:text-accent-light"
           >
             See all reviews on Google
             <ExternalLink className="h-3.5 w-3.5" />

@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { ArrowRight, Shield, BadgeCheck, Scale, Eye, MessageCircle } from "lucide-react";
+import { ArrowRight, Shield, Scale, Eye, MessageCircle } from "lucide-react";
 import { useState, useRef, useEffect, useCallback } from "react";
 import { COMPANY_INFO, getYearsExperience } from "@/lib/data/site-data";
 import { HeroReviewTicker } from "@/components/home/hero-review-ticker";
@@ -18,6 +18,8 @@ const scripture = {
   text: "In all the work you are doing, work the best you can. Work as if you are working for the Lord, not for people. Remember that you will receive your reward from the Lord, who will give you what he promised his people. You are serving the Lord Christ.",
   reference: "Colossians 3:23-24",
 };
+
+const benefits = ["Fixed-Price Contracts", "In-House Design Team", "Design, Permits & Construction"];
 
 const pillars = [
   { icon: Scale, title: "Truth", text: "Honest answers and real numbers, even when it isn't what you hoped to hear." },
@@ -123,10 +125,14 @@ export function Hero() {
         <div className="grid md:grid-cols-2 gap-8 lg:gap-12 items-center">
           {/* Left Content */}
           <div className="text-white">
-            {/* Trust badge */}
-            <div className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-sm rounded-full px-4 py-2 mb-8">
-              <Shield className="h-4 w-4 text-primary-light" />
-              <span className="text-sm">TruthCore &middot; a DBA of {COMPANY_INFO.name}</span>
+            {/* Trust badge — on narrow columns (phones, tablets) the short form drops
+                the repeated "TruthCore" (the logo is right above) to stay on one line. */}
+            <div className="inline-flex max-w-full items-center gap-2 bg-white/10 backdrop-blur-sm rounded-full px-4 py-2 mb-8">
+              <Shield className="h-4 w-4 shrink-0 text-primary-light" aria-hidden="true" />
+              <span className="text-sm whitespace-nowrap">
+                <span className="lg:hidden">A DBA of {COMPANY_INFO.name}</span>
+                <span className="hidden lg:inline">TruthCore &middot; a DBA of {COMPANY_INFO.name}</span>
+              </span>
             </div>
 
             <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold leading-tight mb-6">
@@ -142,44 +148,37 @@ export function Hero() {
             </p>
 
             {/* Key benefits */}
-            <div className="flex flex-wrap gap-6 mb-8">
-              <div className="flex items-center gap-2 text-sm text-white/70">
-                <div className="w-2 h-2 rounded-full bg-primary-light" />
-                Fixed-Price Contracts
-              </div>
-              <div className="flex items-center gap-2 text-sm text-white/70">
-                <div className="w-2 h-2 rounded-full bg-primary-light" />
-                In-House Design Team
-              </div>
-              <div className="flex items-center gap-2 text-sm text-white/70">
-                <BadgeCheck className="h-4 w-4 text-primary-light" />
-                Design, Permits &amp; Construction
-              </div>
-            </div>
+            <ul className="flex flex-wrap gap-x-6 gap-y-3 mb-8">
+              {benefits.map((benefit) => (
+                <li key={benefit} className="flex items-center gap-2 text-sm text-white/70">
+                  <span className="w-2 h-2 rounded-full bg-primary-light shrink-0" aria-hidden="true" />
+                  {benefit}
+                </li>
+              ))}
+            </ul>
 
             {/* CTAs */}
-            <div className="flex flex-wrap gap-4 mb-12">
-              <Link href="/contact">
-                <Button size="lg" rounded="full" className="group">
+            <div className="flex flex-col sm:flex-row gap-4 mb-12">
+              <Link href="/contact" className="w-full sm:w-auto">
+                <Button size="lg" rounded="full" className="group w-full sm:w-auto">
                   Start Your Project
                   <ArrowRight className="h-5 w-5 group-hover:translate-x-1 transition-transform" />
                 </Button>
               </Link>
-              <Link href="/planning-tools">
-                <Button variant="outlineWhite" size="lg" rounded="full">
+              <Link href="/planning-tools" className="w-full sm:w-auto">
+                <Button variant="outlineWhite" size="lg" rounded="full" className="w-full sm:w-auto">
                   Get an Instant Estimate
                 </Button>
               </Link>
             </div>
 
             {/* Stats */}
-            <div className="grid grid-cols-3 gap-6">
+            {/* Phones: content-width columns spread edge to edge so every label stays on one line */}
+            <div className="flex justify-between gap-4 sm:grid sm:grid-cols-3 sm:gap-6">
               {stats.map((stat) => (
-                <div key={stat.label} className="text-center sm:text-left">
-                  <div className="flex items-center justify-center sm:justify-start gap-1">
-                    <span className="text-2xl sm:text-3xl font-bold text-white">{stat.value}</span>
-                  </div>
-                  <span className="text-xs sm:text-sm text-white/60">{stat.label}</span>
+                <div key={stat.label}>
+                  <div className="text-2xl sm:text-3xl font-bold text-white">{stat.value}</div>
+                  <div className="text-xs sm:text-sm text-white/60 min-[380px]:whitespace-nowrap">{stat.label}</div>
                 </div>
               ))}
             </div>
@@ -187,7 +186,7 @@ export function Hero() {
 
           {/* Right Content - Featured Info Card */}
           <div className="relative">
-            <div className="relative rounded-3xl overflow-hidden shadow-2xl bg-white/10 backdrop-blur-md border border-white/20 p-6 sm:p-8">
+            <div className="relative rounded-2xl overflow-hidden shadow-2xl bg-white/10 backdrop-blur-md border border-white/20 p-6 sm:p-8">
               <p className="text-xs font-semibold uppercase tracking-[0.2em] text-accent mb-4">
                 The Standard We Build By
               </p>
@@ -209,7 +208,7 @@ export function Hero() {
                 {pillars.map((pillar) => (
                   <div key={pillar.title} className="flex items-start gap-3">
                     <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center flex-shrink-0 mt-0.5">
-                      <pillar.icon className="h-4 w-4 text-primary-light" />
+                      <pillar.icon className="h-4 w-4 text-primary-light" aria-hidden="true" />
                     </div>
                     <div>
                       <p className="font-semibold text-white">{pillar.title}</p>

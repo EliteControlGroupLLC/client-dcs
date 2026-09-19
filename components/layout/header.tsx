@@ -135,7 +135,7 @@ export function Header() {
             : "bg-secondary/90 backdrop-blur-md border-b border-white/6"
       }`}
     >
-      <nav className="mx-auto max-w-7xl px-5 sm:px-6 lg:px-8" aria-label="Main">
+      <nav className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8" aria-label="Main">
         <div className="flex h-20 items-center justify-between gap-6">
           {/* Logo */}
           <Link href="/" className="flex items-center shrink-0" aria-label="TruthCore — Home">
@@ -270,7 +270,7 @@ export function Header() {
           {/* Mobile menu button */}
           <button
             type="button"
-            className={`lg:hidden -mr-2 rounded-full p-2 transition-colors ${
+            className={`lg:hidden -mr-2.5 rounded-full p-2.5 transition-colors ${
               light ? "text-secondary hover:bg-secondary/5" : "text-white hover:bg-white/10"
             }`}
             aria-label={isOpen ? "Close menu" : "Open menu"}
@@ -290,19 +290,21 @@ export function Header() {
           onClick={closeOnLinkClick}
           className="lg:hidden absolute inset-x-0 top-full h-[calc(100dvh-5rem)] overflow-y-auto overscroll-contain bg-white"
         >
-          <div className="mx-auto max-w-7xl px-5 sm:px-6 pt-4 pb-10">
-            <Link
-              href="/"
-              className={`block py-3 text-[17px] font-medium ${pathname === "/" ? "text-secondary" : "text-secondary/80"}`}
-            >
-              Home
-            </Link>
+          <div className="mx-auto max-w-7xl px-4 sm:px-6 pt-2 pb-10">
+            <div className="py-4">
+              <Link
+                href="/"
+                className={`flex min-h-11 items-center text-[17px] font-medium ${pathname === "/" ? "text-secondary" : "text-secondary/80"}`}
+              >
+                Home
+              </Link>
+            </div>
 
             {navigation.map((item) => (
               <div key={item.name} className="border-t border-secondary/8 py-4">
                 {item.children ? (
                   <>
-                    <p className="mb-2 text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">
+                    <p className="mb-1 text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">
                       {item.name}
                     </p>
                     <div className={item.columns === 2 ? "grid grid-cols-2 gap-x-4" : ""}>
@@ -314,7 +316,7 @@ export function Header() {
                             key={child.name}
                             href={child.href}
                             {...(external ? { target: "_blank", rel: "noopener noreferrer" } : {})}
-                            className={`flex items-center gap-1 py-2 text-[15px] ${
+                            className={`flex min-h-11 items-center gap-1 text-[15px] ${
                               childActive ? "font-medium text-primary-dark" : "text-secondary/85"
                             }`}
                           >
@@ -327,7 +329,7 @@ export function Header() {
                     {item.href && (
                       <Link
                         href={item.href}
-                        className="mt-1 inline-flex items-center gap-1 py-2 text-[14px] font-medium text-secondary"
+                        className="inline-flex min-h-11 items-center gap-1 text-[14px] font-medium text-secondary"
                       >
                         View all {item.name.toLowerCase()}
                         <ArrowRight className="h-3.5 w-3.5" aria-hidden />
@@ -337,7 +339,7 @@ export function Header() {
                 ) : (
                   <Link
                     href={item.href!}
-                    className={`block py-1 text-[17px] font-medium ${
+                    className={`flex min-h-11 items-center text-[17px] font-medium ${
                       isActive(pathname, item.href) ? "text-secondary" : "text-secondary/80"
                     }`}
                   >

@@ -19,7 +19,7 @@ export function Process() {
   const { ref: stepsRef, isVisible: stepsVisible, getDelay } = useStaggeredAnimation(120);
 
   return (
-    <section className="relative py-24 overflow-hidden">
+    <section className="relative py-20 overflow-hidden">
       {/* Background Image */}
       <div className="absolute inset-0">
         <Image
@@ -32,23 +32,22 @@ export function Process() {
         <div className="absolute inset-0 bg-secondary/90" />
         <div className="absolute inset-0 bg-gradient-to-b from-secondary/95 via-secondary/85 to-secondary/95" />
       </div>
-      {/* Architectural grid overlay */}
 
       <div className="relative z-10 mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         {/* Header */}
         <div
           ref={headerRef}
-          className={`text-center max-w-3xl mx-auto mb-16 transition-all duration-700 ${headerVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"}`}
+          className={`text-center max-w-3xl mx-auto mb-12 transition-all duration-700 ${headerVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"}`}
         >
           <span className="inline-block text-primary-light font-semibold text-sm uppercase tracking-wider mb-4">
             OUR PROCESS
           </span>
-          <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-white mb-6 text-balance">
+          <h2 className="text-3xl md:text-4xl font-bold text-white mb-4 text-balance">
             Simple, Transparent, Proven Process
           </h2>
           <p className="text-lg text-white/70 leading-relaxed">
-            We've structured our process to help homeowners plan with confidence
-            and move smoothly from idea to completed project. Here's how we turn
+            We&apos;ve structured our process to help homeowners plan with confidence
+            and move smoothly from idea to completed project. Here&apos;s how we turn
             your vision into reality.
           </p>
         </div>
@@ -68,20 +67,20 @@ export function Process() {
                 style={{ transitionDelay: stepsVisible ? getDelay(index) : "0ms" }}
               >
                 {/* Step card */}
-                <div className={`bg-white/10 backdrop-blur-lg border border-white/20 rounded-2xl p-6 h-full hover:bg-white/15 hover:border-white/30 transition-all duration-500 ${stepsVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"}`}>
+                <div className={`flex flex-col bg-white/10 backdrop-blur-lg border border-white/20 rounded-2xl p-6 h-full hover:bg-white/15 hover:border-white/30 transition-all duration-500 ${stepsVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"}`}>
                   {/* Icon circle */}
                   <div className="relative z-10 w-14 h-14 rounded-full bg-primary/20 border-2 border-primary flex items-center justify-center mb-5 mx-auto">
-                    <Icon className="h-6 w-6 text-primary-light" />
+                    <Icon className="h-6 w-6 text-primary-light" aria-hidden="true" />
                   </div>
 
-                  <div className="text-center">
+                  <div className="flex flex-1 flex-col items-center text-center">
                     {/* Step number */}
                     <span className="text-xs font-semibold text-primary-light/60 uppercase tracking-wider">
                       Step {step.number}
                     </span>
 
                     {/* Title */}
-                    <h3 className="text-lg font-bold text-white mt-2 mb-3 text-balance">
+                    <h3 className="text-lg font-semibold text-white mt-2 mb-3 text-balance">
                       {step.title}
                     </h3>
 
@@ -90,8 +89,8 @@ export function Process() {
                       {step.description}
                     </p>
 
-                    {/* Timeline badge */}
-                    <span className="inline-flex items-center text-xs font-medium text-primary-light bg-primary/10 border border-primary/20 px-3 py-1.5 rounded-full">
+                    {/* Timeline badge — pinned to the card bottom so all five line up */}
+                    <span className="mt-auto inline-flex items-center text-xs font-medium text-primary-light bg-primary/10 border border-primary/20 px-3 py-1.5 rounded-full">
                       {step.timeline}
                     </span>
                   </div>

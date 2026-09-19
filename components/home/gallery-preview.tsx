@@ -22,7 +22,7 @@ export function GalleryPreview() {
   const { ref: statsRef, isVisible: statsVisible } = useScrollAnimation();
 
   return (
-    <section className="py-24 relative overflow-hidden">
+    <section className="py-20 relative overflow-hidden">
       {/* Subtle architectural background */}
       <div className="absolute inset-0">
         <Image
@@ -45,7 +45,7 @@ export function GalleryPreview() {
             <span className="inline-flex items-center gap-2 text-primary font-semibold text-sm uppercase tracking-wider mb-4">
               Our Work
             </span>
-            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-secondary text-balance">
+            <h2 className="text-3xl md:text-4xl font-bold text-secondary text-balance">
               Featured Projects
             </h2>
           </div>
@@ -64,7 +64,7 @@ export function GalleryPreview() {
               key={project.id} 
               href={`/gallery/${project.id}`}
               className={`group relative overflow-hidden rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 aspect-[4/3] ${
-                index === 0 ? "md:col-span-2 md:row-span-2 md:aspect-square" : ""
+                index === 0 ? "md:col-span-2 lg:row-span-2 lg:aspect-auto" : ""
               }`}
             >
               {/* Project image */}
@@ -86,7 +86,7 @@ export function GalleryPreview() {
               {/* Project info with glass effect */}
               <div className="absolute inset-0 p-6 flex flex-col justify-end">
                 {/* Type badge */}
-                  <span className="text-xs font-semibold text-primary-light bg-white/10 backdrop-blur-sm w-fit px-3 py-1.5 rounded-full mb-3 border border-white/10">
+                  <span className="text-xs font-semibold text-white bg-secondary/70 backdrop-blur-sm w-fit px-3 py-1.5 rounded-full mb-3 border border-white/15">
                     {project.type}
                   </span>
                   {project.imageStatus === "pending-replacement" && (
@@ -95,7 +95,7 @@ export function GalleryPreview() {
                     </span>
                   )}
                 
-                <h3 className="text-lg font-bold text-white mb-1 group-hover:text-primary-light transition-colors">
+                <h3 className="text-xl font-semibold text-white mb-1 group-hover:text-primary-light transition-colors">
                   {project.title}
                 </h3>
                 
@@ -118,7 +118,7 @@ export function GalleryPreview() {
         </div>
 
         {/* Stats bar with glass styling */}
-        <div ref={statsRef} className={`mt-12 bg-white/80 backdrop-blur-sm rounded-2xl p-8 shadow-lg border border-white/50 transition-all duration-700 delay-300 ${statsVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"}`}>
+        <div ref={statsRef} className={`mt-12 bg-white rounded-2xl p-8 shadow-lg border border-border transition-all duration-700 delay-300 ${statsVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"}`}>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
             {projectStats.map((stat) => (
               <div key={stat.label} className="group">

@@ -54,7 +54,7 @@ export function SmartTools() {
   const { ref: metricsRef, isVisible: metricsVisible } = useScrollAnimation();
 
   return (
-    <section className="relative py-24 overflow-hidden">
+    <section className="relative py-20 overflow-hidden">
       {/* Background Image */}
       <div className="absolute inset-0">
         <Image
@@ -67,18 +67,17 @@ export function SmartTools() {
         <div className="absolute inset-0 bg-secondary/92" />
         <div className="absolute inset-0 bg-gradient-to-b from-secondary/95 via-secondary/88 to-secondary/95" />
       </div>
-      {/* Architectural grid overlay */}
 
       <div className="relative z-10 mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         {/* Header */}
         <div
           ref={headerRef}
-          className={`text-center max-w-3xl mx-auto mb-16 transition-all duration-700 ${headerVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"}`}
+          className={`text-center max-w-3xl mx-auto mb-12 transition-all duration-700 ${headerVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"}`}
         >
           <span className="inline-block text-primary-light font-semibold text-sm uppercase tracking-wider mb-4">
             SMART PLANNING TOOLS
           </span>
-          <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-white mb-6 text-balance">
+          <h2 className="text-3xl md:text-4xl font-bold text-white mb-4 text-balance">
             Plan Your Project With Confidence
           </h2>
           <p className="text-lg text-white/70 leading-relaxed">
@@ -89,7 +88,7 @@ export function SmartTools() {
 
         {/* Main Feature Module - Design Your ADU */}
         <div ref={mainRef} className={`mb-8 transition-all duration-700 delay-200 ${mainVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"}`}>
-          <div className="bg-white/10 backdrop-blur-xl border border-white/20 rounded-3xl overflow-hidden shadow-2xl">
+          <div className="bg-white/10 backdrop-blur-xl border border-white/20 rounded-2xl overflow-hidden shadow-2xl">
             <div className="grid lg:grid-cols-2 gap-0">
               {/* Left Content */}
               <div className="p-8 lg:p-12 flex flex-col justify-center">
@@ -109,8 +108,8 @@ export function SmartTools() {
                       key={feature.label}
                       className="flex items-center gap-3 text-white/80"
                     >
-                      <div className="w-9 h-9 rounded-lg bg-primary/20 border border-primary/30 flex items-center justify-center">
-                        <feature.icon className="h-4 w-4 text-primary-light" />
+                      <div className="w-10 h-10 rounded-lg bg-primary/20 border border-primary/30 flex items-center justify-center shrink-0">
+                        <feature.icon className="h-5 w-5 text-primary-light" aria-hidden="true" />
                       </div>
                       <span className="text-sm font-medium">
                         {feature.label}
@@ -136,6 +135,7 @@ export function SmartTools() {
                   src="/images/adu-configurator-preview.jpg"
                   alt="Modern ADU example"
                   fill
+                  sizes="(max-width: 1024px) 100vw, 50vw"
                   className="object-cover"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-secondary/80 via-secondary/30 to-transparent" />
@@ -161,7 +161,7 @@ export function SmartTools() {
                   <LayoutGrid className="h-8 w-8 text-primary-light" />
                 </div>
                 <div className="flex-1 text-center md:text-left">
-                  <h3 className="text-xl font-bold text-white mb-2 group-hover:text-primary-light transition-colors">
+                  <h3 className="text-xl font-semibold text-white mb-2 group-hover:text-primary-light transition-colors">
                     Floor Plans Library
                   </h3>
                   <p className="text-white/60">
@@ -192,7 +192,7 @@ export function SmartTools() {
             { icon: Wand2, title: "Design Inspiration", desc: "Generate concept visuals", href: "/tools/adu-design-inspiration" },
           ].map((tool) => (
             <Link key={tool.title} href={tool.href} className="group">
-              <div className="bg-white/10 backdrop-blur-lg border border-white/20 rounded-xl p-5 hover:bg-white/15 hover:border-white/30 transition-all duration-300 h-full">
+              <div className="bg-white/10 backdrop-blur-lg border border-white/20 rounded-2xl p-5 hover:bg-white/15 hover:border-white/30 transition-all duration-300 h-full">
                 <div className="flex items-center gap-4">
                   <div className="w-10 h-10 rounded-lg bg-primary/20 border border-primary/30 flex items-center justify-center shrink-0">
                     <tool.icon className="h-5 w-5 text-primary-light" />
@@ -209,9 +209,9 @@ export function SmartTools() {
 
         <div className="text-center mb-12">
           <Link href="/planning-tools">
-            <Button variant="outlineWhite" rounded="full" className="group">
+            <Button variant="outlineWhite" size="lg" rounded="full" className="group">
               View All Planning Tools
-              <ArrowRight className="h-4 w-4 group-hover:translate-x-1 transition-transform" />
+              <ArrowRight className="h-5 w-5 group-hover:translate-x-1 transition-transform" />
             </Button>
           </Link>
         </div>
