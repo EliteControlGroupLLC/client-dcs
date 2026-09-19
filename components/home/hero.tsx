@@ -15,7 +15,7 @@ const stats = [
 // The standard the company runs by — Colossians 3:23-24, Easy-to-Read Version (ERV).
 const scripture = {
   text: "In all the work you are doing, work the best you can. Work as if you are working for the Lord, not for people. Remember that you will receive your reward from the Lord, who will give you what he promised his people. You are serving the Lord Christ.",
-  reference: "Colossians 3:23-24 (ERV)",
+  reference: "Colossians 3:23-24",
 };
 
 const pillars = [
