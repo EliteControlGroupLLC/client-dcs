@@ -80,6 +80,11 @@ interface AddressAutocompleteInputProps {
   value: string;
   onChange: (value: string) => void;
   onSelect: (address: string) => void;
+  /**
+   * Enter pressed without a highlighted suggestion (free text). Lets the parent
+   * submit/resolve the typed address instead of the key doing nothing.
+   */
+  onEnter?: (value: string) => void;
   placeholder?: string;
   /** Form-field sizing (matches other inputs in a form) instead of the large hero search box. */
   compact?: boolean;
@@ -92,6 +97,7 @@ export function AddressAutocompleteInput({
   value,
   onChange,
   onSelect,
+  onEnter,
   placeholder = "Enter your property address",
   compact = false,
   invalid = false,
@@ -218,8 +224,25 @@ export function AddressAutocompleteInput({
     setSuggestions([]);
   };
 
+  // Free-text submit: cancel any pending type-ahead so a late response can't
+  // reopen the dropdown over the parent's resolution/loading state.
+  const submitTyped = () => {
+    if (debounceTimerRef.current) clearTimeout(debounceTimerRef.current);
+    requestSeqRef.current++;
+    setIsSearching(false);
+    setIsOpen(false);
+    setSuggestions([]);
+    onEnter?.(value);
+  };
+
   const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (!isOpen || suggestions.length === 0) return;
+    if (!isOpen || suggestions.length === 0) {
+      if (e.key === "Enter" && onEnter && value.trim()) {
+        e.preventDefault();
+        submitTyped();
+      }
+      return;
+    }
 
     if (e.key === "ArrowDown") {
       e.preventDefault();
@@ -230,6 +253,9 @@ export function AddressAutocompleteInput({
     } else if (e.key === "Enter" && highlightedIndex >= 0) {
       e.preventDefault();
       handleSelect(suggestions[highlightedIndex]);
+    } else if (e.key === "Enter" && onEnter && value.trim()) {
+      e.preventDefault();
+      submitTyped();
     } else if (e.key === "Escape") {
       setIsOpen(false);
     }

@@ -1,7 +1,7 @@
 "use client";
 
-import { useState, useCallback } from "react";
-import { Shield, Search } from "lucide-react";
+import { useState, useCallback, useEffect, useRef } from "react";
+import { Shield, Search, MapPinOff, MapPin, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { AddressAutocompleteInput } from "./address-autocomplete-input";
 import { PropertyScanLoading } from "./property-scan-loading";
@@ -31,11 +31,37 @@ import { LockedReportPreview } from "./locked-report-preview";
 import { FLOOR_PLANS } from "@/lib/data/site-data";
 import { ReportExportButtons } from "./report-export-buttons";
 // Removed: ShowSourcesPanel - not client-facing per requirements
-import { analyzeProperty } from "@/lib/property-intelligence";
 import type { PropertyAnalysisResult } from "@/lib/property-intelligence";
 import { trackScanCompleted, trackLeadSubmitted } from "@/lib/analytics";
 
-type ScanPhase = "address" | "scanning" | "results";
+type ScanPhase = "address" | "scanning" | "results" | "unresolved";
+
+// Why a scan produced no report. The first three come from
+// /api/analyze-property (422); PICK_SUGGESTION is the client-side
+// "several suggestions match what you typed" prompt.
+type LookupIssueCode =
+  | "ADDRESS_NOT_FOUND"
+  | "ADDRESS_AMBIGUOUS"
+  | "OUT_OF_AREA"
+  | "PICK_SUGGESTION"
+  | "ERROR";
+interface LookupIssue {
+  code: LookupIssueCode;
+  message: string;
+  candidates: string[];
+}
+const SERVER_LOOKUP_CODES = new Set<LookupIssueCode>(["ADDRESS_NOT_FOUND", "ADDRESS_AMBIGUOUS", "OUT_OF_AREA"]);
+
+const ISSUE_TITLES: Record<LookupIssueCode, string> = {
+  ADDRESS_NOT_FOUND: "We couldn't find that property",
+  ADDRESS_AMBIGUOUS: "Which property did you mean?",
+  PICK_SUGGESTION: "Which property did you mean?",
+  OUT_OF_AREA: "That address is outside our service area",
+  ERROR: "We couldn't complete the scan",
+};
+
+const normalizeAddr = (s: string) => s.toLowerCase().replace(/[.,#]/g, " ").replace(/\s+/g, " ").trim();
+const houseNumberOf = (s: string) => s.trim().match(/^(\d+)/)?.[1] ?? null;
 
 // Parse a numeric ADU size from a size-range label like "1,000 - 1,200 sq ft"
 // (returns the upper bound — the best-case recommended size).
@@ -55,60 +81,148 @@ export function PropertyScanner() {
   const [reportUnlocked, setReportUnlocked] = useState(false);
   const [showReportModal, setShowReportModal] = useState(false);
   const [reportData, setReportData] = useState<Record<string, unknown> | undefined>(undefined);
+  // Why the last scan produced no report (never render a report for an
+  // unresolved address — no guessing, no fabricated defaults).
+  const [issue, setIssue] = useState<LookupIssue | null>(null);
+  const [resolving, setResolving] = useState(false);
+  const [animationDone, setAnimationDone] = useState(false);
+  const scanSeqRef = useRef(0);
 
   const handleAddressSelect = (addr: string) => {
     setSelectedAddress(addr);
   };
 
-  const handleStartScan = async () => {
-    if (!selectedAddress && !address) return;
-    const finalAddress = selectedAddress || address;
-    setSelectedAddress(finalAddress);
+  const handleAddressChange = (value: string) => {
+    setAddress(value);
+    // Editing after picking a suggestion invalidates that pick.
+    if (value !== selectedAddress) setSelectedAddress("");
+  };
+
+  // Run the server analysis for one concrete address. Only a real,
+  // parcel-matched San Diego County property yields a report; anything else
+  // comes back as a lookup issue (422) that we show instead.
+  const runScan = async (target: string) => {
+    const seq = ++scanSeqRef.current;
+    setAddress(target);
+    setSelectedAddress(target);
+    setAnalysisData(null);
+    setIssue(null);
+    setAnimationDone(false);
+    setReportUnlocked(false);
     setPhase("scanning");
 
-    // SURGICAL FIX: Try server-side route first (protects API keys),
-    // fall back to client-side if server route unavailable
     try {
-      const serverRes = await fetch('/api/analyze-property', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ address: finalAddress }),
+      const serverRes = await fetch("/api/analyze-property", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ address: target }),
       });
-      if (serverRes.ok) {
-        const data = await serverRes.json();
-        if (data.success && data.result) {
-          setAnalysisData(data.result);
-          return;
+      const data = await serverRes.json().catch(() => null);
+      if (seq !== scanSeqRef.current) return; // a newer scan started
+      if (serverRes.ok && data?.success && data.result) {
+        if (typeof data.meta?.resolvedAddress === "string" && data.meta.resolvedAddress) {
+          setSelectedAddress(data.meta.resolvedAddress);
         }
+        setAnalysisData(data.result);
+        return;
       }
-      // Server route failed — fall back to client-side
-      const result = await analyzeProperty(finalAddress);
-      setAnalysisData(result);
+      if (data && SERVER_LOOKUP_CODES.has(data.code)) {
+        setIssue({
+          code: data.code,
+          message: String(data.message ?? ""),
+          candidates: Array.isArray(data.candidates) ? data.candidates : [],
+        });
+      } else {
+        setIssue({
+          code: "ERROR",
+          message: "Our property lookup is temporarily unavailable. Please try again in a moment.",
+          candidates: [],
+        });
+      }
+      setPhase("unresolved");
     } catch {
-      // If server route fails, try client-side as fallback
-      try {
-        const result = await analyzeProperty(finalAddress);
-        setAnalysisData(result);
-      } catch {
-        // Analysis completely failed - stay on scanning phase
-      }
+      if (seq !== scanSeqRef.current) return;
+      setIssue({
+        code: "ERROR",
+        message: "Our property lookup is temporarily unavailable. Please try again in a moment.",
+        candidates: [],
+      });
+      setPhase("unresolved");
     }
   };
 
+  // Scan button / Enter. A picked suggestion scans directly; free text is
+  // first matched against real-address suggestions: exactly one match → use
+  // it (the loading state shows the full resolved address); several → ask.
+  const handleStartScan = async () => {
+    const typed = (selectedAddress || address).trim();
+    if (!typed || resolving) return;
+    if (selectedAddress && selectedAddress === address) {
+      void runScan(selectedAddress);
+      return;
+    }
+
+    setResolving(true);
+    let target = typed;
+    try {
+      const res = await fetch(`/api/address-suggest?q=${encodeURIComponent(typed)}`);
+      const data = (await res.json()) as { suggestions?: string[] };
+      const houseNo = houseNumberOf(typed);
+      const suggestions = (data.suggestions ?? []).filter(
+        (s) => houseNumberOf(s) !== null && (!houseNo || houseNumberOf(s) === houseNo)
+      );
+      const exact = suggestions.find((s) => normalizeAddr(s) === normalizeAddr(typed));
+      if (exact) {
+        target = exact;
+      } else if (suggestions.length === 1) {
+        target = suggestions[0];
+      } else if (suggestions.length > 1) {
+        setIssue({
+          code: "PICK_SUGGESTION",
+          message: "Several San Diego County addresses match what you typed. Pick yours to scan it.",
+          candidates: suggestions,
+        });
+        setPhase("unresolved");
+        return;
+      }
+      // No suggestion: send the typed text — the server resolves it or
+      // reports it as not found / out of area.
+    } catch {
+      // Suggest service down — the server-side resolver still gates it.
+    } finally {
+      setResolving(false);
+    }
+    void runScan(target);
+  };
+
+  // Stable callback so the loading animation doesn't restart when data lands.
   const handleScanComplete = useCallback(() => {
-    setPhase("results");
-    // Fire conversion events when scan completes
-    if (analysisData) {
+    setAnimationDone(true);
+  }, []);
+
+  // Show results only once the animation has finished AND a real report exists.
+  useEffect(() => {
+    if (phase === "scanning" && animationDone && analysisData) {
+      setPhase("results");
       trackScanCompleted(selectedAddress, analysisData.confidenceScore || 0);
     }
-  }, [analysisData, selectedAddress]);
+  }, [phase, animationDone, analysisData, selectedAddress]);
 
   const handleRescan = () => {
+    scanSeqRef.current++;
     setPhase("address");
     setAddress("");
     setSelectedAddress("");
     setAnalysisData(null);
+    setIssue(null);
     setReportUnlocked(false);
+  };
+
+  // Back to the input with the typed text kept, so it can be corrected.
+  const handleEditAddress = () => {
+    setIssue(null);
+    setSelectedAddress("");
+    setPhase("address");
   };
 
   const handleReportUnlocked = () => {
@@ -158,24 +272,29 @@ export function PropertyScanner() {
           </p>
 
           {/* Address input */}
-          {phase === "address" && (
+          {(phase === "address" || phase === "unresolved") && (
             <div className="max-w-2xl mx-auto animate-fade-in">
               <AddressAutocompleteInput
                 value={address}
-                onChange={setAddress}
+                onChange={handleAddressChange}
                 onSelect={handleAddressSelect}
+                onEnter={() => void handleStartScan()}
                 placeholder="Type your San Diego property address..."
               />
               <div className="mt-4">
                 <Button
                   size="lg"
                   rounded="full"
-                  onClick={handleStartScan}
-                  disabled={!address && !selectedAddress}
+                  onClick={() => void handleStartScan()}
+                  disabled={(!address && !selectedAddress) || resolving}
                   className="group"
                 >
-                  <Search className="h-5 w-5" />
-                  Scan My Property
+                  {resolving ? (
+                    <Loader2 className="h-5 w-5 animate-spin" />
+                  ) : (
+                    <Search className="h-5 w-5" />
+                  )}
+                  {resolving ? "Finding your property..." : "Scan My Property"}
                 </Button>
               </div>
               <p className="text-xs text-white/40 mt-4">
@@ -211,6 +330,62 @@ export function PropertyScanner() {
               address={selectedAddress}
               onComplete={handleScanComplete}
             />
+          </div>
+        )}
+
+        {/* Unresolved lookup — no report, no lead form, never a guess */}
+        {phase === "unresolved" && issue && (
+          <div
+            role="alert"
+            data-testid="scan-lookup-issue"
+            data-issue-code={issue.code}
+            className="bg-white rounded-3xl shadow-xl border border-border p-8 md:p-10 max-w-3xl mx-auto animate-fade-in"
+          >
+            <div className="flex items-start gap-4">
+              <div className="w-12 h-12 rounded-full bg-primary/10 text-primary flex items-center justify-center flex-shrink-0">
+                <MapPinOff className="h-6 w-6" />
+              </div>
+              <div className="min-w-0 flex-1">
+                <h2 className="text-xl font-bold text-secondary">{ISSUE_TITLES[issue.code]}</h2>
+                {issue.message && (
+                  <p className="text-sm text-muted-foreground mt-2">{issue.message}</p>
+                )}
+              </div>
+            </div>
+
+            {issue.candidates.length > 0 && (
+              <div className="mt-6">
+                <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground mb-2">
+                  {issue.candidates.length === 1 ? "Did you mean" : "Choose your property"}
+                </p>
+                <div className="rounded-xl border border-border overflow-hidden">
+                  {issue.candidates.map((candidate, index) => (
+                    <button
+                      type="button"
+                      key={candidate}
+                      onClick={() => void runScan(candidate)}
+                      className={`w-full flex items-center gap-3 px-5 py-4 text-left text-secondary hover:bg-primary/5 hover:text-primary transition-colors ${
+                        index !== issue.candidates.length - 1 ? "border-b border-border/50" : ""
+                      }`}
+                    >
+                      <MapPin className="h-4 w-4 flex-shrink-0 text-muted-foreground" />
+                      <span className="text-sm font-medium">{candidate}</span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            <div className="mt-6 flex flex-wrap items-center gap-3">
+              <Button variant="outline" rounded="full" onClick={handleEditAddress}>
+                Edit address
+              </Button>
+              <p className="text-xs text-muted-foreground">
+                {issue.code === "OUT_OF_AREA"
+                  ? "We currently serve properties in San Diego County."
+                  : "Tip: start typing and pick your address from the suggestions."}
+              </p>
+            </div>
           </div>
         )}
 
