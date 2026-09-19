@@ -40,8 +40,8 @@ export const FOUNDER_STORY: StorySection[] = [
     heading: "The race to the bottom",
     paragraphs: [
       "In construction, the “market price” is too often set by the newest contractor in town — freshly licensed, with little experience, bidding close to cost just to win the work. Everyone else is expected to match it. And when a number is too low to do the job right, something has to give.",
-      "Homeowners end up paying for it later — in surprise change orders, rework and stress. Contractors who look great from the outside turn out to have no systems behind the scenes: no real team, no procedures, no accounting. Developers hand job after job to new contractors who believe they're growing, until those contractors realize they've been building for free, fall behind with their subcontractors, and start robbing Peter to pay Paul just to stay in business.",
-      "I know that pressure from the inside. Early in my career, I was a young contractor trying to compete in that market — without the experience, the systems or the team I have today. Nobody sets out to cut corners; the market pushes you there. Those years taught me exactly what it takes to do this the right way.",
+      "Homeowners end up paying for it later — in surprise change orders, rework and stress. Contractors who look great from the outside turn out to have no systems behind the scenes: no real team, no procedures, no accounting. Developers hand job after job to new contractors who believe they're growing, until those contractors realize they've been working at a loss and are struggling just to keep their business going.",
+      "I know that pressure from the inside. Early in my career, I was a young contractor trying to compete in that market — without the experience, the systems or the team I have today. Those years taught me exactly what it takes to do this the right way, and why pricing to win at any cost helps no one.",
     ],
     pullQuote: "When the cheapest bid wins, everyone loses — the homeowner, the crew, and the builder.",
   },
