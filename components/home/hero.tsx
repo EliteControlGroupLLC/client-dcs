@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { ArrowRight, Shield, BadgeCheck, Scale, Eye, MessageCircle } from "lucide-react";
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
 import { COMPANY_INFO, getYearsExperience } from "@/lib/data/site-data";
 
 const stats = [
@@ -31,62 +31,92 @@ const heroVideos = [
   "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/AI_Generates_Architectural_Video_Prompt-9EmmEZf8o9NOaPUmDsu4jjFdXxGu5j.mp4",
 ];
 
+const PLAYBACK_RATE = 0.7;
+const CROSSFADE_S = 1.2; // start the next clip this many seconds before the current one ends
+
 export function Hero() {
-  const [currentVideoIndex, setCurrentVideoIndex] = useState(0);
-  const [isTransitioning, setIsTransitioning] = useState(false);
-  const videoRef = useRef<HTMLVideoElement>(null);
+  // All clips stay mounted and stacked; only the active one is visible. The
+  // next clip starts underneath shortly before the current one ends and fades
+  // in, so playback never gaps, reloads, or stops (loops forever).
+  const [activeIndex, setActiveIndex] = useState(0);
+  const videoRefs = useRef<(HTMLVideoElement | null)[]>([]);
+  const advancingRef = useRef(false);
 
-  useEffect(() => {
-    const video = videoRef.current;
+  const playClip = useCallback((index: number) => {
+    const video = videoRefs.current[index];
     if (!video) return;
-
-    const handleVideoEnd = () => {
-      setIsTransitioning(true);
-      setTimeout(() => {
-        setCurrentVideoIndex((prev) => (prev + 1) % heroVideos.length);
-        setIsTransitioning(false);
-      }, 500);
-    };
-
-    video.addEventListener("ended", handleVideoEnd);
-    return () => video.removeEventListener("ended", handleVideoEnd);
+    video.defaultPlaybackRate = PLAYBACK_RATE;
+    video.playbackRate = PLAYBACK_RATE;
+    video.play().catch(() => {});
   }, []);
 
+  const advance = useCallback(
+    (from: number) => {
+      if (advancingRef.current) return;
+      advancingRef.current = true;
+      const next = (from + 1) % heroVideos.length;
+      const nextVideo = videoRefs.current[next];
+      if (nextVideo) nextVideo.currentTime = 0;
+      playClip(next);
+      setActiveIndex(next);
+      // Let the outgoing clip finish its fade, then park it at the start.
+      window.setTimeout(() => {
+        const prev = videoRefs.current[from];
+        if (prev && from !== next) {
+          prev.pause();
+          prev.currentTime = 0;
+        }
+        advancingRef.current = false;
+      }, CROSSFADE_S * 1000 + 200);
+    },
+    [playClip]
+  );
+
+  // Start the first clip, and resume whenever the tab becomes visible again.
   useEffect(() => {
-    const video = videoRef.current;
-    if (video) {
-      video.playbackRate = 0.7;
-      video.load();
-      video.play().catch(() => {});
-    }
-  }, [currentVideoIndex]);
+    playClip(activeIndex);
+    const onVisible = () => {
+      if (document.visibilityState === "visible") playClip(activeIndex);
+    };
+    document.addEventListener("visibilitychange", onVisible);
+    return () => document.removeEventListener("visibilitychange", onVisible);
+  }, [activeIndex, playClip]);
 
   return (
-    <section className="relative min-h-screen flex items-center overflow-hidden">
+    <section className="relative min-h-screen flex items-center overflow-hidden bg-secondary">
       {/* Video Background */}
       <div className="absolute inset-0">
-        <video
-          ref={videoRef}
-          key={currentVideoIndex}
-          autoPlay
-          muted
-          playsInline
-          className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-1000 ${
-            isTransitioning ? "opacity-0" : "opacity-100"
-          }`}
-        >
-          <source src={heroVideos[currentVideoIndex]} type="video/mp4" />
-        </video>
+        {heroVideos.map((src, index) => (
+          <video
+            key={src}
+            ref={(el) => {
+              videoRefs.current[index] = el;
+            }}
+            src={src}
+            muted
+            playsInline
+            autoPlay={index === 0}
+            preload={index === activeIndex || index === (activeIndex + 1) % heroVideos.length ? "auto" : "metadata"}
+            aria-hidden="true"
+            onTimeUpdate={(e) => {
+              if (index !== activeIndex) return;
+              const v = e.currentTarget;
+              if (v.duration && v.duration - v.currentTime <= CROSSFADE_S) advance(index);
+            }}
+            onEnded={() => index === activeIndex && advance(index)}
+            onError={() => index === activeIndex && advance(index)}
+            className={`absolute inset-0 w-full h-full object-cover transition-opacity ease-linear ${
+              index === activeIndex ? "opacity-100" : "opacity-0"
+            }`}
+            style={{ transitionDuration: `${CROSSFADE_S}s` }}
+          />
+        ))}
         {/* Dark overlay for text readability */}
         <div className="absolute inset-0 bg-secondary/70" />
         {/* Gradient overlay */}
         <div className="absolute inset-0 bg-gradient-to-t from-secondary via-secondary/50 to-transparent" />
         <div className="absolute inset-0 bg-gradient-to-r from-secondary/80 via-transparent to-transparent" />
       </div>
-
-      {/* Animated shapes */}
-      <div className="absolute top-20 right-20 w-72 h-72 bg-primary/20 rounded-full blur-3xl animate-pulse" />
-      <div className="absolute bottom-40 left-10 w-96 h-96 bg-primary/10 rounded-full blur-3xl animate-pulse delay-1000" />
 
       <div className="relative z-10 mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-32 w-full">
         <div className="grid md:grid-cols-2 gap-8 lg:gap-12 items-center">
@@ -156,23 +186,7 @@ export function Hero() {
 
           {/* Right Content - Featured Info Card */}
           <div className="relative">
-            <div className="relative rounded-3xl overflow-hidden shadow-2xl bg-white/10 backdrop-blur-md border border-white/20 p-6 sm:p-8 animate-pulse-glow">
-              {/* Video progress indicator */}
-              <div className="flex gap-2 mb-6">
-                {heroVideos.map((_, index) => (
-                  <div
-                    key={index}
-                    className={`h-1 flex-1 rounded-full transition-all duration-500 ${
-                      index === currentVideoIndex
-                        ? "bg-primary"
-                        : index < currentVideoIndex
-                        ? "bg-white/60"
-                        : "bg-white/20"
-                    }`}
-                  />
-                ))}
-              </div>
-
+            <div className="relative rounded-3xl overflow-hidden shadow-2xl bg-white/10 backdrop-blur-md border border-white/20 p-6 sm:p-8">
               <p className="text-xs font-semibold uppercase tracking-[0.2em] text-primary mb-4">
                 The Standard We Build By
               </p>
