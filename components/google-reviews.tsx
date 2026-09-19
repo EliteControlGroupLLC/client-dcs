@@ -10,20 +10,30 @@ const reviews = CLIENT_REVIEWS;
 function ReviewText({ text }: { text: string }) {
   const [expanded, setExpanded] = useState(false);
   return (
-    <div className="mb-4">
-      <p className={`text-sm text-muted-foreground leading-relaxed ${expanded ? "" : "line-clamp-4"}`}>
+    <div>
+      <p className={`font-serif text-lg italic leading-relaxed text-white/85 ${expanded ? "" : "line-clamp-5"}`}>
         &ldquo;{text}&rdquo;
       </p>
-      {text.length > 180 && (
+      {text.length > 200 && (
         <button
           type="button"
           onClick={() => setExpanded((v) => !v)}
-          className="mt-2 text-xs font-semibold text-primary hover:text-primary-dark transition-colors"
+          className="mt-3 text-[11px] font-semibold uppercase tracking-[0.2em] text-[#B99A5A] transition-colors hover:text-[#D8C49A]"
         >
-          {expanded ? "Show less" : "Read more"}
+          {expanded ? "Show less" : "Read full review"}
         </button>
       )}
     </div>
+  );
+}
+
+function GoldStars({ className = "h-3.5 w-3.5" }: { className?: string }) {
+  return (
+    <span className="flex gap-0.5" role="img" aria-label="5 out of 5 stars">
+      {[1, 2, 3, 4, 5].map((i) => (
+        <Star key={i} aria-hidden="true" className={`${className} fill-[#B99A5A] text-[#B99A5A]`} />
+      ))}
+    </span>
   );
 }
 
@@ -63,79 +73,65 @@ export function GoogleReviews() {
   }
 
   return (
-    <section id="reviews" className="py-20 bg-muted scroll-mt-24">
-      <div className="container mx-auto px-4 max-w-6xl">
+    <section id="reviews" className="relative scroll-mt-24 overflow-hidden bg-[#1A2B2B] py-24">
+      {/* Soft emerald wash for depth */}
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_top,rgba(51,102,102,0.35),transparent_60%)]"
+      />
+      <div className="container relative mx-auto max-w-6xl px-4">
         {/* Header */}
-        <div className="text-center mb-12">
-          <div className="flex items-center justify-center gap-2 mb-4">
-            <svg className="h-8 w-8" viewBox="0 0 24 24">
-              <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 01-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z"/>
-              <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
-              <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
-              <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
-            </svg>
-            <span className="text-lg font-semibold text-secondary">Google &amp; Yelp Reviews</span>
+        <div className="mb-14 text-center">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.32em] text-[#B99A5A]">
+            Client Reviews
+          </p>
+          <h2 className="mt-4 font-serif text-4xl text-white md:text-5xl">In their words</h2>
+          <div className="mx-auto mt-6 h-px w-16 bg-[#B99A5A]/60" aria-hidden="true" />
+          <div className="mt-6 flex items-center justify-center gap-3">
+            <GoldStars className="h-4 w-4" />
+            <span className="text-sm text-white/60">5.0 from homeowners on Google &amp; Yelp</span>
           </div>
-          <div className="flex items-center justify-center gap-2 mb-2">
-            {[1, 2, 3, 4, 5].map((i) => (
-              <Star key={i} className="h-6 w-6 text-yellow-400 fill-yellow-400" />
-            ))}
-            <span className="text-2xl font-bold text-secondary ml-2">5.0</span>
-          </div>
-          <p className="text-muted-foreground">From homeowners we&apos;ve worked with</p>
         </div>
 
         {/* Reviews Grid */}
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 items-start">
+        <div className="grid items-stretch gap-6 md:grid-cols-2 lg:grid-cols-3">
           {reviews.map((review, index) => (
-            <div
+            <figure
               key={`${review.author}-${index}`}
-              className="bg-white rounded-xl p-6 shadow-sm hover:shadow-md transition-shadow"
+              className={`flex h-full flex-col rounded-xl border bg-white/[0.04] p-7 ${index === 0 ? "md:col-span-2" : ""} backdrop-blur-sm transition-colors duration-300 hover:bg-white/[0.07]`}
+              // Inline so the site-wide `* { border-color }` rule can't override the gold hairline.
+              style={{ borderColor: "rgba(185, 154, 90, 0.3)" }}
             >
-              <div className="flex gap-1 mb-3">
-                {Array.from({ length: review.rating }).map((_, i) => (
-                  <Star key={i} className="h-4 w-4 text-yellow-400 fill-yellow-400" />
-                ))}
+              <div className="mb-5 flex items-center justify-between">
+                <GoldStars />
+                <span className="text-[10px] font-semibold uppercase tracking-[0.24em] text-white/45">
+                  {review.source}
+                  {review.date ? ` · ${review.date}` : ""}
+                </span>
               </div>
-              <ReviewText text={review.text} />
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="font-semibold text-secondary text-sm">{review.author}</p>
-                  <p className="text-xs text-muted-foreground">
-                    {review.project} &middot; {review.source}
-                    {review.date ? `, ${review.date}` : ""}
-                  </p>
-                </div>
-                {review.source === "Google" ? (
-                  <svg className="h-5 w-5 text-muted-foreground/50" viewBox="0 0 24 24">
-                    <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 01-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z"/>
-                    <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
-                    <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
-                    <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
-                  </svg>
-                ) : (
-                  <span
-                    className="inline-flex h-5 w-5 items-center justify-center rounded bg-[#D32323] text-[11px] font-bold text-white"
-                    aria-label="Yelp"
-                  >
-                    y
-                  </span>
-                )}
-              </div>
-            </div>
+              <blockquote className="flex-1">
+                <ReviewText text={review.text} />
+              </blockquote>
+              <div className="mt-6 h-px w-10 bg-[#B99A5A]/50" aria-hidden="true" />
+              <figcaption className="mt-4">
+                <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-[#D8C49A]">{review.author}</p>
+                <p className="mt-1 text-xs text-white/50">{review.project}</p>
+              </figcaption>
+            </figure>
           ))}
         </div>
 
-        {/* CTA to leave a review */}
-        <div className="text-center mt-10">
+        {/* Link out */}
+        <div className="mt-12 text-center">
           <a
             href="https://www.google.com/search?q=Distinct+Construction+Solutions+Chula+Vista+reviews"
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex items-center gap-2 text-primary hover:text-primary-dark font-semibold transition-colors"
+            style={{ borderColor: "rgba(185, 154, 90, 0.5)" }}
+            className="inline-flex items-center gap-2 border-b pb-1 text-[11px] font-semibold uppercase tracking-[0.24em] text-[#B99A5A] transition-colors hover:text-[#D8C49A]"
           >
             See all reviews on Google
-            <ExternalLink className="h-4 w-4" />
+            <ExternalLink className="h-3.5 w-3.5" />
           </a>
         </div>
       </div>
