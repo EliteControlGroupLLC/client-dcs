@@ -52,7 +52,7 @@ export default function ADUOfferLP() {
                   <div className="text-sm text-white/75">Monthly Rental Income</div>
                 </div>
                 <div className="bg-secondary-light border border-white/10 shadow-lg shadow-black/20 rounded-2xl p-4 text-center">
-                  <div className="text-2xl font-bold text-accent">30%+</div>
+                  <div className="text-2xl font-bold text-accent">20–35%</div>
                   <div className="text-sm text-white/75">Property Value Increase</div>
                 </div>
               </div>
@@ -112,7 +112,7 @@ export default function ADUOfferLP() {
           <div className="grid sm:grid-cols-2 gap-6">
             {[
               { title: "Rental Income", desc: "Earn $2,000 – $3,500/month renting your ADU" },
-              { title: "Property Value", desc: "Increase your home value by 20–30%" },
+              { title: "Property Value", desc: "Increase your home value by 20–35%" },
               { title: "Multi-Generational Living", desc: "Keep family close with private space" },
               { title: "Home Office", desc: "A dedicated workspace steps from your home" },
             ].map((item) => (

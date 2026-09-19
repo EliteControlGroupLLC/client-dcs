@@ -665,7 +665,7 @@ export const SERVICE_PRICING = {
     description: "General Construction",
   },
   kitchen: {
-    startingPrice: "$18,000",
+    startingPrice: "$25,000",
     description: "Kitchen Remodeling",
   },
   bathroom: {

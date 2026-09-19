@@ -35,7 +35,7 @@ export default function KitchenPage() {
               From layout redesign to premium finishes, we build kitchens that are beautiful,
               functional, and built to last. Transparent pricing with no hidden costs.
             </p>
-            <p className="text-2xl font-bold text-accent">$18,000 – $75,000+</p>
+            <p className="text-2xl font-bold text-accent">$25,000 – $75,000+</p>
           </div>
         </div>
       </section>
