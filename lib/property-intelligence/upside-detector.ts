@@ -13,6 +13,10 @@ interface UpsideInput {
   zoning: string;
   hasGarage: boolean;
   feasibilityResults: FeasibilityResult[];
+  /** Verified base-zone density for multiple-dwelling zones (e.g. SD RM-2-5). */
+  multiUnitZoning?: { zone: string; lotSqFtPerUnit: number; baseDensityUnits: number; citation: string } | null;
+  /** The detached ADU is sized by replacing the existing detached garage. */
+  detachedReplacesGarage?: boolean;
 }
 
 /**
@@ -47,7 +51,8 @@ export function detectUpsideOpportunities(
   const hasGarageConversion = likelyResults.some((r) => r.type === "Garage Conversion");
   const hasDetachedAdu = likelyResults.some((r) => r.type === "Detached ADU");
 
-  if (hasGarageConversion && hasDetachedAdu && input.hasGarage) {
+  // (Not when the detached ADU itself replaces the garage — can't do both.)
+  if (hasGarageConversion && hasDetachedAdu && input.hasGarage && !input.detachedReplacesGarage) {
     opportunities.push({
       triggerType: "garage-plus-detached",
       title: "Garage Conversion + New Detached ADU",
@@ -63,7 +68,9 @@ export function detectUpsideOpportunities(
   if (
     input.lotSizeSqFt >= 2400 &&
     jurisdiction.sb9.sb9LotSplitPossibleFlag &&
-    !input.zoning.toLowerCase().includes("multi")
+    !input.zoning.toLowerCase().includes("multi") &&
+    // SB 9 applies only in single-family zones (not e.g. SD RM-2-5).
+    !input.multiUnitZoning
   ) {
     const canSplit = input.lotSizeSqFt >= 2400; // minimum 1,200 sq ft per parcel after split
 
@@ -96,7 +103,23 @@ export function detectUpsideOpportunities(
   }
 
   // ── Multifamily ADU Opportunities ──
-  if (
+  const mu = input.multiUnitZoning;
+  if (mu) {
+    // Verified zone density (e.g. SDMC Table 131-04G) — state the base-density
+    // count plainly, without promising it survives coverage/FAR/parking review.
+    const lot = Math.round(input.lotSizeSqFt).toLocaleString();
+    opportunities.push({
+      triggerType: "multifamily-adu",
+      title: `Multi-Unit Zoning (${mu.zone})`,
+      summary:
+        `Zone ${mu.zone} allows one home per ${mu.lotSqFtPerUnit.toLocaleString()} sq ft of lot (${mu.citation}), so this ${lot} sq ft lot supports about ${mu.baseDensityUnits} unit${mu.baseDensityUnits === 1 ? "" : "s"} by base density` +
+        `${mu.baseDensityUnits > 1 ? " — potentially more primary homes, not just an ADU" : ""}. ADUs/JADUs are allowed on top of that under State law (Gov. Code § 66323), and the City's ADU Home Density Bonus program may allow more with affordable units. ` +
+        "Actual yield depends on lot coverage/FAR, setbacks, utilities and City review — worth a site-specific study.",
+      scenarioCount: Math.max(2, mu.baseDensityUnits),
+      estimatedUpsideLevel: mu.baseDensityUnits >= 3 ? "high" : "moderate",
+      recommendedFollowupFlow: "multifamily-calculator",
+    });
+  } else if (
     input.zoning.toLowerCase().includes("multi") ||
     input.zoning.toLowerCase().includes("rm") ||
     input.zoning.toLowerCase().includes("r-2") ||

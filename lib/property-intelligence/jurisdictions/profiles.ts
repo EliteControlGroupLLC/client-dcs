@@ -13,7 +13,24 @@ const COMMON_FINANCIAL_DISCLAIMER =
 const COMMON_INTERNAL_DISCLAIMER =
   "This is a pre-feasibility and opportunity engine, not a permit approval determination.";
 
-function makeProfile(overrides: Partial<JurisdictionProfile> & { identity: JurisdictionProfile["identity"] }): JurisdictionProfile {
+/** Each rule section may be partially overridden; missing fields come from the State-law defaults. */
+type ProfileOverrides = { identity: JurisdictionProfile["identity"] } & {
+  [K in Exclude<keyof JurisdictionProfile, "identity">]?: Partial<JurisdictionProfile[K]>;
+};
+
+/**
+ * Building-code basis for the default ADU ↔ home separation. State ADU law
+ * sets no separation; CA Residential Code R302.1 / Table R302.1(1) measures
+ * fire separation distance to an imaginary line between two buildings on the
+ * lot: walls < 5 ft from it need a 1-hour rating and openings are not allowed
+ * < 3 ft (25% max at 3–5 ft). 6 ft total (3 ft each side) is therefore the
+ * practical minimum for a unit with windows facing the home; ≥ 10 ft allows
+ * unrated walls with unlimited openings.
+ */
+const CRC_SEPARATION_NOTE =
+  "6 ft default — State ADU law sets no separation; CA Residential Code R302.1 / Table R302.1(1) requires 1-hr walls within 5 ft of the line between buildings and bars openings within 3 ft, so 6 ft (3 ft each side) is the practical minimum for facing windows (10 ft+ allows unrated walls).";
+
+function makeProfile(overrides: ProfileOverrides): JurisdictionProfile {
   const defaults: Omit<JurisdictionProfile, "identity"> = {
     eligibility: {
       allowsDetachedAdu: true,
@@ -40,6 +57,9 @@ function makeProfile(overrides: Partial<JurisdictionProfile> & { identity: Juris
     setbacks: {
       sideSetbackFt: 4,
       rearSetbackFt: 4,
+      frontSetbackFt: 15,
+      setbackCitation:
+        "Side/rear 4 ft: Gov. Code § 66314(d)(7) (max a city may require). Front 15 ft: typical San Diego County base-zone front setback, used when the parcel's zone isn't in our verified zone table — ADU front setbacks follow the base zone.",
       frontSetbackRule: "Must comply with underlying zone front setback.",
       streetSideSetbackRule: "Must comply with underlying zone street-side setback.",
       convertedStructureSetbackRule: "No additional setback required for conversion of existing legal structure.",
@@ -59,6 +79,7 @@ function makeProfile(overrides: Partial<JurisdictionProfile> & { identity: Juris
     },
     separation: {
       minDistanceFromPrimaryHomeFt: 6,
+      separationCitation: CRC_SEPARATION_NOTE,
       minDistanceBetweenStructuresNotes: "Minimum 6 ft separation between structures per fire code.",
       rearYardPlacementNotes: "Rear yard is the most common placement for detached ADUs.",
       frontYardFeasibilityNotes: "Front-yard ADUs are generally restricted but may be possible on large lots.",
@@ -177,19 +198,32 @@ const sanDiegoCity = makeProfile({
     notesInternal: "San Diego has a bonus ADU program for properties in certain planning areas.",
   },
   setbacks: {
+    // Standard (conservative) case: 4 ft — required inside a High/Very High
+    // Fire Hazard Severity Zone, and for ADUs > 16 ft tall next to residential
+    // lots (SDMC § 141.0302(b)(9)(C)(ii), (b)(9)(D)).
     sideSetbackFt: 4,
     rearSetbackFt: 4,
+    // Base-zone front setback; 15 ft = RS-1-6/RS-1-7 minimum (SDMC Table
+    // 131-04D). Zone-specific values live in jurisdictions/zone-standards.ts.
+    frontSetbackFt: 15,
+    setbackCitation:
+      "SDMC § 141.0302(b)(9) (7-2026 text, O-22109): front per base zone; interior side/rear 0 ft for ADUs ≤ 16 ft tall outside a High/Very High Fire Hazard Severity Zone, otherwise 4 ft. Base-zone front setbacks per SDMC Tables 131-04D/131-04G.",
+    lowProfileSideRearSetbackFt: 0,
+    lowProfileMaxHeightFt: 16,
+    lowProfileExcludedInFireZone: true,
+    lowProfileCitation:
+      "SDMC § 141.0302(b)(9)(C)(i): no minimum interior side/rear setback for ADUs ≤ 16 ft tall outside a High or Very High Fire Hazard Severity Zone (Fire Code Official may require more); 4 ft inside those zones — (b)(9)(C)(ii).",
     frontSetbackRule: "Front setback per base zone (SDMC § 141.0302(b)(9)(A)); street side 4 ft or base zone, whichever is less.",
     streetSideSetbackRule: "Street-side setback per underlying zone.",
     convertedStructureSetbackRule: "No additional setback for existing legal structures.",
     attachedAduSetbackNotes: "Follows primary structure setback rules.",
-    detachedAduSetbackNotes: "SDMC § 141.0302(b)(9): no interior side/rear setback for ADUs ≤ 16 ft tall outside High/Very High Fire Hazard zones; 4 ft inside those zones or when taller. Engine uses 4 ft (conservative).",
+    detachedAduSetbackNotes: "SDMC § 141.0302(b)(9): no interior side/rear setback for ADUs ≤ 16 ft tall outside High/Very High Fire Hazard zones; 4 ft inside those zones, and 4 ft (or the base-zone minimum, if less) for taller ADUs next to residential lots. Engine uses 0 ft for a one-story unit only when the City fire hazard map confirms the parcel is outside the zone; otherwise 4 ft.",
     encroachmentNotes: "Eave projections up to 2 ft allowed.",
     cornerLotNotes: "Street-side setback applies on secondary frontage.",
   },
   height: {
     maxHeightFt: 16,
-    detachedAduHeightRule: "Base zone height limit applies; max 2 stories in single-family zones (SDMC § 141.0302).",
+    detachedAduHeightRule: "Overall maximum height of the base/overlay zone applies (SDMC § 141.0302(b)(8)(C)); on lots allowing single- but not multiple-dwelling development, detached ADUs may not exceed two stories ((b)(8)(A)).",
     attachedAduHeightRule: "May not exceed primary residence height.",
     twoStoryAllowed: true,
     secondStoryNotes: "Two-story ADUs allowed with 18 ft height near transit. Privacy windows may be required.",
@@ -203,8 +237,8 @@ const sanDiegoCity = makeProfile({
     detachedAduMinSqft: 150,
     attachedAduMinSqft: 150,
     conversionAduSizeNotes: "ADU within an existing/proposed single dwelling structure has no max GFA (SDMC § 141.0302(b)(7)(C)); new attached or detached ADU max 1,200 sq ft, min 150 sq ft.",
-    multifamilyDetachedAduRule: "Up to 2 detached ADUs on multifamily lots.",
-    multifamilyConversionAduRule: "Up to 25% of existing units may be converted.",
+    multifamilyDetachedAduRule: "On a lot with an existing multifamily dwelling, up to 8 detached ADUs but not more than the number of existing units; 2 detached ADUs with a proposed multifamily building (Gov. Code § 66323(a)(4), SB 1211; SDMC § 141.0302(b)(3)).",
+    multifamilyConversionAduRule: "At least one, and up to 25% of existing units, from non-livable space in multifamily buildings (Gov. Code § 66323(a)(3)).",
     bonusProgramNotes: "ADU Bonus program narrowed by O-21989 (2025): barred in RS-1-1/2/3/4/8/9/10/11 unless in a high-opportunity area; unit caps 4/5/6 by lot size; Community Enhancement Fee applies.",
   },
   parking: {
@@ -214,6 +248,14 @@ const sanDiegoCity = makeProfile({
     replacementParkingRequired: false,
     tandemParkingAllowed: true,
     accessNotes: "ADU must have independent exterior access.",
+  },
+  separation: {
+    // SDMC § 131.0450: 6 ft between detached dwellings on the same premises
+    // (3 ft to a nonhabitable accessory building). Also the CRC R302.1
+    // practical minimum for facing windows.
+    minDistanceFromPrimaryHomeFt: 6,
+    separationCitation:
+      "SDMC § 131.0450: detached dwellings keep a minimum 6 ft between dwellings (3 ft to a nonhabitable accessory building); consistent with CA Residential Code R302.1 fire-separation limits.",
   },
 });
 

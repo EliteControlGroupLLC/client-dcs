@@ -99,6 +99,8 @@ export interface UnifiedRecommendationInput {
   hardSizeCapSqFt?: number;
   /** Plain-English reason prepended to the banner details (why this type). */
   contextNote?: string;
+  /** Extra site cost (USD) added to the price range, e.g. a steep-lot engineered foundation. */
+  siteCostAdderUsd?: number;
 }
 
 /**
@@ -126,7 +128,7 @@ export async function generateUnifiedRecommendation(
   const primaryType = isJadu ? "JADU" : labelForType(normalizedType);
   const primarySizeSqFt = Math.round(Math.min(plan.sqFt, allowedSqFt, isJadu ? input.jaduMaxSqFt : Infinity));
 
-  const pricing = estimateAduPriceRange({
+  const basePricing = estimateAduPriceRange({
     sqFt: primarySizeSqFt,
     type: primaryType,
     bedrooms: variation.bedrooms,
@@ -134,6 +136,8 @@ export async function generateUnifiedRecommendation(
     stories: variation.stories,
     garageStalls: plan.id === "garage-conversion" && variation.bedrooms > 0 ? 3 : 2,
   });
+  const siteAdder = input.siteCostAdderUsd && input.siteCostAdderUsd > 0 ? input.siteCostAdderUsd : 0;
+  const pricing = { low: basePricing.low + siteAdder, high: basePricing.high + siteAdder };
   const totalCost = roundToNearest((pricing.low + pricing.high) / 2, 1000);
   const softCost = Math.round(totalCost * 0.15);
   const buildCost = totalCost - softCost;

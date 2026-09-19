@@ -22,6 +22,7 @@ import { getZoningForParcel, type CityZoningResult } from "./city-zoning-service
 import {
   getSanDiegoBuildings,
   getSanDiegoAdjacentParcels,
+  getSanDiegoCityFireHazard,
   shareInside,
   type SanDiegoBuildingsResult,
 } from "./sandiego-data-service";
@@ -39,6 +40,8 @@ import { getOSMPropertyData } from "./osm-service";
 import { getAttomPropertyData } from "./attom-service";
 import { detectJurisdictionFromAddress, detectOverlays } from "./jurisdictions/detector";
 import { COMMON_FINANCIAL_DISCLAIMER } from "./jurisdictions/profiles";
+import { getZoneStandards, baseDensityUnits } from "./jurisdictions/zone-standards";
+import type { SiteZone } from "./types";
 import { evaluateFeasibility } from "./feasibility-engine";
 import { detectUpsideOpportunities } from "./upside-detector";
 import { generateFinancialScenarios } from "./financial-scenarios";
@@ -68,6 +71,7 @@ import {
   runGeometrySanityChecks,
   mergeFootprintSources,
   type GeometryAnalysis,
+  type LeftoverZone,
 } from "./geometry-engine";
 import type { FinalBuildabilityResult } from "./types";
 import { reconcileAllSources } from "./source-reconciliation-engine";
@@ -296,7 +300,10 @@ export async function analyzeProperty(address: string): Promise<PropertyAnalysis
   // Garage: the assessor gives stall count; if a separate outline on the lot
   // is garage-sized we treat the garage as detached, otherwise it's inside
   // the main outline (attached) — which matters for the stories estimate.
-  const assessorStalls = sdParcel?.available ? sdParcel.garageStalls ?? 0 : null;
+  // A stall count > 10 on a residential record is a data-entry value (often
+  // garage sq ft), not stalls — treat it as unknown.
+  const rawStalls = sdParcel?.available ? sdParcel.garageStalls ?? 0 : null;
+  const assessorStalls = rawStalls != null && rawStalls > 10 ? null : rawStalls;
   const detachedGarageOutline =
     assessorStalls && assessorStalls > 0
       ? sdSecondaryBuildings.find(
@@ -310,6 +317,44 @@ export async function analyzeProperty(address: string): Promise<PropertyAnalysis
     assessorStalls,
     garageAttached
   );
+  // Numeric setbacks: jurisdiction profile + verified base-zone table (front),
+  // and the City of San Diego's 0 ft side/rear for a one-story (≤ 16 ft) ADU
+  // outside a (Very) High Fire Hazard Severity Zone (SDMC § 141.0302(b)(9)(C)).
+  const zoneStandards = getZoneStandards(profile.identity.id, cityZoning?.zoneCode ?? intelligence.zoning.value);
+  const frontSetbackFt = zoneStandards?.frontSetbackFt ?? profile.setbacks.frontSetbackFt;
+  const stdSideFt = profile.setbacks.sideSetbackFt;
+  const stdRearFt = profile.setbacks.rearSetbackFt;
+  const stdSideRearFt = Math.max(stdSideFt, stdRearFt);
+  let oneStorySideRearFt = stdSideRearFt;
+  let oneStorySetbackReason: string | undefined;
+  const lowProfileFt = profile.setbacks.lowProfileSideRearSetbackFt;
+  if (lowProfileFt != null && lowProfileFt < stdSideRearFt) {
+    const fire =
+      profile.identity.id === "san-diego-city" && realParcelRings ? await getSanDiegoCityFireHazard(realParcelRings) : null;
+    if (!profile.setbacks.lowProfileExcludedInFireZone) {
+      oneStorySideRearFt = lowProfileFt;
+      oneStorySetbackReason = profile.setbacks.lowProfileCitation;
+    } else if (fire?.available && !fire.inVeryHighZone) {
+      oneStorySideRearFt = lowProfileFt;
+      oneStorySetbackReason = `Parcel is outside the City's Very High Fire Hazard Severity Zone, so a one-story ADU (≤ ${profile.setbacks.lowProfileMaxHeightFt ?? 16} ft) needs no interior side/rear setback (SDMC § 141.0302(b)(9)(C)(i)); the Fire Code Official may still require more.`;
+    } else if (fire?.available && fire.inVeryHighZone) {
+      oneStorySetbackReason = `Parcel is in the City's Very High Fire Hazard Severity Zone, so ${stdSideRearFt} ft side/rear setbacks apply (SDMC § 141.0302(b)(9)(C)(ii)).`;
+    } else {
+      oneStorySetbackReason = `Fire hazard zone status couldn't be confirmed, so we use the conservative ${stdSideRearFt} ft side/rear setback (0 ft is allowed for a one-story ADU only outside a High/Very High Fire Hazard Severity Zone).`;
+    }
+  }
+  // Scenarios on the real parcel: one-story setbacks, and replaceable
+  // accessory structures (detached garage/shed) removed. The primary run
+  // (bestAduZone) always uses the standard setbacks with everything kept.
+  const detachedScenarios = [
+    ...(oneStorySideRearFt !== stdSideRearFt
+      ? [{ id: "oneStory", sideSetbackFt: oneStorySideRearFt, rearSetbackFt: oneStorySideRearFt, removeAccessory: false }]
+      : []),
+    { id: "oneStoryReplace", sideSetbackFt: oneStorySideRearFt, rearSetbackFt: oneStorySideRearFt, removeAccessory: true },
+    ...(oneStorySideRearFt !== stdSideRearFt
+      ? [{ id: "stdReplace", sideSetbackFt: stdSideFt, rearSetbackFt: stdRearFt, removeAccessory: true }]
+      : []),
+  ];
   try {
     const rawOsmBuildings = (osmData?.parcel?.buildings || []).map((b) => ({
       areaSqFt: b.areaSqFt,
@@ -347,9 +392,9 @@ export async function analyzeProperty(address: string): Promise<PropertyAnalysis
       attomStories: attomData?.stories || null,
       osmBuildings,
       osmBoundingBox: osmData?.boundingBox || null,
-      frontSetbackFt: 15,
-      rearSetbackFt: profile.setbacks.rearSetbackFt,
-      sideSetbackFt: profile.setbacks.sideSetbackFt,
+      frontSetbackFt,
+      rearSetbackFt: stdRearFt,
+      sideSetbackFt: stdSideFt,
       separationFt: profile.separation.minDistanceFromPrimaryHomeFt,
       realParcel: realParcelRings
         ? {
@@ -371,6 +416,9 @@ export async function analyzeProperty(address: string): Promise<PropertyAnalysis
             }
           : null,
       storiesEstimate: storiesInfo.stories,
+      detachedScenarios,
+      // 2+ units on the Assessor roll: a secondary building may be a dwelling.
+      keepAccessoryStructures: (sdParcel?.existingUnits ?? 1) > 1,
     });
 
     const geoSanity = runGeometrySanityChecks(geometryAnalysis, attomData?.homeAreaSqFt || intelligence.homeAreaSqFt.value);
@@ -569,7 +617,8 @@ export async function analyzeProperty(address: string): Promise<PropertyAnalysis
       storiesInfo.ratio != null
         ? `(assessor living area ${sdParcel?.livingAreaSqFt?.toLocaleString()} sq ft${garageAttached && assessorStalls ? ` + ${assessorStalls}-car attached garage ≈ ${(assessorStalls * GARAGE_SQFT_PER_STALL).toLocaleString()} sq ft` : ""}) ÷ building footprint ${sdMainBuilding?.areaSqFt.toLocaleString()} sq ft = ${storiesInfo.ratio}`
         : "Unavailable — needs assessor living area and a real building outline",
-    garageStalls: sdParcel?.available ? assessorStalls : null,
+    // Raw value: adu-fit-rules explains an implausible stall count itself.
+    garageStalls: sdParcel?.available ? rawStalls : null,
     garageConverted: sdParcel?.hasGarageConversion === true,
     garageAttached,
     garageSqFtEstimate: detachedGarageOutline
@@ -608,10 +657,43 @@ export async function analyzeProperty(address: string): Promise<PropertyAnalysis
       : null,
     measuredYards: geometryAnalysis?.measuredYards ?? null,
     setbacksUsed: {
-      sideRearFt: Math.max(profile.setbacks.sideSetbackFt, profile.setbacks.rearSetbackFt),
-      frontFt: 15,
+      sideRearFt: stdSideRearFt,
+      frontFt: frontSetbackFt,
       separationFt: profile.separation.minDistanceFromPrimaryHomeFt,
+      oneStorySideRearFt,
+      oneStorySetbackReason,
+      frontSource: zoneStandards
+        ? `${zoneStandards.frontSetbackNote} — ${zoneStandards.citation}`
+        : `City default (${profile.setbacks.frontSetbackFt} ft) — base-zone front setback not in our verified table`,
+      citation: `${profile.setbacks.setbackCitation} Separation: ${profile.separation.separationCitation}`,
     },
+    detachedOptions: geometryVerified
+      ? buildDetachedOptions(geometryAnalysis, bestDetachedZone, profile.height.twoStoryAllowed, garageAttached)
+      : undefined,
+    multiUnitZoning:
+      zoneStandards?.multiUnit && zoneStandards.lotSqFtPerUnit && sdParcel?.lotSizeSqFt
+        ? {
+            zone: zoneStandards.zone,
+            lotSqFtPerUnit: zoneStandards.lotSqFtPerUnit,
+            baseDensityUnits: baseDensityUnits(zoneStandards, sdParcel.lotSizeSqFt) ?? 1,
+            citation: zoneStandards.citation,
+          }
+        : null,
+    recordsVintageNote: recordsVintageNote(
+      sdParcel?.livingAreaSqFt ?? null,
+      sdMainBuilding?.areaSqFt ?? null,
+      garageAttached && assessorStalls ? assessorStalls * GARAGE_SQFT_PER_STALL : 0,
+      storiesInfo.stories
+    ),
+    terrain:
+      lidarTerrain && lidarTerrain.slopeAnalysis.category !== "Unknown"
+        ? {
+            lotSlopePercent: lidarTerrain.slopeAnalysis.averageSlopePercent,
+            aduAreaSlopePercent: lidarTerrain.slopeAnalysis.aduAreaSlopePercent,
+            foundationType: lidarTerrain.foundationRecommendation.type,
+            foundationCostUsd: lidarTerrain.foundationRecommendation.additionalCostEstimate,
+          }
+        : null,
     frontEdgeMethod: geometryAnalysis?.frontEdgeMethod,
     parcelMatch: !sdParcel?.available
       ? "none"
@@ -627,6 +709,27 @@ export async function analyzeProperty(address: string): Promise<PropertyAnalysis
     ],
   };
   const aduVerdicts = evaluateAduTypeFit(siteFacts, profile);
+  if (siteFacts.recordsVintageNote) finalBuildability.warnings.push(siteFacts.recordsVintageNote);
+  // Site diagram: show the footprint the Detached verdict actually uses
+  // (e.g. the rear yard with the detached garage replaced).
+  if (geometryVerified && strictGeometry?.buildableEnvelope && geometryAnalysis?.detachedScenarioZones) {
+    const dv = aduVerdicts["Detached ADU"];
+    const sc = geometryAnalysis.detachedScenarioZones;
+    const z = dv.replacesAccessory
+      ? dv.stories === 2
+        ? (sc.stdReplace ?? sc.oneStoryReplace)?.zone
+        : sc.oneStoryReplace?.zone
+      : dv.stories === 1
+        ? sc.oneStory?.zone
+        : null;
+    if (z) {
+      strictGeometry.buildableEnvelope.buildablePolygon = z.polygon;
+      strictGeometry.buildableEnvelope.buildableAreaSqFt = z.areaSqFt;
+      strictGeometry.buildableEnvelope.constraints = [
+        `Largest detached footprint after setbacks${dv.replacesAccessory ? " (existing accessory structure replaced)" : ""}: ${z.minWidthFt} x ${z.minDepthFt} ft`,
+      ];
+    }
+  }
   if (!geometryVerified) {
     finalBuildability.warnings.push(
       "Real parcel/building geometry could not be verified for this address — detached ADU size requires a manual site review."
@@ -656,14 +759,8 @@ export async function analyzeProperty(address: string): Promise<PropertyAnalysis
         requiredPropertyLineSetbackFt: rectangleFallback.requiredPropertyLineSetbackFt,
         estimatedBuildableEnvelopeSqFt: detachedVerdict.maxSqFt,
         envelopeLabel: detachedVerdict.maxSqFt > 0 ? undefined : "None after required setbacks",
-        oneStoryPotential:
-          detachedVerdict.maxSqFt > 0
-            ? `Detached footprint up to ${detachedVerdict.maxSqFt.toLocaleString()} sq ft fits after setbacks`
-            : "Not recommended — no detached footprint fits after required setbacks",
-        twoStoryPotential:
-          detachedVerdict.maxSqFt > 0 && profile.height.twoStoryAllowed
-            ? `Two-story detached up to ${Math.min(profile.sizeRules.detachedAduMaxSqft, detachedVerdict.maxSqFt * 2).toLocaleString()} sq ft with city review`
-            : "Not recommended — no detached footprint fits after required setbacks",
+        oneStoryPotential: storyPotential(siteFacts, profile.sizeRules.detachedAduMaxSqft, 1, profile.height.twoStoryAllowed),
+        twoStoryPotential: storyPotential(siteFacts, profile.sizeRules.detachedAduMaxSqft, 2, profile.height.twoStoryAllowed),
       }
     : {
         requiredMainHomeSeparationFt: rectangleFallback.requiredMainHomeSeparationFt,
@@ -755,6 +852,8 @@ export async function analyzeProperty(address: string): Promise<PropertyAnalysis
       zoning,
       hasGarage: (sdParcel?.garageStalls ?? 0) > 0 || sdParcel?.hasGarageConversion === true || rawFootprintSqFt > 800,
       feasibilityResults: enhancedFeasibility,
+      multiUnitZoning: siteFacts.multiUnitZoning ?? null,
+      detachedReplacesGarage: aduVerdicts["Detached ADU"].replacesAccessory === true,
     },
     profile
   );
@@ -787,6 +886,8 @@ export async function analyzeProperty(address: string): Promise<PropertyAnalysis
       // modeled conservatively (≤ 600 sq ft) pending a site review.
       hardSizeCapSqFt: bestVerdict.maxSqFt > 0 ? bestVerdict.maxSqFt : 600,
       contextNote: buildBestContextNote(bestRec as AduTypeName, aduVerdicts, siteFacts),
+      // Measured-terrain foundation cost (steep lots) on top of the build price.
+      siteCostAdderUsd: bestVerdict.siteCostUsd ?? 0,
     });
   } catch (err) {
     console.error("[UNIFIED-RECOMMENDATION] Failed to generate unified recommendation:", err);
@@ -977,6 +1078,14 @@ export async function analyzeProperty(address: string): Promise<PropertyAnalysis
     smartBanner = generateSmartBanner(bestRec, buildable, rawLotSizeSqFt, upsideOpportunities.length > 0);
   }
 
+  // Data vintage: County assessor/outline data can predate recent work.
+  const countyRecordsNote = sdParcel?.available
+    ? "Based on San Diego County records; recent additions or ADUs may not be reflected — we verify on site."
+    : null;
+  if (countyRecordsNote) {
+    smartBanner.details = `${smartBanner.details} ${countyRecordsNote}`;
+  }
+
   // FAIL-CLOSED RULE: If polygon geometry missing or low-confidence,
   // mark scan as low confidence and warn user
   if (finalBuildability.geometryMethodUsed === "rectangle-fallback") {
@@ -1121,8 +1230,13 @@ export async function analyzeProperty(address: string): Promise<PropertyAnalysis
           premium: s.premium,
         }))
       : buildRentScenarios(rentEstimates),
-    imageryWarning:
+    imageryWarning: [
+      countyRecordsNote,
+      siteFacts.recordsVintageNote,
       "Aerial imagery may not reflect recent construction or site changes. A professional site visit is recommended to verify current conditions.",
+    ]
+      .filter(Boolean)
+      .join(" "),
 
     // v5 layers — Site Constraint Intelligence
     siteConstraints,
@@ -1491,7 +1605,8 @@ function verdictPriceRange(v: AduTypeVerdict): string {
     stories: v.type === "Second-Story ADU" ? 2 : 1,
     garageStalls: v.type === "Garage Conversion" ? (v.maxSqFt >= 3 * GARAGE_SQFT_PER_STALL ? 3 : 2) : undefined,
   });
-  return formatPriceRange(price.low, price.high);
+  const site = v.siteCostUsd ?? 0;
+  return formatPriceRange(price.low + site, price.high + site);
 }
 
 /** One plain-English sentence explaining why the best type was chosen. */
@@ -1514,10 +1629,81 @@ function buildBestContextNote(
         : `County records show a ${facts.garageStalls}-car garage that can be converted.`
     );
   }
+  if (best === "Detached ADU" && detached.headline) parts.push(detached.headline);
   if (facts.stories != null && facts.stories >= 2 && best !== "Second-Story ADU") {
     parts.push(`The home is already ${facts.stories === 2 ? "two" : facts.stories} stories.`);
   }
   return parts.length ? parts.join(" ") : undefined;
+}
+
+function storyPotential(facts: SiteFacts, cap: number, stories: 1 | 2, twoStoryAllowed: boolean): string {
+  const o = facts.detachedOptions;
+  const none = "Not recommended — no detached footprint fits after required setbacks";
+  if (stories === 2 && !twoStoryAllowed) return "Two-story detached ADUs aren't allowed under this jurisdiction's height limit";
+  const pair = stories === 1 ? o?.oneStory : o?.twoStory;
+  const asIs = pair?.asIs?.areaSqFt ?? (stories === 1 ? facts.detachedZone?.areaSqFt ?? 0 : 0);
+  const repl = pair?.replaceAccessory?.areaSqFt ?? 0;
+  const minFoot = stories === 2 ? 300 : 150;
+  const size = (a: number) => (a >= minFoot ? Math.min(cap, a * stories) : 0);
+  const keep = size(asIs);
+  const replace = size(repl);
+  if (keep <= 0 && replace <= 0) return none;
+  const label = stories === 1 ? "One-story detached" : "Two-story detached";
+  const parts: string[] = [];
+  if (keep > 0) parts.push(`${label} up to ${keep.toLocaleString()} sq ft fits after setbacks`);
+  const what = o?.replaceable.length === 1 ? `~${o.replaceable[0].areaSqFt.toLocaleString()} sq ft ${o.replaceable[0].kind}` : "accessory structures";
+  if (replace > keep) parts.push(`${keep > 0 ? "up to" : `${label} up to`} ${replace.toLocaleString()} sq ft by replacing the existing ${what}`);
+  return parts.join("; ") + (stories === 2 ? " (with City review)" : "");
+}
+
+function toSiteZone(z: LeftoverZone | null | undefined): SiteZone | null {
+  return z
+    ? { areaSqFt: z.areaSqFt, widthFt: z.minWidthFt, depthFt: z.minDepthFt, position: z.position, contiguousAreaSqFt: z.contiguousAreaSqFt ?? null }
+    : null;
+}
+
+/** Detached footprint options (one-/two-story × keep/replace accessory) from the geometry scenarios. */
+function buildDetachedOptions(
+  geometry: GeometryAnalysis | null,
+  stdZone: LeftoverZone | null,
+  twoStoryAllowed: boolean,
+  garageAttached: boolean | null
+): SiteFacts["detachedOptions"] {
+  const sc = geometry?.detachedScenarioZones ?? {};
+  const replaceAny = sc.oneStoryReplace ?? sc.stdReplace;
+  const replaceable = (replaceAny?.removed ?? []).map((r) => ({
+    areaSqFt: r.areaSqFt,
+    kind: (r.classification === "detached-garage" && garageAttached === false ? "detached garage" : "accessory structure") as
+      | "detached garage"
+      | "accessory structure",
+  }));
+  const oneAsIs = sc.oneStory ? sc.oneStory.zone : stdZone;
+  const oneReplace = sc.oneStoryReplace?.zone ?? null;
+  const stdReplace = sc.stdReplace ? sc.stdReplace.zone : oneReplace;
+  return {
+    oneStory: { asIs: toSiteZone(oneAsIs), replaceAccessory: toSiteZone(oneReplace) },
+    twoStory: twoStoryAllowed ? { asIs: toSiteZone(stdZone), replaceAccessory: toSiteZone(stdReplace) } : null,
+    replaceable,
+  };
+}
+
+/**
+ * County records can predate recent work. When the traced outline of a
+ * one-story home is materially larger than the recorded living area (+ any
+ * attached garage), say so — never invent the missing numbers.
+ */
+function recordsVintageNote(
+  livingSqFt: number | null,
+  footprintSqFt: number | null,
+  attachedGarageSqFt: number,
+  stories: number | null
+): string | null {
+  if (!livingSqFt || !footprintSqFt || stories !== 1) return null;
+  const recorded = livingSqFt + attachedGarageSqFt;
+  // Traced ROOF outlines include eaves (~10–20% on a small house), so only a
+  // gap well beyond that is worth flagging.
+  if (footprintSqFt - recorded < 250 || footprintSqFt < recorded * 1.25) return null;
+  return `The traced roof outline (${footprintSqFt.toLocaleString()} sq ft) is well above the County-recorded living area (${livingSqFt.toLocaleString()} sq ft${attachedGarageSqFt ? ` + garage` : ""}) — more than roof overhangs explain — so the home may include additions or roofed areas (covered patios, carports) not reflected in County records; we verify on site.`;
 }
 
 function parseAduAllowanceCap(value: string): number | null {
@@ -1543,7 +1729,7 @@ function synchronizeRecommendations(
         // Feasibility stays exactly what the real-data rules said — the
         // primary pick is never promoted to "Likely" just for being first.
         estimatedSizeRange: sizeKnown
-          ? `${unifiedRecommendation.primarySizeSqFt.toLocaleString()} sq ft`
+          ? `${unifiedRecommendation.primarySizeSqFt.toLocaleString()} sq ft${verdict?.sizeNote ? ` (${verdict.sizeNote})` : ""}`
           : recommendation.estimatedSizeRange,
         priceRange: unifiedRecommendation.priceRange,
         description: sizeKnown

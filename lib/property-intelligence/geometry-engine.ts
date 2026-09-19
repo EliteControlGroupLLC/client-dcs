@@ -156,6 +156,41 @@ export interface GeometryAnalysis {
   measuredYards?: { frontFt: number; rearFt: number; leftFt: number; rightFt: number };
   /** Real-parcel analysis: lot width along frontage / depth perpendicular (ft). */
   orientedLotDims?: { widthFt: number; depthFt: number };
+  /**
+   * Real-parcel analysis: best detached zone per requested scenario (other
+   * setbacks and/or with replaceable accessory structures removed), keyed by
+   * scenario id. Only present when `detachedScenarios` was requested.
+   */
+  detachedScenarioZones?: Record<string, DetachedScenarioZone>;
+}
+
+/** A detached-ADU scenario evaluated on the real parcel. */
+export interface DetachedScenarioSpec {
+  id: string;
+  sideSetbackFt: number;
+  rearSetbackFt: number;
+  /** Treat replaceable accessory structures (detached garage, sheds) as removed. */
+  removeAccessory: boolean;
+}
+
+export interface DetachedScenarioZone {
+  zone: LeftoverZone | null;
+  /** Accessory structures treated as removed in this scenario. */
+  removed: Array<{ areaSqFt: number; classification: StructureClassification }>;
+}
+
+/**
+ * Secondary structures an ADU builder would normally demolish/replace rather
+ * than design around: detached garages, sheds and small unclassified
+ * outbuildings. Anything larger could be a dwelling and is never removed.
+ */
+export const REPLACEABLE_ACCESSORY_MAX_SQFT = 750;
+export function isReplaceableAccessory(s: DetectedStructure): boolean {
+  return (
+    s.classification !== "main-residence" &&
+    s.classification !== "detached-adu" &&
+    s.areaSqFt <= REPLACEABLE_ACCESSORY_MAX_SQFT
+  );
 }
 
 // ─── Coordinate Conversion Constants ───
@@ -1200,6 +1235,10 @@ export interface GeometryInput {
   } | null;
   /** Estimated stories of the main home (from assessor living area ÷ footprint). */
   storiesEstimate?: number | null;
+  /** Extra detached-ADU scenarios to evaluate on a real parcel (see DetachedScenarioSpec). */
+  detachedScenarios?: DetachedScenarioSpec[];
+  /** Never treat accessory structures as replaceable (e.g. assessor shows 2+ units). */
+  keepAccessoryStructures?: boolean;
 }
 
 /**
@@ -1395,9 +1434,39 @@ export function analyzePropertyGeometry(input: GeometryInput): GeometryAnalysis 
     );
   }
 
-  const bestAduZone = [...leftoverZones].sort((a, b) => b.areaSqFt - a.areaSqFt).find(z =>
-    z.suitableFor.includes("Detached ADU") || z.suitableFor.includes("Small Detached ADU")
-  ) || null;
+  const pickBestZone = (zones: LeftoverZone[]): LeftoverZone | null =>
+    [...zones].sort((a, b) => b.areaSqFt - a.areaSqFt).find(z =>
+      z.suitableFor.includes("Detached ADU") || z.suitableFor.includes("Small Detached ADU")
+    ) || null;
+  const bestAduZone = pickBestZone(leftoverZones);
+
+  // ── Step 6b: Extra detached scenarios on the real parcel (other setbacks,
+  // and/or replaceable accessory structures such as a detached garage removed).
+  let detachedScenarioZones: Record<string, DetachedScenarioZone> | undefined;
+  if (raster && mainStructure && realParcel && input.detachedScenarios?.length) {
+    detachedScenarioZones = {};
+    const replaceable = input.keepAccessoryStructures ? [] : secondaryStructures.filter(isReplaceableAccessory);
+    for (const spec of input.detachedScenarios) {
+      const removed = spec.removeAccessory ? replaceable : [];
+      if (spec.removeAccessory && removed.length === 0) continue;
+      const r = analyzeParcelRaster({
+        parcel: parcelPolygon,
+        structures: structures.filter((s) => !removed.includes(s)),
+        mainStructure,
+        addressPoint: lat || lng ? { lat, lng } : null,
+        adjacentParcelRings: realParcel.adjacentParcelRings,
+        frontSetbackFt,
+        sideSetbackFt: spec.sideSetbackFt,
+        rearSetbackFt: spec.rearSetbackFt,
+        separationFt,
+      });
+      if (!r) continue;
+      detachedScenarioZones[spec.id] = {
+        zone: pickBestZone(r.zones),
+        removed: removed.map((s) => ({ areaSqFt: s.areaSqFt, classification: s.classification })),
+      };
+    }
+  }
 
   const bestSideYardZone = leftoverZones.find(z =>
     z.position === "left-side" || z.position === "right-side"
@@ -1483,5 +1552,6 @@ export function analyzePropertyGeometry(input: GeometryInput): GeometryAnalysis 
     frontEdgeMethod: raster?.frontEdgeMethod,
     measuredYards: raster?.measuredYards,
     orientedLotDims: raster ? { widthFt: raster.lotWidthFt, depthFt: raster.lotDepthFt } : undefined,
+    detachedScenarioZones,
   };
 }

@@ -473,3 +473,47 @@ export async function getSanDiegoAdjacentParcels(
     return { available: false, rings: [] };
   }
 }
+
+// ─── City of San Diego Very High Fire Hazard Severity Zone ───
+//
+// SANDAG Hosted/Fire_Hazard_Severity_Zones_SD is the City of San Diego's
+// adopted fire hazard map (single "Very High" multipolygon, lra = "City of
+// San Diego"; the City re-designated Moderate/High areas as Very High and
+// added a 500 ft ember-cast buffer around canyons/open space). It covers the
+// City of San Diego ONLY — other cities must not be evaluated against it.
+// SDMC § 141.0302 ties the 0 ft ADU side/rear setback to being OUTSIDE this
+// zone, so a parcel that touches it anywhere is treated as inside.
+
+const SD_FIRE_HAZARD_URL =
+  "https://geo.sandag.org/server/rest/services/Hosted/Fire_Hazard_Severity_Zones_SD/FeatureServer/0/query";
+
+export interface SanDiegoFireHazardResult {
+  /** False when the query failed — callers must stay conservative. */
+  available: boolean;
+  /** True when any part of the parcel lies in the City's VHFHSZ. */
+  inVeryHighZone: boolean;
+  source: string;
+}
+
+export async function getSanDiegoCityFireHazard(parcelRings: number[][][]): Promise<SanDiegoFireHazardResult> {
+  const source = "City of San Diego Very High Fire Hazard Severity Zone map (SANDAG Fire_Hazard_Severity_Zones_SD)";
+  if (!parcelRings || parcelRings.length === 0 || parcelRings[0].length < 4) {
+    return { available: false, inVeryHighZone: false, source };
+  }
+  try {
+    const data = (await postQuery(SD_FIRE_HAZARD_URL, {
+      geometry: JSON.stringify({ rings: parcelRings, spatialReference: { wkid: 4326 } }),
+      geometryType: "esriGeometryPolygon",
+      inSR: "4326",
+      spatialRel: "esriSpatialRelIntersects",
+      returnGeometry: "false",
+      outFields: "fhsz_description,lra",
+      f: "json",
+    })) as { features?: Array<{ attributes?: { fhsz_description?: string | null } }>; error?: unknown } | null;
+    if (!data || data.error || !Array.isArray(data.features)) return { available: false, inVeryHighZone: false, source };
+    const inZone = data.features.some((f) => /high/i.test(String(f.attributes?.fhsz_description ?? "")));
+    return { available: true, inVeryHighZone: inZone, source };
+  } catch {
+    return { available: false, inVeryHighZone: false, source };
+  }
+}

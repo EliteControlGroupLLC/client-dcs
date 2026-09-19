@@ -50,8 +50,30 @@ export interface SizeRules {
 }
 
 export interface SetbackRules {
+  /** Interior side setback (ft) for a new detached ADU (standard case). */
   sideSetbackFt: number;
+  /** Rear setback (ft) for a new detached ADU (standard case). */
   rearSetbackFt: number;
+  /**
+   * Front setback (ft) the site engine uses when the parcel's base zone is not
+   * in a verified zone table (see zone-standards.ts). ADU front setbacks
+   * follow the base zone, so this is a city-wide default, not a guarantee.
+   */
+  frontSetbackFt: number;
+  /** Where the numeric side/rear/front values come from. */
+  setbackCitation: string;
+  /**
+   * Reduced interior side/rear setback (ft) for a LOW-PROFILE detached ADU
+   * (≤ lowProfileMaxHeightFt tall), where the city allows less than
+   * sideSetbackFt/rearSetbackFt. Undefined = no reduction.
+   */
+  lowProfileSideRearSetbackFt?: number;
+  /** Height (ft) at or below which the low-profile setback applies. */
+  lowProfileMaxHeightFt?: number;
+  /** The low-profile setback does NOT apply inside a (Very) High Fire Hazard Severity Zone. */
+  lowProfileExcludedInFireZone?: boolean;
+  /** Citation for the low-profile setback rule. */
+  lowProfileCitation?: string;
   frontSetbackRule: string;
   streetSideSetbackRule: string;
   convertedStructureSetbackRule: string;
@@ -72,7 +94,10 @@ export interface HeightRules {
 }
 
 export interface SeparationRules {
+  /** Minimum distance (ft) between a new detached ADU and the primary dwelling. */
   minDistanceFromPrimaryHomeFt: number;
+  /** Basis for minDistanceFromPrimaryHomeFt (local code or building-code rationale). */
+  separationCitation: string;
   minDistanceBetweenStructuresNotes: string;
   rearYardPlacementNotes: string;
   frontYardFeasibilityNotes: string;
