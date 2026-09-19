@@ -54,11 +54,12 @@ export function fieldClass({ invalid, valid, tone = "light" }: FieldState = {}, 
     dark ? FIELD_DARK : FIELD_LIGHT,
     invalid
       ? dark
-        ? "border-red-400/80 bg-red-500/10"
+        ? // Keep the dark fill; tint it with a thin red wash (no muddy grey).
+          "border-red-400/80 bg-[linear-gradient(rgba(248,113,113,0.10),rgba(248,113,113,0.10))]"
         : "border-destructive-border bg-destructive-soft"
       : valid
         ? dark
-          ? "border-primary-light/60 bg-primary/20 pr-9"
+          ? "border-primary-light/60 bg-[linear-gradient(rgba(111,163,163,0.14),rgba(111,163,163,0.14))] pr-9"
           : "border-primary/40 bg-primary/5 pr-9"
         : null,
     className
