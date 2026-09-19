@@ -33,7 +33,6 @@ export function Process() {
         <div className="absolute inset-0 bg-gradient-to-b from-secondary/95 via-secondary/85 to-secondary/95" />
       </div>
       {/* Architectural grid overlay */}
-      <div className="absolute inset-0 architectural-grid" />
 
       <div className="relative z-10 mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         {/* Header */}

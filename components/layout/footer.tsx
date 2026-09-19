@@ -50,7 +50,6 @@ export function Footer() {
   return (
     <footer className="relative bg-secondary text-white overflow-hidden">
       {/* Architectural grid pattern */}
-      <div className="absolute inset-0 architectural-grid" />
 
       {/* Soft CTA Section - Replaces Newsletter */}
       <div className="relative border-b border-white/10">

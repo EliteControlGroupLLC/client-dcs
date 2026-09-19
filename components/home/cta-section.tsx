@@ -44,19 +44,6 @@ export function CTASection() {
       {/* Gradient background - green to deep blue */}
       <div className="absolute inset-0 bg-gradient-to-br from-primary via-primary-dark to-secondary" />
 
-      {/* Architectural grid pattern overlay */}
-      <div
-        className="absolute inset-0 opacity-[0.07]"
-        style={{
-          backgroundImage: `
-            linear-gradient(rgba(255,255,255,0.1) 1px, transparent 1px),
-            linear-gradient(90deg, rgba(255,255,255,0.1) 1px, transparent 1px),
-            linear-gradient(rgba(255,255,255,0.05) 1px, transparent 1px),
-            linear-gradient(90deg, rgba(255,255,255,0.05) 1px, transparent 1px)
-          `,
-          backgroundSize: "100px 100px, 100px 100px, 20px 20px, 20px 20px",
-        }}
-      />
 
       {/* Subtle glow effects */}
       <div className="absolute top-0 left-1/4 w-96 h-96 bg-primary/20 rounded-full blur-3xl" />
