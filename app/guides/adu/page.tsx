@@ -1,6 +1,11 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { ArrowRight, CheckCircle, Home, DollarSign, FileText, Clock } from "lucide-react";
+
+export const metadata: Metadata = {
+  title: "ADU Guide",
+};
 
 const sections = [
   {
@@ -16,7 +21,7 @@ const sections = [
   {
     icon: Clock,
     title: "How Long Does It Take?",
-    content: "The typical ADU timeline in San Diego is 12-16 months from start to finish. This includes 1-2 months for design and engineering, 6-9 months for permitting (the longest phase), and 3-4 months for construction. Our team manages every step of the process.",
+    content: "The typical ADU timeline in San Diego is 12–16 months from start to finish. This includes 1–2 months for design and engineering, 6–9 months for permitting (the longest phase), and 3–4 months for construction. Our team manages every step of the process.",
   },
   {
     icon: FileText,
@@ -26,10 +31,10 @@ const sections = [
 ];
 
 const benefits = [
-  "Generate roughly $2,000-$6,000/month depending on the ADU product and lease strategy",
-  "Increase property value by 20-35%",
+  "Generate roughly $2,000 – $6,000/month depending on the ADU product and lease strategy",
+  "Increase property value by 20–35%",
   "Provide housing for family members with privacy",
-  "Average payback period of 5-8 years",
+  "Average payback period of 5–8 years",
   "No additional parking required in most cases",
   "Streamlined permit process under California law",
 ];
@@ -37,10 +42,10 @@ const benefits = [
 export default function ADUGuidePage() {
   return (
     <div className="min-h-screen">
-      <section className="bg-secondary text-white pt-40 pb-20">
+      <section className="bg-secondary bg-[radial-gradient(ellipse_at_top,rgba(51,102,102,0.35),transparent_60%)] text-white pt-40 pb-20">
         <div className="container mx-auto px-4">
           <div className="max-w-3xl">
-            <span className="inline-block text-primary-light font-semibold text-sm uppercase tracking-wider mb-4">
+            <span className="inline-block text-accent font-semibold text-sm uppercase tracking-wider mb-4">
               ADU GUIDE
             </span>
             <h1 className="text-4xl md:text-5xl font-bold mb-6">
@@ -59,7 +64,7 @@ export default function ADUGuidePage() {
       </section>
 
       <section className="py-20">
-        <div className="container mx-auto px-4 max-w-4xl">
+        <div className="container mx-auto px-4 max-w-3xl">
           <div className="space-y-16">
             {sections.map((section) => {
               const Icon = section.icon;
@@ -97,7 +102,7 @@ export default function ADUGuidePage() {
         </div>
       </section>
 
-      <section className="py-20 bg-secondary text-white">
+      <section className="py-20 bg-secondary bg-[radial-gradient(ellipse_at_top,rgba(51,102,102,0.35),transparent_60%)] text-white">
         <div className="container mx-auto px-4 text-center">
           <h2 className="text-3xl md:text-4xl font-bold mb-4">Ready to Build Your ADU?</h2>
           <p className="text-lg text-white/80 mb-8 max-w-2xl mx-auto">

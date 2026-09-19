@@ -21,7 +21,6 @@ import {
   ChevronLeft,
   ChevronRight,
 } from "lucide-react";
-import { FloorPlanLayout } from "./floor-plan-layout";
 import { getRentEstimate, type FloorPlan } from "@/lib/data/site-data";
 
 interface FloorPlanDetailModalProps {
@@ -45,12 +44,15 @@ export function FloorPlanDetailModal({
   hasPrevious = false,
   hasNext = false,
 }: FloorPlanDetailModalProps) {
-  const [activeTab, setActiveTab] = useState<"layout" | "exterior" | "customize">(initialTab);
+  // Drawn floor-plan layouts aren't published yet, so the "layout" entry point
+  // opens the exterior concept instead of a placeholder panel.
+  const startTab = initialTab === "customize" ? "customize" : "exterior";
+  const [activeTab, setActiveTab] = useState<"exterior" | "customize">(startTab);
   const [selectedVariationIndex, setSelectedVariationIndex] = useState(0);
 
   useEffect(() => {
-    setActiveTab(initialTab);
-  }, [initialTab, plan?.id]);
+    setActiveTab(startTab);
+  }, [startTab, plan?.id]);
 
   useEffect(() => {
     setSelectedVariationIndex(0);
@@ -130,24 +132,14 @@ export function FloorPlanDetailModal({
             <div className="bg-muted rounded-2xl p-4 text-center">
               <DollarSign className="h-5 w-5 mx-auto mb-1 text-primary" />
               <p className="text-base md:text-lg font-bold text-secondary">
-                ${selectedVariation.priceLow.toLocaleString()}-<wbr />${selectedVariation.priceHigh.toLocaleString()}
+                ${selectedVariation.priceLow.toLocaleString()}&nbsp;&ndash;<wbr /> ${selectedVariation.priceHigh.toLocaleString()}
               </p>
               <p className="text-xs text-muted-foreground">Price Range</p>
             </div>
           </div>
 
           {/* Tab Navigation */}
-          <div className="grid grid-cols-3 sm:flex border-b border-border mb-6">
-            <button
-              onClick={() => setActiveTab("layout")}
-              className={`px-2 sm:px-4 py-2 min-h-11 leading-tight font-medium text-sm border-b-2 -mb-px transition ${
-                activeTab === "layout"
-                  ? "border-primary text-primary"
-                  : "border-transparent text-muted-foreground hover:text-secondary"
-              }`}
-            >
-              Floor Plan Layout
-            </button>
+          <div className="grid grid-cols-2 sm:flex border-b border-border mb-6">
             <button
               onClick={() => setActiveTab("exterior")}
               className={`px-2 sm:px-4 py-2 min-h-11 leading-tight font-medium text-sm border-b-2 -mb-px transition ${
@@ -174,16 +166,7 @@ export function FloorPlanDetailModal({
           <div className="grid md:grid-cols-2 gap-6 [&>*]:min-w-0">
             {/* Visual */}
             <div>
-              {activeTab === "layout" ? (
-                <FloorPlanLayout
-                  planId={plan.id}
-                  sqFt={plan.sqFt}
-                  bedrooms={plan.bedrooms}
-                  bathrooms={plan.bathrooms}
-                  showLabels={true}
-                  showDimensions={true}
-                />
-              ) : activeTab === "customize" ? (
+              {activeTab === "customize" ? (
                 <div className="space-y-3">
                   {plan.supportedVariations.map((variation, index) => {
                     const active = index === selectedVariationIndex;
@@ -209,7 +192,7 @@ export function FloorPlanDetailModal({
                           <span className="rounded-full bg-secondary/5 px-3 py-1">{variation.bedrooms === 0 ? "Studio" : `${variation.bedrooms} bed`}</span>
                           <span className="rounded-full bg-secondary/5 px-3 py-1">{variation.bathrooms} bath</span>
                           <span className="rounded-full bg-secondary/5 px-3 py-1">{variation.stories} {variation.stories === 1 ? "story" : "stories"}</span>
-                          <span className="rounded-full bg-secondary/5 px-3 py-1">${variation.priceLow.toLocaleString()}-${variation.priceHigh.toLocaleString()}</span>
+                          <span className="rounded-full bg-secondary/5 px-3 py-1">${variation.priceLow.toLocaleString()}&nbsp;&ndash; ${variation.priceHigh.toLocaleString()}</span>
                         </div>
                       </button>
                     );
@@ -241,7 +224,7 @@ export function FloorPlanDetailModal({
                 </p>
                 <p className="font-semibold text-secondary">{plan.dimensions.label}</p>
                 <p className="text-sm text-muted-foreground mt-1">
-                  Layout visuals are shown as practical planning references. Final room shapes can adjust based on the selected configuration and lot conditions.
+                  Final room shapes can adjust based on the selected configuration and lot conditions.
                 </p>
               </div>
 
@@ -262,7 +245,7 @@ export function FloorPlanDetailModal({
                   Estimated Monthly Rent
                 </h4>
                 <p className="text-2xl font-bold text-primary">
-                  ${selectedRent.low.toLocaleString()} - ${selectedRent.high.toLocaleString()}
+                  ${selectedRent.low.toLocaleString()}&nbsp;&ndash; ${selectedRent.high.toLocaleString()}
                 </p>
                 <p className="text-xs text-muted-foreground mt-1">
                   Based on the selected plan configuration and current TruthCore planning assumptions

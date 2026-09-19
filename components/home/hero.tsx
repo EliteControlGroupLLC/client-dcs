@@ -128,7 +128,7 @@ export function Hero() {
             {/* Trust badge — on narrow columns (phones, tablets) the short form drops
                 the repeated "TruthCore" (the logo is right above) to stay on one line. */}
             <div className="inline-flex max-w-full items-center gap-2 bg-white/10 backdrop-blur-sm rounded-full px-4 py-2 mb-8">
-              <Shield className="h-4 w-4 shrink-0 text-primary-light" aria-hidden="true" />
+              <Shield className="h-4 w-4 shrink-0 text-accent" aria-hidden="true" />
               <span className="text-sm whitespace-nowrap">
                 <span className="lg:hidden">A DBA of {COMPANY_INFO.name}</span>
                 <span className="hidden lg:inline">TruthCore &middot; a DBA of {COMPANY_INFO.name}</span>
@@ -151,7 +151,7 @@ export function Hero() {
             <ul className="flex flex-wrap gap-x-6 gap-y-3 mb-8">
               {benefits.map((benefit) => (
                 <li key={benefit} className="flex items-center gap-2 text-sm text-white/70">
-                  <span className="w-2 h-2 rounded-full bg-primary-light shrink-0" aria-hidden="true" />
+                  <span className="w-2 h-2 rounded-full bg-accent shrink-0" aria-hidden="true" />
                   {benefit}
                 </li>
               ))}
@@ -207,8 +207,8 @@ export function Hero() {
               <div className="space-y-3">
                 {pillars.map((pillar) => (
                   <div key={pillar.title} className="flex items-start gap-3">
-                    <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center flex-shrink-0 mt-0.5">
-                      <pillar.icon className="h-4 w-4 text-primary-light" aria-hidden="true" />
+                    <div className="w-8 h-8 rounded-full bg-primary flex items-center justify-center flex-shrink-0 mt-0.5">
+                      <pillar.icon className="h-4 w-4 text-white" aria-hidden="true" />
                     </div>
                     <div>
                       <p className="font-semibold text-white">{pillar.title}</p>

@@ -33,24 +33,27 @@ export default function GalleryPage() {
     : GALLERY_PROJECTS.filter((project) => project.category === activeCategory);
 
   return (
-    <div className="min-h-screen bg-muted">
-      <section className="pt-40 pb-20">
+    <div className="min-h-screen">
+      <section className="bg-secondary bg-[radial-gradient(ellipse_at_top,rgba(51,102,102,0.35),transparent_60%)] text-white pt-40 pb-20">
         <div className="container mx-auto px-4">
-          {/* Header */}
-          <div className="text-center mb-12">
-            <span className="inline-block text-primary font-semibold text-sm uppercase tracking-wider mb-4">
+          <div className="max-w-3xl">
+            <span className="inline-block text-accent font-semibold text-sm uppercase tracking-wider mb-4">
               GALLERY
             </span>
-            <h1 className="text-4xl md:text-5xl font-bold text-secondary mb-4">
+            <h1 className="text-4xl md:text-5xl font-bold mb-6">
               Our Work
             </h1>
-            <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
+            <p className="text-xl text-white/80">
               A tighter look at the projects that define our design-build work across ADUs, remodels, and custom residential construction.
             </p>
           </div>
+        </div>
+      </section>
 
+      <section className="py-20 bg-muted">
+        <div className="container mx-auto px-4">
           {/* Category Filters */}
-          <div className="flex flex-wrap justify-center gap-3 mb-12">
+          <div className="flex flex-wrap gap-3 mb-12">
             {categories.map((cat) => {
               const Icon = cat.icon;
               const active = activeCategory === cat.id;
@@ -98,7 +101,7 @@ export default function GalleryPage() {
                       )}
                     </div>
                     <div className="absolute bottom-0 left-0 right-0 p-6">
-                      <h3 className="text-xl font-semibold text-white">{project.title}</h3>
+                      <h3 className="text-xl font-semibold text-white text-balance">{project.title}</h3>
                       <p className="text-sm text-white/80">
                         {project.location} • {project.sqft}
                       </p>
@@ -122,7 +125,7 @@ export default function GalleryPage() {
       </section>
 
       {/* CTA */}
-      <section className="py-20 bg-secondary text-white">
+      <section className="py-20 bg-secondary bg-[radial-gradient(ellipse_at_top,rgba(51,102,102,0.35),transparent_60%)] text-white">
         <div className="container mx-auto px-4 text-center">
           <h2 className="text-3xl md:text-4xl font-bold mb-4">
             Ready to Start Your Project?
@@ -131,12 +134,12 @@ export default function GalleryPage() {
             Let us help you create something amazing. Schedule a free consultation to discuss your ideas.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Link href="/contact">
-              <Button size="lg" rounded="full" className="w-full sm:w-auto font-semibold">
+            <Link href="/contact" className="w-full sm:w-auto">
+              <Button size="lg" rounded="full" className="w-full sm:w-auto">
                 Get Free Consultation <ArrowRight className="h-5 w-5" />
               </Button>
             </Link>
-            <Link href="/build-your-adu">
+            <Link href="/build-your-adu" className="w-full sm:w-auto">
               <Button size="lg" rounded="full" variant="outlineWhite" className="w-full sm:w-auto">
                 Design Your ADU
               </Button>

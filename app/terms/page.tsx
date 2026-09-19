@@ -1,12 +1,17 @@
+import type { Metadata } from "next";
 import { COMPANY_INFO } from "@/lib/data/site-data";
+
+export const metadata: Metadata = {
+  title: "Terms of Service",
+};
 
 export default function TermsPage() {
   return (
     <div className="min-h-screen">
-      <section className="bg-secondary text-white pt-40 pb-20">
+      <section className="bg-secondary bg-[radial-gradient(ellipse_at_top,rgba(51,102,102,0.35),transparent_60%)] text-white pt-40 pb-20">
         <div className="container mx-auto px-4">
           <div className="max-w-3xl">
-            <span className="inline-block text-primary-light font-semibold text-sm uppercase tracking-wider mb-4">
+            <span className="inline-block text-accent font-semibold text-sm uppercase tracking-wider mb-4">
               LEGAL
             </span>
             <h1 className="text-4xl md:text-5xl font-bold mb-6">Terms of Service</h1>

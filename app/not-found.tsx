@@ -4,7 +4,7 @@ import { ArrowRight, Home, LayoutGrid, Image as ImageIcon, Phone } from "lucide-
 import { Button } from "@/components/ui/button";
 
 export const metadata: Metadata = {
-  title: "Page Not Found | TruthCore",
+  title: "Page Not Found",
   robots: { index: false },
 };
 
@@ -18,10 +18,10 @@ const links = [
 export default function NotFound() {
   return (
     <div className="min-h-screen">
-      <section className="bg-secondary text-white pt-40 pb-20">
+      <section className="bg-secondary bg-[radial-gradient(ellipse_at_top,rgba(51,102,102,0.35),transparent_60%)] text-white pt-40 pb-20">
         <div className="container mx-auto px-4">
           <div className="max-w-3xl">
-            <span className="inline-block text-primary-light font-semibold text-sm uppercase tracking-wider mb-4">
+            <span className="inline-block text-accent font-semibold text-sm uppercase tracking-wider mb-4">
               404 · PAGE NOT FOUND
             </span>
             <h1 className="text-4xl md:text-5xl font-bold mb-6">We couldn&apos;t find that page</h1>

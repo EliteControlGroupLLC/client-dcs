@@ -1,17 +1,20 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { ArrowRight, Pencil, DollarSign, FileText, Hammer, CheckCircle } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 import { PROCESS_STEPS } from "@/lib/data/site-data";
 
-const stepIcons = [Pencil, DollarSign, FileText, Hammer, CheckCircle];
+export const metadata: Metadata = {
+  title: "Our Process",
+};
 
 export default function ProcessPage() {
   return (
     <div className="min-h-screen">
-      <section className="bg-secondary text-white pt-40 pb-20">
+      <section className="bg-secondary bg-[radial-gradient(ellipse_at_top,rgba(51,102,102,0.35),transparent_60%)] text-white pt-40 pb-20">
         <div className="container mx-auto px-4">
           <div className="max-w-3xl">
-            <span className="inline-block text-primary-light font-semibold text-sm uppercase tracking-wider mb-4">
+            <span className="inline-block text-accent font-semibold text-sm uppercase tracking-wider mb-4">
               OUR PROCESS
             </span>
             <h1 className="text-4xl md:text-5xl font-bold mb-6">
@@ -26,10 +29,9 @@ export default function ProcessPage() {
       </section>
 
       <section className="py-20">
-        <div className="container mx-auto px-4 max-w-4xl">
+        <div className="container mx-auto px-4 max-w-3xl">
           <div className="space-y-12">
-            {PROCESS_STEPS.map((item, index) => {
-              const Icon = stepIcons[index];
+            {PROCESS_STEPS.map((item) => {
               return (
                 <div key={item.step} className="flex gap-6">
                   <div className="flex flex-col items-center">
@@ -56,7 +58,7 @@ export default function ProcessPage() {
         </div>
       </section>
 
-      <section className="py-20 bg-secondary text-white">
+      <section className="py-20 bg-secondary bg-[radial-gradient(ellipse_at_top,rgba(51,102,102,0.35),transparent_60%)] text-white">
         <div className="container mx-auto px-4 text-center">
           <h2 className="text-3xl md:text-4xl font-bold mb-4">Ready to Get Started?</h2>
           <p className="text-lg text-white/80 mb-8 max-w-2xl mx-auto">

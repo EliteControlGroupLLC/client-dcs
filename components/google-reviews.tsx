@@ -7,18 +7,22 @@ import { CLIENT_REVIEWS } from "@/lib/data/reviews";
 // Real client reviews (Google + Yelp), verbatim — see lib/data/reviews.ts.
 const reviews = CLIENT_REVIEWS;
 
-function ReviewText({ text }: { text: string }) {
+const GOOGLE_REVIEWS_URL = "https://www.google.com/search?q=Distinct+Construction+Solutions+Chula+Vista+reviews";
+
+function ReviewText({ text, light = false }: { text: string; light?: boolean }) {
   const [expanded, setExpanded] = useState(false);
   return (
     <div>
-      <p className={`font-serif text-lg italic leading-relaxed text-white/85 ${expanded ? "" : "line-clamp-5"}`}>
+      <p className={`font-serif text-lg italic leading-relaxed ${light ? "text-secondary" : "text-white/85"} ${expanded ? "" : "line-clamp-5"}`}>
         &ldquo;{text}&rdquo;
       </p>
       {text.length > 200 && (
         <button
           type="button"
           onClick={() => setExpanded((v) => !v)}
-          className="mt-3 text-xs font-semibold uppercase tracking-[0.2em] text-accent transition-colors hover:text-accent-light"
+          className={`mt-3 text-xs font-semibold uppercase tracking-[0.2em] transition-colors ${
+            light ? "text-primary hover:text-primary-dark" : "text-accent hover:text-accent-light"
+          }`}
         >
           {expanded ? "Show less" : "Read full review"}
         </button>
@@ -34,6 +38,53 @@ function GoldStars({ className = "h-3.5 w-3.5" }: { className?: string }) {
         <Star key={i} aria-hidden="true" className={`${className} fill-accent text-accent`} />
       ))}
     </span>
+  );
+}
+
+/**
+ * Light-surface version of the review cards (same structure as the homepage
+ * section: stars · source/date, serif quote, gold hairline, name, project) for
+ * white/muted sections on interior and landing pages. Real reviews, verbatim.
+ */
+export function ReviewCards({ reviews: items }: { reviews: typeof CLIENT_REVIEWS }) {
+  return (
+    <>
+      <div className="grid items-stretch gap-6 md:grid-cols-2 lg:grid-cols-3">
+        {items.map((review, index) => (
+          <figure
+            key={`${review.author}-${index}`}
+            className="flex h-full flex-col rounded-2xl border border-border bg-white p-6 shadow-sm sm:p-8"
+          >
+            <div className="mb-5 flex items-center justify-between gap-4">
+              <GoldStars />
+              <span className="text-xs font-semibold uppercase tracking-[0.2em] text-muted-foreground">
+                {review.source}
+                {review.date ? ` · ${review.date}` : ""}
+              </span>
+            </div>
+            <blockquote className="flex-1">
+              <ReviewText text={review.text} light />
+            </blockquote>
+            <div className="mt-6 h-px w-12 bg-accent/60" aria-hidden="true" />
+            <figcaption className="mt-4">
+              <p className="text-xs font-semibold uppercase tracking-[0.2em] text-secondary">{review.author}</p>
+              <p className="mt-1 text-xs text-muted-foreground">{review.project}</p>
+            </figcaption>
+          </figure>
+        ))}
+      </div>
+      <div className="mt-12 text-center">
+        <a
+          href={GOOGLE_REVIEWS_URL}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="inline-flex items-center gap-2 border-b border-primary/40 pb-1 text-xs font-semibold uppercase tracking-[0.2em] text-primary transition-colors hover:text-primary-dark"
+        >
+          See all reviews on Google
+          <ExternalLink className="h-3.5 w-3.5" aria-hidden="true" />
+        </a>
+      </div>
+    </>
   );
 }
 
@@ -59,7 +110,7 @@ export function GoogleReviews() {
             See what our clients are saying about their experience working with Distinct Construction Solutions.
           </p>
           <a
-            href="https://www.google.com/search?q=Distinct+Construction+Solutions+Chula+Vista+reviews"
+            href={GOOGLE_REVIEWS_URL}
             target="_blank"
             rel="noopener noreferrer"
             className="inline-flex items-center gap-2 bg-white text-secondary font-semibold px-6 py-3 rounded-full shadow-sm hover:shadow-md transition-shadow"
@@ -89,7 +140,7 @@ export function GoogleReviews() {
           <div className="mx-auto mt-6 h-px w-16 bg-accent/60" aria-hidden="true" />
           <div className="mt-6 flex items-center justify-center gap-3">
             <GoldStars className="h-4 w-4" />
-            <span className="text-sm text-white/60">5.0 from homeowners on Google &amp; Yelp</span>
+            <span className="text-sm text-white/75">5.0 from homeowners on Google &amp; Yelp</span>
           </div>
         </div>
 
@@ -98,11 +149,11 @@ export function GoogleReviews() {
           {reviews.map((review, index) => (
             <figure
               key={`${review.author}-${index}`}
-              className={`flex h-full flex-col rounded-2xl border border-accent/30 bg-white/[0.04] p-6 sm:p-8 ${index === 0 ? "md:col-span-2" : ""} backdrop-blur-sm transition-colors duration-300 hover:bg-white/[0.07]`}
+              className={`flex h-full flex-col rounded-2xl border border-accent/30 bg-secondary-light p-6 shadow-lg shadow-black/20 sm:p-8 ${index === 0 ? "md:col-span-2" : ""} transition-colors duration-300 hover:border-accent/50`}
             >
               <div className="mb-5 flex items-center justify-between">
                 <GoldStars />
-                <span className="text-xs font-semibold uppercase tracking-[0.2em] text-white/50">
+                <span className="text-xs font-semibold uppercase tracking-[0.2em] text-white/60">
                   {review.source}
                   {review.date ? ` · ${review.date}` : ""}
                 </span>
@@ -113,7 +164,7 @@ export function GoogleReviews() {
               <div className="mt-6 h-px w-12 bg-accent/50" aria-hidden="true" />
               <figcaption className="mt-4">
                 <p className="text-xs font-semibold uppercase tracking-[0.2em] text-accent-light">{review.author}</p>
-                <p className="mt-1 text-xs text-white/50">{review.project}</p>
+                <p className="mt-1 text-xs text-white/75">{review.project}</p>
               </figcaption>
             </figure>
           ))}
@@ -122,7 +173,7 @@ export function GoogleReviews() {
         {/* Link out */}
         <div className="mt-12 text-center">
           <a
-            href="https://www.google.com/search?q=Distinct+Construction+Solutions+Chula+Vista+reviews"
+            href={GOOGLE_REVIEWS_URL}
             target="_blank"
             rel="noopener noreferrer"
             className="inline-flex items-center gap-2 border-b border-accent/50 pb-1 text-xs font-semibold uppercase tracking-[0.2em] text-accent transition-colors hover:text-accent-light"

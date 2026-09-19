@@ -18,16 +18,12 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { FLOOR_PLANS_SORTED } from "@/lib/data/site-data";
-import { FloorPlanLayout } from "@/components/floor-plans/floor-plan-layout";
+import { fieldClass } from "@/components/ui/form";
 import { FloorPlanDetailModal } from "@/components/floor-plans/floor-plan-detail-modal";
 
 type ViewMode = "grid" | "list";
 type SortOption = "size-asc" | "size-desc" | "price-asc" | "price-desc";
 type ModalView = "layout" | "customize";
-
-// Matches the lead-gate field style (h-11, rounded-lg, border, text-sm).
-const fieldClass =
-  "w-full h-11 px-3 rounded-lg border border-border bg-white text-sm text-secondary placeholder:text-muted-foreground/70 focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all";
 
 const styles = ["All Styles", ...Array.from(new Set(FLOOR_PLANS_SORTED.map((plan) => plan.style)))];
 const types = ["All Types", ...Array.from(new Set(FLOOR_PLANS_SORTED.map((plan) => plan.type)))];
@@ -36,12 +32,12 @@ const bedroomOptions = ["Any", "Studio", "1", "2", "3", "4"];
 function formatBedroomLabel(minBeds: number, maxBeds: number) {
   if (maxBeds === 0) return "Studio";
   if (minBeds === maxBeds) return `${maxBeds} bed${maxBeds > 1 ? "s" : ""}`;
-  return `${minBeds}-${maxBeds} beds`;
+  return `${minBeds}–${maxBeds} beds`;
 }
 
 function formatBathroomLabel(minBaths: number, maxBaths: number) {
   if (minBaths === maxBaths) return `${minBaths} bath${minBaths > 1 ? "s" : ""}`;
-  return `${minBaths}-${maxBaths} baths`;
+  return `${minBaths}–${maxBaths} baths`;
 }
 
 export default function FloorPlansPage() {
@@ -130,22 +126,25 @@ export default function FloorPlansPage() {
   };
 
   return (
-    <div className="min-h-screen bg-muted">
-      <section className="pt-40 pb-20">
+    <div className="min-h-screen">
+      <section className="bg-secondary bg-[radial-gradient(ellipse_at_top,rgba(51,102,102,0.35),transparent_60%)] text-white pt-40 pb-20">
         <div className="container mx-auto px-4">
-          {/* Header */}
-          <div className="text-center mb-12">
-            <span className="inline-block text-primary font-semibold text-sm uppercase tracking-wider mb-4">
+          <div className="max-w-3xl">
+            <span className="inline-block text-accent font-semibold text-sm uppercase tracking-wider mb-4">
               FLOOR PLANS
             </span>
-            <h1 className="text-4xl md:text-5xl font-bold text-secondary mb-4">
+            <h1 className="text-4xl md:text-5xl font-bold mb-6">
               ADU Floor Plans Library
             </h1>
-            <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
+            <p className="text-xl text-white/80">
               Browse our curated collection of ADU designs with real floor plan layouts. Each plan can be customized to fit your property and lifestyle.
             </p>
           </div>
+        </div>
+      </section>
 
+      <section className="py-20 bg-muted">
+        <div className="container mx-auto px-4">
           {/* Filters */}
           <div className="bg-white rounded-2xl border border-border p-6 shadow-sm mb-8">
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:flex lg:flex-row gap-4 lg:items-center">
@@ -158,7 +157,7 @@ export default function FloorPlansPage() {
                   placeholder="Search floor plans..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className={`${fieldClass} pl-10`}
+                  className={fieldClass({}, "pl-10")}
                 />
               </div>
 
@@ -167,7 +166,7 @@ export default function FloorPlansPage() {
                 aria-label="Filter by style"
                 value={selectedStyle}
                 onChange={(e) => setSelectedStyle(e.target.value)}
-                className={`${fieldClass} lg:w-auto`}
+                className={fieldClass({}, "lg:w-auto")}
               >
                 {styles.map(style => (
                   <option key={style} value={style}>{style}</option>
@@ -179,7 +178,7 @@ export default function FloorPlansPage() {
                 aria-label="Filter by type"
                 value={selectedType}
                 onChange={(e) => setSelectedType(e.target.value)}
-                className={`${fieldClass} lg:w-auto`}
+                className={fieldClass({}, "lg:w-auto")}
               >
                 {types.map(type => (
                   <option key={type} value={type}>{type}</option>
@@ -191,7 +190,7 @@ export default function FloorPlansPage() {
                 aria-label="Filter by bedrooms"
                 value={selectedBedrooms}
                 onChange={(e) => setSelectedBedrooms(e.target.value)}
-                className={`${fieldClass} lg:w-auto`}
+                className={fieldClass({}, "lg:w-auto")}
               >
                 {bedroomOptions.map(opt => (
                   <option key={opt} value={opt}>{opt === "Any" ? "Any Beds" : opt === "Studio" ? "Studio" : `${opt} Bed`}</option>
@@ -203,7 +202,7 @@ export default function FloorPlansPage() {
                 aria-label="Sort floor plans"
                 value={sortBy}
                 onChange={(e) => setSortBy(e.target.value as SortOption)}
-                className={`${fieldClass} lg:w-auto`}
+                className={fieldClass({}, "lg:w-auto")}
               >
                 <option value="size-asc">Size: Small to Large</option>
                 <option value="size-desc">Size: Large to Small</option>
@@ -236,14 +235,9 @@ export default function FloorPlansPage() {
           </div>
 
           {/* Results Count */}
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1 mb-6">
-            <p className="text-muted-foreground">
-              Showing <span className="font-semibold text-secondary">{filteredPlans.length}</span> floor plans
-            </p>
-            <p className="text-sm text-muted-foreground">
-              Canonical pricing and rent assumptions sync to calculators and recommendations
-            </p>
-          </div>
+          <p className="text-muted-foreground mb-6">
+            Showing <span className="font-semibold text-secondary">{filteredPlans.length}</span> floor plans
+          </p>
 
           {/* Floor Plans Grid/List */}
           <div className={viewMode === "grid" 
@@ -285,21 +279,6 @@ export default function FloorPlansPage() {
                   <div className="flex-1">
                     <h3 className="text-xl font-semibold text-secondary mb-3">{plan.name}</h3>
                   
-                    {/* Mini Floor Plan Layout */}
-                    {viewMode === "grid" && (
-                      <div className="mb-4 bg-muted/50 rounded-lg p-2">
-                        <FloorPlanLayout
-                          planId={plan.id}
-                          sqFt={plan.sqFt}
-                          bedrooms={plan.bedrooms}
-                          bathrooms={plan.bathrooms}
-                          showLabels={false}
-                          showDimensions={false}
-                          className="border-0 bg-transparent"
-                        />
-                      </div>
-                    )}
-
                     <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-sm text-muted-foreground mb-3">
                       <span className="flex items-center gap-1">
                         <Bed className="h-4 w-4" />
@@ -311,7 +290,7 @@ export default function FloorPlansPage() {
                       </span>
                       <span className="flex items-center gap-1">
                         <DollarSign className="h-4 w-4" />
-                        ${plan.rentEstimate.low.toLocaleString()}-${plan.rentEstimate.high.toLocaleString()}/mo
+                        ${plan.rentEstimate.low.toLocaleString()}&nbsp;&ndash; ${plan.rentEstimate.high.toLocaleString()}/mo
                       </span>
                       <span className="flex items-center gap-1">
                         <Layers3 className="h-4 w-4" />
@@ -352,7 +331,7 @@ export default function FloorPlansPage() {
       </section>
 
       {/* CTA Section */}
-      <section className="py-20 bg-secondary text-white">
+      <section className="py-20 bg-secondary bg-[radial-gradient(ellipse_at_top,rgba(51,102,102,0.35),transparent_60%)] text-white">
         <div className="container mx-auto px-4 text-center">
           <h2 className="text-3xl md:text-4xl font-bold mb-4">
             Don&apos;t See What You&apos;re Looking For?
@@ -361,12 +340,12 @@ export default function FloorPlansPage() {
             We can design a custom ADU floor plan that perfectly fits your property and needs. Our architects will work with you to create your ideal space.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Link href="/build-your-adu">
-              <Button size="lg" rounded="full" className="w-full sm:w-auto font-semibold">
+            <Link href="/build-your-adu" className="w-full sm:w-auto">
+              <Button size="lg" rounded="full" className="w-full sm:w-auto">
                 Design Custom ADU <ArrowRight className="h-5 w-5" />
               </Button>
             </Link>
-            <Link href="/contact">
+            <Link href="/contact" className="w-full sm:w-auto">
               <Button size="lg" rounded="full" variant="outlineWhite" className="w-full sm:w-auto">
                 Talk to an Expert
               </Button>

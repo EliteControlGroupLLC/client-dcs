@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { COMPANY_INFO, SERVICE_PRICING, getYearsExperience } from "@/lib/data/site-data";
 
 export const metadata: Metadata = {
-  title: "San Diego ADU Builder | Free Quote | TruthCore",
+  title: "San Diego ADU Builder | Free Quote",
   description:
     "Build your dream ADU in San Diego. Detached ADUs starting at $175,000 and garage conversions starting at $155,000. Licensed, bonded, and insured. Get your free quote today.",
   openGraph: {
@@ -37,35 +37,35 @@ export default function ADUSanDiegoLP() {
   return (
     <div className="min-h-screen">
       {/* Hero — No Navigation, focused on conversion */}
-      <section className="bg-secondary text-white pt-40 pb-20">
+      <section className="bg-secondary bg-[radial-gradient(ellipse_at_top,rgba(51,102,102,0.35),transparent_60%)] text-white pt-40 pb-20">
         <div className="container mx-auto px-4">
           <div className="grid lg:grid-cols-2 gap-12 items-center max-w-6xl mx-auto">
             {/* Left — Copy */}
             <div>
-              <div className="inline-flex items-center gap-2 bg-primary/20 rounded-full px-4 py-2 mb-6">
-                <Shield className="h-4 w-4 text-primary-light" />
-                <span className="text-sm text-primary-light font-medium">
+              <div className="inline-flex items-center gap-2 rounded-full border border-accent/30 bg-accent/10 px-4 py-2 mb-6">
+                <Shield className="h-4 w-4 text-accent" aria-hidden="true" />
+                <span className="text-sm text-accent-light font-medium">
                   San Diego&apos;s #1 ADU Builder
                 </span>
               </div>
 
-              <h1 className="text-4xl md:text-5xl font-bold leading-tight mb-6">
+              <h1 className="text-4xl md:text-5xl font-bold leading-tight mb-6 text-balance">
                 Build Your Dream
-                <span className="text-primary-light"> ADU in San Diego</span>
+                <span className="text-accent"> ADU in San Diego</span>
               </h1>
 
               <p className="text-xl text-white/80 mb-6">
-                Detached ADUs starting at <span className="text-primary-light font-bold">{SERVICE_PRICING.adu.detachedStartingPrice}</span>. Garage conversions from <span className="text-primary-light font-bold">{SERVICE_PRICING.adu.startingPrice}</span>.
+                Detached ADUs starting at <span className="text-accent font-bold">{SERVICE_PRICING.adu.detachedStartingPrice}</span>. Garage conversions from <span className="text-accent font-bold">{SERVICE_PRICING.adu.startingPrice}</span>.
                 We handle everything — design, permits, and construction. One team, one price, zero stress.
               </p>
 
               <div className="flex flex-wrap gap-4 mb-8">
-                <div className="flex items-center gap-2 text-sm text-white/70">
-                  <Clock className="h-4 w-4 text-primary-light" />
+                <div className="flex items-center gap-2 text-sm text-white/80">
+                  <Clock className="h-4 w-4 text-accent" aria-hidden="true" />
                   4-Month Average Build
                 </div>
-                <div className="flex items-center gap-2 text-sm text-white/70">
-                  <Star className="h-4 w-4 text-primary-light" />
+                <div className="flex items-center gap-2 text-sm text-white/80">
+                  <Star className="h-4 w-4 text-accent" aria-hidden="true" />
                   500+ Projects Completed
                 </div>
               </div>
@@ -73,7 +73,7 @@ export default function ADUSanDiegoLP() {
               <ul className="space-y-3 mb-8">
                 {benefits.map((b) => (
                   <li key={b} className="flex items-center gap-3 text-white/90">
-                    <CheckCircle className="h-5 w-5 text-primary-light shrink-0" />
+                    <CheckCircle className="h-5 w-5 text-accent shrink-0" aria-hidden="true" />
                     {b}
                   </li>
                 ))}
@@ -165,7 +165,7 @@ export default function ADUSanDiegoLP() {
       </section>
 
       {/* Final CTA */}
-      <section className="bg-secondary py-20 text-center">
+      <section className="bg-secondary bg-[radial-gradient(ellipse_at_top,rgba(51,102,102,0.35),transparent_60%)] py-20 text-center">
         <div className="container mx-auto px-4 max-w-2xl">
           <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">
             Ready to Build Your ADU?

@@ -2,29 +2,16 @@
 
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { CheckCircle, ArrowRight, AlertCircle } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Select } from "@/components/ui/select";
+import { FormField, FormAlert } from "@/components/ui/form";
+import { CheckCircle, ArrowRight } from "lucide-react";
 
-// Field + error styling mirrors the lead-gate form (components/lead-gate).
+// Fields, labels, inline errors and the error box come from the sitewide form
+// primitives (components/ui/form.tsx), so this form matches the lead gate.
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-const inputClass = (invalid: boolean) =>
-  `w-full h-11 px-3 rounded-lg border bg-white text-sm text-secondary placeholder:text-muted-foreground/70 focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all ${
-    invalid ? "border-red-400 bg-red-50" : "border-border"
-  }`;
-
-const labelClass = "block text-xs font-medium text-muted-foreground mb-1.5";
-
 type FieldErrors = Partial<Record<"name" | "email" | "phone", string>>;
-
-function FieldError({ message }: { message?: string }) {
-  if (!message) return null;
-  return (
-    <p className="text-xs text-red-600 mt-1 flex items-center gap-1" role="alert">
-      <AlertCircle className="h-3 w-3 shrink-0" />
-      {message}
-    </p>
-  );
-}
 
 interface LeadFormProps {
   source: string;
@@ -132,67 +119,52 @@ export function LeadForm({
           {heading}
         </h3>
       )}
-      <div>
-        <label htmlFor={`${idPrefix}-name`} className={labelClass}>Full name</label>
-        <input
+      <FormField label="Full name" htmlFor={`${idPrefix}-name`} error={fieldErrors.name}>
+        <Input
           id={`${idPrefix}-name`}
           autoComplete="name"
           value={formData.name}
           onChange={(e) => update("name", e.target.value)}
           placeholder="Jane Smith"
-          aria-invalid={!!fieldErrors.name}
-          className={inputClass(!!fieldErrors.name)}
+          invalid={!!fieldErrors.name}
         />
-        <FieldError message={fieldErrors.name} />
-      </div>
-      <div>
-        <label htmlFor={`${idPrefix}-email`} className={labelClass}>Email</label>
-        <input
+      </FormField>
+      <FormField label="Email" htmlFor={`${idPrefix}-email`} error={fieldErrors.email}>
+        <Input
           id={`${idPrefix}-email`}
           type="email"
           autoComplete="email"
           value={formData.email}
           onChange={(e) => update("email", e.target.value)}
           placeholder="you@example.com"
-          aria-invalid={!!fieldErrors.email}
-          className={inputClass(!!fieldErrors.email)}
+          invalid={!!fieldErrors.email}
         />
-        <FieldError message={fieldErrors.email} />
-      </div>
-      <div>
-        <label htmlFor={`${idPrefix}-phone`} className={labelClass}>Phone</label>
-        <input
+      </FormField>
+      <FormField label="Phone" htmlFor={`${idPrefix}-phone`} error={fieldErrors.phone}>
+        <Input
           id={`${idPrefix}-phone`}
           type="tel"
           autoComplete="tel"
           value={formData.phone}
           onChange={(e) => update("phone", e.target.value)}
           placeholder="(619) 555-0123"
-          aria-invalid={!!fieldErrors.phone}
-          className={inputClass(!!fieldErrors.phone)}
+          invalid={!!fieldErrors.phone}
         />
-        <FieldError message={fieldErrors.phone} />
-      </div>
-      <div>
-        <label htmlFor={`${idPrefix}-project`} className={labelClass}>Project type</label>
-        <select
+      </FormField>
+      <FormField label="Project type" htmlFor={`${idPrefix}-project`}>
+        <Select
           id={`${idPrefix}-project`}
           value={formData.project}
           onChange={(e) => update("project", e.target.value)}
-          className={inputClass(false)}
         >
           <option value="ADU">ADU / Guest House</option>
           <option value="Custom Homes">Custom Homes</option>
           <option value="Remodel">Home Remodeling</option>
           <option value="Garage Conversion">Garage Conversion</option>
           <option value="Other">Other</option>
-        </select>
-      </div>
-      {error && (
-        <div className="bg-red-50 border border-red-200 rounded-lg p-3" role="alert">
-          <p className="text-sm text-red-600">{error}</p>
-        </div>
-      )}
+        </Select>
+      </FormField>
+      <FormAlert>{error}</FormAlert>
       <Button type="submit" size="lg" rounded="full" className="w-full group" disabled={isSubmitting}>
         {isSubmitting ? "Submitting..." : buttonText}
         <ArrowRight className="h-5 w-5 group-hover:translate-x-1 transition-transform" />

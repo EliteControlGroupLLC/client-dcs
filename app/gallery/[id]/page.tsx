@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
@@ -10,22 +11,35 @@ export function generateStaticParams() {
   }));
 }
 
+export async function generateMetadata({ params }: { params: Promise<{ id: string }> }): Promise<Metadata> {
+  const { id } = await params;
+  const project = getProjectById(id);
+  return { title: project ? project.title : "Project Not Found" };
+}
+
 export default async function ProjectPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   const project = getProjectById(id);
 
   if (!project) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-muted pt-40 pb-20">
-        <div className="container mx-auto px-4 text-center">
-          <h1 className="text-4xl md:text-5xl font-bold text-secondary mb-4">Project Not Found</h1>
-          <p className="text-xl text-muted-foreground mb-8">We couldn&apos;t find that project.</p>
-          <Link href="/gallery">
-            <Button size="lg" rounded="full">
-              <ArrowLeft className="h-5 w-5" /> Back to Gallery
-            </Button>
-          </Link>
-        </div>
+      <div className="min-h-screen">
+        <section className="bg-secondary bg-[radial-gradient(ellipse_at_top,rgba(51,102,102,0.35),transparent_60%)] text-white pt-40 pb-20">
+          <div className="container mx-auto px-4">
+            <div className="max-w-3xl">
+              <span className="inline-block text-accent font-semibold text-sm uppercase tracking-wider mb-4">
+                GALLERY
+              </span>
+              <h1 className="text-4xl md:text-5xl font-bold mb-6">Project Not Found</h1>
+              <p className="text-xl text-white/80 mb-8">We couldn&apos;t find that project.</p>
+              <Link href="/gallery" className="inline-block w-full sm:w-auto">
+                <Button size="lg" rounded="full" className="w-full sm:w-auto">
+                  <ArrowLeft className="h-5 w-5" /> Back to Gallery
+                </Button>
+              </Link>
+            </div>
+          </div>
+        </section>
       </div>
     );
   }
@@ -86,12 +100,12 @@ export default async function ProjectPage({ params }: { params: Promise<{ id: st
           </p>
 
           <div className="flex flex-col sm:flex-row gap-4">
-            <Link href="/contact">
-              <Button size="lg" rounded="full" className="w-full sm:w-auto font-semibold">
+            <Link href="/contact" className="w-full sm:w-auto">
+              <Button size="lg" rounded="full" className="w-full sm:w-auto">
                 Start a Similar Project <ArrowRight className="h-5 w-5" />
               </Button>
             </Link>
-            <Link href="/build-your-adu">
+            <Link href="/build-your-adu" className="w-full sm:w-auto">
               <Button size="lg" rounded="full" variant="outline" className="w-full sm:w-auto">
                 Design Your ADU
               </Button>

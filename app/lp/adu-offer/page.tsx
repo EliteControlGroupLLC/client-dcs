@@ -2,10 +2,14 @@
 
 import Link from "next/link";
 import { LeadForm } from "@/components/lead-form";
-import { CheckCircle, Phone, Star, ArrowRight, ExternalLink } from "lucide-react";
+import { CheckCircle, Phone, Star, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Image from "next/image";
 import { COMPANY_INFO } from "@/lib/data/site-data";
+import { CLIENT_REVIEWS } from "@/lib/data/reviews";
+import { ReviewCards } from "@/components/google-reviews";
+
+const aduReviews = CLIENT_REVIEWS.filter((review) => review.project.startsWith("ADU")).slice(0, 3);
 
 export default function ADUOfferLP() {
   return (
@@ -28,34 +32,34 @@ export default function ADUOfferLP() {
         <div className="relative z-10 container mx-auto px-4 pt-40 pb-20">
           <div className="grid lg:grid-cols-2 gap-12 items-center max-w-6xl mx-auto">
             <div className="text-white">
-              <div className="inline-flex items-center gap-2 bg-primary/20 backdrop-blur-sm rounded-full px-4 py-2 mb-6">
-                <Star className="h-4 w-4 text-accent fill-accent" />
-                <span className="text-sm font-medium">Limited Time Offer</span>
+              <div className="inline-flex items-center gap-2 rounded-full border border-accent/30 bg-accent/10 px-4 py-2 mb-6">
+                <Star className="h-4 w-4 text-accent fill-accent" aria-hidden="true" />
+                <span className="text-sm font-medium text-accent-light">Limited Time Offer</span>
               </div>
 
-              <h1 className="text-4xl md:text-5xl font-bold leading-tight mb-6">
+              <h1 className="text-4xl md:text-5xl font-bold leading-tight mb-6 text-balance">
                 Your Backyard Could Be
-                <span className="text-primary-light block">Earning You $2,500/mo</span>
+                <span className="text-accent block text-balance">Earning You $2,500/mo</span>
               </h1>
 
               <p className="text-xl text-white/80 mb-6">
-                Build an ADU in your San Diego backyard. We handle design, permits, and construction — all for a fixed price starting at <span className="text-primary-light font-bold">$175K</span>.
+                Build an ADU in your San Diego backyard. We handle design, permits, and construction — all for a fixed price starting at <span className="text-accent font-bold">$175K</span>.
               </p>
 
               <div className="grid grid-cols-2 gap-4 mb-8">
-                <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-4 text-center">
-                  <div className="text-2xl font-bold text-primary-light">$2,500+</div>
-                  <div className="text-sm text-white/70">Monthly Rental Income</div>
+                <div className="bg-secondary-light border border-white/10 shadow-lg shadow-black/20 rounded-2xl p-4 text-center">
+                  <div className="text-2xl font-bold text-accent">$2,500+</div>
+                  <div className="text-sm text-white/75">Monthly Rental Income</div>
                 </div>
-                <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-4 text-center">
-                  <div className="text-2xl font-bold text-primary-light">30%+</div>
-                  <div className="text-sm text-white/70">Property Value Increase</div>
+                <div className="bg-secondary-light border border-white/10 shadow-lg shadow-black/20 rounded-2xl p-4 text-center">
+                  <div className="text-2xl font-bold text-accent">30%+</div>
+                  <div className="text-sm text-white/75">Property Value Increase</div>
                 </div>
               </div>
 
               <a
                 href={`tel:${COMPANY_INFO.phoneHref}`}
-                className="inline-flex min-h-11 items-center gap-2 text-white/80 hover:text-primary-light transition-colors"
+                className="inline-flex min-h-11 items-center gap-2 text-white/80 hover:text-accent-light transition-colors"
               >
                 <Phone className="h-5 w-5" />
                 <span>Or call us: {COMPANY_INFO.phone}</span>
@@ -86,33 +90,13 @@ export default function ADUOfferLP() {
         </div>
       </section>
 
-      {/* Reviews */}
+      {/* Reviews — real Google & Yelp reviews from ADU clients, verbatim */}
       <section className="py-20 bg-muted">
-        <div className="container mx-auto px-4 max-w-3xl">
+        <div className="container mx-auto px-4 max-w-6xl">
           <h2 className="text-3xl md:text-4xl font-bold text-center text-secondary mb-12">
-            Review Approval In Progress
+            What ADU Clients Say
           </h2>
-          <div className="bg-white rounded-2xl border border-border p-8 text-center shadow-sm">
-            <div className="flex justify-center gap-1 mb-4">
-              {[1, 2, 3, 4, 5].map((i) => (
-                <Star key={i} className="h-5 w-5 text-accent fill-accent" />
-              ))}
-            </div>
-            <p className="text-secondary font-semibold mb-2">No fabricated reviews are shown on this landing page.</p>
-            <p className="text-muted-foreground max-w-2xl mx-auto mb-6">
-              Verified Google and Yelp excerpts for TruthCore are being curated for approval.
-              Until approved text is supplied, this page links directly to the public review profiles instead of showing placeholders.
-            </p>
-            <a
-              href="https://www.google.com/search?q=Distinct+Construction+Solutions+Chula+Vista+reviews"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center gap-2 text-primary font-semibold hover:text-primary-dark transition-colors"
-            >
-              View Public Review Profiles
-              <ExternalLink className="h-4 w-4" />
-            </a>
-          </div>
+          <ReviewCards reviews={aduReviews} />
         </div>
       </section>
 
@@ -127,8 +111,8 @@ export default function ADUOfferLP() {
           </p>
           <div className="grid sm:grid-cols-2 gap-6">
             {[
-              { title: "Rental Income", desc: "Earn $2,000-$3,500/month renting your ADU" },
-              { title: "Property Value", desc: "Increase your home value by 20-30%" },
+              { title: "Rental Income", desc: "Earn $2,000 – $3,500/month renting your ADU" },
+              { title: "Property Value", desc: "Increase your home value by 20–30%" },
               { title: "Multi-Generational Living", desc: "Keep family close with private space" },
               { title: "Home Office", desc: "A dedicated workspace steps from your home" },
             ].map((item) => (

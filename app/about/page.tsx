@@ -1,14 +1,23 @@
-import { Card, CardContent } from "@/components/ui/card";
+import type { Metadata } from "next";
 import { Button } from "@/components/ui/button";
+import { ReviewCards } from "@/components/google-reviews";
 import { 
-  Award, 
-  Users, 
+  Award,
+  Users,
   Clock, 
   Shield,
   CheckCircle,
 } from "lucide-react";
 import Link from "next/link";
 import { COMPANY_INFO, getYearsExperience } from "@/lib/data/site-data";
+import { CLIENT_REVIEWS } from "@/lib/data/reviews";
+
+export const metadata: Metadata = {
+  title: "About Us",
+};
+
+// Real Google/Yelp reviews (verbatim): an ADU client, a roofing client, a repeat-referral client.
+const aboutReviews = [CLIENT_REVIEWS[0], CLIENT_REVIEWS[1], CLIENT_REVIEWS[3]];
 
 const stats = [
   { value: COMPANY_INFO.stats.projectsCompleted, label: "Projects Completed" },
@@ -44,10 +53,10 @@ export default function AboutPage() {
   return (
     <div className="min-h-screen">
       {/* Hero */}
-      <section className="bg-secondary text-white pt-40 pb-20">
+      <section className="bg-secondary bg-[radial-gradient(ellipse_at_top,rgba(51,102,102,0.35),transparent_60%)] text-white pt-40 pb-20">
         <div className="container mx-auto px-4">
           <div className="max-w-3xl">
-            <span className="inline-block text-primary-light font-semibold text-sm uppercase tracking-wider mb-4">
+            <span className="inline-block text-accent font-semibold text-sm uppercase tracking-wider mb-4">
               ABOUT US
             </span>
             <h1 className="text-4xl md:text-5xl font-bold mb-6">
@@ -144,62 +153,39 @@ export default function AboutPage() {
       {/* Why Choose Us */}
       <section className="py-20">
         <div className="container mx-auto px-4">
-          <div className="grid md:grid-cols-2 gap-12 items-center">
-            <div>
-              <h2 className="text-3xl md:text-4xl font-bold text-secondary mb-6">
-                Why Homeowners Choose Us
-              </h2>
-              <ul className="space-y-4">
-                {[
-                  "Design-build model: One team from concept to completion",
-                  "Transparent pricing with no hidden costs",
-                  "Dedicated project manager for every job",
-                  "3D visualization before construction begins",
-                  "Warranty on all workmanship",
-                  "Financing options available",
-                ].map((item) => (
-                  <li key={item} className="flex items-start gap-3">
-                    <CheckCircle className="h-5 w-5 text-primary shrink-0 mt-0.5" />
-                    <span className="text-muted-foreground">{item}</span>
-                  </li>
-                ))}
-              </ul>
-            </div>
-            <div className="bg-gradient-to-br from-primary/20 to-secondary/20 rounded-2xl h-80 flex items-center justify-center">
-              <div className="text-center">
-                <Award className="h-16 w-16 text-primary/50 mx-auto mb-4" />
-                <p className="text-muted-foreground">Team Photo</p>
-              </div>
-            </div>
-          </div>
+          <h2 className="text-3xl md:text-4xl font-bold text-secondary text-center mb-12">
+            Why Homeowners Choose Us
+          </h2>
+          <ul className="grid gap-x-12 gap-y-4 sm:grid-cols-2 lg:grid-cols-3">
+            {[
+              "Design-build model: One team from concept to completion",
+              "Transparent pricing with no hidden costs",
+              "Dedicated project manager for every job",
+              "3D visualization before construction begins",
+              "Warranty on all workmanship",
+              "Financing options available",
+            ].map((item) => (
+              <li key={item} className="flex items-start gap-3">
+                <CheckCircle className="h-5 w-5 text-primary shrink-0 mt-0.5" aria-hidden="true" />
+                <span className="text-muted-foreground">{item}</span>
+              </li>
+            ))}
+          </ul>
         </div>
       </section>
 
-      {/* Testimonials */}
+      {/* Testimonials — real Google & Yelp reviews, verbatim */}
       <section className="py-20 bg-muted">
         <div className="container mx-auto px-4">
           <h2 className="text-3xl md:text-4xl font-bold text-secondary text-center mb-12">
             Verified Reviews
           </h2>
-          <Card className="max-w-4xl mx-auto">
-            <CardContent className="p-8 md:p-10 text-center">
-              <p className="text-sm font-semibold uppercase tracking-wider text-primary mb-3">
-                Manual approval required
-              </p>
-              <p className="text-lg text-secondary font-semibold mb-3">
-                Curated Google and Yelp review excerpts are still awaiting final approved copy.
-              </p>
-              <p className="text-muted-foreground max-w-2xl mx-auto">
-                This site does not publish fabricated testimonials. Once approved review text is supplied,
-                it can be inserted here and across the rest of the site in a consistent format.
-              </p>
-            </CardContent>
-          </Card>
+          <ReviewCards reviews={aboutReviews} />
         </div>
       </section>
 
       {/* CTA */}
-      <section className="py-20 bg-secondary text-white">
+      <section className="py-20 bg-secondary bg-[radial-gradient(ellipse_at_top,rgba(51,102,102,0.35),transparent_60%)] text-white">
         <div className="container mx-auto px-4 text-center">
           <h2 className="text-3xl md:text-4xl font-bold mb-4">
             Let&apos;s Build Something Great Together
