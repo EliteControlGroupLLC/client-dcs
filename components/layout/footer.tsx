@@ -1,6 +1,5 @@
 import Link from "next/link";
-import { Mail, Phone, MapPin, Star, ArrowRight, Shield, CheckCircle2, Building2, CreditCard } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { Mail, Phone, MapPin, Star, Shield, CheckCircle2, Building2, CreditCard } from "lucide-react";
 import { COMPANY_INFO } from "@/lib/data/site-data";
 import { Logo } from "@/components/layout/logo";
 import { SiteChrome } from "@/components/layout/site-chrome";
@@ -41,9 +40,9 @@ const socialLinks = [
 ];
 
 const trustBadges = [
-  { icon: Shield, label: "CSLB Licensed #1098531" },
+  { icon: Shield, label: "CSLB #1098531" },
   { icon: CheckCircle2, label: "Bonded & Insured" },
-  { icon: Building2, label: "Serving San Diego County" },
+  { icon: Building2, label: "San Diego County" },
   { icon: CreditCard, label: "Financing Available" },
 ];
 
@@ -60,36 +59,16 @@ export function Footer() {
     <SiteChrome>
     <footer className="relative bg-secondary text-white overflow-hidden">
 
-      {/* Soft CTA Section - Replaces Newsletter */}
-      <div className="relative border-b border-white/10">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-12">
-          <div className="flex flex-col md:flex-row items-center justify-between gap-6">
-            <div className="text-center md:text-left">
-              <h3 className="text-xl font-semibold mb-2">Still Exploring Your Options?</h3>
-              <p className="text-white/70 max-w-md">
-                Explore what you can build on your property in minutes using our interactive ADU builder.
-              </p>
-            </div>
-            <Button asChild size="lg" rounded="full" className="group shrink-0">
-              <Link href="/build-your-adu">
-                Start Building Your ADU
-                <ArrowRight className="h-5 w-5 group-hover:translate-x-1 transition-transform" aria-hidden="true" />
-              </Link>
-            </Button>
-          </div>
-        </div>
-      </div>
-
       {/* Trust Badges */}
       <div className="relative border-b border-white/10">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-6">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             {trustBadges.map((badge) => (
               <div key={badge.label} className="flex items-center gap-3 text-sm text-white/80">
-                <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center shrink-0">
-                  <badge.icon className="h-4 w-4 text-primary-light" aria-hidden="true" />
+                <div className="w-8 h-8 rounded-full bg-primary flex items-center justify-center shrink-0">
+                  <badge.icon className="h-4 w-4 text-white" aria-hidden="true" />
                 </div>
-                <span>{badge.label}</span>
+                <span className="whitespace-nowrap">{badge.label}</span>
               </div>
             ))}
           </div>
