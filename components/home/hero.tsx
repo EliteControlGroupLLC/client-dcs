@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { ArrowRight, Shield, BadgeCheck, Scale, Eye, MessageCircle } from "lucide-react";
 import { useState, useRef, useEffect, useCallback } from "react";
 import { COMPANY_INFO, getYearsExperience } from "@/lib/data/site-data";
+import { HeroReviewTicker } from "@/components/home/hero-review-ticker";
 
 const stats = [
   { value: COMPANY_INFO.stats.projectsCompleted, label: "Projects Completed" },
@@ -219,6 +220,10 @@ export function Hero() {
               </div>
             </div>
 
+            {/* Real client reviews pop up one at a time, overlapping the card's corner */}
+            <div className="relative z-10 -mt-6 sm:mx-6 lg:-ml-12 lg:mr-16">
+              <HeroReviewTicker />
+            </div>
           </div>
         </div>
       </div>
