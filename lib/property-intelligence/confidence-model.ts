@@ -101,16 +101,24 @@ export function calculateConfidence(
   }
 
   // Slope
-  if (input.slope === "Steep" || input.slope === "Very Steep") {
-    score -= 12;
-    negativeSignals.push("Steep slope detected");
-    manualReviewReasons.push("Steep slope may affect feasibility");
-  } else if (input.slope === "Moderate") {
+  // `slope` is the bare category from USGS 3DEP sampling (see
+  // elevation-service slopeCategoryFromLabel); tolerate full labels too.
+  const slopeCat = (input.slope || "").split("—")[0].trim().toLowerCase();
+  if (slopeCat.startsWith("very steep")) {
+    score -= 15;
+    negativeSignals.push("Very steep slope (>25% measured grade)");
+    manualReviewReasons.push(
+      "Very steep lot (>25% grade) — geotechnical report and civil/structural engineering needed before quoting a detached ADU"
+    );
+  } else if (slopeCat.startsWith("steep")) {
+    score -= 10;
+    negativeSignals.push("Steep slope (15–25% measured grade) — expect foundation, retaining and grading costs");
+  } else if (slopeCat.startsWith("moderate")) {
     score -= 5;
-    negativeSignals.push("Moderate slope");
-  } else if (input.slope === "Unavailable") {
+    negativeSignals.push("Moderate slope (10–15% measured grade)");
+  } else if (slopeCat === "" || slopeCat.startsWith("unavailable") || slopeCat.startsWith("not available")) {
     score -= 3;
-    negativeSignals.push("Slope data unavailable");
+    negativeSignals.push("Slope data unavailable (USGS elevation service did not respond)");
   }
 
   // Missing data

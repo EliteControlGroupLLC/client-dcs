@@ -34,7 +34,7 @@ import {
   type AduTypeVerdict,
   type SiteFacts,
 } from "./adu-fit-rules";
-import { getElevationData } from "./elevation-service";
+import { getElevationData, slopeCategoryFromLabel } from "./elevation-service";
 import { getOSMPropertyData } from "./osm-service";
 import { getAttomPropertyData } from "./attom-service";
 import { detectJurisdictionFromAddress, detectOverlays } from "./jurisdictions/detector";
@@ -112,8 +112,8 @@ export async function analyzeProperty(address: string): Promise<PropertyAnalysis
   }
 
   if (geocoded) {
-    const [slope, osm, zoneomics, msBuildings] = await Promise.all([
-      getElevationData(geocoded.lat, geocoded.lng),
+    // (Slope is sampled later, once the real parcel polygon is known.)
+    const [osm, zoneomics, msBuildings] = await Promise.all([
       getOSMPropertyData(geocoded.lat, geocoded.lng),
       getZoneomicsData(geocoded.lat, geocoded.lng),
       getMicrosoftBuildingFootprints(geocoded.lat, geocoded.lng).catch((err) => {
@@ -121,7 +121,6 @@ export async function analyzeProperty(address: string): Promise<PropertyAnalysis
         return undefined;
       }),
     ]);
-    slopeData = slope;
     osmData = osm;
     zoneomicsData = zoneomics;
     msFootprints = msBuildings;
@@ -141,8 +140,12 @@ export async function analyzeProperty(address: string): Promise<PropertyAnalysis
   // the old address-seeded fabrication for the headline facts.
   let sdParcel: SanDiegoParcel | undefined;
   let cityZoning: CityZoningResult | undefined;
+  let elevationPromise: ReturnType<typeof getElevationData> | undefined;
   if (geocoded) {
     sdParcel = await getSanDiegoParcel(geocoded.lat, geocoded.lng, address, geocoded.components.route);
+    // Real slope: USGS 3DEP elevations sampled across the actual parcel
+    // polygon. Started now so it overlaps zoning/buildings/adjacent lookups.
+    elevationPromise = getElevationData(geocoded.lat, geocoded.lng, sdParcel?.available ? sdParcel.parcelRings : null);
     // Zoning from the parcel's OWN jurisdiction (SANDAG situs_juris), never
     // City-of-San-Diego codes for another city. available:false if unknown.
     cityZoning = await getZoningForParcel(geocoded.lat, geocoded.lng, sdParcel?.jurisdiction ?? null);
@@ -167,6 +170,11 @@ export async function analyzeProperty(address: string): Promise<PropertyAnalysis
         `[SANDAG-BUILDINGS] ${bldgs.buildings.length} building(s) on parcel (${bldgs.totalFootprintSqFt} sq ft), ${bldgs.excludedCount} neighbor outline(s) excluded`
       );
     }
+  }
+
+  if (elevationPromise) {
+    const elev = await elevationPromise;
+    slopeData = { slope: elev.slope, confidence: elev.confidence, sources: elev.sources };
   }
 
   // Step 3: Resolve property data from all sources (ATTOM + OSM + estimates)
@@ -431,7 +439,12 @@ export async function analyzeProperty(address: string): Promise<PropertyAnalysis
       const estLotWidth = attomData?.lotWidth || Math.round(Math.sqrt(rawLotSizeSqFt * 0.5));
       const estLotDepth = attomData?.lotDepth || Math.round(rawLotSizeSqFt / estLotWidth);
       const estAduFootprint = geometryAnalysis?.bestAduZone?.areaSqFt || 800;
-      lidarTerrain = await analyzeLiDARTerrain(geocoded.lat, geocoded.lng, estLotWidth, estLotDepth, estAduFootprint);
+      // Reuses the parcel samples fetched for the Slope field (cached); the
+      // best ADU zone polygon adds the rear-yard grade.
+      lidarTerrain = await analyzeLiDARTerrain(geocoded.lat, geocoded.lng, estLotWidth, estLotDepth, estAduFootprint, {
+        parcelRings: realParcelRings,
+        aduZoneRings: geometryAnalysis?.bestAduZone?.polygon?.coordinates ?? null,
+      });
       if (lidarTerrain.lidarAvailable) {
         console.log(
           `[LIDAR-TERRAIN] LiDAR data available, ${lidarTerrain.terrainProfile.sampleCount} samples, slope: ${lidarTerrain.slopeAnalysis.averageSlopePercent}%`
@@ -506,15 +519,15 @@ export async function analyzeProperty(address: string): Promise<PropertyAnalysis
   }
 
   // Step 4c: Slope percent extraction for constraint analysis
-  const slopeStr = intelligence.slope.value;
+  // Bare category ("Flat" | "Gentle" | "Moderate" | "Steep" | "Very Steep" |
+  // "Unavailable") from the measured USGS 3DEP slope label.
+  const slopeStr = slopeCategoryFromLabel(intelligence.slope.value);
   let slopePercent: number = 0;
-  // Use LiDAR slope data if available (higher resolution than Google Elevation basic)
-  if (lidarTerrain && lidarTerrain.confidence > 50) {
+  // Measured slope from the USGS 3DEP parcel samples (0 when unavailable —
+  // slopeStr "Unavailable" keeps constraints from treating it as flat).
+  if (lidarTerrain && lidarTerrain.slopeAnalysis.category !== "Unknown") {
     slopePercent = lidarTerrain.slopeAnalysis.averageSlopePercent;
-  } else if (slopeStr === "Steep slope" || slopeStr === "Steep") slopePercent = 20;
-  else if (slopeStr === "Moderate slope" || slopeStr === "Moderate") slopePercent = 10;
-  else if (slopeStr === "Mostly flat") slopePercent = 3;
-  else if (slopeStr === "Flat") slopePercent = 1;
+  }
 
   // Step 4c: Site Constraint Intelligence Layer
   // Runs after zoning determination and before buildable-area calculations
@@ -524,6 +537,10 @@ export async function analyzeProperty(address: string): Promise<PropertyAnalysis
     lng: geocoded?.lng || 0,
     slopeCategory: slopeStr,
     slopePercent,
+    maxSlopePercent: lidarTerrain?.lidarAvailable ? lidarTerrain.slopeAnalysis.maxSlopePercent : undefined,
+    elevationChangeFt: lidarTerrain?.lidarAvailable ? lidarTerrain.slopeAnalysis.elevationChangeFt : undefined,
+    aduAreaSlopePercent: lidarTerrain?.slopeAnalysis.aduAreaSlopePercent ?? null,
+    slopeSource: lidarTerrain?.sources[0] ?? intelligence.slope.sources[0],
     jurisdictionId: jurisdictionResult.jurisdictionId,
     formattedAddress,
     lotSizeSqFt: rawLotSizeSqFt,

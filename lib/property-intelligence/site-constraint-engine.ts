@@ -28,9 +28,19 @@ export interface FireHazardAnalysis {
 
 export interface TerrainAnalysis {
   averageSlopePercent: number;
-  terrainClassification: "Flat" | "Gentle" | "Moderate" | "Steep" | "Hillside";
+  terrainClassification: "Flat" | "Gentle" | "Moderate" | "Steep" | "Very Steep" | "Unknown";
   constructionImpact: string;
   costMultiplier: number;
+  /** Max slope measured on the lot (%), when measured */
+  maxSlopePercent?: number;
+  /** Highest minus lowest sampled elevation on the lot (ft), when measured */
+  elevationChangeFt?: number;
+  /** Slope in the likely ADU area (rear yard), when measured */
+  aduAreaSlopePercent?: number | null;
+  /** Where the slope numbers came from */
+  source: string;
+  /** Whether real elevation data backed this analysis */
+  measured: boolean;
 }
 
 export interface CoastalZoneAnalysis {
@@ -67,8 +77,13 @@ export interface SiteConstraintResult {
 interface ConstraintInput {
   lat: number;
   lng: number;
-  slopeCategory: string; // from elevation service
+  slopeCategory: string; // from elevation service ("Flat" | "Gentle" | "Moderate" | "Steep" | "Very Steep" | "Unavailable")
   slopePercent: number;
+  /** Optional measured terrain details (USGS 3DEP) */
+  maxSlopePercent?: number;
+  elevationChangeFt?: number;
+  aduAreaSlopePercent?: number | null;
+  slopeSource?: string;
   jurisdictionId: string;
   formattedAddress: string;
   lotSizeSqFt: number;
@@ -206,49 +221,93 @@ function analyzeFireHazard(input: ConstraintInput): FireHazardAnalysis {
 // ──────────────────────────────────────────────────────────
 
 function analyzeTerrain(input: ConstraintInput): TerrainAnalysis {
-  const { slopePercent } = input;
+  const { slopePercent, maxSlopePercent, elevationChangeFt, aduAreaSlopePercent } = input;
+  const cat = (input.slopeCategory || "").toLowerCase();
+  const unmeasured =
+    cat.startsWith("unavailable") || cat.startsWith("not available") || cat.startsWith("unknown") || cat === "";
 
-  if (slopePercent < 2) {
+  if (unmeasured) {
     return {
-      averageSlopePercent: slopePercent,
+      averageSlopePercent: 0,
+      terrainClassification: "Unknown",
+      constructionImpact:
+        "Slope could not be measured (USGS elevation service unavailable). Grade, grading and foundation needs must be confirmed by a site survey.",
+      costMultiplier: 1.0,
+      source: input.slopeSource || "USGS elevation service unavailable",
+      measured: false,
+    };
+  }
+
+  // Measured details appended to the impact text so the report shows real numbers.
+  const detailParts: string[] = [];
+  if (typeof elevationChangeFt === "number") detailParts.push(`~${Math.round(elevationChangeFt)} ft elevation change across the lot`);
+  if (typeof maxSlopePercent === "number") detailParts.push(`max slope ${maxSlopePercent}%`);
+  if (typeof aduAreaSlopePercent === "number") detailParts.push(`likely ADU area grade ${aduAreaSlopePercent}%`);
+  let detail = detailParts.length ? ` Measured: ${detailParts.join(", ")}.` : "";
+  // The likely ADU spot can be steeper than the lot average (e.g. a flat pad
+  // with a sloping rear yard) — call that out so the cost note isn't missed.
+  const band = (p: number) => (p < 5 ? 0 : p < 10 ? 1 : p < 15 ? 2 : p < 25 ? 3 : 4);
+  if (typeof aduAreaSlopePercent === "number" && band(aduAreaSlopePercent) > band(slopePercent)) {
+    const aduNote = [
+      "",
+      "a raised perimeter footing or minor pad grading (typically +$5k–$10k)",
+      "stepped footings, grading and possibly low retaining walls (typically +$15k–$25k)",
+      "an engineered foundation, retaining walls and grading with civil/structural engineering (typically +$30k–$60k)",
+      "drilled piers/caissons and a geotechnical report — manual review recommended (typically +$50k–$100k+)",
+    ][band(aduAreaSlopePercent)];
+    detail += ` The likely detached-ADU area is steeper (${aduAreaSlopePercent}% grade) and would need ${aduNote}.`;
+  }
+  const base = {
+    averageSlopePercent: slopePercent,
+    maxSlopePercent,
+    elevationChangeFt,
+    aduAreaSlopePercent: aduAreaSlopePercent ?? null,
+    source: input.slopeSource || "USGS 3DEP elevation",
+    measured: true,
+  };
+
+  // Bands: Flat <5, Gentle 5–10, Moderate 10–15, Steep 15–25, Very Steep >25 (% grade)
+  if (slopePercent < 5) {
+    return {
+      ...base,
       terrainClassification: "Flat",
-      constructionImpact: "Normal construction conditions. Standard foundation design.",
+      constructionImpact: `Lot is essentially flat — normal construction conditions.${detail}`,
       costMultiplier: 1.0,
     };
   }
 
-  if (slopePercent < 5) {
+  if (slopePercent < 10) {
     return {
-      averageSlopePercent: slopePercent,
+      ...base,
       terrainClassification: "Gentle",
-      constructionImpact: "Minimal grading may be needed. Standard foundation acceptable.",
-      costMultiplier: 1.0,
+      constructionImpact: `Minor pad grading or a raised perimeter footing may be needed (typically +$5k–$10k).${detail}`,
+      costMultiplier: 1.03,
     };
   }
 
   if (slopePercent < 15) {
     return {
-      averageSlopePercent: slopePercent,
+      ...base,
       terrainClassification: "Moderate",
-      constructionImpact: "Grading and engineered foundation likely required. Stepped or pier foundation design may be recommended.",
-      costMultiplier: 1.10, // 10% cost increase
+      constructionImpact: `Grading and stepped/engineered footings likely; low retaining walls possible (typically +$15k–$25k).${detail}`,
+      costMultiplier: 1.10,
     };
   }
 
   if (slopePercent < 25) {
     return {
-      averageSlopePercent: slopePercent,
+      ...base,
       terrainClassification: "Steep",
-      constructionImpact: "Specialized foundation design required. Significant grading, retaining walls, and drainage engineering needed.",
-      costMultiplier: 1.25, // 25% cost increase
+      constructionImpact: `Detached ADU on a steep lot: engineered foundation (piers/grade beams), retaining walls, grading and drainage design expected; civil/structural engineering and a soils report likely (typically +$30k–$60k).${detail}`,
+      costMultiplier: 1.25,
     };
   }
 
   return {
-    averageSlopePercent: slopePercent,
-    terrainClassification: "Hillside",
-    constructionImpact: "Hillside construction with specialized engineering required. Custom foundation, extensive grading, retaining walls, and drainage systems needed. May require geotechnical report.",
-    costMultiplier: 1.40, // 40% cost increase
+    ...base,
+    terrainClassification: "Very Steep",
+    constructionImpact: `Very steep hillside (>25%): drilled piers/caissons, significant retaining and grading, geotechnical report required; hillside/grading permits may apply. Manual review recommended before quoting (typically +$50k–$100k+).${detail}`,
+    costMultiplier: 1.40,
   };
 }
 
@@ -431,18 +490,25 @@ function buildConstraints(
     Gentle: "none",
     Moderate: "low",
     Steep: "moderate",
-    Hillside: "high",
+    "Very Steep": "high",
+    Unknown: "none",
   };
   constraints.push({
     category: "terrain",
-    classification: `${terrain.terrainClassification} (${terrain.averageSlopePercent}% avg slope)`,
+    classification: terrain.measured
+      ? `${terrain.terrainClassification} (${terrain.averageSlopePercent}% avg slope)`
+      : "Slope not available",
     severity: terrainSeverityMap[terrain.terrainClassification] || "none",
     constructionImpact: terrain.constructionImpact,
-    recommendation: terrain.terrainClassification === "Flat" || terrain.terrainClassification === "Gentle"
+    recommendation: !terrain.measured
+      ? "Confirm grade with a site survey before finalizing foundation and grading scope."
+      : terrain.terrainClassification === "Flat" || terrain.terrainClassification === "Gentle"
       ? "Standard foundation design acceptable."
-      : "Geotechnical report recommended. Budget for engineered foundation.",
-    confidence: 72,
-    source: "Google Elevation API / Terrain Analysis",
+      : terrain.terrainClassification === "Very Steep"
+      ? "Manual review required: geotechnical report and civil/structural engineering before pricing a detached ADU."
+      : "Geotechnical report recommended. Budget for engineered foundation, grading and retaining.",
+    confidence: terrain.measured ? 85 : 0,
+    source: terrain.source,
   });
 
   // Coastal constraint
