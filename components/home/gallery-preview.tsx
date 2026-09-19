@@ -22,17 +22,17 @@ export function GalleryPreview() {
   const { ref: statsRef, isVisible: statsVisible } = useScrollAnimation();
 
   return (
-    <section className="py-20 relative overflow-hidden">
-      {/* Subtle architectural background */}
+    <section className="py-20 relative overflow-hidden bg-secondary">
+      {/* Subtle architectural background on the brand's emerald-charcoal */}
       <div className="absolute inset-0">
         <Image
           src="/images/featured-projects-bg.jpg"
           alt=""
           fill
-          className="object-cover opacity-[0.03]"
+          className="object-cover opacity-[0.06]"
           priority={false}
         />
-        <div className="absolute inset-0 bg-gradient-to-b from-muted via-muted/95 to-muted" />
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,rgba(51,102,102,0.35),transparent_60%)]" />
       </div>
 
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 relative z-10">
@@ -42,15 +42,15 @@ export function GalleryPreview() {
           className={`flex flex-col md:flex-row md:items-end md:justify-between gap-6 mb-12 transition-all duration-700 ${headerVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"}`}
         >
           <div>
-            <span className="inline-flex items-center gap-2 text-primary font-semibold text-sm uppercase tracking-wider mb-4">
+            <span className="inline-flex items-center gap-2 text-primary-light font-semibold text-sm uppercase tracking-wider mb-4">
               Our Work
             </span>
-            <h2 className="text-3xl md:text-4xl font-bold text-secondary text-balance">
+            <h2 className="text-3xl md:text-4xl font-bold text-white text-balance">
               Featured Projects
             </h2>
           </div>
           <Link href="/gallery">
-            <Button variant="outline" rounded="full" className="group">
+            <Button variant="outlineWhite" rounded="full" className="group">
               View All Projects
               <ArrowRight className="h-4 w-4 group-hover:translate-x-1 transition-transform" />
             </Button>
@@ -63,7 +63,7 @@ export function GalleryPreview() {
             <Link 
               key={project.id} 
               href={`/gallery/${project.id}`}
-              className={`group relative overflow-hidden rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 aspect-[4/3] ${
+              className={`group relative overflow-hidden rounded-2xl border border-white/10 shadow-lg hover:shadow-xl transition-all duration-300 aspect-[4/3] ${
                 index === 0 ? "md:col-span-2 lg:row-span-2 lg:aspect-auto" : ""
               }`}
             >
@@ -118,14 +118,14 @@ export function GalleryPreview() {
         </div>
 
         {/* Stats bar with glass styling */}
-        <div ref={statsRef} className={`mt-12 bg-white rounded-2xl p-8 shadow-lg border border-border transition-all duration-700 delay-300 ${statsVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"}`}>
+        <div ref={statsRef} className={`mt-12 bg-white/[0.04] backdrop-blur-sm rounded-2xl p-8 border border-white/10 transition-all duration-700 delay-300 ${statsVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"}`}>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
             {projectStats.map((stat) => (
               <div key={stat.label} className="group">
-                <div className="text-3xl lg:text-4xl font-bold text-primary mb-1 group-hover:scale-105 transition-transform">
+                <div className="text-3xl lg:text-4xl font-bold text-white mb-1 group-hover:scale-105 transition-transform">
                   {stat.value}
                 </div>
-                <div className="text-sm text-muted-foreground font-medium">{stat.label}</div>
+                <div className="text-sm text-white/60 font-medium">{stat.label}</div>
               </div>
             ))}
           </div>
