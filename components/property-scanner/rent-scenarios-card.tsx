@@ -8,6 +8,7 @@ interface RentScenario {
   premium: { monthlyRent: number; annualRent: number };
   source: "rentcast" | "estimated";
   aduType: string;
+  basis?: string;
 }
 
 interface RentScenariosCardProps {
@@ -16,6 +17,7 @@ interface RentScenariosCardProps {
 
 export function RentScenariosCard({ scenarios }: RentScenariosCardProps) {
   if (!scenarios || scenarios.length === 0) return null;
+  const market = scenarios.every((s) => s.source === "rentcast");
 
   return (
     <div className="bg-white rounded-2xl border border-border p-5 hover:shadow-lg transition-shadow">
@@ -29,9 +31,15 @@ export function RentScenariosCard({ scenarios }: RentScenariosCardProps) {
             <p className="text-[10px] text-muted-foreground">Based on your recommended ADU</p>
           </div>
         </div>
-        <span className="text-[10px] px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-600">
-          San Diego Market Data
-        </span>
+        {market ? (
+          <span className="text-[10px] px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-600">
+            RentCast market estimate
+          </span>
+        ) : (
+          <span className="text-[10px] px-2 py-0.5 rounded-full bg-amber-50 text-amber-700">
+            Planning estimate
+          </span>
+        )}
       </div>
 
       <div className="space-y-3">
@@ -88,7 +96,10 @@ export function RentScenariosCard({ scenarios }: RentScenariosCardProps) {
       </div>
 
       <p className="text-[10px] text-muted-foreground mt-3">
-        Scenarios based on San Diego County market data. Actual rents depend on unit quality, location, and market conditions.
+        {market
+          ? "Conservative / premium = the low and high end of RentCast's rent range for this address; market = its point estimate."
+          : "Conservative / premium = low and high end of a San Diego County ADU rent table for this unit size (planning estimate, not a market quote for this address)."}{" "}
+        Actual rents depend on unit quality, finishes and market conditions.
       </p>
     </div>
   );

@@ -4,6 +4,16 @@
 
 import { NextRequest, NextResponse } from "next/server";
 import { analyzeProperty } from "@/lib/property-intelligence";
+import { displayFieldValue, type IntelligenceField } from "@/lib/property-intelligence/types";
+
+/** Tier label from the field's ACTUAL source and status (not a fixed string). */
+function tierOf(f: IntelligenceField<string | number>): string {
+  if (f.status === "Unavailable") return "Not available";
+  const src = f.sources.join(" ");
+  if (/county|sandag|sangis|city of|dsd|usgs|fema|cal fire|gis/i.test(src)) return "Official government record";
+  if (/attom/i.test(src)) return "Tier 1 — ATTOM";
+  return "Estimate / derived";
+}
 
 export async function POST(request: NextRequest) {
   try {
@@ -29,41 +39,41 @@ export async function POST(request: NextRequest) {
       fields: {
         lotSize: {
           finalValue: result.property.lotSizeSqFt.value,
-          displayValue: `${result.property.lotSizeSqFt.value.toLocaleString()} sq ft`,
+          displayValue: displayFieldValue(result.property.lotSizeSqFt, "sq ft"),
           confidence: result.property.lotSizeSqFt.confidence,
           status: result.property.lotSizeSqFt.status,
           sources: result.property.lotSizeSqFt.sources,
-          tier: result.property.lotSizeSqFt.sources.some((s: string) => s.includes("ATTOM")) ? "Tier 1 — Primary Backbone" : "Tier 2 — Geometry",
+          tier: tierOf(result.property.lotSizeSqFt),
         },
         zoning: {
           finalValue: result.property.zoning.value,
           confidence: result.property.zoning.confidence,
           status: result.property.zoning.status,
           sources: result.property.zoning.sources,
-          tier: "Tier 1 — Primary Backbone",
+          tier: tierOf(result.property.zoning),
           enrichment: result.zoningEnrichment || null,
         },
         primaryLivingArea: {
           finalValue: result.property.homeAreaSqFt.value,
-          displayValue: `${result.property.homeAreaSqFt.value.toLocaleString()} sq ft`,
+          displayValue: displayFieldValue(result.property.homeAreaSqFt, "sq ft"),
           confidence: result.property.homeAreaSqFt.confidence,
           status: result.property.homeAreaSqFt.status,
           sources: result.property.homeAreaSqFt.sources,
-          tier: result.property.homeAreaSqFt.sources.some((s: string) => s.includes("ATTOM")) ? "Tier 1 — Primary Backbone" : "Tier 2 — Geometry",
+          tier: tierOf(result.property.homeAreaSqFt),
         },
         footprint: {
           finalValue: result.property.footprintSqFt.value,
-          displayValue: `${result.property.footprintSqFt.value.toLocaleString()} sq ft`,
+          displayValue: displayFieldValue(result.property.footprintSqFt, "sq ft"),
           confidence: result.property.footprintSqFt.confidence,
           status: result.property.footprintSqFt.status,
           sources: result.property.footprintSqFt.sources,
-          tier: result.property.footprintSqFt.sources.some((s: string) => s.includes("ATTOM")) ? "Tier 1 — Primary Backbone" : "Tier 2 — Geometry",
+          tier: tierOf(result.property.footprintSqFt),
         },
         detachedStructureDetection: {
           structureCount: result.detectedStructures?.length || 0,
           structures: result.detectedStructures || [],
           geometryStructures: result.geometryAnalysis?.structures || [],
-          source: result.geometryAnalysis ? "Polygon Geometry Engine" : "OSM Detection",
+          source: result.geometryAnalysis?.footprintSource ?? "Not available",
         },
         buildableArea: {
           finalValue: result.finalBuildability.totalBuildableAreaSqFt,
@@ -95,6 +105,7 @@ export async function POST(request: NextRequest) {
         rentEstimate: {
           available: !!result.rentData,
           source: result.rentData?.source || "none",
+          basis: result.rentData?.basis ?? null,
           estimates: result.rentData?.estimates || [],
         },
         recommendationPath: {
@@ -117,6 +128,10 @@ export async function POST(request: NextRequest) {
         geometryStatus: result.geometryAnalysis?.geometryStatus || "unavailable",
         footprintMergeNotes: result.footprintMergeNotes || [],
       },
+
+      // Site conditions (each from a real map query or "Not checked")
+      siteConstraints: result.siteConstraints?.constraints ?? [],
+      parcelMatch: result.siteFacts?.parcelMatch ?? "none",
 
       // Data source availability
       dataSources: result.dataSources,

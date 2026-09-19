@@ -120,16 +120,19 @@ export async function POST(request: NextRequest) {
     const reportData = {
       propertySummary: {
         address: propertyAddress,
-        apn: scanResults?.property?.apn?.value || "Pending lookup",
-        lotSizeSqFt: scanResults?.property?.lotSizeSqFt?.value || 0,
-        homeAreaSqFt: scanResults?.property?.homeAreaSqFt?.value || 0,
+        apn: scanResults?.property?.apn?.value || "Not available",
+        // null (not 0 / a typical stand-in) when the field isn't real data
+        lotSizeSqFt:
+          scanResults?.property?.lotSizeSqFt?.status !== "Unavailable" ? scanResults?.property?.lotSizeSqFt?.value ?? null : null,
+        homeAreaSqFt:
+          scanResults?.property?.homeAreaSqFt?.status !== "Unavailable" ? scanResults?.property?.homeAreaSqFt?.value ?? null : null,
         yearBuilt: null,
-        zoning: scanResults?.property?.zoning?.value || "Unknown",
+        zoning: scanResults?.property?.zoning?.value || "Not available",
       },
       jurisdictionSummary: {
-        name: scanResults?.jurisdiction?.name || "San Diego County",
-        type: scanResults?.jurisdiction?.type || "city",
-        rulesVersion: scanResults?.jurisdiction?.rulesVersion || "2024",
+        name: scanResults?.jurisdiction?.name || "Not available",
+        type: scanResults?.jurisdiction?.type || "Not available",
+        rulesVersion: scanResults?.jurisdiction?.rulesVersion || "Not available",
       },
       feasibilitySummary: {
         recommendedPath: scanResults?.bestRecommendation || "Review recommended",
@@ -151,15 +154,19 @@ export async function POST(request: NextRequest) {
         estimatedMonthlyRent: scanResults?.financialScenarios?.[0]?.estimatedMonthlyIncome
           ? `$${scanResults.financialScenarios[0].estimatedMonthlyIncome.toLocaleString()}/mo`
           : "TBD",
-        estimatedRoi: scanResults?.financialScenarios?.[0]?.estimatedRoi
-          ? `${scanResults.financialScenarios[0].estimatedRoi}%`
-          : "TBD",
-        estimatedPayback: scanResults?.financialScenarios?.[0]?.estimatedPaybackYears
-          ? `${scanResults.financialScenarios[0].estimatedPaybackYears} years`
-          : "TBD",
+        estimatedRoi:
+          typeof scanResults?.financialScenarios?.[0]?.estimatedRoi === "number"
+            ? `${scanResults.financialScenarios[0].estimatedRoi}%`
+            : "TBD",
+        // 99 = the model's "cash flow never pays it back" sentinel
+        estimatedPayback:
+          typeof scanResults?.financialScenarios?.[0]?.estimatedPaybackYears === "number" &&
+          scanResults.financialScenarios[0].estimatedPaybackYears < 99
+            ? `${scanResults.financialScenarios[0].estimatedPaybackYears} years`
+            : "N/A",
       },
-      confidenceScore: scanResults?.confidenceScore || 0,
-      confidenceBand: scanResults?.confidenceBand || "low",
+      confidenceScore: typeof scanResults?.confidenceScore === "number" ? scanResults.confidenceScore : null,
+      confidenceBand: scanResults?.confidenceBand || "Not available",
       disclaimer: "Recommendations are based on parcel data, mapped jurisdiction standards, and publicly available regulations. Final feasibility depends on site conditions, utilities, easements, overlays, and formal city review.",
       financialDisclaimer: "Cost, financing, rent, and ROI results are planning estimates only and are not loan offers, appraisals, or guaranteed investment returns.",
       generatedAt: new Date().toISOString(),
@@ -177,7 +184,7 @@ export async function POST(request: NextRequest) {
         phone: phone || null,
         service_type: "property-report",
         property_address: propertyAddress,
-        message: `Property Development Report requested. Confidence: ${reportData.confidenceScore}%. Recommended: ${reportData.feasibilitySummary.recommendedPath}.`,
+        message: `Property Development Report requested. Confidence: ${reportData.confidenceScore != null ? `${reportData.confidenceScore}%` : "not available"}. Recommended: ${reportData.feasibilitySummary.recommendedPath}.`,
         source: "Build Your ADU",
         status: "new",
       });
@@ -209,7 +216,7 @@ export async function POST(request: NextRequest) {
         "Build Your ADU property scan (website lead magnet).",
         `Recommended: ${reportData.feasibilitySummary.recommendedPath}.`,
         `Zoning: ${reportData.propertySummary.zoning}. Lot: ${reportData.propertySummary.lotSizeSqFt || "?"} sq ft. APN: ${reportData.propertySummary.apn}.`,
-        `Confidence: ${reportData.confidenceScore}% (${reportData.confidenceBand}).`,
+        `Confidence: ${reportData.confidenceScore != null ? `${reportData.confidenceScore}%` : "not available"} (${reportData.confidenceBand}).`,
         `Email validated: ${verificationData.emailValidated ? "yes" : "no"}. Phone verified: ${verificationData.phoneVerified ? "yes" : "no"}.`,
       ].join("\n"),
       reportPdf,

@@ -4,6 +4,16 @@ import { useState } from "react";
 import { Download, Printer, FileText, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import type { PropertyAnalysisResult } from "@/lib/property-intelligence";
+import { displayFieldValue } from "@/lib/property-intelligence/types";
+
+/** Escape text interpolated into the print document's HTML. */
+function esc(v: unknown): string {
+  return String(v ?? "")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;");
+}
 
 interface ReportExportButtonsProps {
   analysisData: PropertyAnalysisResult;
@@ -16,7 +26,7 @@ export function ReportExportButtons({ analysisData }: ReportExportButtonsProps) 
     setDownloading(true);
 
     try {
-      const pdfContent = generateStructuraPDFContent(analysisData);
+      const pdfContent = generateReportHtml(analysisData);
       const printWindow = window.open("", "_blank");
       if (printWindow) {
         printWindow.document.write(pdfContent);
@@ -36,7 +46,7 @@ export function ReportExportButtons({ analysisData }: ReportExportButtonsProps) 
   };
 
   const handlePrint = () => {
-    const printContent = generateStructuraPDFContent(analysisData);
+    const printContent = generateReportHtml(analysisData);
     
     const printWindow = window.open("", "_blank");
     if (printWindow) {
@@ -88,9 +98,9 @@ export function ReportExportButtons({ analysisData }: ReportExportButtonsProps) 
 }
 
 /**
- * Generate PDF/Print content with Structura Aetrnum branding
+ * Generate PDF/Print content with Distinct Construction Solutions branding
  */
-function generateStructuraPDFContent(data: PropertyAnalysisResult): string {
+function generateReportHtml(data: PropertyAnalysisResult): string {
   const generatedDate = new Date().toLocaleDateString("en-US", {
     year: "numeric",
     month: "long",
@@ -157,10 +167,10 @@ function generateStructuraPDFContent(data: PropertyAnalysisResult): string {
     }
     
     .logo-main {
-      font-size: 24pt;
+      font-size: 18pt;
       font-weight: 700;
       color: #1a4d2e;
-      letter-spacing: 3px;
+      letter-spacing: 1px;
       text-transform: uppercase;
     }
     
@@ -309,18 +319,18 @@ function generateStructuraPDFContent(data: PropertyAnalysisResult): string {
   <div class="page">
     <header class="header">
       <div class="logo">
-        <div class="logo-main">Structura</div>
-        <div class="logo-sub">Aetrnum</div>
+        <div class="logo-main">Distinct Construction</div>
+        <div class="logo-sub">Solutions</div>
       </div>
       <div class="report-info">
         <div><strong>Report Generated:</strong> ${generatedDate}</div>
-        <div><strong>Confidence Score:</strong> ${data.confidenceScore || "N/A"}%</div>
+        <div><strong>Confidence Score:</strong> ${typeof data.confidenceScore === "number" ? `${data.confidenceScore}%` : "Not available"}</div>
       </div>
     </header>
     
     <div class="report-title">
       <h1>ADU Feasibility Report</h1>
-      <div class="address">${data.property.address.value}</div>
+      <div class="address">${esc(data.property.address.value)}</div>
       <div class="confidential">Confidential - Prepared for Property Owner</div>
     </div>
     
@@ -330,19 +340,19 @@ function generateStructuraPDFContent(data: PropertyAnalysisResult): string {
         <div class="section-content">
           <div class="data-row">
             <span class="data-label">Lot Size</span>
-            <span class="data-value">${data.property.lotSizeSqFt.value.toLocaleString()} sq ft</span>
+            <span class="data-value">${esc(displayFieldValue(data.property.lotSizeSqFt, "sq ft"))}</span>
           </div>
           <div class="data-row">
             <span class="data-label">Living Area</span>
-            <span class="data-value">${data.property.homeAreaSqFt.value.toLocaleString()} sq ft</span>
+            <span class="data-value">${esc(displayFieldValue(data.property.homeAreaSqFt, "sq ft"))}</span>
           </div>
           <div class="data-row">
             <span class="data-label">Zoning</span>
-            <span class="data-value">${data.property.zoning.value}</span>
+            <span class="data-value">${esc(displayFieldValue(data.property.zoning))}</span>
           </div>
           <div class="data-row">
             <span class="data-label">Slope</span>
-            <span class="data-value">${data.property.slope.value}</span>
+            <span class="data-value">${esc(displayFieldValue(data.property.slope))}</span>
           </div>
         </div>
       </div>
@@ -352,11 +362,11 @@ function generateStructuraPDFContent(data: PropertyAnalysisResult): string {
         <div class="section-content">
           <div class="data-row">
             <span class="data-label">Jurisdiction</span>
-            <span class="data-value">${data.jurisdiction?.name || "San Diego County"}</span>
+            <span class="data-value">${esc(data.jurisdiction?.name ?? "Not available")}</span>
           </div>
           <div class="data-row">
             <span class="data-label">Rules Version</span>
-            <span class="data-value">${data.jurisdiction?.rulesVersion || "2024"}</span>
+            <span class="data-value">${esc(data.jurisdiction?.rulesVersion ?? "Not available")}</span>
           </div>
           <div class="data-row">
             <span class="data-label">Buildable Envelope</span>
@@ -371,12 +381,12 @@ function generateStructuraPDFContent(data: PropertyAnalysisResult): string {
       <div class="section-content">
         <div class="data-row">
           <span class="data-label">Recommended Path</span>
-          <span class="data-value highlight">${data.bestRecommendation}</span>
+          <span class="data-value highlight">${esc(data.bestRecommendation)}</span>
         </div>
         ${data.recommendations.map(rec => `
         <div class="data-row">
-          <span class="data-label">${rec.type}</span>
-          <span class="data-value">${rec.feasibility} — ${rec.estimatedSizeRange}</span>
+          <span class="data-label">${esc(rec.type)}</span>
+          <span class="data-value">${esc(rec.feasibility)} — ${esc(rec.estimatedSizeRange)}</span>
         </div>
         `).join("")}
       </div>
@@ -388,13 +398,13 @@ function generateStructuraPDFContent(data: PropertyAnalysisResult): string {
       <div class="section-content">
         ${data.financialScenarios.slice(0, 3).map(scenario => `
         <div style="margin-bottom: 12px;">
-          <div style="font-weight: 600; color: #1a4d2e; margin-bottom: 5px;">${scenario.scenarioName}</div>
+          <div style="font-weight: 600; color: #1a4d2e; margin-bottom: 5px;">${esc(scenario.scenarioName)} (planning estimate)</div>
           <div class="data-row">
             <span class="data-label">Estimated Cost</span>
             <span class="data-value">$${scenario.estimatedTotalCost.toLocaleString()}</span>
           </div>
           <div class="data-row">
-            <span class="data-label">Monthly Rent Potential</span>
+            <span class="data-label">Monthly Rent ${scenario.rentSource === "rentcast" ? "(RentCast market estimate)" : "(planning estimate)"}</span>
             <span class="data-value">$${scenario.estimatedMonthlyIncome.toLocaleString()}/mo</span>
           </div>
           <div class="data-row">
@@ -403,7 +413,7 @@ function generateStructuraPDFContent(data: PropertyAnalysisResult): string {
           </div>
           <div class="data-row">
             <span class="data-label">Payback Period</span>
-            <span class="data-value">${scenario.estimatedPaybackYears} years</span>
+            <span class="data-value">${scenario.estimatedPaybackYears < 99 ? `${scenario.estimatedPaybackYears} years` : "N/A (cash flow not positive)"}</span>
           </div>
         </div>
         `).join("")}
@@ -421,8 +431,8 @@ function generateStructuraPDFContent(data: PropertyAnalysisResult): string {
         </div>
         ${data.siteConstraints.constraints.map(c => `
         <div class="data-row">
-          <span class="data-label">${c.category.charAt(0).toUpperCase() + c.category.slice(1)}</span>
-          <span class="data-value">${c.severity === "none" ? "None" : c.severity.charAt(0).toUpperCase() + c.severity.slice(1)}</span>
+          <span class="data-label">${esc(c.category.charAt(0).toUpperCase() + c.category.slice(1))}</span>
+          <span class="data-value">${esc(c.confidence === 0 ? "Not checked" : c.classification)}</span>
         </div>
         `).join("")}
       </div>
@@ -435,8 +445,8 @@ function generateStructuraPDFContent(data: PropertyAnalysisResult): string {
     </div>
     
     <footer class="footer">
-      <div class="footer-brand">Prepared by Structura Aetrnum</div>
-      <div>info@structuraaetrnum.com | (858) 833-0705</div>
+      <div class="footer-brand">Prepared by Distinct Construction Solutions</div>
+      <div>jtalavera@distinctcsolutions.com | (858) 833-0705</div>
     </footer>
   </div>
 </body>

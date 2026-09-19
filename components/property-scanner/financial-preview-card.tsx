@@ -20,6 +20,9 @@ interface FinancialScenario {
   estimatedRoi: number;
   estimatedPaybackYears: number;
   estimatedValueAdd: number;
+  rentSource?: "rentcast" | "estimated";
+  rentBasis?: string;
+  assumptions?: string[];
 }
 
 interface FinancialPreviewCardProps {
@@ -28,14 +31,16 @@ interface FinancialPreviewCardProps {
 }
 
 function formatCurrency(value: number): string {
-  if (Math.abs(value) >= 1000) {
-    return `$${(value / 1000).toFixed(0)}K`;
+  const sign = value < 0 ? "-" : "";
+  const abs = Math.abs(value);
+  if (abs >= 1000) {
+    return `${sign}$${(abs / 1000).toFixed(0)}K`;
   }
-  return `$${value.toLocaleString()}`;
+  return `${sign}$${abs.toLocaleString()}`;
 }
 
 function formatCurrencyFull(value: number): string {
-  return `$${value.toLocaleString()}`;
+  return `${value < 0 ? "-" : ""}$${Math.abs(value).toLocaleString()}`;
 }
 
 export function FinancialPreviewCard({ scenarios, disclaimer }: FinancialPreviewCardProps) {
@@ -55,7 +60,7 @@ export function FinancialPreviewCard({ scenarios, disclaimer }: FinancialPreview
         </div>
         <div>
           <h3 className="text-lg font-bold text-secondary">Financial Preview</h3>
-          <p className="text-xs text-muted-foreground">Estimated costs, income, and returns</p>
+          <p className="text-xs text-muted-foreground">Planning estimates — costs, rent, and returns (assumptions below)</p>
         </div>
       </div>
 
@@ -78,7 +83,10 @@ export function FinancialPreviewCard({ scenarios, disclaimer }: FinancialPreview
             </p>
           </div>
           <div className="text-center">
-            <p className="text-[10px] text-muted-foreground">Monthly Income</p>
+            <p className="text-[10px] text-muted-foreground">
+              Monthly Rent{" "}
+              {primaryScenario.rentSource === "rentcast" ? "(RentCast)" : primaryScenario.rentSource ? "(planning est.)" : ""}
+            </p>
             <p className="text-base font-bold text-emerald-600">
               {formatCurrencyFull(primaryScenario.estimatedMonthlyIncome)}/mo
             </p>
@@ -116,7 +124,7 @@ export function FinancialPreviewCard({ scenarios, disclaimer }: FinancialPreview
           <div className="flex items-center gap-1.5">
             <ArrowUpRight className="h-3 w-3 text-muted-foreground" />
             <div>
-              <p className="text-[10px] text-muted-foreground">Value Add</p>
+              <p className="text-[10px] text-muted-foreground">Value Add (cost-based)</p>
               <p className="text-xs font-semibold text-secondary">
                 +{formatCurrency(primaryScenario.estimatedValueAdd)}
               </p>
@@ -208,7 +216,7 @@ export function FinancialPreviewCard({ scenarios, disclaimer }: FinancialPreview
                     <p className="text-xs font-semibold">{formatCurrencyFull(scenario.estimatedSoftCost)}</p>
                   </div>
                   <div>
-                    <p className="text-[10px] text-muted-foreground">Down Payment (20%)</p>
+                    <p className="text-[10px] text-muted-foreground">Down Payment</p>
                     <p className="text-xs font-semibold">{formatCurrencyFull(scenario.estimatedDownPayment)}</p>
                   </div>
                   <div>
@@ -227,6 +235,17 @@ export function FinancialPreviewCard({ scenarios, disclaimer }: FinancialPreview
               )}
             </div>
           ))}
+        </div>
+      )}
+
+      {primaryScenario.assumptions && primaryScenario.assumptions.length > 0 && (
+        <div className="mt-4 pt-3 border-t border-border/50">
+          <p className="text-[10px] font-medium text-secondary mb-1">How these numbers are estimated</p>
+          <ul className="list-disc pl-4 space-y-0.5">
+            {primaryScenario.assumptions.map((a) => (
+              <li key={a} className="text-[10px] text-muted-foreground leading-relaxed">{a}</li>
+            ))}
+          </ul>
         </div>
       )}
 

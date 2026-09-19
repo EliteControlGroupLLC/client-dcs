@@ -1,6 +1,6 @@
 "use client";
 
-import { DollarSign, TrendingUp, ExternalLink } from "lucide-react";
+import { DollarSign, TrendingUp } from "lucide-react";
 
 interface RentEstimateData {
   estimates: {
@@ -14,6 +14,16 @@ interface RentEstimateData {
   }[];
   available: true;
   source: "rentcast" | "estimated";
+  basis?: string;
+  comparableCount?: number;
+  comparables?: {
+    address: string;
+    monthlyRent: number;
+    squareFootage: number | null;
+    bedrooms: number | null;
+    bathrooms: number | null;
+    distanceMiles: number | null;
+  }[];
 }
 
 interface RentEstimateCardProps {
@@ -30,9 +40,15 @@ export function RentEstimateCard({ data }: RentEstimateCardProps) {
           </div>
           <h3 className="font-semibold text-secondary text-sm">Rent Estimates</h3>
         </div>
-        <span className="text-[10px] px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-600">
-          San Diego Market Data
-        </span>
+        {data.source === "rentcast" ? (
+          <span className="text-[10px] px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-600">
+            RentCast market estimate
+          </span>
+        ) : (
+          <span className="text-[10px] px-2 py-0.5 rounded-full bg-amber-50 text-amber-700">
+            Planning estimate
+          </span>
+        )}
       </div>
 
       <div className="space-y-3">
@@ -64,7 +80,7 @@ export function RentEstimateCard({ data }: RentEstimateCardProps) {
               <div>
                 <p className="text-[10px] text-muted-foreground">$/sqft</p>
                 <p className="text-xs font-semibold text-secondary">
-                  ${est.pricePerSqft.toFixed(2)}
+                  {Number.isFinite(est.pricePerSqft) ? `$${est.pricePerSqft.toFixed(2)}` : "—"}
                 </p>
               </div>
             </div>
@@ -72,9 +88,29 @@ export function RentEstimateCard({ data }: RentEstimateCardProps) {
         ))}
       </div>
 
+      {data.source === "rentcast" && data.comparables && data.comparables.length > 0 && (
+        <div className="mt-3 space-y-1">
+          <p className="text-[10px] font-medium text-secondary">Nearby rental comparables</p>
+          {data.comparables.slice(0, 3).map((c) => (
+            <p key={c.address} className="text-[10px] text-muted-foreground flex justify-between gap-2">
+              <span className="truncate">
+                {c.address}
+                {c.squareFootage ? ` · ${c.squareFootage.toLocaleString()} sq ft` : ""}
+                {c.bedrooms != null ? ` · ${c.bedrooms} bd` : ""}
+                {c.distanceMiles != null ? ` · ${c.distanceMiles} mi` : ""}
+              </span>
+              <span className="font-medium text-secondary whitespace-nowrap">${c.monthlyRent.toLocaleString()}/mo</span>
+            </p>
+          ))}
+        </div>
+      )}
+
       <div className="mt-4 pt-3 border-t border-border/50">
         <span className="text-[10px] text-muted-foreground">
-          Based on current San Diego County rental market data
+          {data.basis ??
+            (data.source === "rentcast"
+              ? "RentCast rent estimate for this address"
+              : "Planning estimate from a San Diego County ADU rent table — not a market quote for this address")}
         </span>
       </div>
     </div>

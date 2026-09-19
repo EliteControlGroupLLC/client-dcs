@@ -121,6 +121,10 @@ export interface BuildableEnvelopeResult {
   buildableAreaSqFt: number;
   /** Best zone for ADU placement */
   bestZone: "rear" | "left-side" | "right-side" | "none";
+  /** Setback (ft) actually used for parcelSetbackPolygon. */
+  propertyLineSetbackFt?: number;
+  /** Separation (ft) actually used for residenceSeparationPolygon. */
+  residenceSeparationFt?: number;
   /** Constraints that affect buildable area */
   constraints: string[];
 }
@@ -316,6 +320,10 @@ export interface StrictPipelineInput {
   knownParcelPolygon?: GeometryPolygon;
   /** Optional: known building polygon if already fetched */
   knownBuildingPolygon?: GeometryPolygon;
+  /** The jurisdiction's ADU side/rear setback (ft); defaults to ADU_RULES. */
+  propertyLineSetbackFt?: number;
+  /** The jurisdiction's ADU-to-home separation (ft); defaults to ADU_RULES. */
+  residenceSeparationFt?: number;
 }
 
 /**
@@ -506,19 +514,13 @@ export async function runStrictGeometryPipeline(
   let buildableEnvelope: BuildableEnvelopeResult | null = null;
 
   if (parcelPolygon && buildingPolygon && canRenderDiagram) {
-    // Create 3ft setback polygon (parcel inset)
-    const parcelSetbackPolygon = insetPolygonByFeet(
-      parcelPolygon,
-      ADU_RULES.propertyLineSetbackFt,
-      lat
-    );
+    const setbackFt = input.propertyLineSetbackFt ?? ADU_RULES.propertyLineSetbackFt;
+    const separationFt = input.residenceSeparationFt ?? ADU_RULES.residenceSeparationFt;
+    // Setback polygon (parcel inset by the jurisdiction's side/rear setback)
+    const parcelSetbackPolygon = insetPolygonByFeet(parcelPolygon, setbackFt, lat);
 
-    // Create 6ft separation polygon (building outset)
-    const residenceSeparationPolygon = outsetPolygonByFeet(
-      buildingPolygon,
-      ADU_RULES.residenceSeparationFt,
-      lat
-    );
+    // Separation polygon (building outset by the required separation)
+    const residenceSeparationPolygon = outsetPolygonByFeet(buildingPolygon, separationFt, lat);
 
     // Subtract separation zone from setback zone to get buildable area
     const remainingZones = subtractPolygonSimple(
@@ -568,6 +570,8 @@ export async function runStrictGeometryPipeline(
       buildableAreaSqFt,
       bestZone,
       constraints,
+      propertyLineSetbackFt: setbackFt,
+      residenceSeparationFt: separationFt,
     };
   }
 

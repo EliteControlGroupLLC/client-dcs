@@ -69,14 +69,18 @@ export function BuildableAreaCard({ data }: BuildableAreaCardProps) {
       <div className="space-y-3">
         <h4 className="text-sm font-semibold text-secondary">ADU Size Potential</h4>
         <div className="flex items-start gap-3 py-2">
-          <CheckCircle2 className="h-4 w-4 text-success mt-0.5 flex-shrink-0" />
+          {/^(not|site review|two-story detached adus aren)/i.test(data.oneStoryPotential) ? (
+            <XCircle className="h-4 w-4 text-muted-foreground mt-0.5 flex-shrink-0" />
+          ) : (
+            <CheckCircle2 className="h-4 w-4 text-success mt-0.5 flex-shrink-0" />
+          )}
           <div>
             <p className="text-xs text-muted-foreground">1-Story ADU</p>
             <p className="text-sm font-semibold text-secondary">{data.oneStoryPotential}</p>
           </div>
         </div>
         <div className="flex items-start gap-3 py-2">
-          {data.twoStoryPotential.toLowerCase().includes("not") ? (
+          {/^(not|site review|two-story detached adus aren)/i.test(data.twoStoryPotential) ? (
             <XCircle className="h-4 w-4 text-destructive mt-0.5 flex-shrink-0" />
           ) : (
             <CheckCircle2 className="h-4 w-4 text-success mt-0.5 flex-shrink-0" />

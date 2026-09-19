@@ -4,6 +4,7 @@ import { useState, useRef } from "react";
 import { X, Download, Printer, FileText, Building, DollarSign, MapPin, Shield, TrendingUp, AlertTriangle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import type { PropertyAnalysisResult } from "@/lib/property-intelligence";
+import { displayFieldValue } from "@/lib/property-intelligence/types";
 import { ShowSourcesPanel } from "./show-sources-panel";
 
 interface PropertyReportModalProps {
@@ -30,8 +31,8 @@ export function PropertyReportModal({
     setDownloading(true);
 
     try {
-      // Generate PDF-styled HTML content with Structura Aetrnum branding
-      const pdfContent = generateStructuraPDFContent(analysisData);
+      // Generate PDF-styled HTML content with Distinct Construction Solutions branding
+      const pdfContent = generateReportHtml(analysisData);
       
       // Create a new window for the PDF content
       const printWindow = window.open("", "_blank");
@@ -54,8 +55,8 @@ export function PropertyReportModal({
   };
 
   const handlePrint = () => {
-    // Generate print-friendly content with Structura Aetrnum branding
-    const printContent = generateStructuraPDFContent(analysisData);
+    // Generate print-friendly content with Distinct Construction Solutions branding
+    const printContent = generateReportHtml(analysisData);
     
     const printWindow = window.open("", "_blank");
     if (printWindow) {
@@ -101,8 +102,8 @@ export function PropertyReportModal({
           {/* Property Summary */}
           <ReportSection icon={Building} title="Property Summary">
             <ReportRow label="Address" value={analysisData.property.address.value} />
-            <ReportRow label="Lot Size" value={`${analysisData.property.lotSizeSqFt.value.toLocaleString()} sq ft`} />
-            <ReportRow label="Living Area" value={`${analysisData.property.homeAreaSqFt.value.toLocaleString()} sq ft`} />
+            <ReportRow label="Lot Size" value={displayFieldValue(analysisData.property.lotSizeSqFt, "sq ft")} />
+            <ReportRow label="Living Area" value={displayFieldValue(analysisData.property.homeAreaSqFt, "sq ft")} />
             {analysisData.geometryAnalysis?.areaSummary && (
               <>
                 <ReportRow label="Main Footprint" value={`${analysisData.geometryAnalysis.areaSummary.mainFootprintSqFt.toLocaleString()} sq ft`} />
@@ -151,7 +152,7 @@ export function PropertyReportModal({
                     <ReportRow label="Est. Cost" value={`$${scenario.estimatedTotalCost.toLocaleString()}`} />
                     <ReportRow label="Est. Rent" value={`$${scenario.estimatedMonthlyIncome.toLocaleString()}/mo`} />
                     <ReportRow label="ROI" value={`${scenario.estimatedRoi}%`} />
-                    <ReportRow label="Payback" value={`${scenario.estimatedPaybackYears} years`} />
+                    <ReportRow label="Payback" value={scenario.estimatedPaybackYears < 99 ? `${scenario.estimatedPaybackYears} years` : "N/A"} />
                   </div>
                 </div>
               ))}
@@ -233,7 +234,7 @@ export function PropertyReportModal({
                 .filter((c) => !c.passed)
                 .map((c) => (
                   <div key={c.name} className="flex items-start gap-1.5 mb-1 last:mb-0">
-                    <span className={`text-[10px] mt-0.5 ${c.severity === "error" ? "text-red-500" : "text-amber-500"}`}>\u25CF</span>
+                    <span className={`text-[10px] mt-0.5 ${c.severity === "error" ? "text-red-500" : "text-amber-500"}`}>{"\u25CF"}</span>
                     <p className="text-[11px] text-muted-foreground">{c.message}</p>
                   </div>
                 ))}
@@ -309,12 +310,12 @@ function ReportRow({ label, value }: { label: string; value: string }) {
 }
 
 /**
- * Generate PDF/Print content with Structura Aetrnum branding
+ * Generate PDF/Print content with Distinct Construction Solutions branding
  * Colors: Dark green (primary), Gold (accent), neutral light tones
  * Typography: Clean architectural font (Bahnschrift style)
  * Layout: Minimal, high-end, structured, no clutter
  */
-function generateStructuraPDFContent(data: PropertyAnalysisResult): string {
+function generateReportHtml(data: PropertyAnalysisResult): string {
   const generatedDate = new Date().toLocaleDateString("en-US", {
     year: "numeric",
     month: "long",
@@ -383,10 +384,10 @@ function generateStructuraPDFContent(data: PropertyAnalysisResult): string {
     }
     
     .logo-main {
-      font-size: 24pt;
+      font-size: 18pt;
       font-weight: 700;
       color: #1a4d2e;
-      letter-spacing: 3px;
+      letter-spacing: 1px;
       text-transform: uppercase;
     }
     
@@ -560,12 +561,12 @@ function generateStructuraPDFContent(data: PropertyAnalysisResult): string {
   <div class="page">
     <header class="header">
       <div class="logo">
-        <div class="logo-main">Structura</div>
-        <div class="logo-sub">Aetrnum</div>
+        <div class="logo-main">Distinct Construction</div>
+        <div class="logo-sub">Solutions</div>
       </div>
       <div class="report-info">
         <div><strong>Report Generated:</strong> ${generatedDate}</div>
-        <div><strong>Confidence Score:</strong> ${data.confidenceScore || "N/A"}%</div>
+        <div><strong>Confidence Score:</strong> ${typeof data.confidenceScore === "number" ? `${data.confidenceScore}%` : "Not available"}</div>
       </div>
     </header>
     
@@ -581,11 +582,11 @@ function generateStructuraPDFContent(data: PropertyAnalysisResult): string {
         <div class="section-content">
           <div class="data-row">
             <span class="data-label">Lot Size</span>
-            <span class="data-value">${data.property.lotSizeSqFt.value.toLocaleString()} sq ft</span>
+            <span class="data-value">${displayFieldValue(data.property.lotSizeSqFt, "sq ft")}</span>
           </div>
           <div class="data-row">
             <span class="data-label">Living Area</span>
-            <span class="data-value">${data.property.homeAreaSqFt.value.toLocaleString()} sq ft</span>
+            <span class="data-value">${displayFieldValue(data.property.homeAreaSqFt, "sq ft")}</span>
           </div>
           <div class="data-row">
             <span class="data-label">Zoning</span>
@@ -603,11 +604,11 @@ function generateStructuraPDFContent(data: PropertyAnalysisResult): string {
         <div class="section-content">
           <div class="data-row">
             <span class="data-label">Jurisdiction</span>
-            <span class="data-value">${data.jurisdiction?.name || "San Diego County"}</span>
+            <span class="data-value">${data.jurisdiction?.name ?? "Not available"}</span>
           </div>
           <div class="data-row">
             <span class="data-label">Rules Version</span>
-            <span class="data-value">${data.jurisdiction?.rulesVersion || "2024"}</span>
+            <span class="data-value">${data.jurisdiction?.rulesVersion ?? "Not available"}</span>
           </div>
           <div class="data-row">
             <span class="data-label">Buildable Envelope</span>
@@ -654,7 +655,7 @@ function generateStructuraPDFContent(data: PropertyAnalysisResult): string {
           </div>
           <div class="data-row">
             <span class="data-label">Payback Period</span>
-            <span class="data-value">${scenario.estimatedPaybackYears} years</span>
+            <span class="data-value">${scenario.estimatedPaybackYears < 99 ? `${scenario.estimatedPaybackYears} years` : "N/A"}</span>
           </div>
         </div>
         `).join("")}
@@ -686,8 +687,8 @@ function generateStructuraPDFContent(data: PropertyAnalysisResult): string {
     </div>
     
     <footer class="footer">
-      <div class="footer-brand">Prepared by Structura Aetrnum</div>
-      <div>info@structuraaetrnum.com | (858) 833-0705</div>
+      <div class="footer-brand">Prepared by Distinct Construction Solutions</div>
+      <div>jtalavera@distinctcsolutions.com | (858) 833-0705</div>
     </footer>
   </div>
 </body>

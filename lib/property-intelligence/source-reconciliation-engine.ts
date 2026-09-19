@@ -60,6 +60,15 @@ export interface ReconciliationInput {
   footprintSource?: string;
   placementMethod?: string;
   geometryConfidence?: number;
+  /** The real source + confidence behind each resolved field (from the report fields). */
+  resolvedFieldSources?: Partial<
+    Record<"apn" | "lotSizeSqFt" | "homeAreaSqFt" | "footprintSqFt" | "openYardSqFt" | "parcelShape", { source: string; confidence: number }>
+  >;
+  /**
+   * County Assessor parcel + SANDAG outlines back the headline facts — don't
+   * pit them against OSM guesses (a 50 m search / Nominatim bbox is not a parcel).
+   */
+  countyRecordsAuthoritative?: boolean;
 }
 
 // ─── Source Classification ───
@@ -308,7 +317,8 @@ export function reconcileAllSources(input: ReconciliationInput): SourceAudit {
     apnCandidates.push(makeCandidate(input.attomData.apn, "ATTOM Property Data", 97));
   }
   if (input.resolvedApn && !input.resolvedApn.includes("Estimated") && input.resolvedApn !== "Not available") {
-    apnCandidates.push(makeCandidate(input.resolvedApn, "Resolved (multi-source)", 80));
+    const rs = input.resolvedFieldSources?.apn;
+    apnCandidates.push(makeCandidate(input.resolvedApn, rs?.source ?? "Resolved (multi-source)", rs?.confidence ?? 80));
   }
   const apnResult = reconcileString("apn", apnCandidates, true);
   allDiscrepancies.push(...apnResult.discrepancies);
@@ -318,7 +328,7 @@ export function reconcileAllSources(input: ReconciliationInput): SourceAudit {
   if (input.attomData?.lotSizeSqFt) {
     lotCandidates.push(makeCandidate(input.attomData.lotSizeSqFt, "ATTOM Property Data", 95));
   }
-  if (input.osmData?.boundingBox) {
+  if (input.osmData?.boundingBox && !input.countyRecordsAuthoritative) {
     const [minLat, maxLat, minLon, maxLon] = input.osmData.boundingBox;
     const latM = (maxLat - minLat) * 111320;
     const lonM = (maxLon - minLon) * 111320 * Math.cos((((minLat + maxLat) / 2) * Math.PI) / 180);
@@ -327,7 +337,13 @@ export function reconcileAllSources(input: ReconciliationInput): SourceAudit {
       lotCandidates.push(makeCandidate(bbSqFt, "OpenStreetMap Nominatim (bbox)", 60));
     }
   }
-  lotCandidates.push(makeCandidate(input.resolvedLotSizeSqFt, "Resolved (multi-source)", 75));
+  lotCandidates.push(
+    makeCandidate(
+      input.resolvedLotSizeSqFt,
+      input.resolvedFieldSources?.lotSizeSqFt?.source ?? "Resolved (multi-source)",
+      input.resolvedFieldSources?.lotSizeSqFt?.confidence ?? 75
+    )
+  );
   const lotResult = reconcileNumeric("lotSizeSqFt", lotCandidates, 15, true);
   allDiscrepancies.push(...lotResult.discrepancies);
 
@@ -371,10 +387,16 @@ export function reconcileAllSources(input: ReconciliationInput): SourceAudit {
   if (input.attomData?.homeAreaSqFt) {
     homeAreaCandidates.push(makeCandidate(input.attomData.homeAreaSqFt, "ATTOM Property Data", 95));
   }
-  if (input.osmData?.parcel?.mainBuildingAreaSqFt) {
+  if (input.osmData?.parcel?.mainBuildingAreaSqFt && !input.countyRecordsAuthoritative) {
     homeAreaCandidates.push(makeCandidate(input.osmData.parcel.mainBuildingAreaSqFt, "OpenStreetMap (footprint × levels)", 72));
   }
-  homeAreaCandidates.push(makeCandidate(input.resolvedHomeAreaSqFt, "Resolved (multi-source)", 70));
+  homeAreaCandidates.push(
+    makeCandidate(
+      input.resolvedHomeAreaSqFt,
+      input.resolvedFieldSources?.homeAreaSqFt?.source ?? "Resolved (multi-source)",
+      input.resolvedFieldSources?.homeAreaSqFt?.confidence ?? 70
+    )
+  );
   const homeAreaResult = reconcileNumeric("homeAreaSqFt", homeAreaCandidates, 15);
   allDiscrepancies.push(...homeAreaResult.discrepancies);
 
@@ -383,22 +405,40 @@ export function reconcileAllSources(input: ReconciliationInput): SourceAudit {
   if (input.attomData?.footprintSqFt) {
     footprintCandidates.push(makeCandidate(input.attomData.footprintSqFt, "ATTOM Property Data", 92));
   }
-  if (input.osmData?.parcel?.mainBuildingFootprintSqFt) {
+  if (input.osmData?.parcel?.mainBuildingFootprintSqFt && !input.countyRecordsAuthoritative) {
     footprintCandidates.push(makeCandidate(input.osmData.parcel.mainBuildingFootprintSqFt, "OpenStreetMap building outline", 82));
   }
-  footprintCandidates.push(makeCandidate(input.resolvedFootprintSqFt, "Resolved (multi-source)", 65));
+  footprintCandidates.push(
+    makeCandidate(
+      input.resolvedFootprintSqFt,
+      input.resolvedFieldSources?.footprintSqFt?.source ?? "Resolved (multi-source)",
+      input.resolvedFieldSources?.footprintSqFt?.confidence ?? 65
+    )
+  );
   const footprintResult = reconcileNumeric("footprintSqFt", footprintCandidates, 20, true);
   allDiscrepancies.push(...footprintResult.discrepancies);
 
   // ── Open Yard ──
   const yardCandidates: SourceCandidate<number>[] = [];
-  yardCandidates.push(makeCandidate(input.resolvedOpenYardSqFt, "Derived (lot - footprint - hardscape)", 60));
+  yardCandidates.push(
+    makeCandidate(
+      input.resolvedOpenYardSqFt,
+      input.resolvedFieldSources?.openYardSqFt?.source ?? "Derived (lot - footprint - hardscape)",
+      input.resolvedFieldSources?.openYardSqFt?.confidence ?? 60
+    )
+  );
   const yardResult = reconcileNumeric("openYardSqFt", yardCandidates, 20);
   allDiscrepancies.push(...yardResult.discrepancies);
 
   // ── Parcel Shape ──
   const shapeCandidates: SourceCandidate<string>[] = [];
-  shapeCandidates.push(makeCandidate(input.resolvedParcelShape, "Derived from lot dimensions", 65));
+  shapeCandidates.push(
+    makeCandidate(
+      input.resolvedParcelShape,
+      input.resolvedFieldSources?.parcelShape?.source ?? "Derived from lot dimensions",
+      input.resolvedFieldSources?.parcelShape?.confidence ?? 65
+    )
+  );
   const shapeResult = reconcileString("parcelShape", shapeCandidates);
   allDiscrepancies.push(...shapeResult.discrepancies);
 
@@ -417,7 +457,7 @@ export function reconcileAllSources(input: ReconciliationInput): SourceAudit {
     rentCandidates.push(
       makeCandidate(
         firstEst.estimatedMonthlyRent,
-        firstEst.source === "rentcast" ? "RentCast" : "Estimated rent model",
+        firstEst.source === "rentcast" ? "RentCast rent AVM" : "DCS rent table (planning estimate)",
         firstEst.confidence
       )
     );

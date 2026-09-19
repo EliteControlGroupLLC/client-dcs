@@ -27,10 +27,10 @@ const COST_PER_SQFT: Record<string, { low: number; mid: number; high: number }> 
   "jadu": { low: 250, mid: 325, high: 400 },
 };
 
-function formatPriceRange(minSqft: number, maxSqft: number, type: string): string {
+function formatPriceRange(minSqft: number, maxSqft: number, type: string, siteCostUsd = 0): string {
   const costs = COST_PER_SQFT[type] || COST_PER_SQFT["detached-adu"];
-  const low = Math.round((minSqft * costs.low) / 1000) * 1000;
-  const high = Math.round((maxSqft * costs.high) / 1000) * 1000;
+  const low = Math.round((minSqft * costs.low + siteCostUsd) / 1000) * 1000;
+  const high = Math.round((maxSqft * costs.high + siteCostUsd) / 1000) * 1000;
   return `$${low.toLocaleString()} – $${high.toLocaleString()}`;
 }
 
@@ -68,7 +68,9 @@ function verdictToResult(v: AduTypeVerdict): FeasibilityResult {
     maxSizeSqft: v.maxSqFt,
     minSizeSqft: v.minSqFt,
     estimatedSizeRange: v.sizeLabel,
-    priceRange: hasSize ? formatPriceRange(v.minSqFt || v.maxSqFt, v.maxSqFt, VERDICT_COST_KEY[v.type] ?? "detached-adu") : "N/A",
+    priceRange: hasSize
+      ? formatPriceRange(v.minSqFt || v.maxSqFt, v.maxSqFt, VERDICT_COST_KEY[v.type] ?? "detached-adu", v.siteCostUsd ?? 0)
+      : "N/A",
     description: v.description,
     constraints: v.constraints,
     confidence: VERDICT_CONFIDENCE[v.level],

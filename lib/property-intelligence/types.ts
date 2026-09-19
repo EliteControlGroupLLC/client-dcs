@@ -18,8 +18,25 @@ export function getConfidenceStatus(score: number): ConfidenceStatus {
 }
 
 export function formatFieldValue(field: IntelligenceField<number>, unit: string): string {
-  const prefix = field.status === "Estimated" ? "Approx. " : "";
-  return `${prefix}${field.value.toLocaleString()} ${unit}`;
+  return displayFieldValue(field, unit);
+}
+
+/**
+ * The one way a report field is printed. An "Unavailable" field (confidence
+ * < 50 — e.g. an assumed typical value when no record exists) is shown as
+ * "Not available", never as a number that looks like data.
+ */
+export function displayFieldValue(field: IntelligenceField<string | number> | null | undefined, unit?: string): string {
+  if (!field) return "Not available";
+  if (field.displayValue) return field.displayValue;
+  const v = field.value;
+  if (typeof v === "number") {
+    if (field.status === "Unavailable" || !Number.isFinite(v)) return "Not available";
+    const prefix = field.status === "Estimated" ? "Approx. " : "";
+    return `${prefix}${v.toLocaleString()}${unit ? ` ${unit}` : ""}`;
+  }
+  const str = v == null ? "" : String(v).trim();
+  return str === "" ? "Not available" : str;
 }
 
 export interface PropertyIntelligence {
@@ -104,6 +121,15 @@ export interface LotDimensions {
   mainHomeDepth: number;
 }
 
+/** A candidate ADU footprint rectangle on the real parcel. */
+export interface SiteZone {
+  areaSqFt: number;
+  widthFt: number;
+  depthFt: number;
+  position: string;
+  contiguousAreaSqFt: number | null;
+}
+
 /**
  * Real site facts behind the ADU-type verdicts (County Assessor + SANDAG
  * parcel polygon + SANDAG Building Outlines). Null fields = unknown.
@@ -133,7 +159,51 @@ export interface SiteFacts {
   } | null;
   attachedFit: { areaSqFt: number; widthFt: number; depthFt: number } | null;
   measuredYards: { frontFt: number; rearFt: number; leftFt: number; rightFt: number } | null;
-  setbacksUsed: { sideRearFt: number; frontFt: number; separationFt: number };
+  setbacksUsed: {
+    /** Standard side/rear setback (two-story / fire zone / unknown fire zone). */
+    sideRearFt: number;
+    frontFt: number;
+    separationFt: number;
+    /** Side/rear setback used for a one-story (≤ 16 ft) detached ADU. */
+    oneStorySideRearFt?: number;
+    /** Why the one-story setback is what it is (fire zone status etc.). */
+    oneStorySetbackReason?: string;
+    frontSource?: string;
+    citation?: string;
+  };
+  /**
+   * Detached-ADU footprint options on the real parcel: one-story vs.
+   * two-story setbacks, keeping vs. replacing accessory structures (a
+   * detached garage/shed). Zones are null when nothing fits.
+   */
+  detachedOptions?: {
+    oneStory: { asIs: SiteZone | null; replaceAccessory: SiteZone | null };
+    twoStory: { asIs: SiteZone | null; replaceAccessory: SiteZone | null } | null;
+    /** Accessory structures an ADU could replace (detached garage, sheds). */
+    replaceable: Array<{ areaSqFt: number; kind: "detached garage" | "accessory structure" }>;
+  };
+  /** Base-zone multi-unit density (multiple-dwelling zones only). */
+  multiUnitZoning?: {
+    zone: string;
+    lotSqFtPerUnit: number;
+    baseDensityUnits: number;
+    citation: string;
+  } | null;
+  /**
+   * County-record vintage check: the traced building outline is materially
+   * larger than the recorded living area (+ garage), suggesting additions
+   * not yet on the Assessor roll. Null when nothing looks stale.
+   */
+  recordsVintageNote?: string | null;
+  /** Measured terrain (USGS 3DEP samples on the real parcel); null when unavailable. */
+  terrain?: {
+    lotSlopePercent: number;
+    /** Grade inside the likely ADU zone (rear yard), when known. */
+    aduAreaSlopePercent: number | null;
+    foundationType: string;
+    /** Extra foundation/site cost vs. slab-on-grade (USD). */
+    foundationCostUsd: number;
+  } | null;
   frontEdgeMethod?: string;
   /** How the County parcel was matched to the address. */
   parcelMatch?: "exact-address" | "address-point" | "nearest" | "none";
@@ -218,6 +288,9 @@ export interface PropertyAnalysisResult {
     estimatedRoi: number;
     estimatedPaybackYears: number;
     estimatedValueAdd: number;
+    rentSource?: "rentcast" | "estimated";
+    rentBasis?: string;
+    assumptions?: string[];
   }[];
   confidenceScore?: number;
   confidenceBand?: "high" | "moderate" | "low";
@@ -274,8 +347,21 @@ export interface PropertyAnalysisResult {
     }[];
     available: true;
     source: "rentcast" | "estimated";
+    /** Plain-English basis of the rent shown (what was priced, and by whom). */
+    basis?: string;
+    comparableCount?: number;
+    comparables?: {
+      address: string;
+      monthlyRent: number;
+      squareFootage: number | null;
+      bedrooms: number | null;
+      bathrooms: number | null;
+      distanceMiles: number | null;
+    }[];
   };
   dataSources?: {
+    /** Which geocoder actually resolved the address (e.g. "U.S. Census Geocoder"). */
+    geocoder?: string | null;
     googlePlaces: boolean;
     attom: boolean;
     openStreetMap: boolean;
@@ -313,6 +399,7 @@ export interface PropertyAnalysisResult {
     premium: { monthlyRent: number; annualRent: number };
     source: "rentcast" | "estimated";
     aduType: string;
+    basis?: string;
   }[];
   imageryWarning?: string;
 
@@ -438,6 +525,8 @@ export interface PropertyAnalysisResult {
       buildableAreaSqFt: number;
       bestZone: "rear" | "left-side" | "right-side" | "none";
       constraints: string[];
+      propertyLineSetbackFt?: number;
+      residenceSeparationFt?: number;
     } | null;
     /** Parcel data source */
     parcelSource: string;

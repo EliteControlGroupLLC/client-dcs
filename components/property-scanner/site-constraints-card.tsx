@@ -95,9 +95,13 @@ export function SiteConstraintsCard({ data }: SiteConstraintsCardProps) {
       <div className="space-y-2 mb-4">
         {data.constraints.map((constraint) => {
           const Icon = categoryIcons[constraint.category] || Shield;
-          const colors = severityColors[constraint.severity] || severityColors.none;
+          // confidence 0 = the map/service couldn't be checked for this parcel
+          const notChecked = constraint.confidence === 0;
+          const colors = notChecked
+            ? { bg: "bg-slate-100", text: "text-slate-600", dot: "bg-slate-400" }
+            : severityColors[constraint.severity] || severityColors.none;
           const label = categoryLabels[constraint.category] || constraint.category;
-          const severityLabel = severityLabels[constraint.severity] || constraint.severity;
+          const severityLabel = notChecked ? "Not checked" : severityLabels[constraint.severity] || constraint.severity;
 
           return (
             <div
@@ -108,9 +112,12 @@ export function SiteConstraintsCard({ data }: SiteConstraintsCardProps) {
                 <Icon className="h-4 w-4 text-slate-500 shrink-0" />
                 <div className="min-w-0">
                   <span className="text-xs font-medium text-secondary block">{label}</span>
-                  <span className="text-[10px] text-muted-foreground block truncate">
+                  <span className="text-[10px] text-muted-foreground block">
                     {constraint.classification}
                   </span>
+                  {constraint.source && (
+                    <span className="text-[9px] text-muted-foreground/80 block">Source: {constraint.source}</span>
+                  )}
                 </div>
               </div>
               <div className={`flex items-center gap-1.5 px-2 py-0.5 rounded-full shrink-0 ${colors.bg}`}>
@@ -127,7 +134,7 @@ export function SiteConstraintsCard({ data }: SiteConstraintsCardProps) {
       {/* Impact Summary */}
       {(data.costAdjustmentPercent > 0 || data.timelineAdjustmentMonths > 0) && (
         <div className="bg-amber-50/50 border border-amber-100 rounded-lg px-3 py-2 mb-3">
-          <p className="text-[10px] font-medium text-amber-800 mb-1">Estimated Impact</p>
+          <p className="text-[10px] font-medium text-amber-800 mb-1">Estimated Impact (planning estimate)</p>
           <div className="flex gap-4">
             {data.costAdjustmentPercent > 0 && (
               <span className="text-[10px] text-amber-700">
@@ -148,7 +155,7 @@ export function SiteConstraintsCard({ data }: SiteConstraintsCardProps) {
         <div className="space-y-1.5 mb-3">
           {activeConstraints.map((c) => (
             <p key={c.category} className="text-[10px] text-muted-foreground">
-              <span className="font-medium text-secondary capitalize">{categoryLabels[c.category]}:</span>{" "}
+              <span className="font-medium text-secondary capitalize">{categoryLabels[c.category] ?? c.category}:</span>{" "}
               {c.constructionImpact}
             </p>
           ))}

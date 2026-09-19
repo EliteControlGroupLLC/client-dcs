@@ -1,88 +1,94 @@
-// Elevation Service - Uses Google Elevation API for real terrain/slope data
+// Elevation Service — real lot slope for the property "Slope" field.
+//
+// Source: USGS 3DEP 1 m lidar-derived elevation (free, keyless), sampled on a
+// grid across the actual SANDAG parcel polygon (see lidar-elevation-service).
+// Google Elevation is used only as a last resort and only when it actually
+// answers "OK". When nothing responds the field is honestly "Not available"
+// (confidence 0 → status "Unavailable") — never a fabricated "Mostly flat".
 
-const GOOGLE_API_KEY = process.env.NEXT_PUBLIC_GOOGLE_PLACES_API_KEY;
+import {
+  sampleParcelTerrain,
+  type LngLatRings,
+  type SlopeCategory,
+  type SlopeStats,
+} from "./lidar-elevation-service";
 
-interface ElevationResult {
+export const SLOPE_NOT_AVAILABLE = "Not available";
+
+export interface ElevationResult {
+  /** Display label, e.g. "Gentle — 6.2% avg slope, ~7 ft change across lot" or "Not available" */
   slope: string;
   confidence: number;
   sources: string[];
+  /** Machine-readable details (absent when unavailable) */
+  category?: SlopeCategory;
+  stats?: SlopeStats;
+  available: boolean;
+  durationMs: number;
 }
 
-interface GoogleElevationResponse {
-  results: Array<{
-    elevation: number;
-    location: { lat: number; lng: number };
-    resolution: number;
-  }>;
-  status: string;
+/**
+ * Map a slope label (new "Category — details" labels, legacy labels, or
+ * "Not available") to the bare category string used by feasibility,
+ * confidence and constraint engines.
+ * Returns "Flat" | "Gentle" | "Moderate" | "Steep" | "Very Steep" | "Unavailable".
+ */
+export function slopeCategoryFromLabel(label: string | null | undefined): SlopeCategory | "Unavailable" {
+  const head = (label ?? "").split("—")[0].trim().toLowerCase();
+  if (!head || head.startsWith("not available") || head.startsWith("unavailable") || head.startsWith("unknown")) {
+    return "Unavailable";
+  }
+  if (head.startsWith("very steep")) return "Very Steep";
+  if (head.startsWith("steep")) return "Steep";
+  if (head.startsWith("moderate")) return "Moderate";
+  if (head.startsWith("gentle")) return "Gentle";
+  if (head.startsWith("flat") || head.startsWith("mostly flat")) return "Flat";
+  return "Unavailable";
 }
 
-export async function getElevationData(lat: number, lng: number): Promise<ElevationResult> {
-  if (!GOOGLE_API_KEY) {
+function fmtPct(v: number): string {
+  return `${v.toFixed(1)}%`;
+}
+
+export async function getElevationData(
+  lat: number,
+  lng: number,
+  parcelRings?: LngLatRings | null
+): Promise<ElevationResult> {
+  const res = await sampleParcelTerrain(lat, lng, { parcelRings });
+
+  if (!res.available || !res.stats) {
     return {
-      slope: "Mostly flat",
-      confidence: 40,
-      sources: ["Default estimate"],
+      slope: SLOPE_NOT_AVAILABLE,
+      confidence: 0,
+      sources: ["USGS elevation service unavailable"],
+      available: false,
+      durationMs: res.durationMs,
     };
   }
 
-  try {
-    // Sample 5 points around the property (center + 4 cardinal directions ~30m away)
-    const offset = 0.0003; // ~30 meters
-    const locations = [
-      `${lat},${lng}`,
-      `${lat + offset},${lng}`,
-      `${lat - offset},${lng}`,
-      `${lat},${lng + offset}`,
-      `${lat},${lng - offset}`,
-    ].join("|");
+  const s = res.stats;
+  console.log(
+    `[ELEVATION] ${res.sourceLabel} in ${res.durationMs} ms: ${s.category}, avg ${s.averageSlopePercent}% / max ${s.maxSlopePercent}%, Δ${s.elevationChangeFt} ft`
+  );
+  const where = res.parcelClipped ? "across lot" : "near geocoded point";
+  const label = `${s.category} — ${fmtPct(s.averageSlopePercent)} avg slope (max ${fmtPct(
+    s.maxSlopePercent
+  )}), ~${Math.round(s.elevationChangeFt)} ft elevation change ${where}`;
 
-    const response = await fetch(
-      `https://maps.googleapis.com/maps/api/elevation/json?locations=${locations}&key=${GOOGLE_API_KEY}`
-    );
+  const isUSGS = res.provider === "usgs-3dep-imageserver" || res.provider === "usgs-epqs";
+  let confidence = isUSGS ? 80 : 65;
+  if (isUSGS && res.parcelClipped && s.sampleCount >= 12) confidence = 88;
+  else if (isUSGS && res.parcelClipped && s.sampleCount >= 6) confidence = 85;
+  if (!res.parcelClipped) confidence -= 10;
 
-    if (!response.ok) {
-      throw new Error(`Elevation API error: ${response.status}`);
-    }
-
-    const data: GoogleElevationResponse = await response.json();
-
-    if (data.status !== "OK" || data.results.length < 5) {
-      throw new Error("Insufficient elevation data");
-    }
-
-    const elevations = data.results.map((r) => r.elevation);
-    const center = elevations[0];
-    const maxDiff = Math.max(...elevations.map((e) => Math.abs(e - center)));
-
-    // Calculate approximate slope percentage over ~30m
-    const slopePercent = (maxDiff / 30) * 100;
-
-    let slope: string;
-    if (slopePercent < 2) {
-      slope = "Flat";
-    } else if (slopePercent < 5) {
-      slope = "Mostly flat";
-    } else if (slopePercent < 15) {
-      slope = "Moderate slope";
-    } else {
-      slope = "Steep slope";
-    }
-
-    const resolution = data.results[0].resolution;
-    // Higher resolution = more confidence
-    const confidence = resolution < 10 ? 82 : resolution < 30 ? 72 : 58;
-
-    return {
-      slope,
-      confidence,
-      sources: ["Google Elevation API"],
-    };
-  } catch {
-    return {
-      slope: "Mostly flat",
-      confidence: 40,
-      sources: ["Default estimate (API unavailable)"],
-    };
-  }
+  return {
+    slope: label,
+    confidence,
+    sources: [res.sourceLabel],
+    category: s.category,
+    stats: s,
+    available: true,
+    durationMs: res.durationMs,
+  };
 }
