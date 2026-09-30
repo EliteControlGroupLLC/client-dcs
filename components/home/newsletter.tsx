@@ -15,7 +15,8 @@ export function Newsletter() {
 
     setStatus("loading");
     
-    // Simulate API call - replace with actual Supabase call
+    // Simulate API call - this form is not wired up yet; post to /api/newsletter
+    // (leads go straight to BuildCore CRM — the site has no database).
     await new Promise((resolve) => setTimeout(resolve, 1000));
     
     setStatus("success");

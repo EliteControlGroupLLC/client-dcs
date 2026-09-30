@@ -1,11 +1,12 @@
 // Property Report API — Lead capture + report generation endpoint
-// Saves the lead and pushes it (with the report PDF) into BuildCore CRM
+// Pushes the lead (with the report PDF) into BuildCore CRM, which is the only
+// place website leads are recorded — this site has no database of its own.
 
 import { NextRequest, NextResponse } from "next/server";
 import { checkRateLimit, getClientIp, RATE_LIMITS } from "@/lib/rate-limit";
 import { buildAduReportPdf } from "@/lib/adu-report-pdf";
 import { isReportSignatureValid } from "@/lib/report-signature";
-import { pushLeadToBuildCore } from "@/lib/buildcore-intake";
+import { captureLead } from "@/lib/buildcore-intake";
 import { isPhoneTokenValid, normalizePhoneE164 } from "@/lib/verification-token";
 import {
   LEAD_PASS_COOKIE,
@@ -125,8 +126,6 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const fullName = `${firstName} ${lastName}`;
-
     // Generate report data from scan results
     const reportData = {
       propertySummary: {
@@ -183,30 +182,11 @@ export async function POST(request: NextRequest) {
       generatedAt: new Date().toISOString(),
     };
 
-    // Try to save the lead to Supabase if available
-    let leadSaved = false;
-    try {
-      const { createClient } = await import("@/lib/supabase/server");
-      const supabase = await createClient();
-
-      await supabase.from("leads").insert({
-        name: fullName,
-        email,
-        phone: phone || null,
-        service_type: "property-report",
-        property_address: propertyAddress,
-        message: `Property Development Report requested. Confidence: ${reportData.confidenceScore != null ? `${reportData.confidenceScore}%` : "not available"}. Recommended: ${reportData.feasibilitySummary.recommendedPath}.`,
-        source: "Build Your ADU",
-        status: "new",
-      });
-      leadSaved = true;
-    } catch {
-      // Supabase not available — lead not saved but report still generated
-      leadSaved = false;
-    }
-
     // Push the lead + the exact report the visitor unlocked into BuildCore CRM.
-    // Non-blocking for the visitor: failures are logged, never surfaced.
+    // BuildCore is the only record — the website has no database of its own.
+    // Non-blocking for the visitor (they have already earned their report), but
+    // a failure is logged loudly by captureLead so the team can call them back,
+    // and reported back as crmSynced: false.
     let reportPdf: Uint8Array | null = null;
     if (scanVerified) {
       try {
@@ -218,7 +198,7 @@ export async function POST(request: NextRequest) {
         console.error("[API] ADU report PDF build failed:", err);
       }
     }
-    const buildCoreResult = await pushLeadToBuildCore({
+    const buildCoreResult = await captureLead("PROPERTY-REPORT", {
       firstName,
       lastName,
       email,
@@ -238,13 +218,9 @@ export async function POST(request: NextRequest) {
       ].join("\n"),
       reportPdf,
     });
-    if (!buildCoreResult.success) {
-      console.error(`[API] BuildCore push failed:`, JSON.stringify(buildCoreResult));
-    }
 
     const res = NextResponse.json({
       success: true,
-      leadSaved,
       crmSynced: buildCoreResult.success,
       report: reportData,
     });
