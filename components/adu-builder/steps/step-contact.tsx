@@ -25,7 +25,8 @@ export function StepContact() {
     e.preventDefault();
     setStatus("loading");
 
-    // Simulate API call - replace with actual Supabase call
+    // Simulate API call - this form is not wired up yet; post to /api/adu-config
+    // (leads go straight to BuildCore CRM — the site has no database).
     await new Promise((resolve) => setTimeout(resolve, 1500));
     
     setStatus("success");

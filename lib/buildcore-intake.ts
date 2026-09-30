@@ -3,6 +3,13 @@
 // what the client received) and contact-form messages. Server-only: uses
 // BUILDCORE_INTAKE_SECRET.
 
+import { COMPANY_INFO } from "@/lib/data/site-data";
+
+// KEEP THE www. HOST. Do not "simplify" this to the apex buildcoreus.ai:
+// the apex 308-redirects to www and that redirect STRIPS the Authorization
+// header, so an apex POST arrives unauthenticated and the lead is lost
+// (verified: apex + auth = 401, www + auth = 200/400). Same applies to
+// BUILDCORE_INTAKE_URL if it is ever set in the environment.
 const DEFAULT_INTAKE_URL = "https://www.buildcoreus.ai/api/intake/consultations";
 const TIMEOUT_MS = 15_000;
 
@@ -117,4 +124,91 @@ export async function pushLeadToBuildCore(input: BuildCoreLeadInput): Promise<Bu
   } catch (err) {
     return { success: false, error: err instanceof Error ? err.message : String(err) };
   }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Lead capture — the website has no database of its own. BuildCore IS the
+// record. Every lead-capturing route goes through captureLead() so a failed
+// push is impossible to miss: it is logged loudly and the visitor is told to
+// call instead, rather than being shown a "thank you" for a lead nobody has.
+// ─────────────────────────────────────────────────────────────────────────────
+
+/**
+ * The visitor-facing message when a lead could not be captured. Honest: the
+ * request did not get through, so give them the phone number instead.
+ */
+export const LEAD_CAPTURE_FAILURE_MESSAGE =
+  `We couldn't send your request right now. Please call us at ${COMPANY_INFO.phone} and we'll take care of you.`;
+
+/**
+ * Push a lead into BuildCore and make any failure impossible to miss.
+ *
+ * Never throws. On a 400 that names `source` (BuildCore doesn't know a newer
+ * source value yet) the lead is resent as a generic website lead rather than
+ * dropped — a 400 means nothing was created, so this cannot duplicate.
+ *
+ * Logging carries the name and the failure reason only — enough for the team
+ * to chase the lead from the server logs, without dumping personal data.
+ */
+export async function captureLead(
+  tag: string,
+  input: BuildCoreLeadInput
+): Promise<BuildCorePushResult> {
+  let source = input.source ?? "adu-builder";
+  let result: BuildCorePushResult;
+  try {
+    result = await pushLeadToBuildCore(input);
+    if (!result.success && result.status === 400 && /source/i.test(result.error ?? "")) {
+      console.warn(`[${tag}] BuildCore rejected source "${source}" — retrying as website-contact`);
+      source = "website-contact";
+      result = await pushLeadToBuildCore({ ...input, source });
+    }
+  } catch (err) {
+    result = { success: false, error: err instanceof Error ? err.message : String(err) };
+  }
+
+  if (result.success) {
+    console.info(`[${tag}] BuildCore lead captured (source=${source}).`);
+  } else {
+    console.error(
+      `[${tag}] LEAD NOT CAPTURED — call this person back manually. ` +
+        `name="${input.firstName} ${input.lastName}" source=${source} ` +
+        `status=${result.status ?? "none"} skipped=${result.skipped ? "yes" : "no"} ` +
+        `reason=${result.error ?? "unknown"}`
+    );
+  }
+  return result;
+}
+
+/** Map a free-text project/service label onto a BuildCore service line. */
+export function serviceLineFromText(service: unknown): BuildCoreServiceLine {
+  const s = String(service ?? "").toLowerCase();
+  if (s.includes("adu") || s.includes("guest house") || s.includes("granny")) return "adu";
+  if (s.includes("custom home") || s.includes("new home")) return "custom-home";
+  if (
+    s.includes("remodel") ||
+    s.includes("kitchen") ||
+    s.includes("bath") ||
+    s.includes("garage conversion") ||
+    s.includes("addition")
+  )
+    return "remodel";
+  if (s.includes("roof")) return "roofing";
+  if (s.includes("fenc")) return "fencing";
+  if (s.includes("concrete") || s.includes("driveway") || s.includes("patio")) return "concrete";
+  if (s.includes("window")) return "windows";
+  return "general-construction";
+}
+
+/** Split a single "full name" field into the first/last BuildCore expects. */
+export function splitFullName(name: unknown): { firstName: string; lastName: string } {
+  const full = String(name ?? "").trim();
+  const [first, ...rest] = full.split(/\s+/);
+  return { firstName: first || full || "Website", lastName: rest.join(" ") || "-" };
+}
+
+/** BuildCore requires a phone; keep obviously-empty values out of the CRM. */
+export function phoneOrNotProvided(phone: unknown): string {
+  const v = String(phone ?? "").trim();
+  return v.replace(/\D/g, "").length >= 7 ? v : "Not provided";
 }

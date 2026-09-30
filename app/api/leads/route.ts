@@ -1,5 +1,15 @@
-import { createClient } from "@/lib/supabase/server";
+// Website lead forms (hero form, ad landing pages) → BuildCore CRM.
+// The website has no database of its own: BuildCore is the record, so the
+// visitor only sees "thank you" when the lead actually landed there.
+
 import { NextRequest, NextResponse } from "next/server";
+import {
+  captureLead,
+  serviceLineFromText,
+  splitFullName,
+  phoneOrNotProvided,
+  LEAD_CAPTURE_FAILURE_MESSAGE,
+} from "@/lib/buildcore-intake";
 import { checkRateLimit, getClientIp, RATE_LIMITS } from "@/lib/rate-limit";
 
 export async function POST(request: NextRequest) {
@@ -22,14 +32,14 @@ export async function POST(request: NextRequest) {
 
   try {
     const body = await request.json();
-    const { 
-      name, 
-      email, 
-      phone, 
-      service_type, 
-      message, 
+    const {
+      name,
+      email,
+      phone,
+      service_type,
+      message,
       property_address,
-      source 
+      source
     } = body;
 
     // Validate required fields
@@ -40,32 +50,36 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const supabase = await createClient();
+    // `source` here is the campaign/placement the form sat on
+    // ("meta-ads-adu-offer", "google-ads-adu-san-diego", "hero", ...), which is
+    // finer-grained than BuildCore's source enum — it goes in the notes so the
+    // team can still see which ad or page produced the lead.
+    const campaign = String(source || "website").trim();
+    const { firstName, lastName } = splitFullName(name);
 
-    const { data, error } = await supabase
-      .from("leads")
-      .insert({
-        name,
-        email,
-        phone,
-        service_type,
-        message,
-        property_address,
-        source: source || "website",
-        status: "new",
-      })
-      .select()
-      .single();
+    const crm = await captureLead("LEADS", {
+      firstName,
+      lastName,
+      email,
+      phone: phoneOrNotProvided(phone),
+      propertyAddress: String(property_address || "").trim() || "Not provided",
+      serviceLine: serviceLineFromText(service_type),
+      source: "website-contact",
+      notes: [
+        `Website lead form — placement: ${campaign}.`,
+        service_type ? `Project type: ${service_type}.` : null,
+        message ? `\n${String(message)}` : null,
+      ]
+        .filter(Boolean)
+        .join("\n"),
+    });
 
-    if (error) {
-      console.error("Error creating lead:", error);
-      return NextResponse.json(
-        { error: "Failed to submit lead" },
-        { status: 500 }
-      );
+    if (!crm.success) {
+      // Honest failure: the request never reached the team, so tell them to call.
+      return NextResponse.json({ error: LEAD_CAPTURE_FAILURE_MESSAGE }, { status: 502 });
     }
 
-    return NextResponse.json({ success: true, data });
+    return NextResponse.json({ success: true });
   } catch (error) {
     console.error("API error:", error);
     return NextResponse.json(
