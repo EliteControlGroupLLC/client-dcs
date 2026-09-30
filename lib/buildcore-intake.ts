@@ -38,8 +38,7 @@ export type BuildCoreLeadSource =
   | "adu-builder"
   | "website-contact"
   | "website-tool"
-  | "website-showroom"
-  | "website-newsletter";
+  | "website-showroom";
 
 export interface BuildCoreLeadInput {
   serviceLine?: BuildCoreServiceLine;
