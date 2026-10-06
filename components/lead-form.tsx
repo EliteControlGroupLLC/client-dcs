@@ -52,6 +52,7 @@ export function LeadForm({
 
   const {
     pass,
+    passChecked,
     alreadyVerified,
     startVerification,
     verifyCode,
@@ -72,6 +73,10 @@ export function LeadForm({
       phone: prev.phone || pass.phone,
       address: prev.address || pass.propertyAddress,
     }));
+    // Every field just filled itself in and `project` already has a default,
+    // so there is genuinely nothing left to type — restart the clock or this
+    // visitor trips the "too fast" bot check by clicking submit.
+    renderedAt.current = Date.now();
   }, [pass]);
 
   // Fired only once the lead is actually in BuildCore — a half-finished or
@@ -95,7 +100,9 @@ export function LeadForm({
     }
   };
 
-  const submitLead = async (phoneToken: string | null) => {
+  // `isRetry` stops the 403 recovery below from looping if the server keeps
+  // refusing: we try once more, then surface the error.
+  const submitLead = async (phoneToken: string | null, isRetry = false) => {
     setIsSubmitting(true);
     setError(null);
     try {
@@ -116,9 +123,16 @@ export function LeadForm({
       });
       const result = await response.json().catch(() => null);
       if (!response.ok || !result?.success) {
-        if (result?.code === "PHONE_NOT_VERIFIED") {
+        // We may not have sent a code yet (this path is reached when a lead
+        // pass turned out to be stale), so send one before asking for it.
+        if (result?.code === "PHONE_NOT_VERIFIED" && !isRetry) {
+          const sent = await sendCode(formData.phone);
+          if (sent.ok && sent.skipped) {
+            await submitLead(sent.phoneToken, true);
+            return;
+          }
           setStep("code");
-          setFieldErrors({ code: "Please enter the code we texted you." });
+          setFieldErrors({ code: sent.ok ? "" : sent.error });
           return;
         }
         throw new Error(result?.error || "We could not submit your request right now.");
@@ -213,6 +227,7 @@ export function LeadForm({
             setStep("details");
             setCode("");
             setFieldErrors({});
+            setError(null);
           }}
           onResend={handleResend}
           resendCooldown={resendCooldown}
@@ -317,7 +332,9 @@ export function LeadForm({
         size="lg"
         rounded="full"
         className="w-full group"
-        disabled={isSubmitting || sending}
+        /* Held until the lead-pass check resolves, so a returning visitor
+           isn't texted a code they don't need. */
+        disabled={isSubmitting || sending || !passChecked}
       >
         {isSubmitting || sending ? (
           <>

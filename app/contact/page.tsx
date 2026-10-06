@@ -61,6 +61,7 @@ export default function ContactPage() {
 
   const {
     pass,
+    passChecked,
     alreadyVerified,
     startVerification,
     verifyCode,
@@ -81,6 +82,10 @@ export default function ContactPage() {
       phone: prev.phone || pass.phone,
       address: prev.address || pass.propertyAddress,
     }));
+    // The form just filled itself in, so the visitor's clock starts now —
+    // otherwise someone with nothing left to type trips the "too fast" bot
+    // check simply by clicking submit.
+    renderedAt.current = Date.now();
   }, [pass]);
 
   const validate = (): boolean => {
@@ -98,7 +103,9 @@ export default function ContactPage() {
     return Object.keys(errors).length === 0;
   };
 
-  const sendMessage = async (phoneToken: string | null) => {
+  // `isRetry` stops the 403 recovery below from looping if the server keeps
+  // refusing: we try once more, then surface the error.
+  const sendMessage = async (phoneToken: string | null, isRetry = false) => {
     setIsSubmitting(true);
     setSubmitError(null);
     try {
@@ -115,10 +122,18 @@ export default function ContactPage() {
       const result = await response.json().catch(() => null);
       if (!response.ok || !result?.success) {
         // The server is the authority on verification; if it says the number
-        // isn't proven, show the code step rather than a dead end.
-        if (result?.code === "PHONE_NOT_VERIFIED") {
+        // isn't proven, show the code step rather than a dead end. We may not
+        // have sent a code yet (this path is reached when a lead pass turned
+        // out to be stale), so send one before asking for it.
+        if (result?.code === "PHONE_NOT_VERIFIED" && !isRetry) {
+          const sent = await sendCode(formData.phone);
+          if (sent.ok && sent.skipped) {
+            // Verification is unavailable after all — retry with its token.
+            await sendMessage(sent.phoneToken, true);
+            return;
+          }
           setStep("code");
-          setFieldErrors({ code: "Please enter the code we texted you." });
+          setFieldErrors({ code: sent.ok ? "" : sent.error });
           return;
         }
         throw new Error(result?.error || "We could not submit your request. Please try again.");
@@ -318,6 +333,7 @@ export default function ContactPage() {
                       setStep("details");
                       setCode("");
                       setFieldErrors({});
+                      setSubmitError(null);
                     }}
                     onResend={handleResend}
                     resendCooldown={resendCooldown}
@@ -428,7 +444,15 @@ export default function ContactPage() {
 
                   <FormAlert tone="dark">{submitError}</FormAlert>
 
-                  <Button type="submit" size="lg" rounded="full" className="w-full" disabled={isSubmitting || sending}>
+                  {/* Held until the lead-pass check resolves, so a returning
+                      visitor isn't texted a code they don't need. */}
+                  <Button
+                    type="submit"
+                    size="lg"
+                    rounded="full"
+                    className="w-full"
+                    disabled={isSubmitting || sending || !passChecked}
+                  >
                     {isSubmitting || sending ? (
                       <>
                         <Loader2 className="h-4 w-4 animate-spin" />

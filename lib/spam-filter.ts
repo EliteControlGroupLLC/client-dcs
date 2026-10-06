@@ -51,7 +51,10 @@ const PITCH_CATEGORIES: { id: string; label: string; re: RegExp }[] = [
   {
     id: "webdev",
     label: "web/app development services",
-    re: /\b(web\s*(?:site)?\s*(?:design|redesign|development)|app\s+development|we\s+build\s+(?:websites|apps)|offshore\s+(?:team|developers)|wordpress\s+(?:theme|plugin))\b/gi,
+    // `web\s*(?:site\s*)?` — NOT two \s* either side of an optional group,
+    // which lets a run of spaces split O(n) ways per start position and
+    // backtrack quadratically on attacker-supplied text.
+    re: /\b(web\s*(?:site\s*)?(?:design|redesign|development)|app\s+development|we\s+build\s+(?:websites|apps)|offshore\s+(?:team|developers)|wordpress\s+(?:theme|plugin))\b/gi,
   },
   {
     id: "marketing",
@@ -70,17 +73,30 @@ const BULK_MAIL =
   /(unsubscribe|opt[\s-]?out|remove\s+me\s+from\s+your\s+(?:list|database)|if\s+you'?re\s+not\s+the\s+right\s+person|mailing\s+list|this\s+is\s+not\s+spam)/gi;
 
 // http(s) links and bare domains alike ("holmrow.com/intro").
+// The label is bounded ({0,63}, the real DNS limit) rather than `*`: an
+// unbounded run of [a-z0-9-] backtracks quadratically hunting for the dot,
+// and this regex runs on text a stranger supplies.
 const LINK_RE =
-  /\b(?:https?:\/\/|www\.)\S+|\b[a-z0-9][a-z0-9-]*\.(?:com|net|org|io|co|ai|biz|info|xyz|online|site|shop|agency|services|dev|app)\b(?:\/\S*)?/gi;
+  /\b(?:https?:\/\/|www\.)\S+|\b[a-z0-9][a-z0-9-]{0,63}\.(?:com|net|org|io|co|ai|biz|info|xyz|online|site|shop|agency|services|dev|app)\b(?:\/\S*)?/gi;
+
+/** At most this many characters of any one field are ever matched against. */
+const MAX_SCAN_CHARS = 5000;
+
+const MAX_EXAMPLES = 4;
 
 function matches(text: string, re: RegExp): string[] {
   const found = text.match(re) || [];
   const unique: string[] = [];
   for (const m of found) {
     const v = m.trim();
-    if (v && !unique.some((u) => u.toLowerCase() === v.toLowerCase())) unique.push(v);
+    if (!v) continue;
+    if (unique.some((u) => u.toLowerCase() === v.toLowerCase())) continue;
+    unique.push(v);
+    // Stop at the examples we quote, so a message with thousands of distinct
+    // matches doesn't turn the dedupe scan itself quadratic.
+    if (unique.length >= MAX_EXAMPLES) break;
   }
-  return unique.slice(0, 4);
+  return unique;
 }
 
 function quote(values: string[]): string {
@@ -129,8 +145,12 @@ export function checkSpam(input: SpamCheckInput): SpamVerdict {
   }
 
   // ── Flag: a judgement about what they wrote ──
-  const message = typeof input.message === "string" ? input.message : "";
-  const name = typeof input.name === "string" ? input.name : "";
+  // Truncated here rather than at the call sites: these patterns run on text
+  // a stranger controls, before any verification, so the bound belongs where
+  // it cannot be forgotten. Nobody's genuine enquiry needs 5000 characters to
+  // show its intent.
+  const message = typeof input.message === "string" ? input.message.slice(0, MAX_SCAN_CHARS) : "";
+  const name = typeof input.name === "string" ? input.name.slice(0, 200) : "";
   if (!message && !name) return CLEAN;
 
   const reasons: string[] = [];

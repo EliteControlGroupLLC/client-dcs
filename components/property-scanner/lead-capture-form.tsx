@@ -288,7 +288,13 @@ export function LeadCaptureForm({
   // Submit without going through the code step: either the phone is already
   // verified on the lead pass, or SMS verification was unavailable and the
   // server handed back a signed "couldn't check" token to send instead.
-  const submitLeadDirectly = async (phoneVerified: boolean = false, phoneToken?: string | null) => {
+  // `isRetry` stops the 403 recovery below from looping if the server keeps
+  // refusing: we try once more, then surface the error.
+  const submitLeadDirectly = async (
+    phoneVerified: boolean = false,
+    phoneToken?: string | null,
+    isRetry = false
+  ) => {
     setSubmitting(true);
     setErrors({});
 
@@ -318,6 +324,21 @@ export function LeadCaptureForm({
       const data = await response.json();
 
       if (!response.ok) {
+        // The server wants a code and we never sent one — this happens when
+        // the lead pass we relied on has expired or was cleared. Send one and
+        // show the code step instead of stranding the visitor on an error.
+        if (data.code === "PHONE_NOT_VERIFIED" && !isRetry) {
+          const retry = await sendOtpCode();
+          if (retry.success && retry.skipped) {
+            await submitLeadDirectly(false, retry.phoneToken, true);
+            return;
+          }
+          if (retry.success) {
+            setStep("phone-verify");
+            setErrors({});
+            return;
+          }
+        }
         setErrors({ form: data.error || "Something went wrong. Please try again." });
         return;
       }

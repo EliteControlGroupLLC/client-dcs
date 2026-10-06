@@ -87,16 +87,37 @@ export function checkRateLimit(
 }
 
 /**
- * Extract client IP from request headers (works with Vercel, Cloudflare, etc.)
+ * The client's IP, for rate limiting.
+ *
+ * NOT the first entry of x-forwarded-for. Vercel (like most proxies) APPENDS
+ * the real client IP to whatever XFF chain the caller sent, so the first entry
+ * is whatever the caller typed — anyone could send a random one per request
+ * and every per-IP limit in this app would evaporate. The last hop is the one
+ * our own edge wrote, so that is the one to trust.
+ *
+ * Platform headers that a proxy sets (and strips from client input) are
+ * preferred where available.
  */
 export function getClientIp(request: Request): string {
   const headers = request.headers;
-  return (
-    headers.get("x-forwarded-for")?.split(",")[0]?.trim() ||
-    headers.get("x-real-ip") ||
-    headers.get("cf-connecting-ip") ||
-    "unknown"
-  );
+
+  const platform =
+    headers.get("x-vercel-forwarded-for") || // Vercel: real client, client-supplied value stripped
+    headers.get("cf-connecting-ip") || // Cloudflare: same guarantee
+    headers.get("x-real-ip");
+  if (platform?.trim()) return platform.trim();
+
+  // Fall back to the LAST x-forwarded-for hop — the one our edge appended.
+  const chain = headers.get("x-forwarded-for");
+  if (chain) {
+    const hops = chain
+      .split(",")
+      .map((h) => h.trim())
+      .filter(Boolean);
+    if (hops.length > 0) return hops[hops.length - 1];
+  }
+
+  return "unknown";
 }
 
 // Pre-configured rate limit profiles for different API routes
@@ -115,9 +136,14 @@ export const RATE_LIMITS = {
   emailValidation: { maxRequests: 10, windowSeconds: 60 },
   // Phone OTP send — 3 per 10 min, applied per IP and per phone number
   phoneSend: { maxRequests: 3, windowSeconds: 10 * 60 },
-  // Phone OTP send, slow-drip cap — 10 per 24h, per IP and per phone number.
-  // Each send costs money at Twilio, so an open endpoint is an invitation.
+  // Phone OTP send, slow-drip cap per PHONE NUMBER — 10 per 24h. Nobody needs
+  // ten codes to one handset in a day; this is the toll-fraud brake.
   phoneSendDaily: { maxRequests: 10, windowSeconds: 24 * 60 * 60 },
+  // Same, per IP — but far looser, because one IP is routinely many people:
+  // mobile carriers (CGNAT), an office, a coffee shop. A tight per-IP daily
+  // cap turns away the 11th genuine visitor of the day, and losing a real
+  // customer is worse than the cost of a few extra messages.
+  phoneSendDailyPerIp: { maxRequests: 50, windowSeconds: 24 * 60 * 60 },
   // Phone OTP verify — 5 per 5 min, applied per IP and per phone number
   phoneVerify: { maxRequests: 5, windowSeconds: 5 * 60 },
   // Address autocomplete (one call per debounced keystroke) — 60 per min per IP

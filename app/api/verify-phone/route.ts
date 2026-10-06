@@ -5,6 +5,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { checkRateLimit, getClientIp, RATE_LIMITS } from "@/lib/rate-limit";
 import { issuePhoneToken, issueUnverifiedPhoneToken } from "@/lib/verification-token";
+import { COMPANY_INFO } from "@/lib/data/site-data";
 
 // The one string every form recognises as "we can't check numbers right now".
 // Sent with a signed bypass token so the lead is still accepted downstream,
@@ -29,7 +30,8 @@ const verificationStore = new Map<string, {
 // capped on a short window (burst) and a daily window (slow drip), by IP and
 // by destination number independently.
 const SEND_OTP_LIMIT = RATE_LIMITS.phoneSend; // 3 sends per 10 min
-const SEND_OTP_DAILY = RATE_LIMITS.phoneSendDaily; // 10 sends per 24h
+const SEND_OTP_DAILY = RATE_LIMITS.phoneSendDaily; // 10 sends per 24h, per number
+const SEND_OTP_DAILY_IP = RATE_LIMITS.phoneSendDailyPerIp; // 50 per 24h, per IP (shared NAT)
 const VERIFY_OTP_LIMIT = RATE_LIMITS.phoneVerify; // 5 attempts per 5 min
 
 function formatPhoneE164(phone: string): string {
@@ -77,20 +79,37 @@ async function sendTwilioOTP(
 
     if (!response.ok) {
       console.error("[PHONE-VERIFY] Twilio send error:", data);
-      // The visitor's problem — they can fix it by correcting the number.
+
+      // OUR problem — credentials, quota, or Twilio itself being broken.
+      // Only these mint a bypass token. Deliberately a narrow allowlist: if
+      // every non-matching error minted one, an attacker could pick a number
+      // Twilio refuses (a landline, say) and collect a signed bypass on
+      // demand, which would make the whole gate optional.
+      const ourFault =
+        response.status >= 500 || response.status === 401 || response.status === 403;
+      if (ourFault) {
+        console.error(
+          `[PHONE-VERIFY] TWILIO UNAVAILABLE on send (HTTP ${response.status}, code ${data?.code ?? "none"}) — ` +
+            "leads will be accepted as phone-unverified until this is fixed"
+        );
+        return { success: false, error: UNAVAILABLE, unavailable: true };
+      }
+
+      // Everything else is the visitor's to fix — a bad number, a landline, an
+      // unsupported region, too many sends. Tell them plainly.
       if (data.code === 60200) {
         return { success: false, error: "Invalid phone number format" };
       }
       if (data.code === 60203) {
-        return { success: false, error: "Max send attempts reached. Try again later." };
+        return { success: false, error: "Too many codes sent to that number. Please try again later." };
       }
-      // Our problem: Twilio is refusing or broken (auth, quota, 5xx). Don't
-      // make the visitor pay for it.
-      console.error(
-        `[PHONE-VERIFY] TWILIO UNAVAILABLE on send (HTTP ${response.status}, code ${data?.code ?? "none"}) — ` +
-          "leads will be accepted as phone-unverified until this is fixed"
-      );
-      return { success: false, error: UNAVAILABLE, unavailable: true };
+      if (data.code === 60205 || data.code === 6033) {
+        return { success: false, error: "That looks like a landline. Please enter a mobile number we can text." };
+      }
+      if (data.code === 60410 || data.code === 21408) {
+        return { success: false, error: "We can't text that number. Please enter a US mobile number." };
+      }
+      return { success: false, error: "We couldn't send a code to that number. Please check it and try again." };
     }
 
     return { success: true };
@@ -173,12 +192,15 @@ export async function POST(request: NextRequest) {
       // daily window. Every send bills us at Twilio.
       const ipLimit = checkRateLimit(`phone-send:${ip}`, SEND_OTP_LIMIT);
       const phoneLimit = checkRateLimit(`phone-send:${formattedPhone}`, SEND_OTP_LIMIT);
-      const ipDaily = checkRateLimit(`phone-send-day:${ip}`, SEND_OTP_DAILY);
+      const ipDaily = checkRateLimit(`phone-send-day:${ip}`, SEND_OTP_DAILY_IP);
       const phoneDaily = checkRateLimit(`phone-send-day:${formattedPhone}`, SEND_OTP_DAILY);
 
       if (!ipLimit.allowed || !phoneLimit.allowed || !ipDaily.allowed || !phoneDaily.allowed) {
+        // Deliberately NOT an `unavailable` bypass: handing out a token here
+        // would let anyone mint one just by exceeding the limit. Instead give
+        // the visitor a way to reach us, so a genuine person isn't stranded.
         return NextResponse.json(
-          { error: "Too many attempts. Please wait a few minutes and try again." },
+          { error: `Too many code requests right now. Please wait a few minutes, or call us at ${COMPANY_INFO.phone}.` },
           { status: 429 }
         );
       }
@@ -274,6 +296,12 @@ export async function POST(request: NextRequest) {
 
     // CHECK STATUS
     if (action === "status") {
+      // Rate limited like the rest: unmetered it is a free oracle for probing
+      // which numbers have verified against this instance.
+      const statusLimit = checkRateLimit(`phone-status:${ip}`, VERIFY_OTP_LIMIT);
+      if (!statusLimit.allowed) {
+        return NextResponse.json({ error: "Too many requests." }, { status: 429 });
+      }
       const existing = verificationStore.get(formattedPhone);
       return NextResponse.json({
         verified: existing?.verified || false,

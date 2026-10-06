@@ -7,14 +7,8 @@ import { checkRateLimit, getClientIp, RATE_LIMITS } from "@/lib/rate-limit";
 import { buildAduReportPdf } from "@/lib/adu-report-pdf";
 import { isReportSignatureValid } from "@/lib/report-signature";
 import { captureLead } from "@/lib/buildcore-intake";
-import {
-  LEAD_PASS_COOKIE,
-  encodeLeadPass,
-  leadPassCookieOptions,
-  newLeadPass,
-} from "@/lib/lead-pass";
-import { isTwilioConfigured } from "@/lib/lead-gate-server";
-import { checkPhoneVerification, PHONE_NOT_VERIFIED } from "@/lib/lead-verification";
+import { LEAD_PASS_COOKIE, encodeLeadPass, leadPassCookieOptions } from "@/lib/lead-pass";
+import { checkPhoneVerification, leadPassForSubmission, PHONE_NOT_VERIFIED } from "@/lib/lead-verification";
 
 // pdf-lib + Buffer need the Node runtime; PDF build + CRM push can take a few seconds.
 export const runtime = "nodejs";
@@ -70,7 +64,6 @@ export async function POST(request: NextRequest) {
       verification?.phoneToken,
       "PROPERTY-REPORT"
     );
-    const existingPass = gate.pass;
     const verificationData = {
       emailValidated: false,
       emailScore: 0,
@@ -234,16 +227,17 @@ export async function POST(request: NextRequest) {
     });
 
     // Verified ADU leads also get a lead pass, so the website tools and the
-    // showroom open without asking for the same info again.
-    if (!existingPass && (verificationData.phoneVerified || !isTwilioConfigured())) {
-      const pass = newLeadPass({
-        firstName: String(firstName).trim(),
-        lastName: String(lastName).trim(),
-        email: String(email).trim().toLowerCase(),
-        phone: String(phone).trim(),
-        propertyAddress: String(propertyAddress).trim(),
-        phoneVerified: verificationData.phoneVerified,
-      });
+    // showroom open without asking for the same info again. Same helper as
+    // /api/contact and /api/leads: it keeps an existing pass for the same
+    // number intact rather than resetting its 90 days and its dedupe map.
+    const pass = leadPassForSubmission(gate, {
+      firstName: String(firstName).trim(),
+      lastName: String(lastName).trim(),
+      email: String(email).trim().toLowerCase(),
+      phone: String(phone).trim(),
+      propertyAddress: String(propertyAddress).trim(),
+    });
+    if (pass) {
       const value = encodeLeadPass(pass);
       if (value) res.cookies.set(LEAD_PASS_COOKIE, value, leadPassCookieOptions(pass));
     }
