@@ -5,7 +5,7 @@
 // visitor need to enter a code?"
 //
 // Three ways the answer is no:
-//   • they already hold a lead pass for this exact number (the 90-day
+//   • they already hold a lead pass for this exact number (the 14-day
 //     httpOnly cookie) — a returning visitor is never asked twice,
 //   • SMS verification is unavailable, and the server handed back a signed
 //     "we couldn't check" token to submit instead,

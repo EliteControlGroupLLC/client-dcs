@@ -23,7 +23,7 @@ import { createHmac, timingSafeEqual } from "node:crypto";
  * takes to finish a form and short enough that a leaked token is worthless by
  * the time anyone reuses it.
  *
- * Returning visitors are unaffected: they are carried by the 90-day lead-pass
+ * Returning visitors are unaffected: they are carried by the 14-day lead-pass
  * cookie, not by this token.
  */
 const TTL_MS = 10 * 60 * 1000;

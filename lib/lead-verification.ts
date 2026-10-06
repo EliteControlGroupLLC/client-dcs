@@ -59,7 +59,7 @@ export function checkPhoneVerification(
     return { ok: true, phoneVerified: true, via: "sms-token", pass };
   }
 
-  // 2. This browser already verified this number (90-day lead pass).
+  // 2. This browser already verified this number (14-day lead pass).
   if (pass?.phoneVerified && samePhoneNumber(pass.phone, phone)) {
     return { ok: true, phoneVerified: true, via: "lead-pass", pass };
   }
@@ -90,7 +90,7 @@ export function phoneVerifiedNote(phoneVerified: boolean): string {
  * the cookie alone.
  *
  * A visitor who already holds a pass for this same number keeps it: re-issuing
- * would reset `issuedAt` (silently extending the 90 days) and wipe the
+ * would reset `issuedAt` (silently extending the 14 days) and wipe the
  * per-interest dedupe map. A visitor who just verified a number for the first
  * time gets one, so the next form — any form, including the tool gate and the
  * showroom — lets them straight through.

@@ -8,7 +8,16 @@
 import { createHmac, timingSafeEqual } from "node:crypto";
 
 export const LEAD_PASS_COOKIE = "dcs_lead_pass";
-export const LEAD_PASS_TTL_MS = 90 * 24 * 60 * 60 * 1000; // 90 days
+/**
+ * How long a verified browser is trusted before it must verify again.
+ *
+ * Owner's call: 14 days. Someone browsing the calculators over an evening or
+ * across a week is never asked twice, but a visitor who comes back a fortnight
+ * later verifies again — and that repeat verification is itself a signal that
+ * they are still shopping. Their activity keeps landing on the SAME lead, so
+ * coming back shows up as more interest rather than as a second person.
+ */
+export const LEAD_PASS_TTL_MS = 14 * 24 * 60 * 60 * 1000; // 14 days
 export const INTEREST_DEDUPE_MS = 24 * 60 * 60 * 1000; // one lead per interest per 24h
 
 export interface LeadPassPayload {
@@ -108,7 +117,7 @@ export function markInterestRegistered(pass: LeadPassPayload, interestKey: strin
 
 /**
  * Cookie options. Expiry is anchored to issuedAt, so re-issuing the cookie to
- * update `recent` never extends the 90-day life of the pass.
+ * update `recent` never extends the 14-day life of the pass.
  * Secure in production; on http://localhost dev it can't be (Safari drops
  * Secure cookies on plain http).
  */

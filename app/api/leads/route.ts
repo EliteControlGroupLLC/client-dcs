@@ -151,7 +151,7 @@ export async function POST(request: NextRequest) {
 
     const res = NextResponse.json({ success: true });
 
-    // One verification covers the whole site for 90 days.
+    // One verification covers the whole site for 14 days.
     const pass = leadPassForSubmission(gate, {
       firstName,
       lastName,

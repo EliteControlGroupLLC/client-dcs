@@ -229,7 +229,7 @@ export async function POST(request: NextRequest) {
     // Verified ADU leads also get a lead pass, so the website tools and the
     // showroom open without asking for the same info again. Same helper as
     // /api/contact and /api/leads: it keeps an existing pass for the same
-    // number intact rather than resetting its 90 days and its dedupe map.
+    // number intact rather than resetting its 14 days and its dedupe map.
     const pass = leadPassForSubmission(gate, {
       firstName: String(firstName).trim(),
       lastName: String(lastName).trim(),

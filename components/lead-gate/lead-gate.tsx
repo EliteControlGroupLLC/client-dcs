@@ -2,7 +2,7 @@
 
 // <LeadGate> — the interactive part of a tool (or the showroom) stays locked
 // until the visitor submits their contact info + verifies their phone by SMS.
-// Visitors who already hold a lead pass (httpOnly cookie, 90 days) go straight
+// Visitors who already hold a lead pass (httpOnly cookie, 14 days) go straight
 // through; a BuildCore lead is still registered for this interest (the API
 // dedupes to one per interest per 24h).
 

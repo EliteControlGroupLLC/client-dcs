@@ -156,7 +156,7 @@ export async function POST(request: NextRequest) {
     const res = NextResponse.json({ success: true });
 
     // Verified here, so every other form on the site now lets them straight
-    // through for 90 days — no second code, no re-typing their details.
+    // through for 14 days — no second code, no re-typing their details.
     const pass = leadPassForSubmission(gate, {
       firstName,
       lastName,
