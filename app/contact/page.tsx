@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { AddressAutocompleteInput } from "@/components/property-scanner/address-autocomplete-input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { 
@@ -35,6 +36,7 @@ export default function ContactPage() {
     name: "",
     email: "",
     phone: "",
+    address: "",
     service: "",
     message: "",
   });
@@ -206,11 +208,12 @@ export default function ContactPage() {
                   </div>
 
                   <div className="grid md:grid-cols-2 gap-4">
-                    <FormField tone="dark" label="Phone Number" htmlFor="contact-phone">
+                    <FormField tone="dark" label="Phone Number *" htmlFor="contact-phone">
                       <Input
                         tone="dark"
                         id="contact-phone"
                         type="tel"
+                        required
                         autoComplete="tel"
                         value={formData.phone}
                         onChange={(e) => setFormData({...formData, phone: e.target.value})}
@@ -231,6 +234,22 @@ export default function ContactPage() {
                       </Select>
                     </FormField>
                   </div>
+
+                  <FormField
+                    tone="dark"
+                    label="Project Address *"
+                    htmlFor="contact-address"
+                    hint="Where the work would happen. Start typing and pick your address from the list."
+                  >
+                    <AddressAutocompleteInput
+                      id="contact-address"
+                      compact
+                      value={formData.address}
+                      onChange={(value) => setFormData({ ...formData, address: value })}
+                      onSelect={(value) => setFormData({ ...formData, address: value })}
+                      placeholder="1015 Monterrey Ct, Chula Vista"
+                    />
+                  </FormField>
 
                   <FormField tone="dark" label="Message *" htmlFor="contact-message">
                     <Textarea

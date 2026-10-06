@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { AddressAutocompleteInput } from "@/components/property-scanner/address-autocomplete-input";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select } from "@/components/ui/select";
@@ -11,7 +12,7 @@ import { CheckCircle, ArrowRight } from "lucide-react";
 // primitives (components/ui/form.tsx), so this form matches the lead gate.
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-type FieldErrors = Partial<Record<"name" | "email" | "phone", string>>;
+type FieldErrors = Partial<Record<"name" | "email" | "phone" | "address", string>>;
 
 interface LeadFormProps {
   source: string;
@@ -34,6 +35,7 @@ export function LeadForm({
     name: "",
     email: "",
     phone: "",
+    address: "",
     project: "ADU",
   });
 
@@ -44,6 +46,9 @@ export function LeadForm({
     if (!formData.name.trim()) nextErrors.name = "Please enter your name.";
     if (!EMAIL_RE.test(formData.email.trim())) nextErrors.email = "Please enter a valid email address.";
     if (formData.phone.replace(/\D/g, "").length < 10) nextErrors.phone = "Please enter a valid phone number.";
+    // An ad lead with no address can't be quoted or even located.
+    if (formData.address.trim().length < 8 || !/\d/.test(formData.address))
+      nextErrors.address = "Please pick your project address from the list.";
     setFieldErrors(nextErrors);
     if (Object.keys(nextErrors).length > 0) return;
     setIsSubmitting(true);
@@ -75,6 +80,7 @@ export function LeadForm({
           name: formData.name,
           email: formData.email,
           phone: formData.phone,
+          property_address: formData.address,
           service_type: formData.project,
           source,
         }),
@@ -152,6 +158,22 @@ export function LeadForm({
           onChange={(e) => update("phone", e.target.value)}
           placeholder="(619) 555-0123"
           invalid={!!fieldErrors.phone}
+        />
+      </FormField>
+      <FormField
+        tone="dark"
+        label="Project address"
+        htmlFor={`${idPrefix}-address`}
+        error={fieldErrors.address}
+      >
+        <AddressAutocompleteInput
+          id={`${idPrefix}-address`}
+          compact
+          invalid={!!fieldErrors.address}
+          value={formData.address}
+          onChange={(value) => update("address", value)}
+          onSelect={(value) => update("address", value)}
+          placeholder="1015 Monterrey Ct, Chula Vista"
         />
       </FormField>
       <FormField tone="dark" label="Project type" htmlFor={`${idPrefix}-project`}>

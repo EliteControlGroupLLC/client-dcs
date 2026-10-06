@@ -42,10 +42,34 @@ export async function POST(request: NextRequest) {
       source
     } = body;
 
-    // Validate required fields
-    if (!name || !email) {
+    // Same bar as the contact form: a lead nobody can call or locate is not
+    // a lead. These come off paid ads, so a bad one costs real money.
+    const text = (v: unknown) => (typeof v === "string" ? v.trim() : "");
+    const cleanName = text(name);
+    const cleanEmail = text(email);
+    const cleanPhone = text(phone);
+    const cleanAddress = text(property_address);
+
+    const missing: string[] = [];
+    if (!cleanName) missing.push("your name");
+    if (!cleanEmail) missing.push("an email address");
+    if (!cleanPhone) missing.push("a phone number");
+    if (!cleanAddress) missing.push("the project address");
+    if (missing.length > 0) {
+      return NextResponse.json({ error: `Please include ${missing.join(", ")}.` }, { status: 400 });
+    }
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(cleanEmail)) {
+      return NextResponse.json({ error: "That email address doesn't look right." }, { status: 400 });
+    }
+    if (cleanPhone.replace(/\D/g, "").length < 10) {
       return NextResponse.json(
-        { error: "Name and email are required" },
+        { error: "Please enter a phone number we can reach you on." },
+        { status: 400 }
+      );
+    }
+    if (cleanAddress.length < 8 || !/\d/.test(cleanAddress)) {
+      return NextResponse.json(
+        { error: "Please pick the project address from the list." },
         { status: 400 }
       );
     }
@@ -55,14 +79,14 @@ export async function POST(request: NextRequest) {
     // finer-grained than BuildCore's source enum — it goes in the notes so the
     // team can still see which ad or page produced the lead.
     const campaign = String(source || "website").trim();
-    const { firstName, lastName } = splitFullName(name);
+    const { firstName, lastName } = splitFullName(cleanName);
 
     const crm = await captureLead("LEADS", {
       firstName,
       lastName,
-      email,
-      phone: phoneOrNotProvided(phone),
-      propertyAddress: String(property_address || "").trim() || "Not provided",
+      email: cleanEmail,
+      phone: cleanPhone,
+      propertyAddress: cleanAddress,
       serviceLine: serviceLineFromText(service_type),
       source: "website-contact",
       notes: [

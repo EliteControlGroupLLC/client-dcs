@@ -7,7 +7,7 @@ import {
   captureLead,
   serviceLineFromText,
   splitFullName,
-  phoneOrNotProvided,
+  cityFromAddress,
   LEAD_CAPTURE_FAILURE_MESSAGE,
 } from "@/lib/buildcore-intake";
 import { checkRateLimit, getClientIp, RATE_LIMITS } from "@/lib/rate-limit";
@@ -32,27 +32,62 @@ export async function POST(request: NextRequest) {
 
   try {
     const body = await request.json();
-    const { name, email, phone, service, message } = body;
+    const { name, email, phone, address, service, message } = body;
 
-    // Validate required fields
-    if (!name || !email || !message) {
+    // Every field is required, and checked here as well as in the form —
+    // leads were arriving with no address and no phone because the form
+    // never asked and the server filled in "Not provided" for them.
+    const text = (v: unknown) => (typeof v === "string" ? v.trim() : "");
+    const cleanName = text(name);
+    const cleanEmail = text(email);
+    const cleanPhone = text(phone);
+    const cleanAddress = text(address);
+    const cleanMessage = text(message);
+
+    const missing: string[] = [];
+    if (!cleanName) missing.push("your name");
+    if (!cleanEmail) missing.push("an email address");
+    if (!cleanPhone) missing.push("a phone number");
+    if (!cleanAddress) missing.push("the project address");
+    if (!cleanMessage) missing.push("a short message");
+    if (missing.length > 0) {
       return NextResponse.json(
-        { error: "Name, email, and message are required" },
+        { error: `Please include ${missing.join(", ")}.` },
         { status: 400 }
       );
     }
 
-    const { firstName, lastName } = splitFullName(name);
+    // Shape checks so a lead can actually be followed up: a real email, a
+    // phone with enough digits to dial, and an address with a street number
+    // rather than just a city.
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(cleanEmail)) {
+      return NextResponse.json({ error: "That email address doesn't look right." }, { status: 400 });
+    }
+    const phoneDigits = cleanPhone.replace(/\D/g, "");
+    if (phoneDigits.length < 10) {
+      return NextResponse.json(
+        { error: "Please enter a phone number we can reach you on." },
+        { status: 400 }
+      );
+    }
+    if (cleanAddress.length < 8 || !/\d/.test(cleanAddress)) {
+      return NextResponse.json(
+        { error: "Please pick the project address from the list so we have the full street address." },
+        { status: 400 }
+      );
+    }
+
+    const { firstName, lastName } = splitFullName(cleanName);
     const crm = await captureLead("CONTACT", {
       firstName,
       lastName,
-      email,
-      phone: phoneOrNotProvided(phone),
-      propertyAddress: "Not provided",
-      city: "Not provided",
+      email: cleanEmail,
+      phone: cleanPhone,
+      propertyAddress: cleanAddress,
+      city: cityFromAddress(cleanAddress),
       serviceLine: serviceLineFromText(service),
       source: "website-contact",
-      notes: [`Website contact form${service ? ` — ${service}` : ""}.`, "", String(message)].join("\n"),
+      notes: [`Website contact form${service ? ` — ${service}` : ""}.`, "", cleanMessage].join("\n"),
     });
 
     if (!crm.success) {

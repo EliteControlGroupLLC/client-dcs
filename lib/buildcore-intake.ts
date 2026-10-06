@@ -212,3 +212,17 @@ export function phoneOrNotProvided(phone: unknown): string {
   const v = String(phone ?? "").trim();
   return v.replace(/\D/g, "").length >= 7 ? v : "Not provided";
 }
+
+/**
+ * Pull the city out of a picked address ("1015 Monterrey Ct, Chula Vista, CA
+ * 91911" -> "Chula Vista"). The address comes from the autocomplete, so the
+ * shape is predictable; anything unexpected returns an empty string rather
+ * than a guess, and the lead still carries the full address.
+ */
+export function cityFromAddress(address: string): string {
+  const parts = address.split(",").map((p) => p.trim()).filter(Boolean);
+  // "street, city, STATE ZIP" — the city is the second part when present.
+  if (parts.length >= 3) return parts[1];
+  if (parts.length === 2) return parts[1].replace(/\s+[A-Z]{2}\s*\d{5}(-\d{4})?$/, "").trim();
+  return "";
+}
