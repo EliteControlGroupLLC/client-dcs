@@ -26,7 +26,7 @@ import { COMPANY_INFO } from "@/lib/data/site-data";
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-type FieldErrors = Partial<Record<"name" | "email" | "phone" | "address" | "message" | "code", string>>;
+type FieldErrors = Partial<Record<"firstName" | "lastName" | "email" | "phone" | "address" | "message" | "code", string>>;
 
 const serviceTypes = [
   "ADU / Accessory Dwelling Unit",
@@ -47,7 +47,8 @@ export default function ContactPage() {
   const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
   const [honeypot, setHoneypot] = useState("");
   const [formData, setFormData] = useState({
-    name: "",
+    firstName: "",
+    lastName: "",
     email: "",
     phone: "",
     address: "",
@@ -77,7 +78,8 @@ export default function ContactPage() {
     prefilled.current = true;
     setFormData((prev) => ({
       ...prev,
-      name: prev.name || [pass.firstName, pass.lastName].filter(Boolean).join(" "),
+      firstName: prev.firstName || pass.firstName || "",
+      lastName: prev.lastName || pass.lastName || "",
       email: prev.email || pass.email,
       phone: prev.phone || pass.phone,
       address: prev.address || pass.propertyAddress,
@@ -90,7 +92,8 @@ export default function ContactPage() {
 
   const validate = (): boolean => {
     const errors: FieldErrors = {};
-    if (!formData.name.trim()) errors.name = "Please enter your name.";
+    if (!formData.firstName.trim()) errors.firstName = "Please enter your first name.";
+    if (!formData.lastName.trim()) errors.lastName = "Please enter your last name.";
     if (!formData.email.trim()) errors.email = "Please enter your email address.";
     else if (!EMAIL_RE.test(formData.email.trim())) errors.email = "Please enter a valid email address.";
     if (!formData.phone.trim()) errors.phone = "Please enter your phone number.";
@@ -348,15 +351,26 @@ export default function ContactPage() {
                 <form onSubmit={handleSubmit} className="relative space-y-4" noValidate>
                   <HoneypotField value={honeypot} onChange={setHoneypot} idSuffix="-contact" />
                   <div className="grid md:grid-cols-2 gap-4">
-                    <FormField tone="dark" label="Full Name *" htmlFor="contact-name" error={fieldErrors.name}>
+                    <FormField tone="dark" label="First Name *" htmlFor="contact-first-name" error={fieldErrors.firstName}>
                       <Input
                         tone="dark"
-                        id="contact-name"
-                        autoComplete="name"
-                        value={formData.name}
-                        onChange={(e) => update("name", e.target.value)}
-                        placeholder="John Smith"
-                        invalid={!!fieldErrors.name}
+                        id="contact-first-name"
+                        autoComplete="given-name"
+                        value={formData.firstName}
+                        onChange={(e) => update("firstName", e.target.value)}
+                        placeholder="John"
+                        invalid={!!fieldErrors.firstName}
+                      />
+                    </FormField>
+                    <FormField tone="dark" label="Last Name *" htmlFor="contact-last-name" error={fieldErrors.lastName}>
+                      <Input
+                        tone="dark"
+                        id="contact-last-name"
+                        autoComplete="family-name"
+                        value={formData.lastName}
+                        onChange={(e) => update("lastName", e.target.value)}
+                        placeholder="Smith"
+                        invalid={!!fieldErrors.lastName}
                       />
                     </FormField>
                     <FormField tone="dark" label="Email *" htmlFor="contact-email" error={fieldErrors.email}>

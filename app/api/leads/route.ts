@@ -63,13 +63,18 @@ export async function POST(request: NextRequest) {
     // Same bar as the contact form: a lead nobody can call or locate is not
     // a lead. These come off paid ads, so a bad one costs real money.
     const text = (v: unknown) => (typeof v === "string" ? v.trim() : "");
-    const cleanName = text(name);
+    // First and last come through separately now; a single name box left
+    // leads recorded as "jordan -".
+    const cleanFirstName = text((body as { firstName?: unknown }).firstName);
+    const cleanLastName = text((body as { lastName?: unknown }).lastName);
+    const cleanName = [cleanFirstName, cleanLastName].filter(Boolean).join(" ") || text(name);
     const cleanEmail = text(email);
     const cleanPhone = text(phone);
     const cleanAddress = text(property_address);
 
     const missing: string[] = [];
-    if (!cleanName) missing.push("your name");
+    if (!cleanFirstName) missing.push("your first name");
+    if (!cleanLastName) missing.push("your last name");
     if (!cleanEmail) missing.push("an email address");
     if (!cleanPhone) missing.push("a phone number");
     if (!cleanAddress) missing.push("the project address");
@@ -118,7 +123,9 @@ export async function POST(request: NextRequest) {
     // finer-grained than BuildCore's source enum — it goes in the notes so the
     // team can still see which ad or page produced the lead.
     const campaign = String(source || "website").trim();
-    const { firstName, lastName } = splitFullName(cleanName);
+    const split = splitFullName(cleanName);
+    const firstName = cleanFirstName || split.firstName;
+    const lastName = cleanLastName || split.lastName;
 
     if (spam.flag) {
       logFlaggedSubmission("LEADS", spam, { name: cleanName, email: cleanEmail });

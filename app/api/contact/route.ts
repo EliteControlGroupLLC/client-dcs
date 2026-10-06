@@ -61,14 +61,19 @@ export async function POST(request: NextRequest) {
     // leads were arriving with no address and no phone because the form
     // never asked and the server filled in "Not provided" for them.
     const text = (v: unknown) => (typeof v === "string" ? v.trim() : "");
-    const cleanName = text(name);
+    // The form now sends first and last separately. A single "Full Name" box
+    // produced leads like "jordan -" when someone typed only a first name.
+    const cleanFirstName = text((body as { firstName?: unknown }).firstName);
+    const cleanLastName = text((body as { lastName?: unknown }).lastName);
+    const cleanName = [cleanFirstName, cleanLastName].filter(Boolean).join(" ") || text(name);
     const cleanEmail = text(email);
     const cleanPhone = text(phone);
     const cleanAddress = text(address);
     const cleanMessage = text(message);
 
     const missing: string[] = [];
-    if (!cleanName) missing.push("your name");
+    if (!cleanFirstName) missing.push("your first name");
+    if (!cleanLastName) missing.push("your last name");
     if (!cleanEmail) missing.push("an email address");
     if (!cleanPhone) missing.push("a phone number");
     if (!cleanAddress) missing.push("the project address");
@@ -120,7 +125,10 @@ export async function POST(request: NextRequest) {
       return NextResponse.json(PHONE_NOT_VERIFIED, { status: 403 });
     }
 
-    const { firstName, lastName } = splitFullName(cleanName);
+    // Prefer what the form sent; fall back to splitting for any older client.
+    const split = splitFullName(cleanName);
+    const firstName = cleanFirstName || split.firstName;
+    const lastName = cleanLastName || split.lastName;
     if (spam.flag) {
       logFlaggedSubmission("CONTACT", spam, { name: cleanName, email: cleanEmail });
     }

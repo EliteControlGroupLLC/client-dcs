@@ -16,7 +16,7 @@ import { CheckCircle, ArrowRight, Loader2, Shield } from "lucide-react";
 // primitives (components/ui/form.tsx), so this form matches the lead gate.
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-type FieldErrors = Partial<Record<"name" | "email" | "phone" | "address" | "code", string>>;
+type FieldErrors = Partial<Record<"firstName" | "lastName" | "email" | "phone" | "address" | "code", string>>;
 
 interface LeadFormProps {
   source: string;
@@ -39,7 +39,8 @@ export function LeadForm({
   const [code, setCode] = useState("");
   const [honeypot, setHoneypot] = useState("");
   const [formData, setFormData] = useState({
-    name: "",
+    firstName: "",
+    lastName: "",
     email: "",
     phone: "",
     address: "",
@@ -68,7 +69,8 @@ export function LeadForm({
     prefilled.current = true;
     setFormData((prev) => ({
       ...prev,
-      name: prev.name || [pass.firstName, pass.lastName].filter(Boolean).join(" "),
+      firstName: prev.firstName || pass.firstName || "",
+      lastName: prev.lastName || pass.lastName || "",
       email: prev.email || pass.email,
       phone: prev.phone || pass.phone,
       address: prev.address || pass.propertyAddress,
@@ -110,7 +112,9 @@ export function LeadForm({
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          name: formData.name,
+          firstName: formData.firstName,
+          lastName: formData.lastName,
+          name: [formData.firstName, formData.lastName].filter(Boolean).join(" "),
           email: formData.email,
           phone: formData.phone,
           property_address: formData.address,
@@ -150,7 +154,8 @@ export function LeadForm({
     e.preventDefault();
     setError(null);
     const nextErrors: FieldErrors = {};
-    if (!formData.name.trim()) nextErrors.name = "Please enter your name.";
+    if (!formData.firstName.trim()) nextErrors.firstName = "Please enter your first name.";
+    if (!formData.lastName.trim()) nextErrors.lastName = "Please enter your last name.";
     if (!EMAIL_RE.test(formData.email.trim())) nextErrors.email = "Please enter a valid email address.";
     if (formData.phone.replace(/\D/g, "").length < 10) nextErrors.phone = "Please enter a valid phone number.";
     // An ad lead with no address can't be quoted or even located.
@@ -250,15 +255,26 @@ export function LeadForm({
           {heading}
         </h3>
       )}
-      <FormField tone="dark" label="Full name" htmlFor={`${idPrefix}-name`} error={fieldErrors.name}>
+      <FormField tone="dark" label="First name" htmlFor={`${idPrefix}-first-name`} error={fieldErrors.firstName}>
         <Input
           tone="dark"
-          id={`${idPrefix}-name`}
-          autoComplete="name"
-          value={formData.name}
-          onChange={(e) => update("name", e.target.value)}
-          placeholder="Jane Smith"
-          invalid={!!fieldErrors.name}
+          id={`${idPrefix}-first-name`}
+          autoComplete="given-name"
+          value={formData.firstName}
+          onChange={(e) => update("firstName", e.target.value)}
+          placeholder="Jane"
+          invalid={!!fieldErrors.firstName}
+        />
+      </FormField>
+      <FormField tone="dark" label="Last name" htmlFor={`${idPrefix}-last-name`} error={fieldErrors.lastName}>
+        <Input
+          tone="dark"
+          id={`${idPrefix}-last-name`}
+          autoComplete="family-name"
+          value={formData.lastName}
+          onChange={(e) => update("lastName", e.target.value)}
+          placeholder="Smith"
+          invalid={!!fieldErrors.lastName}
         />
       </FormField>
       <FormField tone="dark" label="Email" htmlFor={`${idPrefix}-email`} error={fieldErrors.email}>
