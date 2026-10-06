@@ -13,7 +13,20 @@
 
 import { createHmac, timingSafeEqual } from "node:crypto";
 
-const TTL_MS = 60 * 60 * 1000; // 1 hour to finish the form after verifying
+/**
+ * How long a verification stays usable after the code is confirmed.
+ *
+ * The token proves "this number answered a text just now". It is bound to the
+ * phone number but not to a single submission, so anyone holding one can post
+ * leads with it until it expires — an hour of that is a wide window for a
+ * number that was verified once. Ten minutes is comfortably longer than it
+ * takes to finish a form and short enough that a leaked token is worthless by
+ * the time anyone reuses it.
+ *
+ * Returning visitors are unaffected: they are carried by the 90-day lead-pass
+ * cookie, not by this token.
+ */
+const TTL_MS = 10 * 60 * 1000;
 
 function secret(): string | null {
   return process.env.VERIFICATION_TOKEN_SECRET || process.env.TWILIO_AUTH_TOKEN || null;
