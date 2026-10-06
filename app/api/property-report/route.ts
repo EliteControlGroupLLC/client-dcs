@@ -7,15 +7,8 @@ import { checkRateLimit, getClientIp, RATE_LIMITS } from "@/lib/rate-limit";
 import { buildAduReportPdf } from "@/lib/adu-report-pdf";
 import { isReportSignatureValid } from "@/lib/report-signature";
 import { captureLead } from "@/lib/buildcore-intake";
-import { isPhoneTokenValid, normalizePhoneE164 } from "@/lib/verification-token";
-import {
-  LEAD_PASS_COOKIE,
-  encodeLeadPass,
-  leadPassCookieOptions,
-  newLeadPass,
-  readLeadPass,
-} from "@/lib/lead-pass";
-import { isTwilioConfigured } from "@/lib/lead-gate-server";
+import { LEAD_PASS_COOKIE, encodeLeadPass, leadPassCookieOptions } from "@/lib/lead-pass";
+import { checkPhoneVerification, leadPassForSubmission, PHONE_NOT_VERIFIED } from "@/lib/lead-verification";
 
 // pdf-lib + Buffer need the Node runtime; PDF build + CRM push can take a few seconds.
 export const runtime = "nodejs";
@@ -61,22 +54,23 @@ export async function POST(request: NextRequest) {
       console.warn("[API] property-report: scan data failed signature check — not attaching it to the lead");
     }
 
-    // Extract verification data. phoneVerified is NOT trusted from the client:
-    // it must be backed by the signed token /api/verify-phone issued.
-    // A lead pass (set by any lead gate) whose phone was SMS-verified also
-    // counts, so visitors who already verified don't get a second code.
-    const existingPass = readLeadPass(request.cookies.get(LEAD_PASS_COOKIE)?.value);
-    const passCoversPhone =
-      !!existingPass?.phoneVerified &&
-      normalizePhoneE164(existingPass.phone) === normalizePhoneE164(String(phone || ""));
+    // phoneVerified is NOT trusted from the client: it must be backed by the
+    // signed token /api/verify-phone issued, or by a lead pass whose phone was
+    // already SMS-verified (so a returning visitor is never asked twice).
+    // Same gate as every other lead endpoint — see lib/lead-verification.
+    const gate = checkPhoneVerification(
+      request,
+      String(phone || ""),
+      verification?.phoneToken,
+      "PROPERTY-REPORT"
+    );
     const verificationData = {
       emailValidated: false,
       emailScore: 0,
       emailIsDisposable: false,
       verificationCompletedAt: null,
       ...(verification || {}),
-      phoneVerified:
-        isPhoneTokenValid(verification?.phoneToken, String(phone || "")) || passCoversPhone,
+      phoneVerified: gate.phoneVerified,
     };
 
     // Validate required fields
@@ -124,6 +118,13 @@ export async function POST(request: NextRequest) {
         { error: "Property address is required" },
         { status: 400 }
       );
+    }
+
+    // This used to capture the lead whether or not the number checked out,
+    // which made the verification decorative. Now it is enforced — except
+    // when verification itself was unavailable, which `gate` already allows.
+    if (!gate.ok) {
+      return NextResponse.json(PHONE_NOT_VERIFIED, { status: 403 });
     }
 
     // Generate report data from scan results
@@ -226,16 +227,17 @@ export async function POST(request: NextRequest) {
     });
 
     // Verified ADU leads also get a lead pass, so the website tools and the
-    // showroom open without asking for the same info again.
-    if (!existingPass && (verificationData.phoneVerified || !isTwilioConfigured())) {
-      const pass = newLeadPass({
-        firstName: String(firstName).trim(),
-        lastName: String(lastName).trim(),
-        email: String(email).trim().toLowerCase(),
-        phone: String(phone).trim(),
-        propertyAddress: String(propertyAddress).trim(),
-        phoneVerified: verificationData.phoneVerified,
-      });
+    // showroom open without asking for the same info again. Same helper as
+    // /api/contact and /api/leads: it keeps an existing pass for the same
+    // number intact rather than resetting its 14 days and its dedupe map.
+    const pass = leadPassForSubmission(gate, {
+      firstName: String(firstName).trim(),
+      lastName: String(lastName).trim(),
+      email: String(email).trim().toLowerCase(),
+      phone: String(phone).trim(),
+      propertyAddress: String(propertyAddress).trim(),
+    });
+    if (pass) {
       const value = encodeLeadPass(pass);
       if (value) res.cookies.set(LEAD_PASS_COOKIE, value, leadPassCookieOptions(pass));
     }

@@ -2,7 +2,7 @@
 
 // <LeadGate> — the interactive part of a tool (or the showroom) stays locked
 // until the visitor submits their contact info + verifies their phone by SMS.
-// Visitors who already hold a lead pass (httpOnly cookie, 90 days) go straight
+// Visitors who already hold a lead pass (httpOnly cookie, 14 days) go straight
 // through; a BuildCore lead is still registered for this interest (the API
 // dedupes to one per interest per 24h).
 
@@ -24,6 +24,8 @@ import { FieldError, FormAlert, Label, fieldClass } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { AddressAutocompleteInput } from "@/components/property-scanner/address-autocomplete-input";
 import type { LeadGateInterest } from "@/lib/lead-gate-interests";
+import { ELAPSED_FIELD, HONEYPOT_FIELD } from "@/lib/spam-fields";
+import { HoneypotField } from "./honeypot-field";
 import { isValidPhoneFormat, usePhoneVerification } from "./use-phone-verification";
 
 type GateStatus = "checking" | "locked" | "unlocked";
@@ -102,6 +104,10 @@ export function LeadGate({
   const [phone, setPhone] = useState("");
   const [address, setAddress] = useState("");
   const [code, setCode] = useState("");
+  const [honeypot, setHoneypot] = useState("");
+
+  // When the gate form appeared, so the server can reject impossible timings.
+  const renderedAt = useRef(Date.now());
 
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [checkingEmail, setCheckingEmail] = useState(false);
@@ -202,6 +208,8 @@ export function LeadGate({
           interest,
           details: detailsRef.current,
           pageUrl: window.location.href,
+          [HONEYPOT_FIELD]: honeypot,
+          [ELAPSED_FIELD]: Date.now() - renderedAt.current,
         }),
       });
       const data = (await res.json().catch(() => ({}))) as { error?: string; code?: string };
@@ -234,8 +242,9 @@ export function LeadGate({
       return;
     }
     if (sent.skipped) {
-      // SMS verification isn't configured on this deployment — submit as unverified.
-      await submitLead(null);
+      // SMS verification is unavailable — submit with the server's signed
+      // "couldn't check" token so the lead is kept, flagged as unverified.
+      await submitLead(sent.phoneToken);
       return;
     }
     setCode("");
@@ -295,7 +304,8 @@ export function LeadGate({
           {/* Form panel */}
           <div className="lg:col-span-3 p-6 md:p-8">
             {step === "details" ? (
-              <form onSubmit={handleDetailsSubmit} className="space-y-4" noValidate>
+              <form onSubmit={handleDetailsSubmit} className="relative space-y-4" noValidate>
+                <HoneypotField value={honeypot} onChange={setHoneypot} idSuffix={`-${interest.key}`} />
                 <div>
                   <p className="text-sm font-semibold uppercase tracking-wider text-accent-light mb-1">Step 1 of 2</p>
                   <h3 className="text-xl font-semibold text-white">Tell us where to send your results</h3>

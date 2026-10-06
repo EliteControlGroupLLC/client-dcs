@@ -9,7 +9,10 @@ export const PHONE_VERIFY_UNAVAILABLE = "Phone verification is not available";
 
 export type SendCodeResult =
   | { ok: true; skipped: false }
-  | { ok: true; skipped: true } // Twilio not configured — caller submits without a token
+  // SMS verification is unavailable (Twilio unconfigured, or its API down).
+  // `phoneToken` is the server's signed "we couldn't check this" proof —
+  // submit it so the lead is kept and flagged, instead of lost.
+  | { ok: true; skipped: true; phoneToken: string | null }
   | { ok: false; error: string };
 
 export type VerifyCodeResult = { ok: true; phoneToken: string | null } | { ok: false; error: string };
@@ -39,9 +42,15 @@ export function usePhoneVerification() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ action: "send", phone: phone.trim() }),
       });
-      const data = (await res.json().catch(() => ({}))) as { error?: string };
+      const data = (await res.json().catch(() => ({}))) as {
+        error?: string;
+        unavailable?: boolean;
+        phoneToken?: string | null;
+      };
       if (!res.ok) {
-        if (data.error === PHONE_VERIFY_UNAVAILABLE) return { ok: true, skipped: true };
+        if (data.unavailable || data.error === PHONE_VERIFY_UNAVAILABLE) {
+          return { ok: true, skipped: true, phoneToken: data.phoneToken ?? null };
+        }
         return { ok: false, error: data.error || "Failed to send code" };
       }
       setResendCooldown(30);

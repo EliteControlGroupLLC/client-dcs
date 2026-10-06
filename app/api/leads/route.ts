@@ -7,10 +7,27 @@ import {
   captureLead,
   serviceLineFromText,
   splitFullName,
-  phoneOrNotProvided,
   LEAD_CAPTURE_FAILURE_MESSAGE,
 } from "@/lib/buildcore-intake";
 import { checkRateLimit, getClientIp, RATE_LIMITS } from "@/lib/rate-limit";
+import {
+  checkPhoneVerification,
+  leadPassForSubmission,
+  phoneVerifiedNote,
+  PHONE_NOT_VERIFIED,
+} from "@/lib/lead-verification";
+import { encodeLeadPass, leadPassCookieOptions, LEAD_PASS_COOKIE } from "@/lib/lead-pass";
+import {
+  BLOCKED_SUBMISSION_MESSAGE,
+  checkSpam,
+  flagLeadName,
+  logBlockedSubmission,
+  logFlaggedSubmission,
+  spamFlagNote,
+} from "@/lib/spam-filter";
+import { ELAPSED_FIELD, HONEYPOT_FIELD } from "@/lib/spam-fields";
+
+export const runtime = "nodejs";
 
 export async function POST(request: NextRequest) {
   // Rate limit check
@@ -39,15 +56,61 @@ export async function POST(request: NextRequest) {
       service_type,
       message,
       property_address,
-      source
+      source,
+      phoneToken,
     } = body;
 
-    // Validate required fields
-    if (!name || !email) {
+    // Same bar as the contact form: a lead nobody can call or locate is not
+    // a lead. These come off paid ads, so a bad one costs real money.
+    const text = (v: unknown) => (typeof v === "string" ? v.trim() : "");
+    const cleanName = text(name);
+    const cleanEmail = text(email);
+    const cleanPhone = text(phone);
+    const cleanAddress = text(property_address);
+
+    const missing: string[] = [];
+    if (!cleanName) missing.push("your name");
+    if (!cleanEmail) missing.push("an email address");
+    if (!cleanPhone) missing.push("a phone number");
+    if (!cleanAddress) missing.push("the project address");
+    if (missing.length > 0) {
+      return NextResponse.json({ error: `Please include ${missing.join(", ")}.` }, { status: 400 });
+    }
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(cleanEmail)) {
+      return NextResponse.json({ error: "That email address doesn't look right." }, { status: 400 });
+    }
+    if (cleanPhone.replace(/\D/g, "").length < 10) {
       return NextResponse.json(
-        { error: "Name and email are required" },
+        { error: "Please enter a phone number we can reach you on." },
         { status: 400 }
       );
+    }
+    if (cleanAddress.length < 8 || !/\d/.test(cleanAddress)) {
+      return NextResponse.json(
+        { error: "Please pick the project address from the list." },
+        { status: 400 }
+      );
+    }
+
+    const cleanMessage = text(message);
+
+    // Bots first: honeypot and impossible timing are proof of automation.
+    const spam = checkSpam({
+      honeypot: body[HONEYPOT_FIELD],
+      elapsedMs: body[ELAPSED_FIELD],
+      name: cleanName,
+      message: cleanMessage,
+    });
+    if (spam.block) {
+      logBlockedSubmission("LEADS", spam, { name: cleanName, email: cleanEmail });
+      return NextResponse.json({ error: BLOCKED_SUBMISSION_MESSAGE }, { status: 400 });
+    }
+
+    // These come off paid ads, so an unreachable number costs real money.
+    // Server-signed proof only; a returning visitor is never asked twice.
+    const gate = checkPhoneVerification(request, cleanPhone, phoneToken, "LEADS");
+    if (!gate.ok) {
+      return NextResponse.json(PHONE_NOT_VERIFIED, { status: 403 });
     }
 
     // `source` here is the campaign/placement the form sat on
@@ -55,22 +118,29 @@ export async function POST(request: NextRequest) {
     // finer-grained than BuildCore's source enum — it goes in the notes so the
     // team can still see which ad or page produced the lead.
     const campaign = String(source || "website").trim();
-    const { firstName, lastName } = splitFullName(name);
+    const { firstName, lastName } = splitFullName(cleanName);
+
+    if (spam.flag) {
+      logFlaggedSubmission("LEADS", spam, { name: cleanName, email: cleanEmail });
+    }
 
     const crm = await captureLead("LEADS", {
-      firstName,
+      firstName: spam.flag ? flagLeadName(firstName) : firstName,
       lastName,
-      email,
-      phone: phoneOrNotProvided(phone),
-      propertyAddress: String(property_address || "").trim() || "Not provided",
+      email: cleanEmail,
+      phone: cleanPhone,
+      propertyAddress: cleanAddress,
       serviceLine: serviceLineFromText(service_type),
       source: "website-contact",
       notes: [
+        spam.flag ? spamFlagNote(spam, gate.phoneVerified) : null,
+        spam.flag ? "" : null,
         `Website lead form — placement: ${campaign}.`,
         service_type ? `Project type: ${service_type}.` : null,
-        message ? `\n${String(message)}` : null,
+        phoneVerifiedNote(gate.phoneVerified),
+        cleanMessage ? `\n${cleanMessage}` : null,
       ]
-        .filter(Boolean)
+        .filter((line) => line !== null)
         .join("\n"),
     });
 
@@ -79,7 +149,21 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: LEAD_CAPTURE_FAILURE_MESSAGE }, { status: 502 });
     }
 
-    return NextResponse.json({ success: true });
+    const res = NextResponse.json({ success: true });
+
+    // One verification covers the whole site for 14 days.
+    const pass = leadPassForSubmission(gate, {
+      firstName,
+      lastName,
+      email: cleanEmail,
+      phone: cleanPhone,
+      propertyAddress: cleanAddress,
+    });
+    if (pass) {
+      const value = encodeLeadPass(pass);
+      if (value) res.cookies.set(LEAD_PASS_COOKIE, value, leadPassCookieOptions(pass));
+    }
+    return res;
   } catch (error) {
     console.error("API error:", error);
     return NextResponse.json(
