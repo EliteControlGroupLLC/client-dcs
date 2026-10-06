@@ -163,7 +163,11 @@ export function LeadCaptureForm({
   };
 
   // Send OTP - returns { success: boolean, skipped: boolean }
-  const sendOtpCode = async (): Promise<{ success: boolean; skipped: boolean }> => {
+  const sendOtpCode = async (): Promise<{
+    success: boolean;
+    skipped: boolean;
+    phoneToken?: string | null;
+  }> => {
     if (!phone.trim() || !validatePhoneFormat(phone.trim())) {
       setErrors(prev => ({ ...prev, phone: "Please enter a valid phone number" }));
       return { success: false, skipped: false };
@@ -182,10 +186,11 @@ export function LeadCaptureForm({
       const data = await response.json();
 
       if (!response.ok) {
-        // Check if phone verification is unavailable (Twilio not configured)
-        if (data.error === "Phone verification is not available") {
-          // Skip phone verification - submit directly
-          return { success: true, skipped: true };
+        // Verification unavailable (Twilio unconfigured, or its API down).
+        // The server signs a "couldn't check" token — carry it so the lead is
+        // still accepted, flagged unverified, instead of being lost.
+        if (data.unavailable || data.error === "Phone verification is not available") {
+          return { success: true, skipped: true, phoneToken: data.phoneToken ?? null };
         }
         setErrors(prev => ({ ...prev, phone: data.error || "Failed to send code" }));
         return { success: false, skipped: false };
@@ -280,8 +285,10 @@ export function LeadCaptureForm({
     return Object.keys(newErrors).length === 0;
   };
 
-  // Submit lead without phone verification
-  const submitLeadDirectly = async (phoneVerified: boolean = false) => {
+  // Submit without going through the code step: either the phone is already
+  // verified on the lead pass, or SMS verification was unavailable and the
+  // server handed back a signed "couldn't check" token to send instead.
+  const submitLeadDirectly = async (phoneVerified: boolean = false, phoneToken?: string | null) => {
     setSubmitting(true);
     setErrors({});
 
@@ -302,6 +309,7 @@ export function LeadCaptureForm({
             emailScore: emailValidation?.score || 0,
             emailIsDisposable: emailValidation?.isDisposable || false,
             phoneVerified,
+            phoneToken: phoneToken ?? undefined,
             verificationCompletedAt: new Date().toISOString(),
           },
         }),
@@ -346,9 +354,9 @@ export function LeadCaptureForm({
     
     if (!otpResult.success) return;
     
-    // If phone verification is skipped (Twilio not configured), submit directly
+    // Verification unavailable — submit with the server's signed bypass token.
     if (otpResult.skipped) {
-      await submitLeadDirectly(false);
+      await submitLeadDirectly(false, otpResult.phoneToken);
       return;
     }
 

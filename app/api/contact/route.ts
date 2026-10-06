@@ -1,6 +1,11 @@
 // Contact form → BuildCore CRM. The website has no database of its own:
 // BuildCore is the record, so the visitor's success message reflects whether
 // the LEAD was captured, not whether some local log write happened.
+//
+// Someone asking a question still has to prove the phone number is theirs:
+// a lead arrived here named "Christopher Hughes" with a number nobody could
+// dial. The proof is server-signed (lib/lead-verification) — a `phoneVerified`
+// flag from the browser means nothing, since anyone can POST straight here.
 
 import { NextRequest, NextResponse } from "next/server";
 import {
@@ -11,6 +16,24 @@ import {
   LEAD_CAPTURE_FAILURE_MESSAGE,
 } from "@/lib/buildcore-intake";
 import { checkRateLimit, getClientIp, RATE_LIMITS } from "@/lib/rate-limit";
+import {
+  checkPhoneVerification,
+  leadPassForSubmission,
+  phoneVerifiedNote,
+  PHONE_NOT_VERIFIED,
+} from "@/lib/lead-verification";
+import { encodeLeadPass, leadPassCookieOptions, LEAD_PASS_COOKIE } from "@/lib/lead-pass";
+import {
+  BLOCKED_SUBMISSION_MESSAGE,
+  checkSpam,
+  flagLeadName,
+  logBlockedSubmission,
+  logFlaggedSubmission,
+  spamFlagNote,
+} from "@/lib/spam-filter";
+import { ELAPSED_FIELD, HONEYPOT_FIELD } from "@/lib/spam-fields";
+
+export const runtime = "nodejs";
 
 export async function POST(request: NextRequest) {
   // Rate limit check
@@ -32,7 +55,7 @@ export async function POST(request: NextRequest) {
 
   try {
     const body = await request.json();
-    const { name, email, phone, address, service, message } = body;
+    const { name, email, phone, address, service, message, phoneToken } = body;
 
     // Every field is required, and checked here as well as in the form —
     // leads were arriving with no address and no phone because the form
@@ -77,9 +100,35 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Bots: the honeypot and the sub-3-second submit are proof of automation,
+    // so no lead is created and the sender learns nothing about why.
+    const spam = checkSpam({
+      honeypot: body[HONEYPOT_FIELD],
+      elapsedMs: body[ELAPSED_FIELD],
+      name: cleanName,
+      message: cleanMessage,
+    });
+    if (spam.block) {
+      logBlockedSubmission("CONTACT", spam, { name: cleanName, email: cleanEmail });
+      return NextResponse.json({ error: BLOCKED_SUBMISSION_MESSAGE }, { status: 400 });
+    }
+
+    // The number has to be provably theirs. A returning visitor who already
+    // verified this number (lead pass cookie) is not asked again.
+    const gate = checkPhoneVerification(request, cleanPhone, phoneToken, "CONTACT");
+    if (!gate.ok) {
+      return NextResponse.json(PHONE_NOT_VERIFIED, { status: 403 });
+    }
+
     const { firstName, lastName } = splitFullName(cleanName);
+    if (spam.flag) {
+      logFlaggedSubmission("CONTACT", spam, { name: cleanName, email: cleanEmail });
+    }
+
     const crm = await captureLead("CONTACT", {
-      firstName,
+      // Flagged leads carry the warning on the name, so it is unmissable in
+      // the leads list without opening anything.
+      firstName: spam.flag ? flagLeadName(firstName) : firstName,
       lastName,
       email: cleanEmail,
       phone: cleanPhone,
@@ -87,7 +136,16 @@ export async function POST(request: NextRequest) {
       city: cityFromAddress(cleanAddress),
       serviceLine: serviceLineFromText(service),
       source: "website-contact",
-      notes: [`Website contact form${service ? ` — ${service}` : ""}.`, "", cleanMessage].join("\n"),
+      notes: [
+        spam.flag ? spamFlagNote(spam, gate.phoneVerified) : null,
+        spam.flag ? "" : null,
+        `Website contact form${service ? ` — ${service}` : ""}.`,
+        phoneVerifiedNote(gate.phoneVerified),
+        "",
+        cleanMessage,
+      ]
+        .filter((line) => line !== null)
+        .join("\n"),
     });
 
     if (!crm.success) {
@@ -95,7 +153,22 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: LEAD_CAPTURE_FAILURE_MESSAGE }, { status: 502 });
     }
 
-    return NextResponse.json({ success: true });
+    const res = NextResponse.json({ success: true });
+
+    // Verified here, so every other form on the site now lets them straight
+    // through for 90 days — no second code, no re-typing their details.
+    const pass = leadPassForSubmission(gate, {
+      firstName,
+      lastName,
+      email: cleanEmail,
+      phone: cleanPhone,
+      propertyAddress: cleanAddress,
+    });
+    if (pass) {
+      const value = encodeLeadPass(pass);
+      if (value) res.cookies.set(LEAD_PASS_COOKIE, value, leadPassCookieOptions(pass));
+    }
+    return res;
   } catch (error) {
     console.error("API error:", error);
     return NextResponse.json(

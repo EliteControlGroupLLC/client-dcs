@@ -12,7 +12,7 @@
 
 import { NextRequest, NextResponse } from "next/server";
 import { checkRateLimit, getClientIp, RATE_LIMITS } from "@/lib/rate-limit";
-import { isPhoneTokenValid } from "@/lib/verification-token";
+import { checkPhoneVerification, PHONE_NOT_VERIFIED } from "@/lib/lead-verification";
 import {
   LEAD_PASS_COOKIE,
   encodeLeadPass,
@@ -21,7 +21,9 @@ import {
   readLeadPass,
   type LeadPassPayload,
 } from "@/lib/lead-pass";
-import { isTwilioConfigured, parseInterest, registerInterestLead, resolvePageUrl } from "@/lib/lead-gate-server";
+import { parseInterest, registerInterestLead, resolvePageUrl } from "@/lib/lead-gate-server";
+import { BLOCKED_SUBMISSION_MESSAGE, checkSpam, logBlockedSubmission } from "@/lib/spam-filter";
+import { ELAPSED_FIELD, HONEYPOT_FIELD } from "@/lib/spam-fields";
 
 export const runtime = "nodejs";
 export const maxDuration = 30;
@@ -112,6 +114,21 @@ export async function POST(request: NextRequest) {
   const limit = checkRateLimit(`lead-gate-submit:${ip}`, RATE_LIMITS.leadGateSubmit);
   if (!limit.allowed) return tooMany(limit.retryAfterSeconds);
 
+  // Proof of automation: the honeypot, or a submit faster than a human can
+  // type. No lead, and nothing said about which trap it was.
+  const spam = checkSpam({
+    honeypot: body[HONEYPOT_FIELD],
+    elapsedMs: body[ELAPSED_FIELD],
+    name: str(body.firstName, 80),
+  });
+  if (spam.block) {
+    logBlockedSubmission("LEAD-GATE", spam, {
+      name: str(body.firstName, 80),
+      email: str(body.email, 200),
+    });
+    return NextResponse.json({ error: BLOCKED_SUBMISSION_MESSAGE }, { status: 400 });
+  }
+
   const firstName = str(body.firstName, 80);
   const lastName = str(body.lastName, 80);
   const email = str(body.email, 200).toLowerCase();
@@ -132,16 +149,15 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "Property address is required" }, { status: 400 });
   }
 
-  // Phone verification is mandatory whenever Twilio is configured. Only when
-  // it isn't (verify-phone answers "Phone verification is not available") do
-  // we let the visitor through, flagged as unverified in the CRM notes.
-  const phoneVerified = isPhoneTokenValid(body.phoneToken, phone);
-  if (!phoneVerified && isTwilioConfigured()) {
-    return NextResponse.json(
-      { error: "Please verify your phone number to continue.", code: "PHONE_NOT_VERIFIED" },
-      { status: 403 }
-    );
+  // Phone verification is mandatory — unless verification itself was
+  // unavailable, in which case /api/verify-phone hands out a signed "couldn't
+  // check" token and the visitor comes through flagged as unverified in the
+  // CRM notes. Same gate as every other lead endpoint.
+  const gate = checkPhoneVerification(request, phone, body.phoneToken, "LEAD-GATE");
+  if (!gate.ok) {
+    return NextResponse.json(PHONE_NOT_VERIFIED, { status: 403 });
   }
+  const phoneVerified = gate.phoneVerified;
 
   const pass = newLeadPass({ firstName, lastName, email, phone, propertyAddress, phoneVerified });
   const result = await registerInterestLead(pass, interest, {

@@ -113,9 +113,12 @@ export const RATE_LIMITS = {
   regulationStatus: { maxRequests: 30, windowSeconds: 60 },
   // Email validation — 10 per minute per IP
   emailValidation: { maxRequests: 10, windowSeconds: 60 },
-  // Phone OTP send — 3 per 10 min per IP
+  // Phone OTP send — 3 per 10 min, applied per IP and per phone number
   phoneSend: { maxRequests: 3, windowSeconds: 10 * 60 },
-  // Phone OTP verify — 5 per 5 min per IP  
+  // Phone OTP send, slow-drip cap — 10 per 24h, per IP and per phone number.
+  // Each send costs money at Twilio, so an open endpoint is an invitation.
+  phoneSendDaily: { maxRequests: 10, windowSeconds: 24 * 60 * 60 },
+  // Phone OTP verify — 5 per 5 min, applied per IP and per phone number
   phoneVerify: { maxRequests: 5, windowSeconds: 5 * 60 },
   // Address autocomplete (one call per debounced keystroke) — 60 per min per IP
   addressSuggest: { maxRequests: 60, windowSeconds: 60 },

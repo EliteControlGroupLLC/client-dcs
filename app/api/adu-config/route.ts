@@ -9,10 +9,18 @@ import { NextRequest, NextResponse } from "next/server";
 import {
   captureLead,
   splitFullName,
-  phoneOrNotProvided,
   LEAD_CAPTURE_FAILURE_MESSAGE,
 } from "@/lib/buildcore-intake";
 import { checkRateLimit, getClientIp, RATE_LIMITS } from "@/lib/rate-limit";
+import {
+  checkPhoneVerification,
+  phoneVerifiedNote,
+  PHONE_NOT_VERIFIED,
+} from "@/lib/lead-verification";
+import { BLOCKED_SUBMISSION_MESSAGE, checkSpam, logBlockedSubmission } from "@/lib/spam-filter";
+import { ELAPSED_FIELD, HONEYPOT_FIELD } from "@/lib/spam-fields";
+
+export const runtime = "nodejs";
 
 function money(v: unknown): string | null {
   return typeof v === "number" && Number.isFinite(v) ? `$${v.toLocaleString()}` : null;
@@ -58,12 +66,50 @@ export async function POST(request: NextRequest) {
       estimated_price_high,
     } = body;
 
-    // Validate required fields
-    if (!contact_info?.email || !contact_info?.name) {
+    // Validate required fields. A phone that can't be dialled and an address
+    // that can't be found are not a lead — this endpoint used to accept
+    // "Not provided" for both, which is how junk got in.
+    const text = (v: unknown) => (typeof v === "string" ? v.trim() : "");
+    const cleanName = text(contact_info?.name);
+    const cleanEmail = text(contact_info?.email);
+    const cleanPhone = text(contact_info?.phone);
+    const cleanAddress = text(property_info?.address);
+
+    if (!cleanName || !cleanEmail) {
       return NextResponse.json(
         { error: "Contact information is required" },
         { status: 400 }
       );
+    }
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(cleanEmail)) {
+      return NextResponse.json({ error: "That email address doesn't look right." }, { status: 400 });
+    }
+    if (cleanPhone.replace(/\D/g, "").length < 10) {
+      return NextResponse.json(
+        { error: "Please enter a phone number we can reach you on." },
+        { status: 400 }
+      );
+    }
+    if (cleanAddress.length < 8 || !/\d/.test(cleanAddress)) {
+      return NextResponse.json(
+        { error: "Please pick the project address from the list." },
+        { status: 400 }
+      );
+    }
+
+    const spam = checkSpam({
+      honeypot: body[HONEYPOT_FIELD],
+      elapsedMs: body[ELAPSED_FIELD],
+      name: cleanName,
+    });
+    if (spam.block) {
+      logBlockedSubmission("ADU-CONFIG", spam, { name: cleanName, email: cleanEmail });
+      return NextResponse.json({ error: BLOCKED_SUBMISSION_MESSAGE }, { status: 400 });
+    }
+
+    const gate = checkPhoneVerification(request, cleanPhone, body.phoneToken, "ADU-CONFIG");
+    if (!gate.ok) {
+      return NextResponse.json(PHONE_NOT_VERIFIED, { status: 403 });
     }
 
     const low = money(estimated_price_low);
@@ -84,17 +130,18 @@ export async function POST(request: NextRequest) {
       list(upgrades) ? `Upgrades: ${list(upgrades)}` : null,
       estimate ? `Estimated: ${estimate}` : null,
       property_info?.lot_size ? `Lot size: ${property_info.lot_size}` : null,
+      phoneVerifiedNote(gate.phoneVerified),
     ]
       .filter(Boolean)
       .join("\n");
 
-    const { firstName, lastName } = splitFullName(contact_info.name);
+    const { firstName, lastName } = splitFullName(cleanName);
     const crm = await captureLead("ADU-CONFIG", {
       firstName,
       lastName,
-      email: contact_info.email,
-      phone: phoneOrNotProvided(contact_info.phone),
-      propertyAddress: String(property_info?.address || "").trim() || "Not provided",
+      email: cleanEmail,
+      phone: cleanPhone,
+      propertyAddress: cleanAddress,
       serviceLine: "adu",
       source: "adu-builder",
       notes,

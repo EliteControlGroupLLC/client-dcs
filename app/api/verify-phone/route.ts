@@ -3,8 +3,13 @@
 // POST with action: "verify" to verify OTP
 
 import { NextRequest, NextResponse } from "next/server";
-import { checkRateLimit, getClientIp } from "@/lib/rate-limit";
-import { issuePhoneToken } from "@/lib/verification-token";
+import { checkRateLimit, getClientIp, RATE_LIMITS } from "@/lib/rate-limit";
+import { issuePhoneToken, issueUnverifiedPhoneToken } from "@/lib/verification-token";
+
+// The one string every form recognises as "we can't check numbers right now".
+// Sent with a signed bypass token so the lead is still accepted downstream,
+// flagged as unverified, rather than lost.
+const UNAVAILABLE = "Phone verification is not available";
 
 const TWILIO_ACCOUNT_SID = process.env.TWILIO_ACCOUNT_SID;
 const TWILIO_AUTH_TOKEN = process.env.TWILIO_AUTH_TOKEN;
@@ -20,9 +25,12 @@ const verificationStore = new Map<string, {
   verifiedAt?: number;
 }>();
 
-// Rate limits
-const SEND_OTP_LIMIT = { maxRequests: 3, windowSeconds: 10 * 60 }; // 3 sends per 10 min
-const VERIFY_OTP_LIMIT = { maxRequests: 5, windowSeconds: 5 * 60 }; // 5 attempts per 5 min
+// Rate limits. Every Twilio Verify message costs real money, so sends are
+// capped on a short window (burst) and a daily window (slow drip), by IP and
+// by destination number independently.
+const SEND_OTP_LIMIT = RATE_LIMITS.phoneSend; // 3 sends per 10 min
+const SEND_OTP_DAILY = RATE_LIMITS.phoneSendDaily; // 10 sends per 24h
+const VERIFY_OTP_LIMIT = RATE_LIMITS.phoneVerify; // 5 attempts per 5 min
 
 function formatPhoneE164(phone: string): string {
   const digits = phone.replace(/\D/g, "");
@@ -38,10 +46,15 @@ function formatPhoneE164(phone: string): string {
   return `+${digits}`;
 }
 
-async function sendTwilioOTP(phone: string): Promise<{ success: boolean; error?: string }> {
+// `unavailable` means OUR side failed (no credentials, Twilio unreachable or
+// 5xx) — the caller must not lose the lead over it. A bad phone number or a
+// per-number limit is the visitor's to fix, so those are plain errors.
+async function sendTwilioOTP(
+  phone: string
+): Promise<{ success: boolean; error?: string; unavailable?: boolean }> {
   if (!TWILIO_ACCOUNT_SID || !TWILIO_AUTH_TOKEN || !TWILIO_VERIFY_SERVICE_SID) {
     console.error("[PHONE-VERIFY] Twilio credentials not configured");
-    return { success: false, error: "Phone verification is not available" };
+    return { success: false, error: UNAVAILABLE, unavailable: true };
   }
 
   const url = `https://verify.twilio.com/v2/Services/${TWILIO_VERIFY_SERVICE_SID}/Verifications`;
@@ -64,26 +77,32 @@ async function sendTwilioOTP(phone: string): Promise<{ success: boolean; error?:
 
     if (!response.ok) {
       console.error("[PHONE-VERIFY] Twilio send error:", data);
-      // Handle specific Twilio errors
+      // The visitor's problem — they can fix it by correcting the number.
       if (data.code === 60200) {
         return { success: false, error: "Invalid phone number format" };
       }
       if (data.code === 60203) {
         return { success: false, error: "Max send attempts reached. Try again later." };
       }
-      return { success: false, error: "Failed to send verification code" };
+      // Our problem: Twilio is refusing or broken (auth, quota, 5xx). Don't
+      // make the visitor pay for it.
+      console.error(
+        `[PHONE-VERIFY] TWILIO UNAVAILABLE on send (HTTP ${response.status}, code ${data?.code ?? "none"}) — ` +
+          "leads will be accepted as phone-unverified until this is fixed"
+      );
+      return { success: false, error: UNAVAILABLE, unavailable: true };
     }
 
     return { success: true };
   } catch (error) {
-    console.error("[PHONE-VERIFY] Send error:", error);
-    return { success: false, error: "Failed to send verification code" };
+    console.error("[PHONE-VERIFY] TWILIO UNREACHABLE on send — leads accepted as phone-unverified:", error);
+    return { success: false, error: UNAVAILABLE, unavailable: true };
   }
 }
 
 async function verifyTwilioOTP(phone: string, code: string): Promise<{ valid: boolean; error?: string }> {
   if (!TWILIO_ACCOUNT_SID || !TWILIO_AUTH_TOKEN || !TWILIO_VERIFY_SERVICE_SID) {
-    return { valid: false, error: "Phone verification is not available" };
+    return { valid: false, error: UNAVAILABLE };
   }
 
   const url = `https://verify.twilio.com/v2/Services/${TWILIO_VERIFY_SERVICE_SID}/VerificationCheck`;
@@ -150,11 +169,14 @@ export async function POST(request: NextRequest) {
 
     // SEND OTP
     if (action === "send") {
-      // Rate limit by IP and phone number
+      // Rate limit by IP and by destination number, on a burst window and a
+      // daily window. Every send bills us at Twilio.
       const ipLimit = checkRateLimit(`phone-send:${ip}`, SEND_OTP_LIMIT);
       const phoneLimit = checkRateLimit(`phone-send:${formattedPhone}`, SEND_OTP_LIMIT);
+      const ipDaily = checkRateLimit(`phone-send-day:${ip}`, SEND_OTP_DAILY);
+      const phoneDaily = checkRateLimit(`phone-send-day:${formattedPhone}`, SEND_OTP_DAILY);
 
-      if (!ipLimit.allowed || !phoneLimit.allowed) {
+      if (!ipLimit.allowed || !phoneLimit.allowed || !ipDaily.allowed || !phoneDaily.allowed) {
         return NextResponse.json(
           { error: "Too many attempts. Please wait a few minutes and try again." },
           { status: 429 }
@@ -174,6 +196,19 @@ export async function POST(request: NextRequest) {
       const result = await sendTwilioOTP(formattedPhone);
 
       if (!result.success) {
+        // Our side is down: hand back a SIGNED bypass token. The browser can't
+        // mint one, so lead endpoints can still tell a real "we couldn't
+        // check" from a spoofed one — and the lead is kept, marked unverified.
+        if (result.unavailable) {
+          return NextResponse.json(
+            {
+              error: UNAVAILABLE,
+              unavailable: true,
+              phoneToken: issueUnverifiedPhoneToken(formattedPhone),
+            },
+            { status: 400 }
+          );
+        }
         return NextResponse.json(
           { error: result.error || "Failed to send code" },
           { status: 400 }
@@ -202,9 +237,11 @@ export async function POST(request: NextRequest) {
         );
       }
 
-      // Rate limit verification attempts
+      // Rate limit verification attempts by number AND by IP — the per-number
+      // cap alone lets one host brute-force codes across rotating numbers.
       const verifyLimit = checkRateLimit(`phone-verify:${formattedPhone}`, VERIFY_OTP_LIMIT);
-      if (!verifyLimit.allowed) {
+      const verifyIpLimit = checkRateLimit(`phone-verify-ip:${ip}`, VERIFY_OTP_LIMIT);
+      if (!verifyLimit.allowed || !verifyIpLimit.allowed) {
         return NextResponse.json(
           { error: "Too many attempts. Please request a new code." },
           { status: 429 }

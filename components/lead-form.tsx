@@ -1,18 +1,22 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { AddressAutocompleteInput } from "@/components/property-scanner/address-autocomplete-input";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select } from "@/components/ui/select";
 import { FormField, FormAlert } from "@/components/ui/form";
-import { CheckCircle, ArrowRight } from "lucide-react";
+import { HoneypotField } from "@/components/lead-gate/honeypot-field";
+import { PhoneCodeStep } from "@/components/lead-gate/phone-code-step";
+import { useLeadVerification } from "@/components/lead-gate/use-lead-verification";
+import { ELAPSED_FIELD, HONEYPOT_FIELD } from "@/lib/spam-fields";
+import { CheckCircle, ArrowRight, Loader2, Shield } from "lucide-react";
 
 // Fields, labels, inline errors and the error box come from the sitewide form
 // primitives (components/ui/form.tsx), so this form matches the lead gate.
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-type FieldErrors = Partial<Record<"name" | "email" | "phone" | "address", string>>;
+type FieldErrors = Partial<Record<"name" | "email" | "phone" | "address" | "code", string>>;
 
 interface LeadFormProps {
   source: string;
@@ -31,6 +35,9 @@ export function LeadForm({
   const [error, setError] = useState<string | null>(null);
   const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [step, setStep] = useState<"details" | "code">("details");
+  const [code, setCode] = useState("");
+  const [honeypot, setHoneypot] = useState("");
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -38,6 +45,92 @@ export function LeadForm({
     address: "",
     project: "ADU",
   });
+
+  // When the form appeared. A submit that beats MIN_FILL_MS is a bot.
+  const renderedAt = useRef(Date.now());
+  const prefilled = useRef(false);
+
+  const {
+    pass,
+    alreadyVerified,
+    startVerification,
+    verifyCode,
+    sendCode,
+    sending,
+    verifying,
+    resendCooldown,
+  } = useLeadVerification();
+
+  // Someone who already gave us their details doesn't retype them.
+  useEffect(() => {
+    if (!pass || prefilled.current) return;
+    prefilled.current = true;
+    setFormData((prev) => ({
+      ...prev,
+      name: prev.name || [pass.firstName, pass.lastName].filter(Boolean).join(" "),
+      email: prev.email || pass.email,
+      phone: prev.phone || pass.phone,
+      address: prev.address || pass.propertyAddress,
+    }));
+  }, [pass]);
+
+  // Fired only once the lead is actually in BuildCore — a half-finished or
+  // rejected submission is not a conversion.
+  const trackConversion = () => {
+    if (typeof window === "undefined") return;
+    const w = window as Window & { dataLayer?: Record<string, unknown>[] };
+    if (w.dataLayer) {
+      w.dataLayer.push({
+        event: "lead_form_submit",
+        form_source: source,
+        project_type: formData.project,
+      });
+    }
+    const fb = window as Window & { fbq?: (...args: unknown[]) => void };
+    if (fb.fbq) {
+      fb.fbq("track", "Lead", {
+        content_name: source,
+        content_category: formData.project,
+      });
+    }
+  };
+
+  const submitLead = async (phoneToken: string | null) => {
+    setIsSubmitting(true);
+    setError(null);
+    try {
+      const response = await fetch("/api/leads", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: formData.name,
+          email: formData.email,
+          phone: formData.phone,
+          property_address: formData.address,
+          service_type: formData.project,
+          source,
+          phoneToken,
+          [HONEYPOT_FIELD]: honeypot,
+          [ELAPSED_FIELD]: Date.now() - renderedAt.current,
+        }),
+      });
+      const result = await response.json().catch(() => null);
+      if (!response.ok || !result?.success) {
+        if (result?.code === "PHONE_NOT_VERIFIED") {
+          setStep("code");
+          setFieldErrors({ code: "Please enter the code we texted you." });
+          return;
+        }
+        throw new Error(result?.error || "We could not submit your request right now.");
+      }
+      trackConversion();
+      setSubmitted(true);
+    } catch (submitError) {
+      setError(submitError instanceof Error ? submitError.message : "We could not submit your request right now.");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -51,50 +144,37 @@ export function LeadForm({
       nextErrors.address = "Please pick your project address from the list.";
     setFieldErrors(nextErrors);
     if (Object.keys(nextErrors).length > 0) return;
-    setIsSubmitting(true);
-    // Track conversion event
-    if (typeof window !== "undefined") {
-      // GTM event
-      const w = window as Window & { dataLayer?: Record<string, unknown>[] };
-      if (w.dataLayer) {
-        w.dataLayer.push({
-          event: "lead_form_submit",
-          form_source: source,
-          project_type: formData.project,
-        });
-      }
-      // Meta Pixel event
-      const fb = window as Window & { fbq?: (...args: unknown[]) => void };
-      if (fb.fbq) {
-        fb.fbq("track", "Lead", {
-          content_name: source,
-          content_category: formData.project,
-        });
-      }
+
+    const started = await startVerification(formData.phone);
+    if (started.status === "error") {
+      setFieldErrors((prev) => ({ ...prev, phone: started.error }));
+      return;
     }
-    try {
-      const response = await fetch("/api/leads", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          name: formData.name,
-          email: formData.email,
-          phone: formData.phone,
-          property_address: formData.address,
-          service_type: formData.project,
-          source,
-        }),
-      });
-      const result = await response.json().catch(() => null);
-      if (!response.ok || !result?.success) {
-        throw new Error(result?.error || "We could not submit your request right now.");
-      }
-      setSubmitted(true);
-    } catch (submitError) {
-      setError(submitError instanceof Error ? submitError.message : "We could not submit your request right now.");
-    } finally {
-      setIsSubmitting(false);
+    if (started.status === "ready") {
+      await submitLead(started.phoneToken);
+      return;
     }
+    setCode("");
+    setFieldErrors({});
+    setStep("code");
+  };
+
+  const handleVerify = async () => {
+    const result = await verifyCode(formData.phone, code);
+    if (!result.ok) {
+      setFieldErrors({ code: result.error });
+      return;
+    }
+    await submitLead(result.phoneToken);
+  };
+
+  const handleResend = async () => {
+    const sent = await sendCode(formData.phone);
+    if (sent.ok && sent.skipped) {
+      await submitLead(sent.phoneToken);
+      return;
+    }
+    setFieldErrors(sent.ok ? {} : { code: sent.error });
   };
 
   if (submitted) {
@@ -118,8 +198,38 @@ export function LeadForm({
 
   const idPrefix = `lf-${source}`;
 
+  if (step === "code") {
+    return (
+      <div className={compact ? "space-y-3" : "space-y-4"}>
+        {heading && (
+          <h3 className={`font-semibold text-white ${compact ? "text-lg" : "text-xl"}`}>{heading}</h3>
+        )}
+        <PhoneCodeStep
+          phone={formData.phone}
+          code={code}
+          onCodeChange={setCode}
+          onSubmit={handleVerify}
+          onBack={() => {
+            setStep("details");
+            setCode("");
+            setFieldErrors({});
+          }}
+          onResend={handleResend}
+          resendCooldown={resendCooldown}
+          sending={sending}
+          verifying={verifying}
+          submitting={isSubmitting}
+          codeError={fieldErrors.code}
+          formError={error ?? undefined}
+          confirmLabel={buttonText}
+        />
+      </div>
+    );
+  }
+
   return (
-    <form onSubmit={handleSubmit} noValidate className={compact ? "space-y-3" : "space-y-4"}>
+    <form onSubmit={handleSubmit} noValidate className={`relative ${compact ? "space-y-3" : "space-y-4"}`}>
+      <HoneypotField value={honeypot} onChange={setHoneypot} idSuffix={`-${source}`} />
       {heading && (
         <h3 className={`font-semibold text-white ${compact ? "text-lg" : "text-xl"}`}>
           {heading}
@@ -148,11 +258,22 @@ export function LeadForm({
           invalid={!!fieldErrors.email}
         />
       </FormField>
-      <FormField tone="dark" label="Phone" htmlFor={`${idPrefix}-phone`} error={fieldErrors.phone}>
+      <FormField
+        tone="dark"
+        label="Mobile Phone"
+        htmlFor={`${idPrefix}-phone`}
+        error={fieldErrors.phone}
+        hint={
+          alreadyVerified(formData.phone)
+            ? "Already verified — no second code."
+            : "We'll text you a one-time code."
+        }
+      >
         <Input
           tone="dark"
           id={`${idPrefix}-phone`}
           type="tel"
+          inputMode="tel"
           autoComplete="tel"
           value={formData.phone}
           onChange={(e) => update("phone", e.target.value)}
@@ -191,12 +312,28 @@ export function LeadForm({
         </Select>
       </FormField>
       <FormAlert tone="dark">{error}</FormAlert>
-      <Button type="submit" size="lg" rounded="full" className="w-full group" disabled={isSubmitting}>
-        {isSubmitting ? "Submitting..." : buttonText}
-        <ArrowRight className="h-5 w-5 group-hover:translate-x-1 transition-transform" />
+      <Button
+        type="submit"
+        size="lg"
+        rounded="full"
+        className="w-full group"
+        disabled={isSubmitting || sending}
+      >
+        {isSubmitting || sending ? (
+          <>
+            <Loader2 className="h-4 w-4 animate-spin" />
+            {sending ? "Sending code..." : "Submitting..."}
+          </>
+        ) : (
+          <>
+            {buttonText}
+            <ArrowRight className="h-5 w-5 group-hover:translate-x-1 transition-transform" />
+          </>
+        )}
       </Button>
-      <p className="text-xs text-center text-white/75">
-        No obligation. We&apos;ll never share your info.
+      <p className="flex items-center justify-center gap-1.5 text-xs text-white/75">
+        <Shield className="h-3.5 w-3.5 text-accent" />
+        Secure SMS verification. No obligation, and we&apos;ll never share your info.
       </p>
     </form>
   );
