@@ -615,6 +615,32 @@ export const RENT_ASSUMPTIONS: RentAssumption[] = [
   { sqFt: 1200, type: "two-story", bedrooms: 4, low: 5000, high: 6000, description: "1,200 sq ft two-story ADU" },
 ];
 
+/**
+ * NEW-CONSTRUCTION RENT PREMIUM — OWNER'S ASSUMPTION, NOT A MEASURED MARKET FACT.
+ *
+ * Rental comparables pulled from the market are overwhelmingly older housing
+ * stock: existing back houses, converted garages, and aging apartments. What
+ * TruthCore delivers is a brand-new unit — solar, current electrical and
+ * plumbing, modern insulation and finishes, everything under warranty — and
+ * that commands more than a comparable older unit on the same street.
+ *
+ * This is the one place that premium is set. Retune it here and it moves
+ * everywhere: the report's rent figure, the ROI and payback math, and the PDF.
+ *
+ * 0.15 = 15%. Starting value, chosen as a mid-range new-construction premium;
+ * it is an assumption we state openly in the report, not something we measured.
+ */
+export const NEW_CONSTRUCTION_RENT_PREMIUM = 0.15;
+
+/**
+ * Apply the new-construction premium to a rent figure taken from market comps.
+ * Rounded to the nearest $50 so the report never prints false precision.
+ */
+export function applyNewConstructionPremium(compRent: number): number {
+  if (!(compRent > 0)) return 0;
+  return Math.round((compRent * (1 + NEW_CONSTRUCTION_RENT_PREMIUM)) / 50) * 50;
+}
+
 // =============================================================================
 // SERVICE PRICING
 // =============================================================================
@@ -1080,44 +1106,63 @@ export function estimateAduPriceRange(input: AduEstimateInput): { low: number; h
   };
 }
 
+/**
+ * Find the rent-table row that matches a unit's CONFIGURATION.
+ *
+ * Configuration — ADU type and bedroom count (stall count for a garage
+ * conversion) — decides the rent. A 3-bed rents as a 3-bed whether it is 900
+ * or 1,200 sq ft. Square footage is only used to break a tie between rows that
+ * already match the configuration, so the row we land on is the same one the
+ * floor-plan section of the report prints.
+ */
+export function findRentAssumption(
+  sqFt: number,
+  type: string,
+  bedrooms?: number,
+  options?: { stories?: number; garageStalls?: 2 | 3 }
+): RentAssumption | null {
+  const normalizedType = normalizeAduType(type, options?.stories ?? 1);
+  const requestedBedrooms = bedrooms ?? 0;
+
+  const sameType = RENT_ASSUMPTIONS.filter((assumption) => assumption.type === normalizedType);
+  const pool = sameType.length > 0 ? sameType : RENT_ASSUMPTIONS;
+
+  // A garage conversion's configuration is its stall count — but only when the
+  // caller actually knows it. Left unsaid, bedrooms decide, same as everything else.
+  if (normalizedType === "garage-conversion" && options?.garageStalls) {
+    const byStalls = pool.filter((assumption) => assumption.garageStalls === options.garageStalls);
+    if (byStalls.length > 0) {
+      return [...byStalls].sort((a, b) => Math.abs(a.sqFt - sqFt) - Math.abs(b.sqFt - sqFt))[0];
+    }
+  }
+
+  // Configuration first: exact bedroom count wins, closest size only breaks ties.
+  const sameBedrooms = pool.filter((assumption) => assumption.bedrooms === requestedBedrooms);
+  if (sameBedrooms.length > 0) {
+    return [...sameBedrooms].sort((a, b) => Math.abs(a.sqFt - sqFt) - Math.abs(b.sqFt - sqFt))[0];
+  }
+
+  // No row for that bedroom count: nearest bedroom count, then nearest size.
+  const closest = [...pool].sort((a, b) => {
+    const bedDelta = Math.abs(a.bedrooms - requestedBedrooms) - Math.abs(b.bedrooms - requestedBedrooms);
+    if (bedDelta !== 0) return bedDelta;
+    return Math.abs(a.sqFt - sqFt) - Math.abs(b.sqFt - sqFt);
+  })[0];
+
+  return closest ?? null;
+}
+
 export function getRentEstimate(
   sqFt: number,
   type: string,
   bedrooms?: number,
   options?: { stories?: number; garageStalls?: 2 | 3 }
 ): { low: number; high: number } {
-  const normalizedType = normalizeAduType(type, options?.stories ?? 1);
-  const requestedBedrooms = bedrooms ?? 0;
-
-  const exact = RENT_ASSUMPTIONS.find((assumption) => {
-    if (assumption.type !== normalizedType) return false;
-    if (assumption.sqFt !== sqFt) return false;
-    if (normalizedType === "garage-conversion") {
-      return assumption.garageStalls === (options?.garageStalls ?? 2);
-    }
-    return assumption.bedrooms === requestedBedrooms || assumption.bedrooms === 0;
-  });
-
-  if (exact) {
-    return { low: exact.low, high: exact.high };
-  }
-
-  const sameType = RENT_ASSUMPTIONS.filter((assumption) => assumption.type === normalizedType);
-  const sorted = sameType.length > 0 ? sameType : RENT_ASSUMPTIONS;
-  const closest = [...sorted].sort((a, b) => {
-    const sizeDelta = Math.abs(a.sqFt - sqFt) - Math.abs(b.sqFt - sqFt);
-    if (sizeDelta !== 0) return sizeDelta;
-    return Math.abs(a.bedrooms - requestedBedrooms) - Math.abs(b.bedrooms - requestedBedrooms);
-  })[0];
-
-  if (!closest) {
+  const match = findRentAssumption(sqFt, type, bedrooms, options);
+  if (!match) {
     return { low: 2500, high: 3200 };
   }
-
-  return {
-    low: closest.low,
-    high: closest.high,
-  };
+  return { low: match.low, high: match.high };
 }
 
 export function getAverageMonthlyRent(

@@ -1003,9 +1003,9 @@ export async function analyzeProperty(address: string): Promise<PropertyAnalysis
       sqft: unifiedRecommendation.primarySizeSqFt,
       propertyType: "adu",
       // RentCast AVM for this address vs. a generic planning table.
-      confidence: unifiedRecommendation.rentSource === "market-data" ? 80 : 40,
+      confidence: unifiedRecommendation.rentIsMarketVerified ? 80 : 50,
       available: true,
-      source: unifiedRecommendation.rentSource === "market-data" ? "rentcast" : "estimated",
+      source: unifiedRecommendation.rentIsMarketVerified ? "rentcast" : "estimated",
     });
   }
 
@@ -1221,7 +1221,9 @@ export async function analyzeProperty(address: string): Promise<PropertyAnalysis
           | "rentcast"
           | "estimated",
         basis: unifiedRecommendation?.rentBasis,
+        basisLabel: unifiedRecommendation?.rentSourceLabel,
         comparableCount: unifiedRecommendation?.rentComparableCount ?? 0,
+        comparableRadiusMiles: unifiedRecommendation?.rentComparableRadiusMiles ?? null,
         comparables: unifiedRecommendation?.rentComparables ?? [],
       }
     : undefined;
@@ -1305,6 +1307,22 @@ export async function analyzeProperty(address: string): Promise<PropertyAnalysis
     staticMapUrl: staticMapUrl || undefined,
     zoningEnrichment,
     rentData,
+    // The plan the recommendation is anchored to, carrying the ONE resolved
+    // rent. The report's floor-plan section prints this figure on this plan's
+    // row so it can never disagree with the Financial Snapshot.
+    recommendedPlan: unifiedRecommendation
+      ? {
+          planId: unifiedRecommendation.primaryPlanId,
+          sizeSqFt: unifiedRecommendation.primarySizeSqFt,
+          bedrooms: unifiedRecommendation.primaryBedrooms,
+          bathrooms: unifiedRecommendation.primaryBathrooms,
+          monthlyRent: unifiedRecommendation.primaryRentEstimate.monthlyRent,
+          rentRangeLow: unifiedRecommendation.primaryRentEstimate.rentRangeLow,
+          rentRangeHigh: unifiedRecommendation.primaryRentEstimate.rentRangeHigh,
+          rentBasis: unifiedRecommendation.rentBasis,
+          rentBasisLabel: unifiedRecommendation.rentSourceLabel,
+        }
+      : undefined,
     dataSources: {
       geocoder: geocoded?.provider ?? null,
       googlePlaces: Boolean(geocoded) && /google/i.test(geocoded?.provider ?? ""),
@@ -1312,7 +1330,7 @@ export async function analyzeProperty(address: string): Promise<PropertyAnalysis
       openStreetMap: osmData?.parcel !== null && osmData?.parcel !== undefined,
       zoneomics: zoneomicsData?.available === true,
       // True only when RentCast actually returned the rent shown.
-      rentCast: unifiedRecommendation?.rentSource === "market-data",
+      rentCast: unifiedRecommendation?.rentIsMarketVerified === true,
       mapbox: isMapboxAvailable(),
       microsoftFootprints: msFootprints?.available === true,
       lidar: lidarTerrain?.lidarAvailable === true,
@@ -1328,7 +1346,7 @@ export async function analyzeProperty(address: string): Promise<PropertyAnalysis
     rentScenarios: unifiedRecommendation
       ? buildUnifiedRentScenarios(unifiedRecommendation).map((s) => ({
           aduType: s.aduType,
-          source: (unifiedRecommendation!.rentSource === "market-data" ? "rentcast" : "estimated") as "rentcast" | "estimated",
+          source: (unifiedRecommendation!.rentIsMarketVerified ? "rentcast" : "estimated") as "rentcast" | "estimated",
           basis: unifiedRecommendation!.rentBasis,
           conservative: s.conservative,
           market: s.market,
@@ -1844,7 +1862,7 @@ function synchronizeRecommendations(
       if (recommendation.type !== unifiedRecommendation.primaryType) return recommendation;
       const verdict = verdicts[recommendation.type as AduTypeName];
       const sizeKnown = verdict ? verdict.maxSqFt > 0 : true;
-      const rent = `$${unifiedRecommendation.primaryRentEstimate.rentRangeLow.toLocaleString()}\u00A0– $${unifiedRecommendation.primaryRentEstimate.rentRangeHigh.toLocaleString()}/month (${unifiedRecommendation.rentSource === "market-data" ? "RentCast market estimate for this address" : "TruthCore rent-table planning estimate"})`;
+      const rent = `$${unifiedRecommendation.primaryRentEstimate.rentRangeLow.toLocaleString()}\u00A0– $${unifiedRecommendation.primaryRentEstimate.rentRangeHigh.toLocaleString()}/month (${unifiedRecommendation.rentSourceLabel})`;
       return {
         ...recommendation,
         // Feasibility stays exactly what the real-data rules said — the

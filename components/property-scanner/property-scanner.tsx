@@ -261,6 +261,8 @@ export function PropertyScanner() {
     ? primaryScenario.estimatedAnnualNetCashflow + primaryScenario.estimatedMonthlyPayment * 12
     : null;
   const aduTotalCost = primaryScenario?.estimatedTotalCost ?? null;
+  // The plan this report recommends, carrying the ONE resolved rent figure.
+  const recommendedPlan = analysisData?.recommendedPlan;
   // Only a real recorded living area — never the resolver's "typical" stand-in.
   const homeAreaField = analysisData?.property?.homeAreaSqFt;
   const homeAreaSqFt = homeAreaField && homeAreaField.status !== "Unavailable" ? homeAreaField.value : null;
@@ -556,10 +558,18 @@ export function PropertyScanner() {
                 </p>
               </div>
               <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                {FLOOR_PLANS.map((plan) => (
+                {FLOOR_PLANS.map((plan) => {
+                  // The recommended plan shows the SAME resolved rent as the
+                  // financial snapshot above — one number for this property.
+                  const isRecommended = recommendedPlan?.planId === plan.id;
+                  const rentLow = isRecommended ? recommendedPlan.rentRangeLow : plan.rentEstimate.low;
+                  const rentHigh = isRecommended ? recommendedPlan.rentRangeHigh : plan.rentEstimate.high;
+                  return (
                   <div
                     key={plan.id}
-                    className="rounded-2xl border border-white/10 bg-secondary p-6 flex flex-col h-full transition-colors hover:border-accent/50"
+                    className={`rounded-2xl border bg-secondary p-6 flex flex-col h-full transition-colors ${
+                      isRecommended ? "border-accent" : "border-white/10 hover:border-accent/50"
+                    }`}
                   >
                     <div className="flex items-baseline justify-between gap-2">
                       <h3 className="text-xl font-semibold text-white">{plan.name}</h3>
@@ -567,19 +577,31 @@ export function PropertyScanner() {
                         {plan.sqFt.toLocaleString()} sq ft
                       </span>
                     </div>
+                    {isRecommended && (
+                      <span className="mt-2 self-start rounded-full bg-accent/15 px-3 py-1 text-xs font-semibold text-accent">
+                        Recommended for your property
+                      </span>
+                    )}
                     <p className="text-sm text-white/75 mt-1 mb-4">
                       {plan.bedrooms === 0 ? "Studio" : `${plan.bedrooms} bed`} · {plan.bathrooms} bath
                     </p>
                     <div className="mt-auto pt-4 border-t border-white/10">
                       <div className="text-lg font-bold text-accent">{plan.priceRange}</div>
                       <div className="text-sm text-white/75 mt-1">
-                        Est. rent ${plan.rentEstimate.low.toLocaleString()}&nbsp;– $
-                        {plan.rentEstimate.high.toLocaleString()}/mo
+                        Est. rent ${rentLow.toLocaleString()}&nbsp;– ${rentHigh.toLocaleString()}/mo
                       </div>
                     </div>
                   </div>
-                ))}
+                  );
+                })}
               </div>
+              {recommendedPlan && (
+                <p className="text-xs text-white/60 mt-6">
+                  {recommendedPlan.rentBasis} This is the same rent used in the financial
+                  snapshot above. Rents on the other plans are our San Diego County ranges for
+                  that configuration.
+                </p>
+              )}
             </div>
 
             {/* CTA Section */}

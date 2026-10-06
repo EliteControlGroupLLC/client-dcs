@@ -143,6 +143,11 @@ export function generateFinancialScenarios(
       estimatedRoi: roi,
       estimatedPaybackYears: paybackYears,
       estimatedValueAdd: valueAdd,
+      // Fallback path only (the unified engine failed). Label it honestly so the
+      // report never shows an unexplained rent.
+      rentSource: "estimated",
+      rentBasis:
+        "A planning figure from our San Diego County rent-per-square-foot assumptions. We could not resolve verified rentals for this property on this run \u2014 our team will pull live comps during the site review.",
     });
   }
 
@@ -194,6 +199,11 @@ export function generateFinancialScenarios(
       estimatedRoi: combinedRoi,
       estimatedPaybackYears: combinedPayback,
       estimatedValueAdd: combined.valueAdd,
+      // Fallback path only (the unified engine failed). Label it honestly so the
+      // report never shows an unexplained rent.
+      rentSource: "estimated",
+      rentBasis:
+        "A planning figure from our San Diego County rent-per-square-foot assumptions. We could not resolve verified rentals for this property on this run \u2014 our team will pull live comps during the site review.",
     });
   }
 

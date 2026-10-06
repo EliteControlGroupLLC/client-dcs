@@ -52,88 +52,219 @@ export interface MarketRentComparable {
   distanceMiles: number | null;
 }
 
+/** Comps are drawn from this radius first — "within about a mile" of the subject. */
+export const MARKET_RENT_RADIUS_MILES = 1;
+/** Only widened to this when a mile does not hold enough same-configuration rentals. */
+export const MARKET_RENT_WIDENED_RADIUS_MILES = 3;
+/** Fewer qualifying comps than this is not credible evidence — we say so instead of showing it. */
+export const MARKET_RENT_MIN_COMPS = 3;
+
 export interface MarketRentResult {
   monthlyRent: number;
   rentRangeLow: number;
   rentRangeHigh: number;
   comparableCount: number;
   comparables: MarketRentComparable[];
-  /** What was priced, e.g. "1,200 sq ft 3-bed / 2.5-bath (Single Family comps)". */
+  /** What was priced, e.g. "3-bed / 2-bath rentals within 1 mile". */
   basis: string;
+  /** Radius the shown comps actually came from, in miles. */
+  radiusMiles: number;
+  /** True when one mile did not hold enough same-configuration rentals and we went wider. */
+  widened: boolean;
+  /** Bedroom count every shown comp matches. */
+  bedrooms: number;
   source: "RentCast rent AVM";
 }
 
 /**
- * Real market rent for a unit of the given size/layout AT this address
- * (RentCast long-term rent AVM, priced from nearby rental listings).
- * Returns null on any failure — callers must label their fallback, never
- * present it as market data.
+ * Outcome of the market-rent lookup. Deliberately explicit: the report must be
+ * able to say "we found N comps within X miles" or "we could not find enough",
+ * and must never silently pass off a thin or wide sample as local market data.
  */
-export async function fetchMarketRent(q: {
+export type MarketRentOutcome =
+  | { status: "ok"; result: MarketRentResult }
+  | {
+      /** RentCast answered, but too few same-configuration rentals inside the widened radius. */
+      status: "insufficient";
+      qualifyingCount: number;
+      radiusMiles: number;
+      bedrooms: number;
+    }
+  | {
+      /** No key, network/HTTP failure, or an unusable payload. Nothing may be claimed. */
+      status: "unavailable";
+      reason: string;
+    };
+
+interface RawComparable {
+  formattedAddress?: string;
+  price?: number;
+  rent?: number;
+  squareFootage?: number;
+  bedrooms?: number;
+  bathrooms?: number;
+  distance?: number;
+}
+
+function toNumberOrNull(value: unknown): number | null {
+  const n = Number(value);
+  return Number.isFinite(n) ? n : null;
+}
+
+/**
+ * Keep only comps that are genuinely comparable to the modeled unit:
+ * the SAME bedroom count, and inside the radius. Square footage is
+ * deliberately ignored — a 3-bed is a 3-bed at 900 or 1,200 sq ft.
+ * A comp with no reported distance cannot be proven to be inside the
+ * radius, so it is dropped rather than assumed.
+ *
+ * Exported for offline verification; pure, no network.
+ */
+export function selectConfigurationComps(
+  raw: RawComparable[],
+  opts: { bedrooms: number; radiusMiles: number }
+): MarketRentComparable[] {
+  return raw
+    .map((c) => ({
+      address: typeof c.formattedAddress === "string" ? c.formattedAddress : "",
+      monthlyRent: Math.round(Number(c.price ?? c.rent ?? 0)),
+      squareFootage: toNumberOrNull(c.squareFootage),
+      bedrooms: toNumberOrNull(c.bedrooms),
+      bathrooms: toNumberOrNull(c.bathrooms),
+      distanceMiles: (() => {
+        const d = toNumberOrNull(c.distance);
+        return d === null ? null : Math.round(d * 100) / 100;
+      })(),
+    }))
+    .filter(
+      (c) =>
+        c.address !== "" &&
+        c.monthlyRent > 0 &&
+        c.bedrooms === opts.bedrooms &&
+        c.distanceMiles !== null &&
+        c.distanceMiles <= opts.radiusMiles
+    )
+    .sort((a, b) => (a.distanceMiles ?? 0) - (b.distanceMiles ?? 0));
+}
+
+/** Median of the comps' actual asking rents — never an interpolated or modeled figure. */
+export function medianRent(comps: MarketRentComparable[]): number {
+  const rents = comps.map((c) => c.monthlyRent).sort((a, b) => a - b);
+  if (rents.length === 0) return 0;
+  const mid = Math.floor(rents.length / 2);
+  return rents.length % 2 === 1 ? rents[mid] : Math.round((rents[mid - 1] + rents[mid]) / 2);
+}
+
+async function requestRentComps(q: {
   address: string;
   bedrooms: number;
   bathrooms: number;
-  sqft: number;
   propertyType: "Single Family" | "Apartment";
-}): Promise<MarketRentResult | null> {
-  if (!RENTCAST_API_KEY || !q.address || !(q.sqft > 0)) return null;
+  radiusMiles: number;
+}): Promise<RawComparable[] | { error: string }> {
+  const params = new URLSearchParams({
+    address: q.address,
+    propertyType: q.propertyType,
+    bedrooms: String(q.bedrooms),
+    bathrooms: String(q.bathrooms),
+    // Comps are matched on CONFIGURATION, not size. Sending squareFootage made
+    // RentCast price a 1,200 sq ft ADU like a small apartment.
+    maxRadius: String(q.radiusMiles),
+    // RentCast caps compCount at 25; ask for the most it will give so there is
+    // something left after we filter to the exact bedroom count.
+    compCount: "25",
+    // Without this, RentCast quietly substitutes the MAIN HOUSE's attributes
+    // (its square footage, its bed/bath count) for anything we leave out — the
+    // opposite of what we want when pricing a backyard unit.
+    lookupSubjectAttributes: "false",
+  });
   try {
-    const params = new URLSearchParams({
-      address: q.address,
-      propertyType: q.propertyType,
-      bedrooms: String(q.bedrooms),
-      bathrooms: String(q.bathrooms),
-      squareFootage: String(Math.round(q.sqft)),
-      compCount: "10",
-    });
     const response = await fetch(`${RENTCAST_BASE_URL}/avm/rent/long-term?${params}`, {
-      headers: { Accept: "application/json", "X-Api-Key": RENTCAST_API_KEY },
+      headers: { Accept: "application/json", "X-Api-Key": RENTCAST_API_KEY as string },
       signal: AbortSignal.timeout(8000),
       cache: "no-store",
     });
     if (!response.ok) {
       console.error(`[PROVIDER-ERROR] RentCast rent AVM: HTTP ${response.status}`);
-      return null;
+      return { error: `RentCast returned HTTP ${response.status}` };
     }
-    const data = (await response.json()) as {
-      rent?: number;
-      rentRangeLow?: number;
-      rentRangeHigh?: number;
-      comparables?: Array<{
-        formattedAddress?: string;
-        price?: number;
-        rent?: number;
-        squareFootage?: number;
-        bedrooms?: number;
-        bathrooms?: number;
-        distance?: number;
-      }>;
-    };
-    if (!data.rent || !Number.isFinite(data.rent) || !data.rentRangeLow || !data.rentRangeHigh) return null;
-    const comps = (data.comparables ?? [])
-      .map((c) => ({
-        address: c.formattedAddress ?? "",
-        monthlyRent: Math.round(Number(c.price ?? c.rent ?? 0)),
-        squareFootage: Number.isFinite(c.squareFootage) ? Number(c.squareFootage) : null,
-        bedrooms: Number.isFinite(c.bedrooms) ? Number(c.bedrooms) : null,
-        bathrooms: Number.isFinite(c.bathrooms) ? Number(c.bathrooms) : null,
-        distanceMiles: Number.isFinite(c.distance) ? Math.round(Number(c.distance) * 100) / 100 : null,
-      }))
-      .filter((c) => c.address && c.monthlyRent > 0);
-    const layout = q.bedrooms === 0 ? "studio" : `${q.bedrooms}-bed / ${q.bathrooms}-bath`;
-    return {
-      monthlyRent: Math.round(data.rent),
-      rentRangeLow: Math.round(data.rentRangeLow),
-      rentRangeHigh: Math.round(data.rentRangeHigh),
-      comparableCount: data.comparables?.length ?? 0,
-      comparables: comps.slice(0, 5),
-      basis: `${Math.round(q.sqft).toLocaleString()} sq ft ${layout} at this address, priced against nearby ${q.propertyType === "Apartment" ? "apartment" : "single-family"} rental listings`,
-      source: "RentCast rent AVM",
-    };
+    const data = (await response.json()) as { comparables?: RawComparable[] };
+    return Array.isArray(data.comparables) ? data.comparables : [];
   } catch (err) {
-    console.error(`[PROVIDER-ERROR] RentCast rent AVM: ${err instanceof Error ? err.message : String(err)}`);
-    return null;
+    const reason = err instanceof Error ? err.message : String(err);
+    console.error(`[PROVIDER-ERROR] RentCast rent AVM: ${reason}`);
+    return { error: reason };
   }
+}
+
+/**
+ * Real rental comparables for a unit of the given CONFIGURATION near this
+ * address (RentCast long-term rent AVM).
+ *
+ * Matched on bedrooms / bathrooms / property type and drawn from ~1 mile.
+ * Square footage is deliberately not sent: a 3-bed ADU rents as a 3-bed
+ * whether it is 900 or 1,200 sq ft, and sending a small footprint made the
+ * AVM price it like a small apartment.
+ *
+ * The returned numbers are the comps' own asking rents (median, low, high) —
+ * nothing is modeled or interpolated. If fewer than MARKET_RENT_MIN_COMPS
+ * same-bedroom rentals sit inside the radius, the radius is widened once and
+ * the result SAYS it was widened; if it still falls short, the outcome is
+ * "insufficient" and the report must say so rather than quietly using a
+ * wider or looser net.
+ */
+export async function fetchMarketRent(q: {
+  address: string;
+  bedrooms: number;
+  bathrooms: number;
+  propertyType: "Single Family" | "Apartment";
+}): Promise<MarketRentOutcome> {
+  if (!RENTCAST_API_KEY) return { status: "unavailable", reason: "RentCast API key not configured" };
+  if (!q.address) return { status: "unavailable", reason: "No formatted address to price against" };
+
+  const radii = [MARKET_RENT_RADIUS_MILES, MARKET_RENT_WIDENED_RADIUS_MILES];
+  let lastQualifyingCount = 0;
+  let lastError: string | null = null;
+
+  for (const radiusMiles of radii) {
+    const raw = await requestRentComps({ ...q, radiusMiles });
+    if (!Array.isArray(raw)) {
+      lastError = raw.error;
+      continue;
+    }
+    // Belt and braces: RentCast honors maxRadius, but we re-check every comp's
+    // own distance so nothing outside the stated radius can reach the report.
+    const comps = selectConfigurationComps(raw, { bedrooms: q.bedrooms, radiusMiles });
+    lastQualifyingCount = comps.length;
+    if (comps.length < MARKET_RENT_MIN_COMPS) continue;
+
+    const rents = comps.map((c) => c.monthlyRent);
+    const layout = q.bedrooms === 0 ? "studio" : `${q.bedrooms}-bed / ${q.bathrooms}-bath`;
+    const widened = radiusMiles > MARKET_RENT_RADIUS_MILES;
+    return {
+      status: "ok",
+      result: {
+        monthlyRent: medianRent(comps),
+        rentRangeLow: Math.min(...rents),
+        rentRangeHigh: Math.max(...rents),
+        comparableCount: comps.length,
+        comparables: comps.slice(0, 5),
+        basis: `${comps.length} ${layout} ${q.propertyType === "Apartment" ? "apartment" : "single-family"} rentals within ${radiusMiles} mile${radiusMiles === 1 ? "" : "s"} of this address${widened ? ` (widened from ${MARKET_RENT_RADIUS_MILES} mile — fewer than ${MARKET_RENT_MIN_COMPS} matching rentals were listed that close)` : ""}`,
+        radiusMiles,
+        widened,
+        bedrooms: q.bedrooms,
+        source: "RentCast rent AVM",
+      },
+    };
+  }
+
+  if (lastError && lastQualifyingCount === 0) return { status: "unavailable", reason: lastError };
+  return {
+    status: "insufficient",
+    qualifyingCount: lastQualifyingCount,
+    radiusMiles: MARKET_RENT_WIDENED_RADIUS_MILES,
+    bedrooms: q.bedrooms,
+  };
 }
 
 /**

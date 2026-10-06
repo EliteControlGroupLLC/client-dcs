@@ -158,6 +158,9 @@ export function PropertyReportModal({
                     <ReportRow label="ROI" value={`${scenario.estimatedRoi}%`} />
                     <ReportRow label="Payback" value={scenario.estimatedPaybackYears < 99 ? `${scenario.estimatedPaybackYears} years` : "N/A"} />
                   </div>
+                  {scenario.rentBasis && (
+                    <p className="text-[11px] text-white/60 mt-1">Where the rent comes from: {scenario.rentBasis}</p>
+                  )}
                 </div>
               ))}
             </ReportSection>
@@ -319,6 +322,15 @@ function ReportRow({ label, value }: { label: string; value: string }) {
  * Typography: Red Hat Display (site font)
  * Layout: Minimal, high-end, structured, no clutter
  */
+/** Minimal HTML escape for engine text injected into the printable report. */
+function escHtml(v: unknown): string {
+  return String(v ?? "")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;");
+}
+
 function generateReportHtml(data: PropertyAnalysisResult): string {
   const generatedDate = new Date().toLocaleDateString("en-US", {
     year: "numeric",
@@ -639,7 +651,7 @@ function generateReportHtml(data: PropertyAnalysisResult): string {
             <span class="data-value">$${scenario.estimatedTotalCost.toLocaleString()}</span>
           </div>
           <div class="data-row">
-            <span class="data-label">Monthly Rent Potential</span>
+            <span class="data-label">Monthly Rent</span>
             <span class="data-value">$${scenario.estimatedMonthlyIncome.toLocaleString()}/mo</span>
           </div>
           <div class="data-row">
@@ -650,6 +662,7 @@ function generateReportHtml(data: PropertyAnalysisResult): string {
             <span class="data-label">Payback Period</span>
             <span class="data-value">${scenario.estimatedPaybackYears < 99 ? `${scenario.estimatedPaybackYears} years` : "N/A"}</span>
           </div>
+          ${scenario.rentBasis ? `<p style="font-size: 11px; color: #555; margin: 6px 0 0;">Where the rent comes from: ${escHtml(scenario.rentBasis)}</p>` : ""}
         </div>
         `).join("")}
       </div>
