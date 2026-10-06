@@ -15,7 +15,9 @@ interface RentEstimateData {
   available: true;
   source: "rentcast" | "estimated";
   basis?: string;
+  basisLabel?: string;
   comparableCount?: number;
+  comparableRadiusMiles?: number | null;
   comparables?: {
     address: string;
     monthlyRent: number;
@@ -40,15 +42,15 @@ export function RentEstimateCard({ data }: RentEstimateCardProps) {
           </div>
           <h3 className="text-xl font-semibold text-white">Rent Estimates</h3>
         </div>
-        {data.source === "rentcast" ? (
-          <span className="inline-flex items-center gap-1.5 text-xs font-medium px-2.5 py-1 rounded-full whitespace-nowrap bg-accent/10 text-accent-light border border-accent/30">
-            RentCast market estimate
-          </span>
-        ) : (
-          <span className="inline-flex items-center gap-1.5 text-xs font-medium px-2.5 py-1 rounded-full whitespace-nowrap bg-amber-500/10 text-amber-200 border border-amber-400/30">
-            Planning estimate
-          </span>
-        )}
+        <span
+          className={`inline-flex items-center gap-1.5 text-xs font-medium px-2.5 py-1 rounded-full whitespace-nowrap ${
+            data.source === "rentcast"
+              ? "bg-accent/10 text-accent-light border border-accent/30"
+              : "bg-amber-500/10 text-amber-200 border border-amber-400/30"
+          }`}
+        >
+          {data.basisLabel ?? (data.source === "rentcast" ? "Verified nearby rentals" : "TruthCore's own rents")}
+        </span>
       </div>
 
       <div className="space-y-3">
@@ -88,9 +90,15 @@ export function RentEstimateCard({ data }: RentEstimateCardProps) {
         ))}
       </div>
 
-      {data.source === "rentcast" && data.comparables && data.comparables.length > 0 && (
+      {data.comparables && data.comparables.length > 0 && (
         <div className="mt-3 space-y-1">
-          <p className="text-xs font-medium text-white">Nearby rental comparables</p>
+          <p className="text-xs font-medium text-white">
+            Verified rentals we found
+            {data.comparableRadiusMiles
+              ? ` within ${data.comparableRadiusMiles} mile${data.comparableRadiusMiles === 1 ? "" : "s"}`
+              : " nearby"}
+            {data.comparableCount ? ` (${data.comparableCount} total)` : ""}
+          </p>
           {data.comparables.slice(0, 3).map((c) => (
             <p key={c.address} className="text-xs text-white/75 flex justify-between gap-2 min-w-0">
               <span className="truncate min-w-0">
@@ -109,8 +117,8 @@ export function RentEstimateCard({ data }: RentEstimateCardProps) {
         <span className="text-xs text-white/75">
           {data.basis ??
             (data.source === "rentcast"
-              ? "RentCast rent estimate for this address"
-              : "Planning estimate from a San Diego County ADU rent table — not a market quote for this address")}
+              ? "Based on verified rentals of the same bed/bath configuration near this address."
+              : "From what our own ADUs of this configuration rent for in San Diego County — not a market quote for this address.")}
         </span>
       </div>
     </div>

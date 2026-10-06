@@ -85,7 +85,11 @@ export function FinancialPreviewCard({ scenarios, disclaimer }: FinancialPreview
           <div className="text-center">
             <p className="text-xs text-white/75">
               Monthly Rent{" "}
-              {primaryScenario.rentSource === "rentcast" ? "(RentCast)" : primaryScenario.rentSource ? "(planning est.)" : ""}
+              {primaryScenario.rentSource === "rentcast"
+                ? "(verified nearby rentals)"
+                : primaryScenario.rentSource
+                  ? "(TruthCore's own rents)"
+                  : ""}
             </p>
             <p className="text-base font-bold text-accent">
               {formatCurrencyFull(primaryScenario.estimatedMonthlyIncome)}/mo

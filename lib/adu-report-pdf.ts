@@ -732,6 +732,12 @@ export async function buildAduReportPdf(lead: AduReportLead, scanResults: unknow
   // 7. Floor plans
   w.sectionTitle("Our ADU Floor Plans & Pricing", ++n);
   const plans = Array.isArray(FLOOR_PLANS) ? FLOOR_PLANS : [];
+  // The recommended plan's row carries the SAME resolved rent as the Financial
+  // Snapshot above — one number for this property, never two.
+  const recommended = isObj(get(scan, "recommendedPlan")) ? (get(scan, "recommendedPlan") as Record<string, unknown>) : null;
+  const recommendedPlanId = recommended ? str(recommended.planId) : "";
+  const recLo = recommended ? num(recommended.rentRangeLow) : null;
+  const recHi = recommended ? num(recommended.rentRangeHigh) : null;
   w.table(
     [
       { header: "Floor plan", width: 150 },
@@ -745,12 +751,13 @@ export async function buildAduReportPdf(lead: AduReportLead, scanResults: unknow
       const bath = num(p.bathrooms);
       const bedLabel = bed === null ? "-" : bed === 0 ? "Studio" : `${bed} bd`;
       const bathLabel = bath === null ? "-" : `${bath} ba`;
-      const lo = num(p.rentEstimate?.low);
-      const hi = num(p.rentEstimate?.high);
+      const isRecommended = recommendedPlanId !== "" && str(p.id) === recommendedPlanId;
+      const lo = isRecommended && recLo !== null ? recLo : num(p.rentEstimate?.low);
+      const hi = isRecommended && recHi !== null ? recHi : num(p.rentEstimate?.high);
       const rent = lo !== null && hi !== null ? `${fmtCurrency(lo)}-${fmtCurrency(hi)}/mo` : "";
       return {
         cells: [
-          orDash(str(p.name)),
+          orDash(str(p.name)) + (isRecommended ? " (recommended for you)" : ""),
           orDash(fmtSqFt(num(p.sqFt))),
           `${bedLabel} / ${bathLabel}`,
           orDash(str(p.priceRange)),
@@ -761,8 +768,15 @@ export async function buildAduReportPdf(lead: AduReportLead, scanResults: unknow
     }),
   );
   w.space(6);
+  if (recommended && recLo !== null && recHi !== null) {
+    w.paragraph(
+      `The plan marked "recommended for you" shows ${fmtCurrency(recLo)}-${fmtCurrency(recHi)}/mo — the same rent used in the Financial Snapshot above. ${str(recommended.rentBasis)}`,
+      { size: 8.5, color: C.muted },
+    );
+    w.space(6);
+  }
   w.paragraph(
-    "Pricing reflects typical all-in design, permitting, and construction ranges. Final pricing depends on site conditions, utilities, and finish selections.",
+    "Rents for the other plans are our San Diego County ranges for that configuration. Pricing reflects typical all-in design, permitting, and construction ranges. Final pricing depends on site conditions, utilities, and finish selections.",
     { size: 8.5, color: C.muted },
   );
 

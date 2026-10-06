@@ -435,7 +435,7 @@ function generateReportHtml(data: PropertyAnalysisResult): string {
             <span class="data-value">$${scenario.estimatedTotalCost.toLocaleString()}</span>
           </div>
           <div class="data-row">
-            <span class="data-label">Monthly Rent ${scenario.rentSource === "rentcast" ? "(RentCast market estimate)" : "(planning estimate)"}</span>
+            <span class="data-label">Monthly Rent ${scenario.rentSource === "rentcast" ? "(verified nearby rentals)" : "(TruthCore's own rents)"}</span>
             <span class="data-value">$${scenario.estimatedMonthlyIncome.toLocaleString()}/mo</span>
           </div>
           <div class="data-row">
@@ -446,6 +446,7 @@ function generateReportHtml(data: PropertyAnalysisResult): string {
             <span class="data-label">Payback Period</span>
             <span class="data-value">${scenario.estimatedPaybackYears < 99 ? `${scenario.estimatedPaybackYears} years` : "N/A (cash flow not positive)"}</span>
           </div>
+          ${scenario.rentBasis ? `<p style="font-size: 11px; color: #555; margin: 6px 0 0;">Where the rent comes from: ${esc(scenario.rentBasis)}</p>` : ""}
         </div>
         `).join("")}
       </div>

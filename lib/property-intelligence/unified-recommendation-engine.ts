@@ -13,12 +13,12 @@
  */
 
 import type { FeasibilityResult, FinancialScenario } from "./jurisdictions/types";
-import type { MarketRentResult } from "./rentcast-service";
+import type { MarketRentComparable, MarketRentOutcome } from "./rentcast-service";
+import { resolveRent, type ResolvedRentBasis } from "./rent-resolution";
 import {
   FLOOR_PLANS_SORTED,
   estimateAduPriceRange,
   formatPriceRange,
-  getAverageMonthlyRent,
   getRecommendedFloorPlan,
   getRentEstimate as getCanonicalRentEstimate,
   normalizeAduType,
@@ -78,13 +78,29 @@ export interface UnifiedRecommendation {
   // Audit trail
   derivedFromFeasibility: string;
   zipCode: string | null;
-  /** "market-data" = RentCast rent AVM for this address; "estimated" = DCS rent table. */
-  rentSource: "market-data" | "estimated";
-  /** Plain-English basis of the rent figure shown. */
+  /**
+   * Where the ONE resolved rent figure came from:
+   * "verified-comps"  — nearby same-configuration rentals + new-construction allowance
+   * "truthcore-floor" — comps came in under TruthCore's own rents, so ours was used
+   * "truthcore-table" — not enough verified comps nearby
+   */
+  rentSource: ResolvedRentBasis;
+  /** True only when the number is backed by verified nearby rentals. */
+  rentIsMarketVerified: boolean;
+  /** Plain-English, client-facing basis of the rent figure shown. */
   rentBasis: string;
-  /** Nearby rental comps behind a market-data rent (empty for the table). */
-  rentComparables: MarketRentResult["comparables"];
+  /** Short label for pills / table headers. */
+  rentSourceLabel: string;
+  /** Nearby rental comps behind the figure (empty when none qualified). */
+  rentComparables: MarketRentComparable[];
   rentComparableCount: number;
+  /** Radius the comps came from, in miles (null when there are none). */
+  rentComparableRadiusMiles: number | null;
+  /**
+   * The floor-plan the recommendation is anchored to. The report's floor-plan
+   * section prints the resolved rent on THIS row so the two never disagree.
+   */
+  primaryPlanId: string;
   /** Planning assumptions behind the cost / financing / cash-flow figures. */
   financialAssumptions: string[];
 }
@@ -111,15 +127,19 @@ export interface UnifiedRecommendationInput {
   /** Extra site cost (USD) added to the price range, e.g. a steep-lot engineered foundation. */
   siteCostAdderUsd?: number;
   /**
-   * Real market-rent lookup for the modeled unit at this address (RentCast).
-   * When it returns null the DCS rent table is used and labeled as such.
+   * Verified rental comparables for the modeled unit near this address: matched
+   * on bedrooms / bathrooms, then narrowed to rentals of a comparable size.
+   * Square footage is a band on which rentals count, never a price input. The
+   * outcome is explicit about whether enough comps were found; see resolveRent
+   * for how it is reconciled against TruthCore's own rent table.
    */
   marketRentLookup?: (q: {
-    sqft: number;
     bedrooms: number;
     bathrooms: number;
+    /** The modeled unit's size — a band on which rentals count, never sent to the AVM. */
+    sqft: number;
     propertyType: "Single Family" | "Apartment";
-  }) => Promise<MarketRentResult | null>;
+  }) => Promise<MarketRentOutcome>;
 }
 
 // Financing / operating assumptions for the planning cash-flow model.
@@ -173,33 +193,40 @@ export async function generateUnifiedRecommendation(
   const softCost = Math.round(totalCost * SOFT_COST_SHARE);
   const buildCost = totalCost - softCost;
 
-  // Rent: REAL market rent for this unit at this address when RentCast
-  // answers; otherwise the DCS rent table (labeled as a planning estimate).
+  // Rent: ONE resolved figure. Verified rentals of the same configuration AND a
+  // comparable size, within about a mile, lead; a new-construction allowance is
+  // added on top; and TruthCore's own rent table — matched on bedrooms and
+  // nearest size — is the floor. See ./rent-resolution.
   const unitIsHouseLike = (normalizedType === "detached" || normalizedType === "two-story") && variation.bedrooms >= 2;
-  const market = input.marketRentLookup
+  const market: MarketRentOutcome = input.marketRentLookup
     ? await input
         .marketRentLookup({
-          sqft: primarySizeSqFt,
           bedrooms: variation.bedrooms,
           bathrooms: variation.bathrooms,
+          sqft: primarySizeSqFt,
           propertyType: unitIsHouseLike ? "Single Family" : "Apartment",
         })
-        .catch(() => null)
-    : null;
+        .catch((err: unknown) => ({
+          status: "unavailable" as const,
+          reason: err instanceof Error ? err.message : String(err),
+        }))
+    : { status: "unavailable", reason: "Market rent lookup not configured" };
+
+  // TruthCore's own rents for this CONFIGURATION (bedrooms / type), not for
+  // this square footage. This is the same row the floor-plan section prints.
   const tableRange = getCanonicalRentEstimate(primarySizeSqFt, plan.type, variation.bedrooms, {
     stories: variation.stories,
     garageStalls: plan.id === "garage-conversion" && variation.bedrooms > 0 ? 3 : 2,
   });
-  const tableMonthly = getAverageMonthlyRent(primarySizeSqFt, plan.type, variation.bedrooms, {
-    stories: variation.stories,
-    garageStalls: plan.id === "garage-conversion" && variation.bedrooms > 0 ? 3 : 2,
+  const resolvedRent = resolveRent({
+    market,
+    truthcoreRange: tableRange,
+    bedrooms: variation.bedrooms,
+    bathrooms: variation.bathrooms,
   });
-  const rentRange = market ? { low: market.rentRangeLow, high: market.rentRangeHigh } : tableRange;
-  const monthlyRent = market ? market.monthlyRent : tableMonthly;
-  const layout = variation.bedrooms === 0 ? "studio" : `${variation.bedrooms}-bed / ${variation.bathrooms}-bath`;
-  const rentBasis = market
-    ? `RentCast rent estimate for a ${market.basis} (${market.comparableCount} comparable rentals)`
-    : `Planning estimate from TruthCore's San Diego County ADU rent table for a ${primarySizeSqFt.toLocaleString()} sq ft ${layout} unit — not a market quote for this address (live market rent was unavailable)`;
+  const rentRange = { low: resolvedRent.rentRangeLow, high: resolvedRent.rentRangeHigh };
+  const monthlyRent = resolvedRent.monthlyRent;
+  const rentBasis = resolvedRent.explanation;
 
   const loanAmount = Math.round(totalCost * LOAN_TO_COST);
   const monthlyPayment = calculateMonthlyPayment(loanAmount, INTEREST_RATE, TERM_YEARS);
@@ -212,7 +239,7 @@ export async function generateUnifiedRecommendation(
   const financialAssumptions = [
     `Project cost = TruthCore turnkey price for this plan (${formatPriceRange(pricing.low, pricing.high)}, midpoint used)${siteAdder ? `, incl. $${siteAdder.toLocaleString()} measured-slope foundation allowance` : ""}; ${Math.round(SOFT_COST_SHARE * 100)}% of it shown as soft costs (design, permits, fees)`,
     `Financing: ${Math.round(LOAN_TO_COST * 100)}% of project cost at ${(INTEREST_RATE * 100).toFixed(2)}% for ${TERM_YEARS} years, ${Math.round((1 - LOAN_TO_COST) * 100)}% down`,
-    `Rent: ${market ? "RentCast market estimate for this address" : "TruthCore rent-table planning estimate"}; cash flow nets ${Math.round(VACANCY * 100)}% vacancy and reserves of ${Math.round(RESERVES_PCT_OF_RENT * 100)}% of rent + $${RESERVES_FIXED_MONTHLY}/mo`,
+    `Rent: ${resolvedRent.explanation} Cash flow nets ${Math.round(VACANCY * 100)}% vacancy and reserves of ${Math.round(RESERVES_PCT_OF_RENT * 100)}% of rent + $${RESERVES_FIXED_MONTHLY}/mo`,
     "ROI = annual net cash flow ÷ total project cost",
     `Value add = ${VALUE_ADD_MULTIPLE}× project cost (cost-based rule of thumb, not an appraisal)`,
   ];
@@ -226,7 +253,7 @@ export async function generateUnifiedRecommendation(
     pricing.high,
     rentRange.low,
     rentRange.high,
-    market ? "market" : "table",
+    resolvedRent.label,
     buildableEnvelopeSqFt > maxAllowedSqFt
   );
   const bannerDetailsFinal = input.contextNote ? `${input.contextNote} ${bannerDetails}` : bannerDetails;
@@ -267,10 +294,14 @@ export async function generateUnifiedRecommendation(
     bannerDetails: bannerDetailsFinal,
     derivedFromFeasibility: bestRecommendationType,
     zipCode,
-    rentSource: market ? "market-data" : "estimated",
+    rentSource: resolvedRent.basis,
+    rentIsMarketVerified: resolvedRent.basis === "verified-comps",
     rentBasis,
-    rentComparables: market?.comparables ?? [],
-    rentComparableCount: market?.comparableCount ?? 0,
+    rentSourceLabel: resolvedRent.label,
+    rentComparables: resolvedRent.comparables,
+    rentComparableCount: resolvedRent.comparableCount,
+    rentComparableRadiusMiles: resolvedRent.radiusMiles,
+    primaryPlanId: plan.id,
     financialAssumptions,
   };
 }
@@ -294,7 +325,7 @@ function generateSmartBannerText(
   priceHigh: number,
   rentLow: number,
   rentHigh: number,
-  rentKind: "market" | "table",
+  rentSourceLabel: string,
   sizeIsCappedByRules: boolean
 ): { bannerRecommendation: string; bannerDetails: string } {
   const sizeLabel = primarySizeSqFt.toLocaleString();
@@ -305,7 +336,7 @@ function generateSmartBannerText(
 
   return {
     bannerRecommendation: `Best fit for this property: ${planName} at ${sizeLabel} sq ft`,
-    bannerDetails: `${primaryType} recommendation aligned to the current parcel allowance${sizeIsCappedByRules ? " and city size cap" : ""}. Recommended configuration: ${layoutLabel}. Estimated project investment (TruthCore plan pricing): ${formatPriceRange(priceLow, priceHigh)}. ${rentKind === "market" ? "Market rent estimate for this address (RentCast)" : "Planning rent estimate (TruthCore rent table; live market rent unavailable)"}: $${rentLow.toLocaleString()}\u00A0– $${rentHigh.toLocaleString()}/month.`,
+    bannerDetails: `${primaryType} recommendation aligned to the current parcel allowance${sizeIsCappedByRules ? " and city size cap" : ""}. Recommended configuration: ${layoutLabel}. Estimated project investment (TruthCore plan pricing): ${formatPriceRange(priceLow, priceHigh)}. Estimated rent: $${rentLow.toLocaleString()}\u00A0– $${rentHigh.toLocaleString()}/month (${rentSourceLabel}).`,
   };
 }
 
@@ -438,7 +469,7 @@ export function buildUnifiedFinancialScenarios(
     estimatedRoi: fp.roi,
     estimatedPaybackYears: fp.paybackYears,
     estimatedValueAdd: fp.valueAdd,
-    rentSource: recommendation.rentSource === "market-data" ? "rentcast" : "estimated",
+    rentSource: recommendation.rentIsMarketVerified ? "rentcast" : "estimated",
     rentBasis: recommendation.rentBasis,
     assumptions: recommendation.financialAssumptions,
   }];

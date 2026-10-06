@@ -349,7 +349,11 @@ export interface PropertyAnalysisResult {
     source: "rentcast" | "estimated";
     /** Plain-English basis of the rent shown (what was priced, and by whom). */
     basis?: string;
+    /** Short label for pills / headers, e.g. "Verified rentals within 1 mile". */
+    basisLabel?: string;
     comparableCount?: number;
+    /** Radius the shown comparables came from, in miles. */
+    comparableRadiusMiles?: number | null;
     comparables?: {
       address: string;
       monthlyRent: number;
@@ -358,6 +362,22 @@ export interface PropertyAnalysisResult {
       bathrooms: number | null;
       distanceMiles: number | null;
     }[];
+  };
+  /**
+   * The floor plan the recommendation is anchored to, with the ONE resolved
+   * rent figure. The floor-plan section of the report prints this figure on
+   * this plan's row so it always matches the Financial Snapshot.
+   */
+  recommendedPlan?: {
+    planId: string;
+    sizeSqFt: number;
+    bedrooms: number;
+    bathrooms: number;
+    monthlyRent: number;
+    rentRangeLow: number;
+    rentRangeHigh: number;
+    rentBasis: string;
+    rentBasisLabel: string;
   };
   dataSources?: {
     /** Which geocoder actually resolved the address (e.g. "U.S. Census Geocoder"). */

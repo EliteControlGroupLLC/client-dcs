@@ -18,6 +18,8 @@ interface RentScenariosCardProps {
 export function RentScenariosCard({ scenarios }: RentScenariosCardProps) {
   if (!scenarios || scenarios.length === 0) return null;
   const market = scenarios.every((s) => s.source === "rentcast");
+  // The engine's plain-English explanation of where this number came from.
+  const basis = scenarios.find((s) => s.basis)?.basis;
 
   return (
     <div className="bg-secondary-light rounded-2xl border border-white/10 shadow-lg shadow-black/20 p-6">
@@ -31,15 +33,15 @@ export function RentScenariosCard({ scenarios }: RentScenariosCardProps) {
             <p className="text-sm text-white/75">Based on your recommended ADU</p>
           </div>
         </div>
-        {market ? (
-          <span className="inline-flex items-center gap-1.5 text-xs font-medium px-2.5 py-1 rounded-full whitespace-nowrap bg-accent/10 text-accent-light border border-accent/30">
-            RentCast market estimate
-          </span>
-        ) : (
-          <span className="inline-flex items-center gap-1.5 text-xs font-medium px-2.5 py-1 rounded-full whitespace-nowrap bg-amber-500/10 text-amber-200 border border-amber-400/30">
-            Planning estimate
-          </span>
-        )}
+        <span
+          className={`inline-flex items-center gap-1.5 text-xs font-medium px-2.5 py-1 rounded-full whitespace-nowrap ${
+            market
+              ? "bg-accent/10 text-accent-light border border-accent/30"
+              : "bg-amber-500/10 text-amber-200 border border-amber-400/30"
+          }`}
+        >
+          {market ? "Verified nearby rentals" : "TruthCore's own rents"}
+        </span>
       </div>
 
       <div className="space-y-3">
@@ -96,9 +98,10 @@ export function RentScenariosCard({ scenarios }: RentScenariosCardProps) {
       </div>
 
       <p className="text-xs text-white/75 mt-3">
-        {market
-          ? "Conservative / premium = the low and high end of RentCast's rent range for this address; market = its point estimate."
-          : "Conservative / premium = low and high end of a San Diego County ADU rent table for this unit size (planning estimate, not a market quote for this address)."}{" "}
+        {basis ??
+          (market
+            ? "Conservative / premium = the lowest and highest asking rents among the verified rentals of this configuration near you; market = the middle of them."
+            : "Conservative / premium = the low and high end of what our own ADUs of this configuration rent for in San Diego County — not a market quote for this address.")}{" "}
         Actual rents depend on unit quality, finishes and market conditions.
       </p>
     </div>

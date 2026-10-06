@@ -457,7 +457,9 @@ export function reconcileAllSources(input: ReconciliationInput): SourceAudit {
     rentCandidates.push(
       makeCandidate(
         firstEst.estimatedMonthlyRent,
-        firstEst.source === "rentcast" ? "RentCast rent AVM" : "TruthCore rent table (planning estimate)",
+        firstEst.source === "rentcast"
+          ? "Verified nearby rentals (RentCast comps, same configuration) + new-construction allowance"
+          : "TruthCore rent table (our own rents for this configuration)",
         firstEst.confidence
       )
     );
