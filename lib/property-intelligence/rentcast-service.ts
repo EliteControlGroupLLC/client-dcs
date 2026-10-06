@@ -2,6 +2,8 @@
 // Powers estimated monthly/annual rent, ROI/cash-flow scenarios, and value assumptions.
 // All outputs are clearly labeled as estimate-based and assumption-driven.
 
+import { comparableSizeWindow } from "../data/site-data";
+
 // Server-side key (the one set in .env.local / prod). The NEXT_PUBLIC_ name is
 // only a legacy fallback — reading it alone made RentCast silently "off".
 const RENTCAST_API_KEY = process.env.RENTCAST_API_KEY || process.env.NEXT_PUBLIC_RENTCAST_API_KEY;
@@ -73,6 +75,12 @@ export interface MarketRentResult {
   widened: boolean;
   /** Bedroom count every shown comp matches. */
   bedrooms: number;
+  /** The size window every sized comp falls inside, in square feet. */
+  sizeWindow: { minSqFt: number; maxSqFt: number };
+  /** True when the size window itself had to be opened up (last resort). */
+  sizeBandWidened: boolean;
+  /** True when rentals with no reported square footage had to be included. */
+  includesUnsizedComps: boolean;
   source: "RentCast rent AVM";
 }
 
@@ -84,11 +92,12 @@ export interface MarketRentResult {
 export type MarketRentOutcome =
   | { status: "ok"; result: MarketRentResult }
   | {
-      /** RentCast answered, but too few same-configuration rentals inside the widened radius. */
+      /** RentCast answered, but too few comparable rentals even after widening. */
       status: "insufficient";
       qualifyingCount: number;
       radiusMiles: number;
       bedrooms: number;
+      sizeWindow: { minSqFt: number; maxSqFt: number };
     }
   | {
       /** No key, network/HTTP failure, or an unusable payload. Nothing may be claimed. */
@@ -112,17 +121,31 @@ function toNumberOrNull(value: unknown): number | null {
 }
 
 /**
- * Keep only comps that are genuinely comparable to the modeled unit:
- * the SAME bedroom count, and inside the radius. Square footage is
- * deliberately ignored — a 3-bed is a 3-bed at 900 or 1,200 sq ft.
- * A comp with no reported distance cannot be proven to be inside the
- * radius, so it is dropped rather than assumed.
+ * Keep only rentals that are genuinely comparable to the modeled unit:
+ *
+ *   - the SAME bedroom count (a 3-bed is compared to 3-beds, full stop)
+ *   - inside the search radius, proven by the comp's own reported distance
+ *   - inside the size window around the subject (see COMPARABLE_SIZE_BAND)
+ *
+ * Size is a sanity band, not the thing rent is priced on. An 800 sq ft 3-bed is
+ * not a fair comparable for a 1,200 sq ft 3-bed; a 1,400 sq ft one is.
+ *
+ * A comp with no reported distance cannot be proven to be inside the radius, so
+ * it is always dropped. A comp with no reported SQUARE FOOTAGE cannot be proven
+ * to be inside the window either — it is dropped unless `allowUnsized` is set,
+ * which only happens once the sized sample has already come up short, and which
+ * the report discloses.
  *
  * Exported for offline verification; pure, no network.
  */
 export function selectConfigurationComps(
   raw: RawComparable[],
-  opts: { bedrooms: number; radiusMiles: number }
+  opts: {
+    bedrooms: number;
+    radiusMiles: number;
+    sizeWindow: { minSqFt: number; maxSqFt: number };
+    allowUnsized?: boolean;
+  }
 ): MarketRentComparable[] {
   return raw
     .map((c) => ({
@@ -136,14 +159,13 @@ export function selectConfigurationComps(
         return d === null ? null : Math.round(d * 100) / 100;
       })(),
     }))
-    .filter(
-      (c) =>
-        c.address !== "" &&
-        c.monthlyRent > 0 &&
-        c.bedrooms === opts.bedrooms &&
-        c.distanceMiles !== null &&
-        c.distanceMiles <= opts.radiusMiles
-    )
+    .filter((c) => {
+      if (c.address === "" || c.monthlyRent <= 0) return false;
+      if (c.bedrooms !== opts.bedrooms) return false;
+      if (c.distanceMiles === null || c.distanceMiles > opts.radiusMiles) return false;
+      if (c.squareFootage === null || c.squareFootage <= 0) return opts.allowUnsized === true;
+      return c.squareFootage >= opts.sizeWindow.minSqFt && c.squareFootage <= opts.sizeWindow.maxSqFt;
+    })
     .sort((a, b) => (a.distanceMiles ?? 0) - (b.distanceMiles ?? 0));
 }
 
@@ -198,49 +220,100 @@ async function requestRentComps(q: {
 }
 
 /**
- * Real rental comparables for a unit of the given CONFIGURATION near this
- * address (RentCast long-term rent AVM).
+ * Real rental comparables for a unit of the given CONFIGURATION and SIZE near
+ * this address (RentCast long-term rent AVM).
  *
- * Matched on bedrooms / bathrooms / property type and drawn from ~1 mile.
- * Square footage is deliberately not sent: a 3-bed ADU rents as a 3-bed
- * whether it is 900 or 1,200 sq ft, and sending a small footprint made the
- * AVM price it like a small apartment.
+ * Matched on bedrooms / bathrooms / property type, drawn from ~1 mile, and
+ * narrowed to rentals of a comparable size (see COMPARABLE_SIZE_BAND).
+ *
+ * Square footage is never SENT to the AVM — doing that made it price a 1,200
+ * sq ft ADU like a small apartment. It is used afterwards, as a sanity band on
+ * which rentals count: an 800 sq ft 3-bed is not a comparable for a 1,200 sq ft
+ * 3-bed, a 1,400 sq ft one is.
  *
  * The returned numbers are the comps' own asking rents (median, low, high) —
- * nothing is modeled or interpolated. If fewer than MARKET_RENT_MIN_COMPS
- * same-bedroom rentals sit inside the radius, the radius is widened once and
- * the result SAYS it was widened; if it still falls short, the outcome is
- * "insufficient" and the report must say so rather than quietly using a
- * wider or looser net.
+ * nothing is modeled or interpolated. When the sample comes up short we loosen
+ * in a fixed order, never two things at once, and the result records which:
+ *
+ *   1. radius 1 mile, sized comps inside the size window
+ *   2. radius 3 miles, sized comps inside the size window      (widened)
+ *   3. radius 3 miles, plus rentals with no reported size      (includesUnsizedComps)
+ *   4. radius 3 miles, size window opened up                   (sizeBandWidened)
+ *
+ * Still short of MARKET_RENT_MIN_COMPS after all four and the outcome is
+ * "insufficient" — the report says so rather than showing a thin sample.
  */
 export async function fetchMarketRent(q: {
   address: string;
   bedrooms: number;
   bathrooms: number;
+  sqft: number;
   propertyType: "Single Family" | "Apartment";
 }): Promise<MarketRentOutcome> {
   if (!RENTCAST_API_KEY) return { status: "unavailable", reason: "RentCast API key not configured" };
   if (!q.address) return { status: "unavailable", reason: "No formatted address to price against" };
+  if (!(q.sqft > 0)) return { status: "unavailable", reason: "No modeled unit size to compare against" };
 
-  const radii = [MARKET_RENT_RADIUS_MILES, MARKET_RENT_WIDENED_RADIUS_MILES];
+  const tightWindow = comparableSizeWindow(q.sqft, false);
+  const wideWindow = comparableSizeWindow(q.sqft, true);
+
+  // Loosen one thing at a time, in this order. Never two silently.
+  const attempts: Array<{
+    radiusMiles: number;
+    sizeWindow: { minSqFt: number; maxSqFt: number };
+    allowUnsized: boolean;
+    sizeBandWidened: boolean;
+  }> = [
+    { radiusMiles: MARKET_RENT_RADIUS_MILES, sizeWindow: tightWindow, allowUnsized: false, sizeBandWidened: false },
+    { radiusMiles: MARKET_RENT_WIDENED_RADIUS_MILES, sizeWindow: tightWindow, allowUnsized: false, sizeBandWidened: false },
+    { radiusMiles: MARKET_RENT_WIDENED_RADIUS_MILES, sizeWindow: tightWindow, allowUnsized: true, sizeBandWidened: false },
+    { radiusMiles: MARKET_RENT_WIDENED_RADIUS_MILES, sizeWindow: wideWindow, allowUnsized: true, sizeBandWidened: true },
+  ];
+
+  // One network call per distinct radius; the later attempts re-filter the
+  // widest result set rather than hammering RentCast four times.
+  const rawByRadius = new Map<number, RawComparable[]>();
   let lastQualifyingCount = 0;
   let lastError: string | null = null;
 
-  for (const radiusMiles of radii) {
-    const raw = await requestRentComps({ ...q, radiusMiles });
-    if (!Array.isArray(raw)) {
-      lastError = raw.error;
-      continue;
+  for (const attempt of attempts) {
+    let raw = rawByRadius.get(attempt.radiusMiles);
+    if (!raw) {
+      const fetched = await requestRentComps({ ...q, radiusMiles: attempt.radiusMiles });
+      if (!Array.isArray(fetched)) {
+        lastError = fetched.error;
+        continue;
+      }
+      raw = fetched;
+      rawByRadius.set(attempt.radiusMiles, raw);
     }
+
     // Belt and braces: RentCast honors maxRadius, but we re-check every comp's
-    // own distance so nothing outside the stated radius can reach the report.
-    const comps = selectConfigurationComps(raw, { bedrooms: q.bedrooms, radiusMiles });
-    lastQualifyingCount = comps.length;
+    // own distance and size so nothing outside the stated window reaches the report.
+    const comps = selectConfigurationComps(raw, {
+      bedrooms: q.bedrooms,
+      radiusMiles: attempt.radiusMiles,
+      sizeWindow: attempt.sizeWindow,
+      allowUnsized: attempt.allowUnsized,
+    });
+    lastQualifyingCount = Math.max(lastQualifyingCount, comps.length);
     if (comps.length < MARKET_RENT_MIN_COMPS) continue;
 
     const rents = comps.map((c) => c.monthlyRent);
     const layout = q.bedrooms === 0 ? "studio" : `${q.bedrooms}-bed / ${q.bathrooms}-bath`;
-    const widened = radiusMiles > MARKET_RENT_RADIUS_MILES;
+    const widened = attempt.radiusMiles > MARKET_RENT_RADIUS_MILES;
+    const includesUnsized = attempt.allowUnsized && comps.some((c) => c.squareFootage === null);
+    const window = attempt.sizeWindow;
+    const notes = [
+      widened
+        ? `widened from ${MARKET_RENT_RADIUS_MILES} mile — fewer than ${MARKET_RENT_MIN_COMPS} matching rentals were listed that close`
+        : null,
+      attempt.sizeBandWidened
+        ? `size window opened up to ${window.minSqFt.toLocaleString()}–${window.maxSqFt.toLocaleString()} sq ft to find enough of them`
+        : null,
+      includesUnsized ? "includes rentals whose square footage was not listed" : null,
+    ].filter(Boolean);
+
     return {
       status: "ok",
       result: {
@@ -249,10 +322,13 @@ export async function fetchMarketRent(q: {
         rentRangeHigh: Math.max(...rents),
         comparableCount: comps.length,
         comparables: comps.slice(0, 5),
-        basis: `${comps.length} ${layout} ${q.propertyType === "Apartment" ? "apartment" : "single-family"} rentals within ${radiusMiles} mile${radiusMiles === 1 ? "" : "s"} of this address${widened ? ` (widened from ${MARKET_RENT_RADIUS_MILES} mile — fewer than ${MARKET_RENT_MIN_COMPS} matching rentals were listed that close)` : ""}`,
-        radiusMiles,
+        basis: `${comps.length} ${layout} ${q.propertyType === "Apartment" ? "apartment" : "single-family"} rentals of ${window.minSqFt.toLocaleString()}–${window.maxSqFt.toLocaleString()} sq ft within ${attempt.radiusMiles} mile${attempt.radiusMiles === 1 ? "" : "s"} of this address${notes.length ? ` (${notes.join("; ")})` : ""}`,
+        radiusMiles: attempt.radiusMiles,
         widened,
         bedrooms: q.bedrooms,
+        sizeWindow: window,
+        sizeBandWidened: attempt.sizeBandWidened,
+        includesUnsizedComps: includesUnsized,
         source: "RentCast rent AVM",
       },
     };
@@ -264,6 +340,7 @@ export async function fetchMarketRent(q: {
     qualifyingCount: lastQualifyingCount,
     radiusMiles: MARKET_RENT_WIDENED_RADIUS_MILES,
     bedrooms: q.bedrooms,
+    sizeWindow: wideWindow,
   };
 }
 

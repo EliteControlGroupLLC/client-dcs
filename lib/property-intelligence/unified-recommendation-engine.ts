@@ -127,14 +127,17 @@ export interface UnifiedRecommendationInput {
   /** Extra site cost (USD) added to the price range, e.g. a steep-lot engineered foundation. */
   siteCostAdderUsd?: number;
   /**
-   * Verified rental comparables for the modeled unit's CONFIGURATION near this
-   * address. Matched on bedrooms / bathrooms, not square footage. The outcome
-   * is explicit about whether enough comps were found; see resolveRent for how
-   * it is reconciled against TruthCore's own rent table.
+   * Verified rental comparables for the modeled unit near this address: matched
+   * on bedrooms / bathrooms, then narrowed to rentals of a comparable size.
+   * Square footage is a band on which rentals count, never a price input. The
+   * outcome is explicit about whether enough comps were found; see resolveRent
+   * for how it is reconciled against TruthCore's own rent table.
    */
   marketRentLookup?: (q: {
     bedrooms: number;
     bathrooms: number;
+    /** The modeled unit's size — a band on which rentals count, never sent to the AVM. */
+    sqft: number;
     propertyType: "Single Family" | "Apartment";
   }) => Promise<MarketRentOutcome>;
 }
@@ -190,15 +193,17 @@ export async function generateUnifiedRecommendation(
   const softCost = Math.round(totalCost * SOFT_COST_SHARE);
   const buildCost = totalCost - softCost;
 
-  // Rent: ONE resolved figure. Verified same-configuration rentals within about
-  // a mile lead, a new-construction allowance is added on top, and TruthCore's
-  // own configuration-matched rent table is the floor. See ./rent-resolution.
+  // Rent: ONE resolved figure. Verified rentals of the same configuration AND a
+  // comparable size, within about a mile, lead; a new-construction allowance is
+  // added on top; and TruthCore's own rent table — matched on bedrooms and
+  // nearest size — is the floor. See ./rent-resolution.
   const unitIsHouseLike = (normalizedType === "detached" || normalizedType === "two-story") && variation.bedrooms >= 2;
   const market: MarketRentOutcome = input.marketRentLookup
     ? await input
         .marketRentLookup({
           bedrooms: variation.bedrooms,
           bathrooms: variation.bathrooms,
+          sqft: primarySizeSqFt,
           propertyType: unitIsHouseLike ? "Single Family" : "Apartment",
         })
         .catch((err: unknown) => ({

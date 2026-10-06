@@ -10,8 +10,12 @@
  * THE RULE, in the order it is applied:
  *
  *   1. Verified comps lead. Rental comparables are matched on CONFIGURATION —
- *      bedrooms, bathrooms, property type — never on square footage, and drawn
- *      from about a mile around the subject address.
+ *      bedrooms, bathrooms, property type — drawn from about a mile around the
+ *      subject address, and narrowed to rentals of a COMPARABLE SIZE. Square
+ *      footage is never sent to the AVM (that is what priced a 1,200 sq ft ADU
+ *      like a small apartment); it is a sanity band on which rentals count. An
+ *      800 sq ft 3-bed is not a comparable for a 1,200 sq ft 3-bed. A 1,400
+ *      sq ft one is.
  *   2. A new-construction premium is added on top of the comp median. The comps
  *      are existing housing stock; a TruthCore unit is brand new with solar and
  *      modern systems, and that rents for more. The premium is the owner's
@@ -115,9 +119,18 @@ export function resolveRent(args: {
     const adjustedLow = applyNewConstructionPremium(m.rentRangeLow);
     const adjustedHigh = applyNewConstructionPremium(m.rentRangeHigh);
     const radiusLabel = `${m.radiusMiles} mile${m.radiusMiles === 1 ? "" : "s"}`;
-    const widenedNote = m.widened
-      ? ` We had to look out to ${radiusLabel} to find them — fewer than ${MARKET_RENT_MIN_COMPS} ${layout} rentals were listed within ${MARKET_RENT_RADIUS_MILES} mile.`
-      : "";
+    const sizeLabel = `${m.sizeWindow.minSqFt.toLocaleString()} and ${m.sizeWindow.maxSqFt.toLocaleString()} sq ft`;
+    const widenedNote = [
+      m.widened
+        ? ` We had to look out to ${radiusLabel} to find them — fewer than ${MARKET_RENT_MIN_COMPS} comparable ${layout} rentals were listed within ${MARKET_RENT_RADIUS_MILES} mile.`
+        : "",
+      m.sizeBandWidened
+        ? ` We also had to open the size range up to ${sizeLabel} to get enough of them.`
+        : "",
+      m.includesUnsizedComps
+        ? " A few of them did not list their square footage; we counted those rather than show you a thinner sample, and they are marked below."
+        : "",
+    ].join("");
 
     if (adjustedMedian >= truthcoreRange.low) {
       // Comps lead. The owner's low is still a floor on the bottom of the range.
@@ -135,8 +148,8 @@ export function resolveRent(args: {
         compMedianRent: m.monthlyRent,
         compAdjustedRent: adjustedMedian,
         ...tableBase,
-        explanation: `${money(adjustedMedian)}/month, based on ${m.comparableCount} verified ${layout} rentals within ${radiusLabel} of this address. Those rentals are asking a median of ${money(m.monthlyRent)}/month.${widenedNote} ${premiumSentence()} We also never quote below what our own ${layout} ADUs rent for, so the bottom of the range holds at ${money(low)}.`,
-        label: `Verified rentals within ${radiusLabel}`,
+        explanation: `${money(adjustedMedian)}/month, based on ${m.comparableCount} verified ${layout} rentals between ${sizeLabel} within ${radiusLabel} of this address — close enough in size to be a fair comparison to what we would build here. Those rentals are asking a median of ${money(m.monthlyRent)}/month.${widenedNote} ${premiumSentence()} We also never quote below what our own ${layout} ADUs rent for, so the bottom of the range holds at ${money(low)}.`,
+        label: `Verified ${layout} rentals within ${radiusLabel}`,
       };
     }
 
@@ -153,7 +166,7 @@ export function resolveRent(args: {
       compMedianRent: m.monthlyRent,
       compAdjustedRent: adjustedMedian,
       ...tableBase,
-      explanation: `${money(truthcoreRange.low)} – ${money(truthcoreRange.high)}/month. The ${m.comparableCount} verified ${layout} rentals we found within ${radiusLabel} of this address are asking a median of ${money(m.monthlyRent)}/month — ${money(adjustedMedian)} once we allow for new construction — which is below what our own ${layout} ADUs actually rent for.${widenedNote} We do not quote below our own numbers, so this figure is TruthCore's, and the nearby rentals are shown alongside it so you can see both.`,
+      explanation: `${money(truthcoreRange.low)} – ${money(truthcoreRange.high)}/month. The ${m.comparableCount} verified ${layout} rentals we found between ${sizeLabel} within ${radiusLabel} of this address are asking a median of ${money(m.monthlyRent)}/month — ${money(adjustedMedian)} once we allow for new construction — which is below what our own ${layout} ADUs actually rent for.${widenedNote} We do not quote below our own numbers, so this figure is TruthCore's, and the nearby rentals are shown alongside it so you can see both.`,
       label: "TruthCore's own rents (nearby rentals came in lower)",
     };
   }
@@ -171,7 +184,7 @@ export function resolveRent(args: {
       compMedianRent: null,
       compAdjustedRent: null,
       ...tableBase,
-      explanation: `${money(truthcoreRange.low)} – ${money(truthcoreRange.high)}/month, from what our own ${layout} ADUs rent for in San Diego County. We looked for comparable ${layout} rentals near this address and found only ${market.qualifyingCount} within ${market.radiusMiles} miles — not enough to call it a market read, and we will not stretch the search until it says what we want. Our team will pull live rental comps for your block during the site review.`,
+      explanation: `${money(truthcoreRange.low)} – ${money(truthcoreRange.high)}/month, from what our own ${layout} ADUs rent for in San Diego County. We looked for ${layout} rentals of a comparable size (${market.sizeWindow.minSqFt.toLocaleString()}–${market.sizeWindow.maxSqFt.toLocaleString()} sq ft) near this address and found only ${market.qualifyingCount} within ${market.radiusMiles} miles — not enough to call it a market read, and we will not stretch the search until it says what we want. Our team will pull live rental comps for your block during the site review.`,
       label: "TruthCore's own rents (not enough nearby rentals to verify)",
     };
   }

@@ -641,6 +641,49 @@ export function applyNewConstructionPremium(compRent: number): number {
   return Math.round((compRent * (1 + NEW_CONSTRUCTION_RENT_PREMIUM)) / 50) * 50;
 }
 
+/**
+ * COMPARABLE SIZE BAND — how close in size a rental has to be to count as a
+ * comparable. OWNER'S RULE, retune here.
+ *
+ * Bedrooms and baths decide what a unit IS, but size still decides whether a
+ * rental is a fair comparison. An 800 sq ft 3-bed is not a comparable for a
+ * 1,200 sq ft 3-bed — it is a much smaller home, and letting those in is what
+ * dragged the reported rent down. A 1,400 sq ft 3-bed is close enough to use.
+ * Anything much larger is a different product again.
+ *
+ * Expressed as multipliers of the subject unit's square footage:
+ *   0.85 - 1.20 of a 1,200 sq ft subject = 1,020 - 1,440 sq ft
+ * which admits the 1,400 sq ft comp and excludes the 800 sq ft one.
+ *
+ * Both bounds live here. Change them and the report's comp selection and its
+ * stated window move together.
+ */
+export const COMPARABLE_SIZE_BAND = {
+  lower: 0.85,
+  upper: 1.2,
+} as const;
+
+/**
+ * The size window for a given subject unit, in square feet, rounded to whole
+ * feet so the report can print it ("between 1,020 and 1,440 sq ft").
+ *
+ * `widen` doubles the band's reach on both sides (0.85/1.20 becomes 0.70/1.40).
+ * It is the LAST resort, used only after widening the search radius has already
+ * failed to find enough comparable rentals, and the report always says when it
+ * was used.
+ */
+export function comparableSizeWindow(
+  subjectSqFt: number,
+  widen = false
+): { minSqFt: number; maxSqFt: number } {
+  const lower = widen ? 1 - (1 - COMPARABLE_SIZE_BAND.lower) * 2 : COMPARABLE_SIZE_BAND.lower;
+  const upper = widen ? 1 + (COMPARABLE_SIZE_BAND.upper - 1) * 2 : COMPARABLE_SIZE_BAND.upper;
+  return {
+    minSqFt: Math.round(subjectSqFt * lower),
+    maxSqFt: Math.round(subjectSqFt * upper),
+  };
+}
+
 // =============================================================================
 // SERVICE PRICING
 // =============================================================================
