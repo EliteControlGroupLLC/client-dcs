@@ -9,7 +9,7 @@ import { Logo } from "@/components/layout/logo";
 import { isLandingPage } from "@/components/layout/site-chrome";
 
 const SHOWROOM_HREF = "/showroom";
-const AI_DESIGN_HREF = "https://www.distinctcsolutions.com/showroom/design-ai";
+const AI_DESIGN_HREF = "/showroom/design-ai";
 
 type NavLink = { name: string; href: string; description?: string };
 type NavGroup = { name: string; href?: string; children?: NavLink[]; columns?: 1 | 2 };
