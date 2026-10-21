@@ -18,7 +18,7 @@ export const COMPANY_INFO = {
     state: "CA",
     zip: "91945",
   },
-  email: "jtalavera@distinctcsolutions.com",
+  email: "jtalavera@truthcoredevelopers.com",
   phone: "(858) 833-0705",
   phoneHref: "+18588330705",
   founded: 2014,
